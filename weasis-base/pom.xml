@@ -18,5 +18,6 @@
   <modules>
     <module>weasis-base-parent</module>
     <module>weasis-base-ui</module>
+    <module>weasis-base-explorer</module>
   </modules>
 </project>

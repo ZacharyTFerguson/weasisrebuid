@@ -16,4 +16,9 @@
   <packaging>pom</packaging>
   <name>Weasis acquire</name>
   <description>Dicomizer aggregator. There is no weasis-acquire-parent. WP-12 adds explorer/editor.</description>
+
+  <modules>
+    <module>weasis-acquire-explorer</module>
+    <module>weasis-acquire-editor</module>
+  </modules>
 </project>

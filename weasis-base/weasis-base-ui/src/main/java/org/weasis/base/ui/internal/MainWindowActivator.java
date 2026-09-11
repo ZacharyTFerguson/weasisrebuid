@@ -32,6 +32,7 @@ import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.explorer.DicomImportFactory;
 import org.weasis.core.api.explorer.ImportDicom;
+import org.weasis.core.api.gui.FactoryEnablement;
 import org.weasis.core.api.gui.util.GuiExecutor;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
@@ -64,6 +65,9 @@ public class MainWindowActivator implements BundleActivator {
           window.add(plugin, BorderLayout.CENTER);
           for (DataExplorerViewFactory explorerFactory :
               UICore.getInstance().getExplorerFactories()) {
+            if (!FactoryEnablement.isEnabled(explorerFactory.getClass())) {
+              continue;
+            }
             DataExplorerView explorer = explorerFactory.createInstance(new Hashtable<>());
             if (explorer instanceof Component component) {
               component.setPreferredSize(new Dimension(280, 640));
