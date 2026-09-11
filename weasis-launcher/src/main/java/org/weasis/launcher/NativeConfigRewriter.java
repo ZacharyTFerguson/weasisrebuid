@@ -24,7 +24,7 @@ public final class NativeConfigRewriter {
 
   private static final Pattern MAVEN_FILE =
       Pattern.compile(
-          "file:\\$\\{(?:maven\\.localRepository|maven\\.local\\.repo|settings\\.localRepository)}/\\S+?/([^\\s\"]+\\.jar)");
+          "file:\\$\\{(?:maven\\.localRepository|maven\\.local\\.repo|settings\\.localRepository)}(?:/[^\\s\"]+)+/([^/\\s\"]+\\.jar)");
 
   private NativeConfigRewriter() {}
 
