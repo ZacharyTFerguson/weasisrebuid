@@ -50,7 +50,8 @@ public final class LocaleCoverage {
 
   public static LocaleCoverage loadDefault() {
     Properties props = new Properties();
-    try (InputStream in = LocaleCoverage.class.getClassLoader().getResourceAsStream(CATALOG_RESOURCE)) {
+    try (InputStream in =
+        LocaleCoverage.class.getClassLoader().getResourceAsStream(CATALOG_RESOURCE)) {
       if (in == null) {
         throw new IllegalStateException("missing " + CATALOG_RESOURCE);
       }

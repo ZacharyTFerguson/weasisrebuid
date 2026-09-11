@@ -91,8 +91,7 @@ public class DicomProtocolCommands {
 
   String getPortable(String root) throws Exception {
     Path base = root == null || root.isBlank() ? null : Path.of(root);
-    String csv =
-        System.getProperty(PortableDicomDirs.PREF, PortableDicomDirs.DEFAULT);
+    String csv = System.getProperty(PortableDicomDirs.PREF, PortableDicomDirs.DEFAULT);
     List<Path> dirs = PortableDicomDirs.existing(base, csv);
     int imported = 0;
     for (Path dir : dirs) {

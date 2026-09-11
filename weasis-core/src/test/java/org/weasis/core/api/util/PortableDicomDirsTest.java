@@ -22,8 +22,7 @@ class PortableDicomDirsTest {
 
   @Test
   void defaultNamesAndExistingSiblings(@TempDir Path root) throws Exception {
-    assertEquals(
-        List.of("dicom", "DICOM", "IMAGES", "images"), PortableDicomDirs.names(null));
+    assertEquals(List.of("dicom", "DICOM", "IMAGES", "images"), PortableDicomDirs.names(null));
     Files.createDirectory(root.resolve("dicom"));
     Files.createDirectory(root.resolve("IMAGES"));
     Files.createDirectory(root.resolve("other"));

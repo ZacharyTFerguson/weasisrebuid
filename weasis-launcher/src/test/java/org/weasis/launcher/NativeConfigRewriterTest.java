@@ -37,7 +37,8 @@ class NativeConfigRewriterTest {
     String rewritten = NativeConfigRewriter.rewriteFileUrls(json);
     assertTrue(rewritten.contains("file:${weasis.resources.path}/bundle/gogo-runtime-1.1.6.jar"));
     assertTrue(rewritten.contains("file:${weasis.resources.path}/bundle/bar-1.0.jar"));
-    assertFalse(rewritten.contains("felix.auto.start.1") && rewritten.contains("maven.localRepository"));
+    assertFalse(
+        rewritten.contains("felix.auto.start.1") && rewritten.contains("maven.localRepository"));
     assertFalse(NativeConfigRewriter.usesMavenRepo(rewritten));
   }
 
@@ -93,8 +94,7 @@ class NativeConfigRewriterTest {
       assertEquals("system", data.value("locale.format.code"));
       assertEquals("dicom,DICOM,IMAGES,images", data.value("weasis.portable.dicom.directory"));
     }
-    Path fragment =
-        root.resolve("../weasis-i18n-dist/org.weasis.core.nl_fr/META-INF/MANIFEST.MF");
+    Path fragment = root.resolve("../weasis-i18n-dist/org.weasis.core.nl_fr/META-INF/MANIFEST.MF");
     assertTrue(Files.isRegularFile(fragment));
     assertTrue(Files.readString(fragment).contains("Fragment-Host: org.weasis.core"));
   }
