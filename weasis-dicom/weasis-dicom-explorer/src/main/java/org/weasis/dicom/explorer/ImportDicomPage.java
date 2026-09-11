@@ -66,6 +66,9 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     form.add(passwordField);
     if (copyToTemp) {
       form.add(new JLabel("DICOM CD: copy-to-temp before parse"));
+      JButton detect = new JButton("Detect CD-ROM");
+      detect.addActionListener(e -> detectCdrom(CdromDetector.defaultSearchRoots()));
+      form.add(detect);
     }
     JButton importBtn = new JButton("Import");
     importBtn.addActionListener(e -> runImport());
@@ -74,6 +77,16 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     form.add(dontShow);
     form.add(status);
     add(form, BorderLayout.NORTH);
+  }
+
+  void detectCdrom(List<File> roots) {
+    var found = CdromDetector.detectDicomdir(roots);
+    if (found.isEmpty()) {
+      status.setText("No DICOMDIR on searched volumes");
+      return;
+    }
+    pathField.setText(found.get().getAbsolutePath());
+    status.setText("Detected " + found.get().getAbsolutePath());
   }
 
   void browse() {
