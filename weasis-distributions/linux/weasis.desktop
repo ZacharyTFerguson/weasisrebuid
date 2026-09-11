@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Weasis
+Comment=Weasis DICOM viewer
+Exec=weasis %u
+Terminal=false
+Type=Application
+MimeType=x-scheme-handler/weasis;application/dicom;
+# Enterprise browsers should allow-list weasis://*
