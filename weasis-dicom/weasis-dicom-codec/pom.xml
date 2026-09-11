@@ -104,6 +104,14 @@ Import-Package: !jakarta.json,!jakarta.json.*,!org.dcm4che3.net.*,!org.dcm4che3.
           <argLine>@{argLine} -Djava.library.path=${maven.multiModuleProjectDirectory}/weasis-opencv/weasis-opencv-core-linux-x86-64/target/classes</argLine>
         </configuration>
       </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>exec-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>org.weasis.dicom.codec.DicomUnderstandingOracle</mainClass>
+          <classpathScope>compile</classpathScope>
+        </configuration>
+      </plugin>
     </plugins>
   </build>
 </project>
