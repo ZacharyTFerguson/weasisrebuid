@@ -37,6 +37,9 @@ public final class MimeInspector {
     if (name.endsWith(".zip")) {
       return "application/zip";
     }
+    if ("dicomdir".equals(name)) {
+      return DICOM_MIME;
+    }
     return "application/octet-stream";
   }
 }

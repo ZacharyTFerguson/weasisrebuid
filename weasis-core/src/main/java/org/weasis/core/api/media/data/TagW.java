@@ -21,6 +21,12 @@ public class TagW {
   public static final TagW SOPInstanceUID = new TagW("SOPInstanceUID", "SOP Instance UID");
   public static final TagW Modality = new TagW("Modality", "Modality");
   public static final TagW MIME = new TagW("MIME", "MIME type");
+  public static final TagW SOPClassUID = new TagW("SOPClassUID", "SOP Class UID");
+  public static final TagW SeriesNumber = new TagW("SeriesNumber", "Series Number");
+  public static final TagW InstanceNumber = new TagW("InstanceNumber", "Instance Number");
+  public static final TagW SeriesDescription = new TagW("SeriesDescription", "Series Description");
+  public static final TagW StudyDate = new TagW("StudyDate", "Study Date");
+  public static final TagW StudyDescription = new TagW("StudyDescription", "Study Description");
 
   private final String keyword;
   private final String displayedName;
