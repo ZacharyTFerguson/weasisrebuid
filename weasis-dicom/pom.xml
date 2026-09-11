@@ -17,5 +17,6 @@
 
   <modules>
     <module>weasis-dicom-parent</module>
+    <module>weasis-dicom-codec</module>
   </modules>
 </project>

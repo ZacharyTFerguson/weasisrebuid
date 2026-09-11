@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis.dicom</groupId>
+    <artifactId>weasis-dicom-parent</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../weasis-dicom-parent/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>weasis-dicom-codec</artifactId>
+  <name>Weasis DICOM codec</name>
+  <description>Part-10 parse via weasis-dicom-tools; MIME table; SRS §4.13 transfer syntaxes.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.weasis</groupId>
+      <artifactId>weasis-dicom-tools</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>org.weasis.core</groupId>
+          <artifactId>weasis-core-img</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>org.weasis.thirdparty.org.opencv</groupId>
+          <artifactId>libopencv_java</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.dcm4che</groupId>
+      <artifactId>dcm4che-core</artifactId>
+      <version>${weasis-dicom-tools.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.imageio</groupId>
+      <artifactId>weasis-imageio-codec</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.core</groupId>
+      <artifactId>weasis-core-img</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-dicom-tools</id>
+            <phase>process-classes</phase>
+            <goals>
+              <goal>unpack-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeArtifactIds>weasis-dicom-tools,dcm4che-core,dcm4che-dict</includeArtifactIds>
+              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+              <excludes>META-INF/MANIFEST.MF,META-INF/maven/**,module-info.class,META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA</excludes>
+              <overWrite>false</overWrite>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd><![CDATA[
+Bundle-SymbolicName: org.weasis.dicom.codec
+Bundle-Name: Weasis DICOM Codec
+-dsannotations: *
+Private-Package: org.dcm4che3.*,org.weasis.dicom.geom,org.weasis.dicom.macro,org.weasis.dicom.mf,org.weasis.dicom.param,org.weasis.dicom.ref,org.weasis.dicom.hp,org.weasis.dicom.hp.*,org.weasis.dicom.util,org.weasis.dicom.codec
+Export-Package: !org.weasis.dicom.codec.internal.*, org.weasis.dicom.codec.*
+]]></bnd>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <argLine>@{argLine} -Djava.library.path=${maven.multiModuleProjectDirectory}/weasis-opencv/weasis-opencv-core-linux-x86-64/target/classes</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>

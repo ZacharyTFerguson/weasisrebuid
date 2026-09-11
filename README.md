@@ -7,7 +7,8 @@ Independent reconstruction of **[Weasis](https://weasis.org)** **4.7.3** (Java, 
 ## Status
 
 - **WP-0:** `AppLauncher` boots Felix **7.0.5**. Gogo `gosh.port` **17179**. `weasis:info -v`; `lb` lists Felix + core.
-- **WP-1 (this branch):** Core SDK — `Insertable` / factories, `OpManager`, graphic hierarchy stubs, prefs dialog shell, `UICore`. A dummy `SeriesViewerFactory` opens a blank `ViewerPlugin`.
+- **WP-1:** Core SDK — dummy `SeriesViewerFactory` opens a blank `ViewerPlugin`.
+- **WP-2 (this branch):** OpenCV fragment (linux-x86-64), `weasis-core-img`, `weasis-imageio-codec`, `weasis-dicom-codec`. Explicit VR LE MONOCHROME2 CT paints with W/L.
 
 Shipping prefs (MX-03) are `weasis-distributions/etc/config/base.json` (INFO, stack **3**, `felix.log.level` **1**). `weasis-launcher/conf/base.json` is IDE/DEBUG.
 

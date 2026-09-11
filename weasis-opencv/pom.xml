@@ -15,5 +15,9 @@
   <artifactId>weasis-opencv</artifactId>
   <packaging>pom</packaging>
   <name>Weasis OpenCV</name>
-  <description>Native fragment aggregator. WP-2 adds weasis-opencv-core-${native.library.spec}.</description>
+  <description>Native fragment aggregator. WP-2 ships one arch: linux-x86-64.</description>
+
+  <modules>
+    <module>weasis-opencv-core-linux-x86-64</module>
+  </modules>
 </project>

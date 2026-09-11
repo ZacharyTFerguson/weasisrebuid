@@ -21,6 +21,26 @@
     </license>
   </licenses>
 
+  <repositories>
+    <repository>
+      <id>nroduit-mvn-repo</id>
+      <name>nroduit GitHub Maven Repository</name>
+      <url>https://raw.githubusercontent.com/nroduit/mvn-repo/master/</url>
+      <snapshots>
+        <enabled>true</enabled>
+        <updatePolicy>daily</updatePolicy>
+      </snapshots>
+    </repository>
+    <repository>
+      <id>dcm4che</id>
+      <name>dcm4che Repository</name>
+      <url>https://www.dcm4che.org/maven2</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
   <properties>
     <revision>4.7.3</revision>
     <changelist></changelist>
@@ -58,7 +78,10 @@
     <joml.version>1.10.9</joml.version>
     <zip4j.version>2.11.6</zip4j.version>
     <weasis.core.img.version>5.0.0</weasis.core.img.version>
+    <weasis-dicom-tools.version>5.35.0</weasis-dicom-tools.version>
+    <weasis.opencv.native.version>5.0.0-dcm</weasis.opencv.native.version>
     <weasis.opencv.pkg.version>5.0.0-dcm</weasis.opencv.pkg.version>
+    <native.library.spec>linux-x86-64</native.library.spec>
     <jogamp.version>2.6.0</jogamp.version>
     <dockingframes.version>1.1.7</dockingframes.version>
 
@@ -174,6 +197,26 @@
         <groupId>com.miglayout</groupId>
         <artifactId>miglayout-core</artifactId>
         <version>${miglayout.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.weasis.core</groupId>
+        <artifactId>weasis-core-img</artifactId>
+        <version>${weasis.core.img.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.weasis</groupId>
+        <artifactId>weasis-dicom-tools</artifactId>
+        <version>${weasis-dicom-tools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.joml</groupId>
+        <artifactId>joml</artifactId>
+        <version>${joml.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>net.lingala.zip4j</groupId>
+        <artifactId>zip4j</artifactId>
+        <version>${zip4j.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

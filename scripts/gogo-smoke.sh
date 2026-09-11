@@ -59,6 +59,18 @@ felix_ok = "System Bundle" in lb or "7.0.5" in lb or "felix" in lb.lower()
 core_ok = "Weasis Core" in lb or "weasis-core" in lb or "org.weasis.core" in lb
 if not felix_ok or not core_ok:
     sys.exit("lb did not list Felix + core: %r" % lb)
+img_ok = "weasis-core-img" in lb or "Image processing" in lb
+imageio_ok = "weasis-imageio" in lb or "ImageIO" in lb or "org.weasis.imageio" in lb
+codec_ok = "weasis-dicom-codec" in lb or "DICOM Codec" in lb or "org.weasis.dicom.codec" in lb
+opencv_ok = "weasis-opencv-core" in lb or "linux-x86-64" in lb
+if not img_ok:
+    sys.exit("lb did not list weasis-core-img: %r" % lb)
+if not imageio_ok:
+    sys.exit("lb did not list weasis-imageio-codec: %r" % lb)
+if not codec_ok:
+    sys.exit("lb did not list weasis-dicom-codec: %r" % lb)
+if not opencv_ok:
+    sys.exit("lb did not list OpenCV native fragment (install @23): %r" % lb)
 send("weasis:ui -q")
 print("SMOKE_OK")
 PY
