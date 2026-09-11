@@ -18,7 +18,7 @@ import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.SynchView;
 
-/** One tab: ImageViewerPlugin holding a {@link View2d}. Not MPR (WP-7). */
+/** One tab: ImageViewerPlugin holding a {@link View2d}. MPR lives in {@code mpr/} (WP-7). */
 public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public static final String NAME = "DICOM 2D";

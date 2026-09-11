@@ -50,7 +50,7 @@
 Bundle-SymbolicName: org.weasis.dicom.viewer2d
 Bundle-Name: Weasis DICOM 2D Viewer
 -dsannotations: *
-Export-Package: !org.weasis.dicom.viewer2d.internal.*, org.weasis.dicom.viewer2d
+Export-Package: !org.weasis.dicom.viewer2d.internal.*, org.weasis.dicom.viewer2d.*
 Import-Package: !jakarta.json,!jakarta.json.*,org.weasis.core.*,org.weasis.dicom.codec.*,org.dcm4che3.data,org.dcm4che3.io,org.dcm4che3.util,org.slf4j;version=!,org.osgi.service.component;resolution:=optional,*
 ]]></bnd>
         </configuration>
