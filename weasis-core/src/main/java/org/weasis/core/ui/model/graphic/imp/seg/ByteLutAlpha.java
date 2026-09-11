@@ -9,21 +9,33 @@
  */
 package org.weasis.core.ui.model.graphic.imp.seg;
 
-/** Transparency ramp used by fusion / SEG (WP-8 / WP-10). */
-public class ByteLutAlpha {
+/** Transparency ramp for SEG / fusion overlays (ARCHITECTURE §5.2 / §6.5). */
+public final class ByteLutAlpha {
 
-  private final byte[] lut;
+  private final byte[] alpha;
 
-  public ByteLutAlpha(byte[] lut) {
-    this.lut = lut == null ? new byte[256] : lut.clone();
+  public ByteLutAlpha(byte[] alpha) {
+    this.alpha = alpha == null ? identityBytes() : alpha.clone();
   }
 
-  public byte[] getLut() {
-    return lut.clone();
+  public static ByteLutAlpha identity() {
+    return new ByteLutAlpha(identityBytes());
+  }
+
+  public byte[] table() {
+    return alpha.clone();
   }
 
   public int alphaAt(int index) {
-    int i = Math.max(0, Math.min(255, index));
-    return lut[i] & 0xFF;
+    int i = Math.max(0, Math.min(alpha.length - 1, index));
+    return alpha[i] & 0xff;
+  }
+
+  static byte[] identityBytes() {
+    byte[] t = new byte[256];
+    for (int i = 0; i < 256; i++) {
+      t[i] = (byte) i;
+    }
+    return t;
   }
 }

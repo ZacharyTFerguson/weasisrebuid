@@ -30,6 +30,11 @@ public abstract class AbstractGraphic implements Graphic {
   private String[] label = new String[0];
   private Shape shape;
 
+  /** Fill opacity relative to line alpha (CHECKLIST §4.4). Default 1.0. */
+  private float fillOpacity = 1.0f;
+
+  private float lineAlpha = 1.0f;
+
   protected AbstractGraphic(int expectedPts) {
     for (int i = 0; i < expectedPts; i++) {
       pts.add(new Point2D.Double(0, 0));
@@ -153,7 +158,34 @@ public abstract class AbstractGraphic implements Graphic {
     copy.setLineThickness(getLineThickness());
     copy.setLabelVisible(getLabelVisible());
     copy.setLabel(getLabel());
+    copy.fillOpacity = this.fillOpacity;
+    copy.lineAlpha = this.lineAlpha;
     return copy;
+  }
+
+  public float getFillOpacity() {
+    return fillOpacity;
+  }
+
+  public void setFillOpacity(float fillOpacity) {
+    this.fillOpacity = clamp01(fillOpacity);
+  }
+
+  public float getLineAlpha() {
+    return lineAlpha;
+  }
+
+  public void setLineAlpha(float lineAlpha) {
+    this.lineAlpha = clamp01(lineAlpha);
+  }
+
+  /** Perceived fill = fillOpacity × lineAlpha (e.g. 0.8 × 0.2 = 0.16). */
+  public float perceivedFillAlpha() {
+    return fillOpacity * lineAlpha;
+  }
+
+  static float clamp01(float v) {
+    return Math.max(0f, Math.min(1f, v));
   }
 
   protected abstract AbstractGraphic newInstance();

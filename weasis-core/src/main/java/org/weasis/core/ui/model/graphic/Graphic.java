@@ -52,4 +52,9 @@ public interface Graphic extends UUIDable {
   void buildShape();
 
   Graphic copy();
+
+  default boolean isMeasurement() {
+    GraphicKind kind = GraphicKind.of(this);
+    return kind == null || kind.measurement();
+  }
 }
