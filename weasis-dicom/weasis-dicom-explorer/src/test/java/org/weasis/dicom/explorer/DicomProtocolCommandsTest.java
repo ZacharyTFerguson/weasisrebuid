@@ -43,4 +43,16 @@ class DicomProtocolCommandsTest {
     assertEquals(DicomRsArgs.MISSING_URL, cmd.rs("-r", "1.2.3"));
     assertTrue(cmd.rs("-u", "https://example/rs").startsWith("rs https://example/rs"));
   }
+
+  @Test
+  void getPortableWalksSiblingDirs(@TempDir Path root) throws Exception {
+    Path dicom = root.resolve("dicom");
+    Files.createDirectories(dicom);
+    LoadLocalDicomTest.writeCt(dicom.resolve("a.dcm").toFile());
+    DicomModel model = new DicomModel();
+    DicomProtocolCommands cmd = new DicomProtocolCommands(model);
+    String out = cmd.get("-p", root.toString());
+    assertTrue(out.startsWith("imported 1 portable"), out);
+    assertEquals(1, model.getInstances().size());
+  }
 }

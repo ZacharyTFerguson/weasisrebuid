@@ -67,6 +67,7 @@ public class WeasisLauncher {
     Framework framework = factory.newFramework(fwConfig);
     framework.init();
     BundleInstaller.install(framework, config);
+    BundleInstaller.installI18nFragments(framework, config);
     framework.start();
     BundleInstaller.raiseStartLevel(framework, config);
     LauncherGogo.register(framework);
@@ -169,7 +170,10 @@ public class WeasisLauncher {
               if (value == null) {
                 return;
               }
-              boolean launchPref = key.startsWith("weasis.") || key.startsWith("org.weasis.");
+              boolean launchPref =
+                  key.startsWith("weasis.")
+                      || key.startsWith("org.weasis.")
+                      || key.startsWith("locale.");
               if (launchPref && System.getProperty(key) == null) {
                 System.setProperty(key, value);
               }

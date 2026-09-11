@@ -208,7 +208,7 @@
     {
       "code": "maven.local.repo",
       "value": "${settings.localRepository}",
-      "description": "Local Maven repository (dev)",
+      "description": "Local Maven repository (DEV only; native zip uses weasis.resources.path)",
       "type": "A",
       "category": "LAUNCH"
     },
@@ -239,6 +239,27 @@
       "value": "default",
       "description": "Preferences profile",
       "type": "AP",
+      "category": "LAUNCH"
+    },
+    {
+      "code": "locale.lang.code",
+      "value": "en",
+      "description": "UI language. Default en. Prefs list only Transifex coverage >= 30%.",
+      "type": "F",
+      "category": "UI"
+    },
+    {
+      "code": "locale.format.code",
+      "value": "system",
+      "description": "Regional format (dates, numbers, explorer sort). Independent of UI language. Default system.",
+      "type": "F",
+      "category": "UI"
+    },
+    {
+      "code": "weasis.portable.dicom.directory",
+      "value": "dicom,DICOM,IMAGES,images",
+      "description": "Portable/CD sibling folders beside the native binary ($dicom:get -p)",
+      "type": "A",
       "category": "LAUNCH"
     },
     {

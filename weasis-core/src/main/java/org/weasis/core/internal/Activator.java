@@ -11,6 +11,7 @@ package org.weasis.core.internal;
 
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.weasis.core.api.i18n.LocaleCoverage;
 import org.weasis.core.api.service.BundleTools;
 import org.weasis.core.api.service.UICore;
 
@@ -20,6 +21,7 @@ public class Activator implements BundleActivator {
   public void start(BundleContext context) {
     UICore.getInstance().setBundleContext(context);
     BundleTools.setBundleContext(context);
+    LocaleCoverage.seed(UICore.getInstance().getSystemPreferences());
   }
 
   @Override
