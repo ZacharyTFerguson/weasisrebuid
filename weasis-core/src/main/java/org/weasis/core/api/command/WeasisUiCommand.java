@@ -9,12 +9,15 @@
  */
 package org.weasis.core.api.command;
 
+import javax.swing.JFrame;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.gui.util.GuiExecutor;
+import org.weasis.core.api.service.UICore;
 
-/** Gogo {@code weasis:ui}. WP-0 implements {@code -q} shutdown. */
+/** Gogo {@code weasis:ui}. {@code -q} shutdown; {@code -v}/{@code -m} the aggregator window. */
 @Component(
     immediate = true,
     service = WeasisUiCommand.class,
@@ -41,11 +44,29 @@ public class WeasisUiCommand {
         bundleContext.getBundle(0).stop();
         yield "stopping";
       }
-      case "-v", "--visible", "-m", "--minimized" ->
-          "UI chrome is a stub in WP-0 (window may already be visible)";
+      case "-v", "--visible" -> showWindow(false);
+      case "-m", "--minimized" -> showWindow(true);
       case "-?", "--help" -> help();
       default -> help();
     };
+  }
+
+  static String showWindow(boolean minimize) {
+    JFrame window = UICore.getInstance().getApplicationWindow();
+    if (window == null) {
+      return GraphicsEnvironmentNote.HEADLESS;
+    }
+    GuiExecutor.execute(
+        () -> {
+          if (minimize) {
+            window.setExtendedState(window.getExtendedState() | JFrame.ICONIFIED);
+          } else {
+            window.setExtendedState(window.getExtendedState() & ~JFrame.ICONIFIED);
+            window.setVisible(true);
+            window.toFront();
+          }
+        });
+    return minimize ? "minimized" : "visible";
   }
 
   static String help() {

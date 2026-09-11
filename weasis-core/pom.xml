@@ -14,7 +14,7 @@
   <groupId>org.weasis.core</groupId>
   <artifactId>weasis-core</artifactId>
   <name>Weasis core</name>
-  <description>Plugin SDK + Gogo weasis:* commands (WP-0 skeleton).</description>
+  <description>Plugin SDK: Insertable factories, OpManager, graphics stubs, prefs, UICore, Gogo weasis:*.</description>
 
   <dependencies>
     <dependency>
@@ -48,9 +48,10 @@
           <bnd><![CDATA[
 Bundle-SymbolicName: org.weasis.core
 Bundle-Name: Weasis Core
+Bundle-Activator: org.weasis.core.internal.Activator
 -dsannotations: *
 Export-Package: !org.weasis.core.internal.*, org.weasis.core.*
-Import-Package: org.osgi.framework,org.osgi.service.component,org.slf4j;version=!,*
+Import-Package: org.osgi.framework,org.osgi.service.component,org.slf4j;version=!,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,javax.swing.text,*
 ]]></bnd>
         </configuration>
       </plugin>

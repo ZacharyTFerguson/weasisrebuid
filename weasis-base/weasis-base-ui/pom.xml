@@ -13,7 +13,7 @@
 
   <artifactId>weasis-base-ui</artifactId>
   <name>Weasis base UI</name>
-  <description>UI aggregator named by weasis.main.ui. WP-0 shows a stub window.</description>
+  <description>UI aggregator named by weasis.main.ui. WP-1 opens a dummy SeriesViewerFactory / ViewerPlugin.</description>
 
   <build>
     <plugins>
@@ -25,8 +25,9 @@
 Bundle-SymbolicName: org.weasis.base.ui
 Bundle-Name: Weasis Base UI
 Bundle-Activator: org.weasis.base.ui.internal.MainWindowActivator
+-dsannotations: *
 Export-Package: !org.weasis.base.ui.internal.*, org.weasis.base.ui.*
-Import-Package: org.osgi.framework,javax.swing,javax.swing.border,*
+Import-Package: org.osgi.framework,org.osgi.service.component,javax.swing,javax.swing.border,javax.swing.event,*
 ]]></bnd>
         </configuration>
       </plugin>

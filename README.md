@@ -4,9 +4,10 @@ Independent reconstruction of **[Weasis](https://weasis.org)** **4.7.3** (Java, 
 
 **License:** EPL-2.0 OR Apache-2.0 (`ORIGIN.md`). No PHI.
 
-## WP-0 (this PR)
+## Status
 
-`org.weasis.launcher.AppLauncher` (plain JAR) boots Felix **7.0.5**. Gogo listens on VM property `gosh.port` **17179** (not a `base.json` pref). `weasis:info -v` prints a version; `lb` lists Felix + core. UI may be a stub window.
+- **WP-0:** `AppLauncher` boots Felix **7.0.5**. Gogo `gosh.port` **17179**. `weasis:info -v`; `lb` lists Felix + core.
+- **WP-1 (this branch):** Core SDK — `Insertable` / factories, `OpManager`, graphic hierarchy stubs, prefs dialog shell, `UICore`. A dummy `SeriesViewerFactory` opens a blank `ViewerPlugin`.
 
 Shipping prefs (MX-03) are `weasis-distributions/etc/config/base.json` (INFO, stack **3**, `felix.log.level` **1**). `weasis-launcher/conf/base.json` is IDE/DEBUG.
 
@@ -32,14 +33,17 @@ g! lb
 g! weasis:ui -q
 ```
 
+Non-headless: File > Preferences (Alt+P) and a blank dummy viewer in the center.
+
 IDE: main `org.weasis.launcher.AppLauncher`, VM `-Xms64m -Xmx768m -Dgosh.port=17179`, working directory `weasis-launcher`.
 
 ## Tests
 
-JUnit Jupiter **6.1.2** + Mockito **5.23.0**. No AssertJ. Surefire `<parallel>all</parallel>`. Felix boot is a smoke (`weasis:info`), not a unit test.
+JUnit Jupiter **6.1.2** + Mockito **5.23.0**. No AssertJ. Surefire `<parallel>all</parallel>`. Felix boot is a smoke (`weasis:info`), not a unit test. Do **not** tick CHECKLIST §6 Pass from tests or `weasis:info`.
 
 ```bash
 mvn -q test
+bash scripts/gogo-smoke.sh
 ```
 
 ## Reactor locks
