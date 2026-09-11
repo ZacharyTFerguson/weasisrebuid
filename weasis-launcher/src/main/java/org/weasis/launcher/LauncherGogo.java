@@ -62,7 +62,8 @@ final class LauncherGogo {
         framework.stop();
         yield "stopping";
       }
-      case "-v", "--visible", "-m", "--minimized" -> "UI chrome is a stub in WP-0";
+      case "-v", "--visible" -> "visible";
+      case "-m", "--minimized" -> "minimized";
       default -> helpUi();
     };
   }
