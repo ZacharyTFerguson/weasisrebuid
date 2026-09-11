@@ -90,6 +90,39 @@
       <artifactId>org.apache.felix.scr</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.weasis.core</groupId>
+      <artifactId>weasis-core-img</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.lingala.zip4j</groupId>
+      <artifactId>zip4j</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.joml</groupId>
+      <artifactId>joml</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.imageio</groupId>
+      <artifactId>weasis-imageio-codec</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.dicom</groupId>
+      <artifactId>weasis-dicom-codec</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.opencv</groupId>
+      <artifactId>weasis-opencv-core-linux-x86-64</artifactId>
+      <version>${weasis.opencv.pkg.version}</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
 
   <build>

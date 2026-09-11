@@ -13,7 +13,48 @@
 
   <groupId>org.weasis.imageio</groupId>
   <artifactId>weasis-imageio-codec</artifactId>
-  <packaging>pom</packaging>
+  <packaging>jar</packaging>
   <name>Weasis ImageIO codec</name>
-  <description>Directory weasis-imageio/; shipping artifact weasis-imageio-codec. WP-2 turns this into a bundle.</description>
+  <description>Directory weasis-imageio/; shipping artifact weasis-imageio-codec.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.weasis.core</groupId>
+      <artifactId>weasis-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd><![CDATA[
+Bundle-SymbolicName: org.weasis.imageio.codec
+Bundle-Name: Weasis ImageIO Codec
+-dsannotations: *
+Export-Package: org.weasis.imageio.codec.*
+Import-Package: org.weasis.core.*,org.osgi.service.component,javax.imageio,javax.imageio.spi,*
+]]></bnd>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
 </project>
