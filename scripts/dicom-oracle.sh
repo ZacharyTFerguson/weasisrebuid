@@ -11,4 +11,6 @@ if [[ $# -lt 1 ]]; then
   exit 2
 fi
 FILE="$1"
-mvn -q -pl weasis-dicom/weasis-dicom-codec -am exec:java -Dexec.args="$FILE"
+# Compile reactor first, then exec only on the codec module (parent has no mainClass).
+mvn -q -pl weasis-dicom/weasis-dicom-codec -am -DskipTests install
+mvn -q -pl weasis-dicom/weasis-dicom-codec exec:java -Dexec.args="$FILE"
