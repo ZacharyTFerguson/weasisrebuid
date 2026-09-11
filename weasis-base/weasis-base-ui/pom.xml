@@ -13,7 +13,20 @@
 
   <artifactId>weasis-base-ui</artifactId>
   <name>Weasis base UI</name>
-  <description>UI aggregator named by weasis.main.ui. WP-1 opens a dummy SeriesViewerFactory / ViewerPlugin.</description>
+  <description>UI aggregator named by weasis.main.ui. Docking layout model (not persisted).</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.miglayout</groupId>
+      <artifactId>miglayout-swing</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.miglayout</groupId>
+      <artifactId>miglayout-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
 
   <build>
     <plugins>
