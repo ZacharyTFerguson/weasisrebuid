@@ -7,16 +7,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-package org.weasis.core.api.image;
+package org.weasis.core.ui.editor.image;
 
-/** Overlay (60xx) bits OR'd onto the 8-bit grey image. */
-public class OverlayOp extends AbstractOp {
-
-  public static final String P_ENABLED = "overlay.enabled";
-  public static final String P_BITS = "overlay.bits";
-
-  public OverlayOp() {
-    super("op.overlay");
-    setParam(P_ENABLED, Boolean.TRUE);
-  }
+/** View synchronization. Default Stack is scroll-only; Default Tile enables all actions. */
+public enum SynchView {
+  NONE,
+  STACK,
+  TILE
 }

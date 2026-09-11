@@ -124,6 +124,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.weasis.dicom</groupId>
+      <artifactId>weasis-dicom-viewer2d</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.weasis.opencv</groupId>
       <artifactId>weasis-opencv-core-linux-x86-64</artifactId>
       <version>${weasis.opencv.pkg.version}</version>

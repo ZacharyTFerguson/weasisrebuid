@@ -101,6 +101,32 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     } else {
       status.setText("Imported " + model.getInstances().size() + " instance(s)");
     }
+    openViewerIfPresent();
+  }
+
+  void openViewerIfPresent() {
+    if (java.awt.GraphicsEnvironment.isHeadless() || model.getInstances().isEmpty()) {
+      return;
+    }
+    org.weasis.core.api.media.data.Series<org.weasis.core.api.media.data.MediaElement> series =
+        new org.weasis.core.api.media.data.Series<>();
+    series.setMimeType(org.weasis.dicom.codec.DicomMime.IMAGE_DICOM);
+    for (ImportedInstance inst : model.getInstances()) {
+      if (inst.file() == null) {
+        continue;
+      }
+      org.weasis.core.api.media.data.MediaElement el =
+          new org.weasis.core.api.media.data.MediaElement();
+      el.setMediaURI(inst.file().toURI());
+      el.setMimeType(org.weasis.dicom.codec.DicomMime.IMAGE_DICOM);
+      series.addMedia(el);
+    }
+    org.weasis.core.api.service.UICore.getInstance()
+        .getViewerFactory(org.weasis.dicom.codec.DicomMime.IMAGE_DICOM)
+        .ifPresent(
+            factory ->
+                org.weasis.core.ui.editor.ViewerPluginBuilder.openSequenceInPlugin(
+                    factory, series, new java.util.Hashtable<>(), true, true));
   }
 
   @Override

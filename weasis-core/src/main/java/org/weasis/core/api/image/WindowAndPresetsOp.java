@@ -15,6 +15,8 @@ public class WindowAndPresetsOp extends AbstractOp {
   public static final String P_WINDOW = "window";
   public static final String P_LEVEL = "level";
   public static final String P_VOI_LUT_SHAPE = "voi.shape";
+  public static final String P_PRESET = "preset";
+  public static final String P_INVERT = "invert";
 
   public WindowAndPresetsOp() {
     super("op.window.presets");

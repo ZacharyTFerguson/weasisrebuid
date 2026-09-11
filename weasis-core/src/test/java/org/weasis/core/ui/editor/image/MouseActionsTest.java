@@ -7,16 +7,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-package org.weasis.core.api.image;
+package org.weasis.core.ui.editor.image;
 
-/** Overlay (60xx) bits OR'd onto the 8-bit grey image. */
-public class OverlayOp extends AbstractOp {
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-  public static final String P_ENABLED = "overlay.enabled";
-  public static final String P_BITS = "overlay.bits";
+import org.junit.jupiter.api.Test;
 
-  public OverlayOp() {
-    super("op.overlay");
-    setParam(P_ENABLED, Boolean.TRUE);
+class MouseActionsTest {
+
+  @Test
+  void drawingsAliasIsDraw() {
+    MouseActions actions = new MouseActions();
+    actions.setLeft("drawings");
+    assertEquals(MouseActions.DRAW, actions.getLeft());
   }
 }
