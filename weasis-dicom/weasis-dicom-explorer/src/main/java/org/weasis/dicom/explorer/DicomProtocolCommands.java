@@ -22,6 +22,7 @@ import org.osgi.service.component.annotations.Component;
 import org.weasis.core.api.command.DicomCloseArgs;
 import org.weasis.core.api.command.DicomGetArgs;
 import org.weasis.core.api.command.DicomRsArgs;
+import org.weasis.core.api.util.PortableDicomDirs;
 import org.weasis.dicom.explorer.mf.ManifestParser;
 
 /**
@@ -60,7 +61,8 @@ public class DicomProtocolCommands {
       case MANIFEST -> getManifest(parsed.value(), false);
       case IWADO -> getManifest(parsed.value(), true);
       case ZIP -> getLocal(parsed.value());
-      case REMOTE, PORTABLE -> "queued " + parsed.mode() + " " + parsed.value();
+      case REMOTE -> "queued " + parsed.mode() + " " + parsed.value();
+      case PORTABLE -> getPortable(parsed.value());
       case HELP -> helpGet();
     };
   }
@@ -85,6 +87,20 @@ public class DicomProtocolCommands {
     } catch (IllegalArgumentException e) {
       return e.getMessage();
     }
+  }
+
+  String getPortable(String root) throws Exception {
+    Path base = root == null || root.isBlank() ? null : Path.of(root);
+    String csv =
+        System.getProperty(PortableDicomDirs.PREF, PortableDicomDirs.DEFAULT);
+    List<Path> dirs = PortableDicomDirs.existing(base, csv);
+    int imported = 0;
+    for (Path dir : dirs) {
+      LoadLocalDicom.ImportResult result =
+          LoadLocalDicom.importPath(dir.toFile(), null, model, new SkipUnsupportedSopNotifier());
+      imported += result.imported().size();
+    }
+    return "imported " + imported + " portable " + dirs.size();
   }
 
   String getLocal(String path) throws Exception {

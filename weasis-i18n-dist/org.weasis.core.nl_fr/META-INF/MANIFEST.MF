@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Weasis Core French
+Bundle-SymbolicName: org.weasis.core.nl_fr
+Bundle-Version: 4.7.3
+Fragment-Host: org.weasis.core
+Bundle-Vendor: Weasis rebuild

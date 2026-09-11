@@ -66,6 +66,10 @@ public final class ConfigData {
     seeds.put("maven.localRepository", mavenRepo);
     seeds.put("settings.localRepository", mavenRepo);
     seeds.put("maven.local.repo", mavenRepo);
+    String resourcesPath = System.getProperty(NativeConfigRewriter.RESOURCES_PATH, "");
+    if (resourcesPath != null && !resourcesPath.isBlank()) {
+      seeds.put(NativeConfigRewriter.RESOURCES_PATH, resourcesPath);
+    }
     if (buildInfo != null) {
       seeds.putAll(buildInfo);
     }

@@ -60,6 +60,7 @@ class ProtocolCommandsTest {
     assertEquals(DicomRsArgs.DEFAULT_ACCEPT_EXT, rs.acceptExt());
     assertTrue(rs.showWholeStudy());
     assertEquals(DicomCloseArgs.Mode.ALL, DicomCloseArgs.parse("-a").mode());
+    assertEquals(DicomGetArgs.Mode.PORTABLE, DicomGetArgs.parse("$dicom:get", "-p").mode());
     assertEquals(ImageCommandArgs.GetMode.FILE, ImageCommandArgs.parseGet("-f", "/tmp/a.png"));
   }
 
