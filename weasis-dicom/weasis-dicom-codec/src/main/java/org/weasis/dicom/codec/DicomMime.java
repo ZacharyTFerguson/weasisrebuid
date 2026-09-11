@@ -21,6 +21,10 @@ public final class DicomMime {
   public static final String PR_DICOM = "pr/dicom";
   public static final String KO_DICOM = "ko/dicom";
   public static final String SEG_DICOM = "seg/dicom";
+  public static final String SR_DICOM = "sr/dicom";
+  public static final String AU_DICOM = "au/dicom";
+  public static final String ECG_DICOM = "ecg/dicom";
+  public static final String RT_DICOM = "rt/dicom";
   public static final String ENCAP_DICOM = "encap/dicom";
   public static final String UNREADABLE_DICOM = "unreadable/dicom";
 
@@ -39,6 +43,20 @@ public final class DicomMime {
     if (UID.SegmentationStorage.equals(sopClassUid)
         || UID.SurfaceSegmentationStorage.equals(sopClassUid)) {
       return SEG_DICOM;
+    }
+    if (isStructuredReport(sopClassUid)) {
+      return SR_DICOM;
+    }
+    if (UID.BasicVoiceAudioWaveformStorage.equals(sopClassUid)
+        || UID.GeneralAudioWaveformStorage.equals(sopClassUid)
+        || "1.2.840.10008.10.0.2.2.1.9.4.1".equals(sopClassUid)) {
+      return AU_DICOM;
+    }
+    if (isEcg(sopClassUid)) {
+      return ECG_DICOM;
+    }
+    if (isRt(sopClassUid)) {
+      return RT_DICOM;
     }
     if (isEncapsulatedDocument(sopClassUid)) {
       return ENCAP_DICOM;
@@ -63,6 +81,29 @@ public final class DicomMime {
         || UID.EncapsulatedCDAStorage.equals(uid)
         || "1.2.840.10008.10.0.2.2.1.104.3".equals(uid)
         || uid.startsWith("1.2.840.10008.10.0.2.2.1.104.");
+  }
+
+  static boolean isStructuredReport(String uid) {
+    return UID.BasicTextSRStorage.equals(uid)
+        || UID.EnhancedSRStorage.equals(uid)
+        || UID.ComprehensiveSRStorage.equals(uid)
+        || UID.Comprehensive3DSRStorage.equals(uid)
+        || UID.MammographyCADSRStorage.equals(uid)
+        || uid.contains("1.2.840.10008.10.0.2.2.1.88.");
+  }
+
+  static boolean isEcg(String uid) {
+    return UID.TwelveLeadECGWaveformStorage.equals(uid)
+        || UID.GeneralECGWaveformStorage.equals(uid)
+        || UID.AmbulatoryECGWaveformStorage.equals(uid)
+        || UID.HemodynamicWaveformStorage.equals(uid);
+  }
+
+  static boolean isRt(String uid) {
+    return UID.RTStructureSetStorage.equals(uid)
+        || UID.RTDoseStorage.equals(uid)
+        || UID.RTPlanStorage.equals(uid)
+        || UID.RTBeamsTreatmentRecordStorage.equals(uid);
   }
 
   static boolean isVideoSop(String uid) {
