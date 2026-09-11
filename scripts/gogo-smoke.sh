@@ -55,22 +55,33 @@ if "4.7" not in out:
     sys.exit("weasis:info -v did not print a 4.7 version: %r" % out)
 lb = send("lb")
 print(lb)
+def bundle_state(listing, needle):
+    for line in listing.splitlines():
+        if needle in line:
+            parts = [p.strip() for p in line.split("|")]
+            if len(parts) >= 2:
+                return parts[1]
+    return ""
+
 felix_ok = "System Bundle" in lb or "7.0.5" in lb or "felix" in lb.lower()
 core_ok = "Weasis Core" in lb or "weasis-core" in lb or "org.weasis.core" in lb
 if not felix_ok or not core_ok:
     sys.exit("lb did not list Felix + core: %r" % lb)
-img_ok = "weasis-core-img" in lb or "Image processing" in lb
-imageio_ok = "weasis-imageio" in lb or "ImageIO" in lb or "org.weasis.imageio" in lb
-codec_ok = "weasis-dicom-codec" in lb or "DICOM Codec" in lb or "org.weasis.dicom.codec" in lb
-opencv_ok = "weasis-opencv-core" in lb or "linux-x86-64" in lb
+img_ok = bundle_state(lb, "Image processing") == "Active" or bundle_state(lb, "weasis-core-img") == "Active"
+imageio_ok = bundle_state(lb, "Weasis ImageIO Codec") == "Active"
+codec_ok = bundle_state(lb, "Weasis DICOM Codec") == "Active"
+opencv_state = bundle_state(lb, "OpenCV native")
+if not opencv_state:
+    opencv_state = bundle_state(lb, "linux-x86-64")
+opencv_ok = opencv_state in ("Resolved", "Installed")
 if not img_ok:
-    sys.exit("lb did not list weasis-core-img: %r" % lb)
+    sys.exit("lb did not list weasis-core-img ACTIVE: %r" % lb)
 if not imageio_ok:
-    sys.exit("lb did not list weasis-imageio-codec: %r" % lb)
+    sys.exit("lb did not list weasis-imageio-codec ACTIVE: %r" % lb)
 if not codec_ok:
-    sys.exit("lb did not list weasis-dicom-codec: %r" % lb)
+    sys.exit("lb did not list weasis-dicom-codec ACTIVE: %r" % lb)
 if not opencv_ok:
-    sys.exit("lb did not list OpenCV native fragment (install @23): %r" % lb)
+    sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
 send("weasis:ui -q")
 print("SMOKE_OK")
 PY
