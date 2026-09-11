@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -244,7 +245,7 @@ class DicomUnderstandingOracleTest {
   }
 
   static void write(File dest, Attributes fmi, Attributes dcm, String ts) throws Exception {
-    try (DicomOutputStream out = new DicomOutputStream(dest, ts)) {
+    try (DicomOutputStream out = new DicomOutputStream(new FileOutputStream(dest), ts)) {
       out.writeDataset(fmi, dcm);
     }
   }
