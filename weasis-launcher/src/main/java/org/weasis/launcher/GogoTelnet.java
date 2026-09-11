@@ -85,9 +85,7 @@ final class GogoTelnet {
   private static boolean alreadyRunning(Throwable t, String port) {
     while (t != null) {
       String message = t.getMessage();
-      if (message != null
-          && message.contains("already running")
-          && message.contains(port)) {
+      if (message != null && message.contains("already running") && message.contains(port)) {
         return true;
       }
       t = t.getCause();

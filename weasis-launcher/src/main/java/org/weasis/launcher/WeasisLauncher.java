@@ -57,7 +57,7 @@ public class WeasisLauncher {
     Map<String, String> fwConfig = new HashMap<>(config.frameworkProperties());
     fwConfig.put(GOGO_PORT_PROPERTY, System.getProperty(GOGO_PORT_PROPERTY));
     // Keep the framework up when stdin is not a TTY (CI / background launch).
-    fwConfig.put("gosh.args", " --noshutdown");
+    fwConfig.put("gosh.args", " --noshutdown --nointeractive");
     FrameworkFactory factory = ServiceLoader.load(FrameworkFactory.class).iterator().next();
     Framework framework = factory.newFramework(fwConfig);
     framework.init();
