@@ -1,0 +1,14 @@
+Weasis rebuild (weasisrebuid)
+================================
+
+This tree reconstructs Weasis 4.7.3 as Weasis (Java, Apache Felix 7.0.5,
+Swing, OSGi) from the specification in ZacharyTFerguson/dicomlight
+docs/weasis-spec. It is an independent codebase, not a fork of
+nroduit/Weasis.
+
+Pin: Weasis 4.7.3. When weasis.org disagrees with tagged code, Have
+follows the tagged code.
+
+License: EPL-2.0 OR Apache-2.0 (CHECKLIST §0 / ORIGIN.md).
+
+No patient DICOM is stored in this repository.

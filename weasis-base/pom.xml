@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis</groupId>
+    <artifactId>weasis-parent</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../weasis-parent/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>weasis-base</artifactId>
+  <packaging>pom</packaging>
+  <name>Weasis base</name>
+
+  <modules>
+    <module>weasis-base-parent</module>
+    <module>weasis-base-ui</module>
+  </modules>
+</project>

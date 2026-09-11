@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis</groupId>
+    <artifactId>weasis-parent</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../../weasis-parent/pom.xml</relativePath>
+  </parent>
+
+  <groupId>org.weasis.base</groupId>
+  <artifactId>weasis-base-parent</artifactId>
+  <packaging>pom</packaging>
+  <name>Weasis base parent</name>
+  <description>provided weasis-core (+ docking-frames in later WPs). Feature bundles parent this, not weasis-parent.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.weasis.core</groupId>
+      <artifactId>weasis-core</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+</project>

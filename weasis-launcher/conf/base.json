@@ -1,0 +1,291 @@
+{
+  "weasisPreferences": [
+    {
+      "code": "framework.system.packages.extra.basic",
+      "value": "ch.qos.logback.classic,ch.qos.logback.classic.encoder,ch.qos.logback.classic.spi,ch.qos.logback.core,ch.qos.logback.core.encoder,ch.qos.logback.core.rolling,ch.qos.logback.core.util,com.formdev.flatlaf,javax.accessibility,javax.imageio,javax.swing,javax.swing.border,javax.swing.event,javax.swing.plaf,javax.swing.table,javax.swing.text,javax.swing.tree,net.miginfocom.layout,net.miginfocom.swing,org.slf4j,org.weasis.pref",
+      "description": "Additional packages visible from the Felix system bundle",
+      "type": "A",
+      "category": "FELIX_CONFIG"
+    },
+    {
+      "code": "org.osgi.framework.system.packages.extra",
+      "value": "${framework.system.packages.extra.basic}",
+      "description": "OSGi system packages extra",
+      "type": "A",
+      "category": "FELIX_CONFIG"
+    },
+    {
+      "code": "felix.cache.rootdir",
+      "value": "${user.home}",
+      "description": "Base directory of the bundle cache",
+      "type": "A",
+      "category": "FELIX_CONFIG"
+    },
+    {
+      "code": "org.osgi.framework.storage",
+      "value": "${felix.cache.rootdir}/.weasis/cache-dev",
+      "description": "Location of the bundle cache (Maven/IDE; shipping uses ~/.weasis/cache)",
+      "type": "A",
+      "category": "FELIX_CONFIG"
+    },
+    {
+      "code": "org.osgi.framework.storage.clean",
+      "value": "onFirstInit",
+      "description": "Flush cache on first init (none | onFirstInit)",
+      "type": "A",
+      "category": "FELIX_CONFIG"
+    },
+    {
+      "code": "org.osgi.framework.startlevel.beginning",
+      "value": "130",
+      "description": "Initial framework start level",
+      "type": "A",
+      "category": "FELIX_CONFIG",
+      "javaType": "INT"
+    },
+    {
+      "code": "felix.startlevel.bundle",
+      "value": "300",
+      "description": "Start level of newly installed bundles",
+      "type": "A",
+      "category": "FELIX_CONFIG",
+      "javaType": "INT"
+    },
+    {
+      "code": "felix.auto.start.1",
+      "value": "file:${maven.localRepository}/org/apache/felix/org.apache.felix.gogo.runtime/${felix.gogo.version}/org.apache.felix.gogo.runtime-${felix.gogo.version}.jar",
+      "description": "Gogo runtime",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.3",
+      "value": "file:${maven.localRepository}/org/apache/felix/org.apache.felix.gogo.command/${felix.gogo.command.version}/org.apache.felix.gogo.command-${felix.gogo.command.version}.jar file:${maven.localRepository}/org/apache/felix/org.apache.felix.gogo.shell/${felix.gogo.shell.version}/org.apache.felix.gogo.shell-${felix.gogo.shell.version}.jar",
+      "description": "Gogo command and shell",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.4",
+      "value": "file:${maven.localRepository}/org/apache/felix/org.apache.felix.bundlerepository/${felix.bundlerepository.version}/org.apache.felix.bundlerepository-${felix.bundlerepository.version}.jar file:${maven.localRepository}/org/osgi/osgi.promise/${osgi.promise.version}/osgi.promise-${osgi.promise.version}.jar",
+      "description": "Bundle repository + OSGi promise",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.5",
+      "value": "file:${maven.localRepository}/org/osgi/org.osgi.service.component/${osgi.component.version}/org.osgi.service.component-${osgi.component.version}.jar file:${maven.localRepository}/org/apache/felix/org.apache.felix.configadmin/${felix.configadmin.version}/org.apache.felix.configadmin-${felix.configadmin.version}.jar file:${maven.localRepository}/org/apache/felix/org.apache.felix.prefs/${felix.prefs.version}/org.apache.felix.prefs-${felix.prefs.version}.jar file:${maven.localRepository}/org/apache/felix/org.apache.felix.scr/${felix.scr.version}/org.apache.felix.scr-${felix.scr.version}.jar",
+      "description": "DS component, configadmin, prefs, SCR",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.7",
+      "value": "file:${maven.localRepository}/com/miglayout/miglayout-core/${miglayout.version}/miglayout-core-${miglayout.version}.jar file:${maven.localRepository}/com/miglayout/miglayout-swing/${miglayout.version}/miglayout-swing-${miglayout.version}.jar",
+      "description": "MigLayout (JAXB-OSGi in later WPs)",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.10",
+      "value": "file:${maven.localRepository}/org/weasis/core/weasis-core-img/${weasis.core.img.version}/weasis-core-img-${weasis.core.img.version}.jar file:${maven.localRepository}/net/lingala/zip4j/zip4j/${zip4j.version}/zip4j-${zip4j.version}.jar file:${maven.localRepository}/org/joml/joml/${joml.version}/joml-${joml.version}.jar",
+      "description": "core-img, zip4j, JOML (docking-frames in later WPs)",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.12",
+      "value": "file:${maven.localRepository}/org/weasis/core/weasis-core/${app.version}/weasis-core-${app.version}.jar",
+      "description": "weasis-core",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.15",
+      "value": "file:${maven.localRepository}/org/weasis/imageio/weasis-imageio-codec/${app.version}/weasis-imageio-codec-${app.version}.jar",
+      "description": "weasis-imageio-codec",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.install.23",
+      "value": "file:${maven.localRepository}/org/weasis/opencv/weasis-opencv-core-${native.library.spec}/${weasis.opencv.pkg.version}/weasis-opencv-core-${native.library.spec}-${weasis.opencv.pkg.version}.jar",
+      "description": "OpenCV native for this arch",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.30",
+      "value": "file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-codec/${app.version}/weasis-dicom-codec-${app.version}.jar",
+      "description": "weasis-dicom-codec",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.35",
+      "value": "file:${maven.localRepository}/com/fasterxml/jackson/core/jackson-annotations/${jackson.annotations.version}/jackson-annotations-${jackson.annotations.version}.jar file:${maven.localRepository}/com/fasterxml/jackson/core/jackson-core/${jackson.version}/jackson-core-${jackson.version}.jar file:${maven.localRepository}/com/fasterxml/jackson/core/jackson-databind/${jackson.version}/jackson-databind-${jackson.version}.jar",
+      "description": "Jackson",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.40",
+      "value": "file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-explorer/${app.version}/weasis-dicom-explorer-${app.version}.jar",
+      "description": "weasis-dicom-explorer",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.60",
+      "value": "file:${maven.localRepository}/org/weasis/base/weasis-base-ui/${app.version}/weasis-base-ui-${app.version}.jar",
+      "description": "weasis-base-ui",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.70",
+      "value": "file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-viewer2d/${app.version}/weasis-dicom-viewer2d-${app.version}.jar file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-sr/${app.version}/weasis-dicom-sr-${app.version}.jar",
+      "description": "viewer2d + SR",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.75",
+      "value": "file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-au/${app.version}/weasis-dicom-au-${app.version}.jar file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-wave/${app.version}/weasis-dicom-wave-${app.version}.jar",
+      "description": "AU + ECG",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.100",
+      "value": "file:${maven.localRepository}/org/weasis/base/weasis-base-viewer2d/${app.version}/weasis-base-viewer2d-${app.version}.jar",
+      "description": "non-DICOM 2D",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.110",
+      "value": "file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-send/${app.version}/weasis-dicom-send-${app.version}.jar file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-isowriter/${app.version}/weasis-dicom-isowriter-${app.version}.jar file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-qr/${app.version}/weasis-dicom-qr-${app.version}.jar",
+      "description": "send + isowriter + qr",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.115",
+      "value": "file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-rt/${app.version}/weasis-dicom-rt-${app.version}.jar",
+      "description": "RT",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.120",
+      "value": "file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-viewer3d/${app.version}/weasis-dicom-viewer3d-${app.version}.jar",
+      "description": "JOGL + 3D viewer (JOGL coords in WP-9)",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.install.121",
+      "value": "file:${maven.localRepository}/org/weasis/thirdparty/org/jogamp/jogamp-${native.library.spec}/${jogamp.version}/jogamp-${native.library.spec}-${jogamp.version}.jar",
+      "description": "JOGL native for this arch",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "weasis.version",
+      "value": "${app.version}",
+      "description": "Application version",
+      "type": "A",
+      "category": "LOCK"
+    },
+    {
+      "code": "weasis.min.native.version",
+      "value": "${base.minimal.version}",
+      "description": "Minimal native installer",
+      "type": "A",
+      "category": "LOCK"
+    },
+    {
+      "code": "maven.local.repo",
+      "value": "${settings.localRepository}",
+      "description": "Local Maven repository (dev)",
+      "type": "A",
+      "category": "LAUNCH"
+    },
+    {
+      "code": "weasis.clean.previous.version",
+      "value": "false",
+      "description": "Wipe bundle cache on version change",
+      "type": "A",
+      "category": "LAUNCH",
+      "javaType": "BOOLEAN"
+    },
+    {
+      "code": "weasis.main.ui",
+      "value": "weasis-base-ui",
+      "description": "UI aggregator bundle",
+      "type": "A",
+      "category": "LAUNCH"
+    },
+    {
+      "code": "weasis.name",
+      "value": "Weasis",
+      "description": "Application name",
+      "type": "AP",
+      "category": "LAUNCH"
+    },
+    {
+      "code": "weasis.profile",
+      "value": "default",
+      "description": "Preferences profile",
+      "type": "AP",
+      "category": "LAUNCH"
+    },
+    {
+      "code": "org.apache.sling.commons.log.file.activate",
+      "value": "false",
+      "description": "Rolling log files",
+      "type": "F",
+      "category": "LOG",
+      "javaType": "BOOLEAN"
+    },
+    {
+      "code": "org.apache.sling.commons.log.file.number",
+      "value": "20",
+      "description": "Max rolling log files",
+      "type": "F",
+      "category": "LOG",
+      "javaType": "INT"
+    },
+    {
+      "code": "org.apache.sling.commons.log.file.size",
+      "value": "10MB",
+      "description": "Max rolling log file size",
+      "type": "F",
+      "category": "LOG"
+    },
+    {
+      "code": "felix.log.level",
+      "value": "2",
+      "description": "OSGi framework log 0=None / 1=Error / 2=Warning / 3=Information / 4=Debug",
+      "type": "A",
+      "category": "LOG",
+      "javaType": "INT"
+    },
+    {
+      "code": "org.apache.sling.commons.log.level",
+      "value": "DEBUG",
+      "description": "Application logging level TRACE, DEBUG, INFO, WARN, ERROR",
+      "type": "F",
+      "category": "LOG"
+    },
+    {
+      "code": "org.apache.sling.commons.log.stack.limit",
+      "value": "-1",
+      "description": "Stack trace lines (0=NONE, -1=ALL). Shipping default 3.",
+      "type": "F",
+      "category": "LOG",
+      "javaType": "INT"
+    }
+  ]
+}
