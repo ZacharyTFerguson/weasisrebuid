@@ -26,5 +26,9 @@ class DicomMimeTest {
     assertEquals(DicomMime.ENCAP_DICOM, DicomMime.fromSopClass(UID.EncapsulatedPDFStorage));
     assertEquals(DicomMime.VIDEO_DICOM, DicomMime.fromSopClass(UID.VideoEndoscopicImageStorage));
     assertEquals(DicomMime.UNREADABLE_DICOM, DicomMime.fromSopClass(null));
+    assertEquals(DicomMime.SR_DICOM, DicomMime.fromSopClass(UID.BasicTextSRStorage));
+    assertEquals(DicomMime.AU_DICOM, DicomMime.fromSopClass(UID.BasicVoiceAudioWaveformStorage));
+    assertEquals(DicomMime.ECG_DICOM, DicomMime.fromSopClass(UID.TwelveLeadECGWaveformStorage));
+    assertEquals(DicomMime.RT_DICOM, DicomMime.fromSopClass(UID.RTStructureSetStorage));
   }
 }

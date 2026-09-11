@@ -286,6 +286,37 @@
       "type": "F",
       "category": "LOG",
       "javaType": "INT"
+    },
+    {
+      "code": "weasis.dicom.seg.hide.all",
+      "value": "false",
+      "description": "Hide all SEG",
+      "type": "A",
+      "category": "DICOM",
+      "javaType": "BOOLEAN"
+    },
+    {
+      "code": "weasis.dicom.seg.hide.keywords",
+      "value": "table removal, table segmentation, tabletop, couch, patient support, bed removal",
+      "description": "SEG keywords to hide",
+      "type": "A",
+      "category": "DICOM"
+    },
+    {
+      "code": "weasis.dicom.seg.hide.count",
+      "value": "3",
+      "description": "Hide from N segmentations (0 disables)",
+      "type": "A",
+      "category": "DICOM",
+      "javaType": "INT"
+    },
+    {
+      "code": "weasis.rt.dvh.recalculate.enable",
+      "value": "true",
+      "description": "false (default)",
+      "type": "A",
+      "category": "DICOM",
+      "javaType": "BOOLEAN"
     }
   ]
 }
