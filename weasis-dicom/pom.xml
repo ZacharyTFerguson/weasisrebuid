@@ -18,5 +18,6 @@
   <modules>
     <module>weasis-dicom-parent</module>
     <module>weasis-dicom-codec</module>
+    <module>weasis-dicom-explorer</module>
   </modules>
 </project>

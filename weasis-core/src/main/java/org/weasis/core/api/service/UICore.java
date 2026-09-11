@@ -18,6 +18,8 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JFrame;
 import org.osgi.framework.BundleContext;
+import org.weasis.core.api.explorer.DataExplorerViewFactory;
+import org.weasis.core.api.explorer.DicomImportFactory;
 import org.weasis.core.api.gui.InsertableFactory;
 import org.weasis.core.api.gui.PreferencesPageFactory;
 import org.weasis.core.ui.editor.SeriesViewer;
@@ -38,6 +40,8 @@ public class UICore {
   private final List<InsertableFactory> insertableFactories = new CopyOnWriteArrayList<>();
   private final List<PreferencesPageFactory> preferencesPageFactories =
       new CopyOnWriteArrayList<>();
+  private final List<DataExplorerViewFactory> explorerFactories = new CopyOnWriteArrayList<>();
+  private final List<DicomImportFactory> dicomImportFactories = new CopyOnWriteArrayList<>();
   private final List<ViewerPlugin<?>> openPlugins = new CopyOnWriteArrayList<>();
   private volatile JFrame applicationWindow;
   private volatile BundleContext bundleContext;
@@ -106,6 +110,10 @@ public class UICore {
       registerPreferencesPageFactory(pref);
       return;
     }
+    if (factory instanceof DataExplorerViewFactory explorer) {
+      registerExplorerFactory(explorer);
+      return;
+    }
     if (!insertableFactories.contains(factory)) {
       insertableFactories.add(factory);
     }
@@ -115,6 +123,9 @@ public class UICore {
     insertableFactories.remove(factory);
     if (factory instanceof PreferencesPageFactory pref) {
       preferencesPageFactories.remove(pref);
+    }
+    if (factory instanceof DataExplorerViewFactory explorer) {
+      explorerFactories.remove(explorer);
     }
   }
 
@@ -130,6 +141,33 @@ public class UICore {
 
   public List<PreferencesPageFactory> getPreferencesPageFactories() {
     return Collections.unmodifiableList(preferencesPageFactories);
+  }
+
+  public void registerExplorerFactory(DataExplorerViewFactory factory) {
+    if (factory != null && !explorerFactories.contains(factory)) {
+      explorerFactories.add(factory);
+      if (!insertableFactories.contains(factory)) {
+        insertableFactories.add(factory);
+      }
+    }
+  }
+
+  public List<DataExplorerViewFactory> getExplorerFactories() {
+    return Collections.unmodifiableList(explorerFactories);
+  }
+
+  public void registerDicomImportFactory(DicomImportFactory factory) {
+    if (factory != null && !dicomImportFactories.contains(factory)) {
+      dicomImportFactories.add(factory);
+    }
+  }
+
+  public void unregisterDicomImportFactory(DicomImportFactory factory) {
+    dicomImportFactories.remove(factory);
+  }
+
+  public List<DicomImportFactory> getDicomImportFactories() {
+    return Collections.unmodifiableList(dicomImportFactories);
   }
 
   public void openViewerPlugin(ViewerPlugin<?> plugin) {

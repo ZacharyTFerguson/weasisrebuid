@@ -88,7 +88,7 @@ Bundle-SymbolicName: org.weasis.dicom.codec
 Bundle-Name: Weasis DICOM Codec
 -dsannotations: *
 Private-Package: org.dcm4che3.data,org.dcm4che3.io,org.dcm4che3.util,org.dcm4che3.imageio.codec,org.dcm4che3.imageio.codec.*,org.dcm4che3.img,org.dcm4che3.img.*,org.dcm4che3.media,org.weasis.dicom.geom,org.weasis.dicom.macro,org.weasis.dicom.mf,org.weasis.dicom.param,org.weasis.dicom.ref,org.weasis.dicom.hp,org.weasis.dicom.hp.*,org.weasis.dicom.util
-Export-Package: !org.weasis.dicom.codec.internal.*, org.weasis.dicom.codec.*
+Export-Package: !org.weasis.dicom.codec.internal.*, org.weasis.dicom.codec.*, org.dcm4che3.data, org.dcm4che3.io, org.dcm4che3.media, org.dcm4che3.util
 Import-Package: !jakarta.json,!jakarta.json.*,!org.dcm4che3.net.*,!org.dcm4che3.tool.*,!org.dcm4che3.json.*,!org.weasis.dicom.op,!org.weasis.dicom.web.*,!org.weasis.dicom.tool,org.weasis.core.api.*,org.weasis.core.ui.*,org.slf4j;version=!,org.osgi.service.component;resolution:=optional,*
 ]]></bnd>
         </configuration>
