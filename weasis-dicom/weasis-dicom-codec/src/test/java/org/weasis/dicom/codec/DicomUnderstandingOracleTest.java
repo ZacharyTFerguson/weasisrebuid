@@ -245,7 +245,9 @@ class DicomUnderstandingOracleTest {
   }
 
   static void write(File dest, Attributes fmi, Attributes dcm, String ts) throws Exception {
-    try (DicomOutputStream out = new DicomOutputStream(new FileOutputStream(dest), ts)) {
+    // Part-10 FMI is always EVR LE; dataset encoding follows FMI TransferSyntaxUID.
+    try (DicomOutputStream out =
+        new DicomOutputStream(new FileOutputStream(dest), UID.ExplicitVRLittleEndian)) {
       out.writeDataset(fmi, dcm);
     }
   }
