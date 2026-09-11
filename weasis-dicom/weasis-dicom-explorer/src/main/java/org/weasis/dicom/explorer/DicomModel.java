@@ -53,6 +53,10 @@ public class DicomModel implements DataExplorerModel {
     return List.copyOf(instances);
   }
 
+  public void clear() {
+    instances.clear();
+  }
+
   public Map<String, List<ImportedInstance>> patients() {
     Map<String, List<ImportedInstance>> map = new LinkedHashMap<>();
     for (ImportedInstance inst : instances) {

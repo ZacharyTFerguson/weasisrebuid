@@ -37,6 +37,8 @@ public class WeasisLauncher {
 
   public void launch(String[] args) throws Exception {
     suppressAssistiveTech();
+    LaunchSession session = LaunchSession.fromArgs(args);
+    session.applyConfigs();
     Path weasisHome = Path.of(System.getProperty("user.home"), ".weasis");
     Files.createDirectories(weasisHome.resolve("log"));
     BootLog.install(weasisHome.resolve("log"));
