@@ -26,4 +26,20 @@ public class ByteLutAlpha {
     int i = Math.max(0, Math.min(255, index));
     return lut[i] & 0xFF;
   }
+
+  /** Transparent below ~1% of the LUT, opaque from ~10% (fusion overlay ramp, one native call). */
+  public static ByteLutAlpha fusionRamp() {
+    byte[] lut = new byte[256];
+    for (int i = 0; i < 256; i++) {
+      double t = i / 255.0;
+      if (t < 0.01) {
+        lut[i] = 0;
+      } else if (t >= 0.10) {
+        lut[i] = (byte) 255;
+      } else {
+        lut[i] = (byte) Math.round(255.0 * (t - 0.01) / 0.09);
+      }
+    }
+    return new ByteLutAlpha(lut);
+  }
 }
