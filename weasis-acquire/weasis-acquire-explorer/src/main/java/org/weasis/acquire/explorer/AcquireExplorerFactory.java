@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-package org.weasis.dicom.explorer;
+package org.weasis.acquire.explorer;
 
 import java.util.Hashtable;
 import org.osgi.service.component.annotations.Activate;
@@ -15,28 +15,15 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Deactivate;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
-import org.weasis.core.api.gui.FactoryEnablement;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.service.UICore;
 
 @Component(service = DataExplorerViewFactory.class, immediate = true)
-public class DicomExplorerFactory implements DataExplorerViewFactory {
+public class AcquireExplorerFactory implements DataExplorerViewFactory {
 
   @Activate
   public void activate() {
-    if (!FactoryEnablement.isEnabled(DicomExplorerFactory.class)) {
-      return;
-    }
-    UICore core = UICore.getInstance();
-    core.registerExplorerFactory(this);
-    core.getSystemPreferences()
-        .putIntProperty(
-            org.weasis.dicom.explorer.SeriesDownloadManager.PREF_SERIES,
-            org.weasis.dicom.explorer.SeriesDownloadManager.CONCURRENT_SERIES);
-    core.getSystemPreferences()
-        .putIntProperty(
-            org.weasis.dicom.explorer.SeriesDownloadManager.PREF_IMAGES,
-            org.weasis.dicom.explorer.SeriesDownloadManager.CONCURRENT_DOWNLOADS_IN_SERIES);
+    UICore.getInstance().registerExplorerFactory(this);
   }
 
   @Deactivate
@@ -46,18 +33,18 @@ public class DicomExplorerFactory implements DataExplorerViewFactory {
 
   @Override
   public DataExplorerView createInstance(Hashtable<String, Object> properties) {
-    return new DicomExplorer(new DicomModel());
+    return new AcquireExplorer();
   }
 
   @Override
   public void dispose(Insertable component) {
-    if (component instanceof DicomExplorer explorer) {
+    if (component instanceof AcquireExplorer explorer) {
       explorer.dispose();
     }
   }
 
   @Override
   public boolean isComponentCreatedByThisFactory(Insertable component) {
-    return component instanceof DicomExplorer;
+    return component instanceof AcquireExplorer;
   }
 }

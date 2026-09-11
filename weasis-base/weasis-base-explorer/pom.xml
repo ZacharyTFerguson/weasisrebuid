@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis.base</groupId>
+    <artifactId>weasis-base-parent</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../weasis-base-parent/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>weasis-base-explorer</artifactId>
+  <name>Weasis base explorer</name>
+  <description>Filesystem explorer. Desktop default does not start this bundle (profile-only).</description>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd><![CDATA[
+Bundle-SymbolicName: org.weasis.base.explorer
+Bundle-Name: Weasis Base Explorer
+-dsannotations: *
+Export-Package: !org.weasis.base.explorer.internal.*, org.weasis.base.explorer.*
+Import-Package: org.osgi.framework,org.osgi.service.component,javax.swing,javax.swing.border,org.weasis.core.*,*
+]]></bnd>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
