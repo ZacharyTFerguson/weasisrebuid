@@ -9,10 +9,17 @@
  */
 package org.weasis.core.api.image;
 
-/** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
+/** Rectangular shutter; black outside the box. */
 public class ShutterOp extends AbstractOp {
+
+  public static final String P_ENABLED = "shutter.enabled";
+  public static final String P_LEFT = "shutter.left";
+  public static final String P_RIGHT = "shutter.right";
+  public static final String P_UPPER = "shutter.upper";
+  public static final String P_LOWER = "shutter.lower";
 
   public ShutterOp() {
     super("op.shutter");
+    setParam(P_ENABLED, Boolean.FALSE);
   }
 }

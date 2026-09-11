@@ -9,10 +9,25 @@
  */
 package org.weasis.core.api.image;
 
-/** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
+/** Last View2d node: zoom / pan / rotation applied at paint time. */
 public class AffineTransformOp extends AbstractOp {
+
+  public static final String P_ZOOM = "zoom";
+  public static final String P_ROTATION = "rotation";
+  public static final String P_PAN_X = "pan.x";
+  public static final String P_PAN_Y = "pan.y";
+
+  /** Magic zoom: best fit (default). */
+  public static final double ZOOM_BEST_FIT = -200.0;
+
+  /** Magic zoom: real-world / actual pixels (1:1). */
+  public static final double ZOOM_REAL_SIZE = -100.0;
 
   public AffineTransformOp() {
     super("op.affine");
+    setParam(P_ZOOM, ZOOM_BEST_FIT);
+    setParam(P_ROTATION, 0.0);
+    setParam(P_PAN_X, 0.0);
+    setParam(P_PAN_Y, 0.0);
   }
 }

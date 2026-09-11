@@ -9,10 +9,14 @@
  */
 package org.weasis.core.api.image;
 
-/** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
+/** Windowing-panel filter. Default {@code None}; runs before pseudo-color. */
 public class FilterOp extends AbstractOp {
+
+  public static final String P_FILTER = "filter";
+  public static final String NONE = "None";
 
   public FilterOp() {
     super("op.filter");
+    setParam(P_FILTER, NONE);
   }
 }

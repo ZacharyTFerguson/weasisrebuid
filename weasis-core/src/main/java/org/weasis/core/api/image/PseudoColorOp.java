@@ -9,10 +9,16 @@
  */
 package org.weasis.core.api.image;
 
-/** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
+/** Pseudo-color LUT after filter. Gray is identity. */
 public class PseudoColorOp extends AbstractOp {
+
+  public static final String P_LUT = "lut";
+  public static final String P_INVERT = "invert";
+  public static final String GRAY = "Gray";
 
   public PseudoColorOp() {
     super("op.pseudocolor");
+    setParam(P_LUT, GRAY);
+    setParam(P_INVERT, Boolean.FALSE);
   }
 }
