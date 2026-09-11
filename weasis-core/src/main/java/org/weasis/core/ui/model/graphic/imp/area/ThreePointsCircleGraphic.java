@@ -9,8 +9,10 @@
  */
 package org.weasis.core.ui.model.graphic.imp.area;
 
+import java.awt.geom.Ellipse2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import org.weasis.core.ui.model.graphic.GraphicMath;
 
 public class ThreePointsCircleGraphic extends AbstractDragGraphicArea {
 
@@ -18,9 +20,24 @@ public class ThreePointsCircleGraphic extends AbstractDragGraphicArea {
     super(3);
   }
 
+  public Ellipse2D.Double circumcircle() {
+    return GraphicMath.circumcircle(getHandlePoint(0), getHandlePoint(1), getHandlePoint(2));
+  }
+
+  @Override
+  public double getAreaValue() {
+    Ellipse2D.Double e = circumcircle();
+    if (e == null) {
+      return 0;
+    }
+    double r = e.width / 2.0;
+    return Math.PI * r * r;
+  }
+
   @Override
   public void buildShape() {
-    setShape(null);
+    Ellipse2D.Double e = circumcircle();
+    setShape(e);
   }
 
   @Override

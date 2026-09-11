@@ -51,7 +51,7 @@ Bundle-Name: Weasis Core
 Bundle-Activator: org.weasis.core.internal.Activator
 -dsannotations: *
 Export-Package: !org.weasis.core.internal.*, org.weasis.core.*
-Import-Package: org.osgi.framework,org.osgi.service.component,org.slf4j;version=!,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,javax.swing.text,*
+Import-Package: org.osgi.framework,org.osgi.service.component,org.slf4j;version=!,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,javax.swing.text,javax.xml.parsers,javax.xml.transform,javax.xml.transform.dom,javax.xml.transform.stream,org.w3c.dom,org.xml.sax,*
 ]]></bnd>
         </configuration>
       </plugin>

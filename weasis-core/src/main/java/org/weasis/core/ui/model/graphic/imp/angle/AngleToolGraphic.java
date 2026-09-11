@@ -9,18 +9,38 @@
  */
 package org.weasis.core.ui.model.graphic.imp.angle;
 
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import org.weasis.core.ui.model.graphic.GraphicMath;
 
+/** Three-point angle (A–vertex–B). */
 public class AngleToolGraphic extends AbstractDragGraphic {
 
   public AngleToolGraphic() {
     super(3);
   }
 
+  public double getAngleDeg() {
+    return GraphicMath.angleDeg(getHandlePoint(0), getHandlePoint(1), getHandlePoint(2));
+  }
+
   @Override
   public void buildShape() {
-    setShape(null);
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double v = getHandlePoint(1);
+    Point2D.Double b = getHandlePoint(2);
+    if (a == null || v == null || b == null) {
+      setShape(null);
+      return;
+    }
+    Path2D path = new Path2D.Double();
+    path.moveTo(a.x, a.y);
+    path.lineTo(v.x, v.y);
+    path.lineTo(b.x, b.y);
+    setShape(path);
+    setLabel(new String[] {Double.toString(getAngleDeg()) + " °"});
   }
 
   @Override

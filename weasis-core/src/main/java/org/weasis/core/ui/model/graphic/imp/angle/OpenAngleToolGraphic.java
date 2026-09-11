@@ -7,7 +7,7 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-package org.weasis.core.ui.model.graphic.imp.line;
+package org.weasis.core.ui.model.graphic.imp.angle;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -15,15 +15,16 @@ import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 import org.weasis.core.ui.model.graphic.GraphicMath;
 
-public class ParallelLineGraphic extends AbstractDragGraphic {
+/** Two independent segments; angle between them (may be obtuse). */
+public class OpenAngleToolGraphic extends AbstractDragGraphic {
 
-  public ParallelLineGraphic() {
+  public OpenAngleToolGraphic() {
     super(4);
   }
 
-  public boolean isParallel() {
-    return GraphicMath.nearlyParallel(
-        getHandlePoint(0), getHandlePoint(1), getHandlePoint(2), getHandlePoint(3), 1.0);
+  public double getAngleDeg() {
+    return GraphicMath.lineAngleDeg(
+        getHandlePoint(0), getHandlePoint(1), getHandlePoint(2), getHandlePoint(3));
   }
 
   @Override
@@ -42,10 +43,11 @@ public class ParallelLineGraphic extends AbstractDragGraphic {
     path.moveTo(c.x, c.y);
     path.lineTo(d.x, d.y);
     setShape(path);
+    setLabel(new String[] {Double.toString(getAngleDeg()) + " °"});
   }
 
   @Override
   protected AbstractGraphic newInstance() {
-    return new ParallelLineGraphic();
+    return new OpenAngleToolGraphic();
   }
 }

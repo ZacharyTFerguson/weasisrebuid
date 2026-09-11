@@ -9,11 +9,18 @@
  */
 package org.weasis.core.ui.model.graphic.imp.seg;
 
-/** SEG region stub (full overlay is WP-10). */
-public class SegRegion {
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/** SEG region (ARCHITECTURE §5.2). Overlay attaches to an image series; not its own tab. */
+public final class SegRegion {
 
   private String label = "";
-  private boolean visible = true;
+  private Color color = Color.RED;
+  private final List<SegContour> contours = new ArrayList<>();
+  private ByteLutAlpha lut = ByteLutAlpha.identity();
 
   public String getLabel() {
     return label;
@@ -23,11 +30,29 @@ public class SegRegion {
     this.label = label == null ? "" : label;
   }
 
-  public boolean isVisible() {
-    return visible;
+  public Color getColor() {
+    return color;
   }
 
-  public void setVisible(boolean visible) {
-    this.visible = visible;
+  public void setColor(Color color) {
+    this.color = color == null ? Color.RED : color;
+  }
+
+  public List<SegContour> getContours() {
+    return Collections.unmodifiableList(contours);
+  }
+
+  public void addContour(SegContour contour) {
+    if (contour != null) {
+      contours.add(contour);
+    }
+  }
+
+  public ByteLutAlpha getLut() {
+    return lut;
+  }
+
+  public void setLut(ByteLutAlpha lut) {
+    this.lut = lut == null ? ByteLutAlpha.identity() : lut;
   }
 }

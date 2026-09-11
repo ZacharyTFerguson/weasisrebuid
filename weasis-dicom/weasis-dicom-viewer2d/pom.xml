@@ -13,7 +13,7 @@
 
   <artifactId>weasis-dicom-viewer2d</artifactId>
   <name>Weasis DICOM 2D viewer</name>
-  <description>View2d op chain, overlays, shutter, padding, lossy indicator, dcmview2d:* commands.</description>
+  <description>View2d, LUT, dcmview2d:*, Draw &amp; Measure, GSPS, KO/PR.</description>
 
   <dependencies>
     <dependency>

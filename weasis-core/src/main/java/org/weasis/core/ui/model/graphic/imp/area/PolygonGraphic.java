@@ -13,6 +13,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import org.weasis.core.ui.model.graphic.GraphicMath;
 
 public class PolygonGraphic extends AbstractDragGraphicArea {
 
@@ -36,6 +37,16 @@ public class PolygonGraphic extends AbstractDragGraphicArea {
     }
     path.closePath();
     setShape(path);
+  }
+
+  @Override
+  public double getPerimeter() {
+    return GraphicMath.polygonPerimeter(getPts(), true);
+  }
+
+  @Override
+  public double getOmbbArea() {
+    return GraphicMath.ombbArea(getPts());
   }
 
   @Override

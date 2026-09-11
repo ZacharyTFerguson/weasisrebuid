@@ -10,21 +10,36 @@
 package org.weasis.core.ui.model.graphic.imp.seg;
 
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
+import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
-public class SegContour {
+/** Closed SEG contour graphic (not a selected-measurement row). */
+public class SegContour extends AbstractGraphic {
 
-  private Path2D path = new Path2D.Double();
-  private SegRegion region = new SegRegion();
-
-  public Path2D getPath() {
-    return path;
+  public SegContour() {
+    super(0);
   }
 
-  public void setPath(Path2D path) {
-    this.path = path == null ? new Path2D.Double() : path;
+  @Override
+  public void buildShape() {
+    var pts = getPts();
+    if (pts.size() < 3) {
+      setShape(null);
+      return;
+    }
+    Path2D path = new Path2D.Double();
+    Point2D.Double first = pts.getFirst();
+    path.moveTo(first.x, first.y);
+    for (int i = 1; i < pts.size(); i++) {
+      Point2D.Double p = pts.get(i);
+      path.lineTo(p.x, p.y);
+    }
+    path.closePath();
+    setShape(path);
   }
 
-  public SegRegion getRegion() {
-    return region;
+  @Override
+  protected AbstractGraphic newInstance() {
+    return new SegContour();
   }
 }

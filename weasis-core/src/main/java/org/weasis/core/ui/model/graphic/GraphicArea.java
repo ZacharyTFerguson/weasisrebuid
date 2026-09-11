@@ -13,4 +13,12 @@ package org.weasis.core.ui.model.graphic;
 public interface GraphicArea extends DragGraphic {
 
   double getAreaValue();
+
+  default double getPerimeter() {
+    return org.weasis.core.ui.model.graphic.GraphicMath.polygonPerimeter(getPts(), true);
+  }
+
+  default double getOmbbArea() {
+    return org.weasis.core.ui.model.graphic.GraphicMath.ombbArea(getPts());
+  }
 }
