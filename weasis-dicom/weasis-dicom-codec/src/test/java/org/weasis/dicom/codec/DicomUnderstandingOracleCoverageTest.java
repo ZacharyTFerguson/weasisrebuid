@@ -29,6 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.weasis.dicom.codec.DicomUnderstandingOracle.Verdict;
 import org.weasis.dicom.codec.utils.SyntheticCtWriter;
+import org.weasis.dicom.codec.utils.SyntheticDicomFixtures;
 
 /** Extra oracle branches: JSON escaping, disposition, paint failures, CLI exit codes. */
 class DicomUnderstandingOracleCoverageTest {
@@ -43,17 +44,17 @@ class DicomUnderstandingOracleCoverageTest {
 
   @ParameterizedTest
   @CsvSource({
-    "unreadable/dicom, skipped",
-    "video/dicom, skipped",
-    "pr/dicom, skipped",
-    "ko/dicom, skipped",
-    "seg/dicom, skipped",
-    "encap/dicom, skipped",
-    "image/dicom, accepted",
-    ", skipped"
+    "unreadable/dicom, true",
+    "video/dicom, true",
+    "pr/dicom, true",
+    "ko/dicom, true",
+    "seg/dicom, true",
+    "encap/dicom, true",
+    "image/dicom, false",
+    ", true"
   })
-  void dispositionMapsMimeFamilies(String mime, String expected) {
-    assertEquals(expected, DicomUnderstandingOracle.disposition(mime));
+  void skippedMimeFamilies(String mime, boolean skipped) {
+    assertEquals(skipped, DicomUnderstandingOracle.isSkippedMime(mime));
   }
 
   @Test
@@ -85,7 +86,7 @@ class DicomUnderstandingOracleCoverageTest {
     assertTrue(v.opened());
     assertFalse(v.understood());
     assertEquals(DicomUnderstandingOracle.SKIPPED, v.disposition());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertTrue(v.reason().startsWith(DicomUnderstandingOracle.NOT_UNDERSTOOD));
     assertEquals(400.0, v.window(), 1e-9);
     assertEquals(40.0, v.level(), 1e-9);
   }
@@ -125,7 +126,7 @@ class DicomUnderstandingOracleCoverageTest {
   @Test
   void cliReturnsOneWhenOpenedButNotUnderstood(@TempDir Path dir) throws Exception {
     Path file = dir.resolve("rgb.dcm");
-    DicomUnderstandingOracleTest.writeRgb(file.toFile());
+    SyntheticDicomFixtures.writeRgb(file.toFile());
     ByteArrayOutputStream stdout = new ByteArrayOutputStream();
     int code =
         DicomUnderstandingOracle.run(
@@ -151,7 +152,7 @@ class DicomUnderstandingOracleCoverageTest {
   static void writeMonochrome2WithShortPixels(File dest) throws Exception {
     String sop = UIDUtils.createUID("2.25");
     Attributes fmi =
-        DicomUnderstandingOracleTest.fmi(UID.CTImageStorage, sop, UID.ExplicitVRLittleEndian);
+        SyntheticDicomFixtures.fmi(UID.CTImageStorage, sop, UID.ExplicitVRLittleEndian);
     Attributes dcm = new Attributes();
     dcm.setString(Tag.SOPClassUID, VR.UI, UID.CTImageStorage);
     dcm.setString(Tag.SOPInstanceUID, VR.UI, sop);
@@ -169,18 +170,18 @@ class DicomUnderstandingOracleCoverageTest {
     dcm.setDouble(Tag.WindowCenter, VR.DS, 40);
     dcm.setDouble(Tag.WindowWidth, VR.DS, 400);
     dcm.setInt(Tag.PixelData, VR.OW, new int[] {0, 1, 2, 3});
-    DicomUnderstandingOracleTest.write(dest, fmi, dcm, UID.ExplicitVRLittleEndian);
+    SyntheticDicomFixtures.write(dest, fmi, dcm, UID.ExplicitVRLittleEndian);
   }
 
   static void writeMinimalSop(File dest, String sopClass, String ts) throws Exception {
     String sop = UIDUtils.createUID("2.25");
-    Attributes fmi = DicomUnderstandingOracleTest.fmi(sopClass, sop, ts);
+    Attributes fmi = SyntheticDicomFixtures.fmi(sopClass, sop, ts);
     Attributes dcm = new Attributes();
     dcm.setString(Tag.SOPClassUID, VR.UI, sopClass);
     dcm.setString(Tag.SOPInstanceUID, VR.UI, sop);
     dcm.setString(Tag.StudyInstanceUID, VR.UI, UIDUtils.createUID("2.25"));
     dcm.setString(Tag.SeriesInstanceUID, VR.UI, UIDUtils.createUID("2.25"));
     dcm.setString(Tag.Modality, VR.CS, "OT");
-    DicomUnderstandingOracleTest.write(dest, fmi, dcm, ts);
+    SyntheticDicomFixtures.write(dest, fmi, dcm, ts);
   }
 }

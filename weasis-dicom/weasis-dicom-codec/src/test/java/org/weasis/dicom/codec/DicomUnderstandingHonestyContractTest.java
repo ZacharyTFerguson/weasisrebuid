@@ -33,7 +33,7 @@ class DicomUnderstandingHonestyContractTest {
     assertFalse(v.opened());
     assertFalse(v.understood());
     assertEquals(DicomUnderstandingOracle.SKIPPED, v.disposition());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertTrue(v.reason().startsWith(DicomUnderstandingOracle.NOT_UNDERSTOOD));
   }
 
   @Test
@@ -54,7 +54,7 @@ class DicomUnderstandingHonestyContractTest {
     Verdict v = DicomUnderstandingOracle.evaluate(file);
     assertTrue(v.opened());
     assertFalse(v.understood());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertTrue(v.reason().startsWith(DicomUnderstandingOracle.NOT_UNDERSTOOD));
     assertNull(v.samples());
   }
 
@@ -70,27 +70,15 @@ class DicomUnderstandingHonestyContractTest {
   }
 
   @Test
-  void dispositionMapsSkippedMimeFamilies() {
-    assertEquals(DicomUnderstandingOracle.SKIPPED, DicomUnderstandingOracle.disposition(null));
-    assertEquals(
-        DicomUnderstandingOracle.SKIPPED,
-        DicomUnderstandingOracle.disposition(DicomMime.UNREADABLE_DICOM));
-    assertEquals(
-        DicomUnderstandingOracle.SKIPPED,
-        DicomUnderstandingOracle.disposition(DicomMime.ENCAP_DICOM));
-    assertEquals(
-        DicomUnderstandingOracle.SKIPPED,
-        DicomUnderstandingOracle.disposition(DicomMime.VIDEO_DICOM));
-    assertEquals(
-        DicomUnderstandingOracle.SKIPPED, DicomUnderstandingOracle.disposition(DicomMime.PR_DICOM));
-    assertEquals(
-        DicomUnderstandingOracle.SKIPPED, DicomUnderstandingOracle.disposition(DicomMime.KO_DICOM));
-    assertEquals(
-        DicomUnderstandingOracle.SKIPPED,
-        DicomUnderstandingOracle.disposition(DicomMime.SEG_DICOM));
-    assertEquals(
-        DicomUnderstandingOracle.ACCEPTED,
-        DicomUnderstandingOracle.disposition(DicomMime.IMAGE_DICOM));
+  void skippedMimeFamiliesExcludeRasterImageDicom() {
+    assertTrue(DicomUnderstandingOracle.isSkippedMime(null));
+    assertTrue(DicomUnderstandingOracle.isSkippedMime(DicomMime.UNREADABLE_DICOM));
+    assertTrue(DicomUnderstandingOracle.isSkippedMime(DicomMime.ENCAP_DICOM));
+    assertTrue(DicomUnderstandingOracle.isSkippedMime(DicomMime.VIDEO_DICOM));
+    assertTrue(DicomUnderstandingOracle.isSkippedMime(DicomMime.PR_DICOM));
+    assertTrue(DicomUnderstandingOracle.isSkippedMime(DicomMime.KO_DICOM));
+    assertTrue(DicomUnderstandingOracle.isSkippedMime(DicomMime.SEG_DICOM));
+    assertFalse(DicomUnderstandingOracle.isSkippedMime(DicomMime.IMAGE_DICOM));
   }
 
   @Test

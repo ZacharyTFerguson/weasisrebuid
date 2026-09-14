@@ -149,7 +149,7 @@ public final class SyntheticDicomFixtures {
     return dcm;
   }
 
-  static Attributes fmi(String sopClass, String sop, String ts) {
+  public static Attributes fmi(String sopClass, String sop, String ts) {
     Attributes fmi = new Attributes();
     fmi.setBytes(Tag.FileMetaInformationVersion, VR.OB, new byte[] {0, 1});
     fmi.setString(Tag.MediaStorageSOPClassUID, VR.UI, sopClass);
@@ -160,7 +160,8 @@ public final class SyntheticDicomFixtures {
     return fmi;
   }
 
-  static void write(File dest, Attributes fmi, Attributes dcm, String ts) throws Exception {
+  public static void write(File dest, Attributes fmi, Attributes dcm, String ts)
+      throws Exception {
     try (DicomOutputStream out =
         new DicomOutputStream(new FileOutputStream(dest), UID.ExplicitVRLittleEndian)) {
       out.writeDataset(fmi, dcm);

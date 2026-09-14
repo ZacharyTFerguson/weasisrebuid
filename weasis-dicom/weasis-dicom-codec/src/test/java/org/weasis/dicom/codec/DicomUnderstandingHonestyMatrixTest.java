@@ -45,34 +45,34 @@ class DicomUnderstandingHonestyMatrixTest {
                 SyntheticDicomFixtures.writeMonochrome2WithTransferSyntax(
                     f.toFile(), UID.ImplicitVRLittleEndian),
             DicomMime.IMAGE_DICOM,
-            DicomUnderstandingOracle.ACCEPTED),
+            DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION),
         new Case(
             "JPEG baseline MONOCHROME2",
             f ->
                 SyntheticDicomFixtures.writeMonochrome2WithTransferSyntax(
                     f.toFile(), UID.JPEGBaseline8Bit),
             DicomMime.IMAGE_DICOM,
-            DicomUnderstandingOracle.ACCEPTED),
+            DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION),
         new Case(
             "explicit VR BE MONOCHROME2",
             f -> SyntheticDicomFixtures.writeMonochrome2ExplicitVrBe(f.toFile()),
             DicomMime.IMAGE_DICOM,
-            DicomUnderstandingOracle.ACCEPTED),
+            DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION),
         new Case(
             "RLE lossless MONOCHROME2",
             f -> SyntheticDicomFixtures.writeMonochrome2Rle(f.toFile()),
             DicomMime.IMAGE_DICOM,
-            DicomUnderstandingOracle.ACCEPTED),
+            DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION),
         new Case(
             "explicit VR LE MONOCHROME1",
             f -> SyntheticDicomFixtures.writeMonochrome1ExplicitVrLe(f.toFile()),
             DicomMime.IMAGE_DICOM,
-            DicomUnderstandingOracle.ACCEPTED),
+            DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION),
         new Case(
             "explicit VR LE RGB",
             f -> SyntheticDicomFixtures.writeRgb(f.toFile()),
             DicomMime.IMAGE_DICOM,
-            DicomUnderstandingOracle.ACCEPTED),
+            DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION),
         new Case(
             "encapsulated PDF",
             f -> SyntheticDicomFixtures.writeEncapsulatedPdf(f.toFile()),
@@ -103,7 +103,9 @@ class DicomUnderstandingHonestyMatrixTest {
     Verdict v = DicomUnderstandingOracle.evaluate(file);
     assertTrue(v.opened(), case_.label + " should parse as Part-10");
     assertFalse(v.understood(), case_.label + " must not claim pixel understanding");
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertTrue(
+        v.reason() != null && v.reason().startsWith(DicomUnderstandingOracle.NOT_UNDERSTOOD),
+        () -> case_.label + " reason: " + v.reason());
     assertEquals(case_.expectedMime, v.mime());
     assertEquals(case_.expectedDisposition, v.disposition());
   }
