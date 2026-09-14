@@ -61,7 +61,7 @@ class DicomOracleFailClosedTest {
     assertTrue(verdict.opened());
     assertFalse(verdict.understood());
     assertEquals(DicomUnderstandingOracle.SKIPPED, verdict.disposition());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, verdict.reason());
+    assertTrue(verdict.reason().startsWith(DicomUnderstandingOracle.NOT_UNDERSTOOD));
     assertEquals(1, runCli(file));
   }
 

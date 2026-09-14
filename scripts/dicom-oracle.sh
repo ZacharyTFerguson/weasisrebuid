@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 # Headless DICOM-understanding oracle. JSON verdict on stdout. No GUI.
 # Fail-closed: exit 0 only when understood; 1 when not decoded; 2 when unopenable / usage.
+# Gate: DicomUnderstandingLimits (uncompressed EVR LE MONOCHROME2). See
+# docs/architecture/clean-room-and-understanding.md
 # Maven may log above JSON; cross-oracle consumers keep the last line starting with "{".
 # Usage: scripts/dicom-oracle.sh <part-10-path>
 set -euo pipefail
