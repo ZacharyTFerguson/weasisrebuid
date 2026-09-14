@@ -102,6 +102,7 @@ Import-Package: !jakarta.json,!jakarta.json.*,!org.dcm4che3.net.*,!org.dcm4che3.
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <argLine>@{argLine} -Djava.library.path=${maven.multiModuleProjectDirectory}/weasis-opencv/weasis-opencv-core-linux-x86-64/target/classes</argLine>
+          <excludedGroups>honesty-fail</excludedGroups>
         </configuration>
       </plugin>
       <plugin>
@@ -114,4 +115,22 @@ Import-Package: !jakarta.json,!jakarta.json.*,!org.dcm4che3.net.*,!org.dcm4che3.
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>honesty-gaps</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <excludedGroups combine.self="override" />
+              <groups>honesty-fail</groups>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
