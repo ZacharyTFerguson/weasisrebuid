@@ -191,7 +191,10 @@ class DicomUnderstandingOracleTest {
 
   @Test
   void cliExitCodeContract() {
-    assertEquals(2, DicomUnderstandingOracle.cliExitCode(DicomUnderstandingOracle.closed("/x")));
+    assertEquals(
+        2,
+        DicomUnderstandingOracle.cliExitCode(
+            DicomUnderstandingOracle.closed("/x", DicomUnderstandingOracle.NOT_UNDERSTOOD)));
     Verdict notUnderstood =
         new DicomUnderstandingOracle.Verdict(
             "/x",
@@ -201,7 +204,7 @@ class DicomUnderstandingOracleTest {
             UID.CTImageStorage,
             DicomMime.IMAGE_DICOM,
             "RGB",
-            DicomUnderstandingOracle.ACCEPTED,
+            DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION,
             false,
             4,
             4,
