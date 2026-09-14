@@ -1,0 +1,179 @@
+{
+  "version": 1,
+  "generatedAt": "2026-09-11T23:16:18.730Z",
+  "pack": "testdata/weasis-roundtrip",
+  "phi": "synthetic-only",
+  "summary": {
+    "total": 5,
+    "both_accepted": 5,
+    "diverged": 0,
+    "not_understood": 0
+  },
+  "studies": [
+    {
+      "path": "dx_chest_pa_256.dcm",
+      "sha256": "1d5b1dc76cb9a9502347dd0431d8f7e5df0c4b9152e985cb7fc1ce429b1601dd",
+      "modality": "DX",
+      "dicomlight_ts": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "DX",
+        "photometric": "MONOCHROME2",
+        "pixelHash": "747bf4aab4d9dbd0",
+        "windowLevelSamples": {
+          "x0y0": 102,
+          "center": 193
+        },
+        "reason": null
+      },
+      "weasis": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "image/dicom",
+        "photometric": "MONOCHROME2",
+        "understood": true,
+        "disposition": "accepted",
+        "samples": {
+          "x0y0": 102,
+          "center": 193
+        },
+        "reason": null
+      },
+      "agreement": "both_accepted"
+    },
+    {
+      "path": "dx_hand_pa_256.dcm",
+      "sha256": "3f2e9f35631b7451b839dd623c7b995c507c78965b75e598dda6e577f142f308",
+      "modality": "DX",
+      "dicomlight_ts": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "DX",
+        "photometric": "MONOCHROME2",
+        "pixelHash": "87a6d6a78231ae34",
+        "windowLevelSamples": {
+          "x0y0": 2,
+          "center": 253
+        },
+        "reason": null
+      },
+      "weasis": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "image/dicom",
+        "photometric": "MONOCHROME2",
+        "understood": true,
+        "disposition": "accepted",
+        "samples": {
+          "x0y0": 2,
+          "center": 253
+        },
+        "reason": null
+      },
+      "agreement": "both_accepted"
+    },
+    {
+      "path": "dx_knee_ap_256.dcm",
+      "sha256": "a05fc6e293a873534de3864688e2d6267b8ec5e4f719e62bcea5cdfb1c888e35",
+      "modality": "DX",
+      "dicomlight_ts": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "DX",
+        "photometric": "MONOCHROME2",
+        "pixelHash": "4415400cdab670fa",
+        "windowLevelSamples": {
+          "x0y0": 7,
+          "center": 25
+        },
+        "reason": null
+      },
+      "weasis": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "image/dicom",
+        "photometric": "MONOCHROME2",
+        "understood": true,
+        "disposition": "accepted",
+        "samples": {
+          "x0y0": 7,
+          "center": 25
+        },
+        "reason": null
+      },
+      "agreement": "both_accepted"
+    },
+    {
+      "path": "ct_brain_ax_s01_256.dcm",
+      "sha256": "c1e1828cad619e521c23ae8a16461543f26da818ba48e9dab7886424626dac7c",
+      "modality": "CT",
+      "dicomlight_ts": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "CT",
+        "photometric": "MONOCHROME2",
+        "pixelHash": "d4f8e28541a441c3",
+        "windowLevelSamples": {
+          "x0y0": 0,
+          "center": 92
+        },
+        "reason": null
+      },
+      "weasis": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "image/dicom",
+        "photometric": "MONOCHROME2",
+        "understood": true,
+        "disposition": "accepted",
+        "samples": {
+          "x0y0": 0,
+          "center": 92
+        },
+        "reason": null
+      },
+      "agreement": "both_accepted"
+    },
+    {
+      "path": "ct_brain_ax_s02_256.dcm",
+      "sha256": "b8457603c3765cd220d98421a7f480f3ab375a22f05bd41ac1dbedebfdb9d9fb",
+      "modality": "CT",
+      "dicomlight_ts": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "CT",
+        "photometric": "MONOCHROME2",
+        "pixelHash": "a12504b37895b349",
+        "windowLevelSamples": {
+          "x0y0": 0,
+          "center": 99
+        },
+        "reason": null
+      },
+      "weasis": {
+        "opened": true,
+        "status": "accepted",
+        "transferSyntaxUid": "1.2.840.10008.1.2.1",
+        "modality": "image/dicom",
+        "photometric": "MONOCHROME2",
+        "understood": true,
+        "disposition": "accepted",
+        "samples": {
+          "x0y0": 0,
+          "center": 99
+        },
+        "reason": null
+      },
+      "agreement": "both_accepted"
+    }
+  ]
+}

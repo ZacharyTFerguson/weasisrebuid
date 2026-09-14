@@ -201,6 +201,10 @@ public final class DicomUnderstandingOracle {
         NOT_UNDERSTOOD);
   }
 
+  /**
+   * CLI exit contract for cross-oracle callers: {@code 0} understood, {@code 1} opened but not
+   * decoded / not understood, {@code 2} usage error or file not opened.
+   */
   public static int run(String[] args, PrintStream out, PrintStream err) {
     if (args == null || args.length < 1 || args[0] == null || args[0].isBlank()) {
       err.println("usage: DicomUnderstandingOracle <part-10-path>");
@@ -208,6 +212,10 @@ public final class DicomUnderstandingOracle {
     }
     Verdict verdict = evaluate(Path.of(args[0]));
     out.println(verdict.toJson());
+    return cliExitCode(verdict);
+  }
+
+  public static int cliExitCode(Verdict verdict) {
     if (!verdict.opened()) {
       return 2;
     }

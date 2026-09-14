@@ -170,6 +170,29 @@ class DicomUnderstandingOracleTest {
     assertTrue(stderr.toString(StandardCharsets.UTF_8).contains("usage:"));
   }
 
+  @Test
+  void cliExitCodeContract() {
+    assertEquals(2, DicomUnderstandingOracle.cliExitCode(DicomUnderstandingOracle.closed("/x")));
+    Verdict notUnderstood =
+        new DicomUnderstandingOracle.Verdict(
+            "/x",
+            true,
+            UID.ExplicitVRLittleEndian,
+            "EXPLICIT_VR_LE",
+            UID.CTImageStorage,
+            DicomMime.IMAGE_DICOM,
+            "RGB",
+            DicomUnderstandingOracle.ACCEPTED,
+            false,
+            4,
+            4,
+            null,
+            null,
+            null,
+            DicomUnderstandingOracle.NOT_UNDERSTOOD);
+    assertEquals(1, DicomUnderstandingOracle.cliExitCode(notUnderstood));
+  }
+
   static void writeEncapsulatedPdf(File dest) throws Exception {
     String sop = UIDUtils.createUID("2.25");
     Attributes fmi = fmi(UID.EncapsulatedPDFStorage, sop, UID.ExplicitVRLittleEndian);
