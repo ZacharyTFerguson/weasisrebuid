@@ -19,6 +19,8 @@ jobs:
       - name: Reactor bundle jars
         run: bash scripts/verify-reactor-jars.sh
       - name: DICOM oracle smoke
+        env:
+          DICOM_ORACLE_SKIP_BUILD: "1"
         run: bash scripts/dicom-oracle-smoke.sh
       - name: Spotless
         run: mvn -B spotless:check
