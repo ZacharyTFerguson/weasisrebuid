@@ -23,12 +23,19 @@ import org.weasis.dicom.codec.utils.DicomMediaUtils;
  * Headless DICOM-understanding oracle. Reads a Part-10 path (Composer / Dicom Light TS output) and
  * prints one JSON object on stdout. No PHI is emitted. Pixel understanding is EVR LE MONOCHROME2
  * W/L only; every other case is explicit {@code not understood}.
+ *
+ * <p>{@code disposition} is the oracle outcome, not a viewer success flag: {@value #ACCEPTED} only
+ * when {@code understood} is true. Opened-but-unsupported raster objects use {@value
+ * #NOT_UNDERSTOOD_DISPOSITION}.
  */
 public final class DicomUnderstandingOracle {
 
+  /** Human-readable reason prefix; detail appended after {@code : }. */
   public static final String NOT_UNDERSTOOD = "not understood";
+
   public static final String ACCEPTED = "accepted";
   public static final String SKIPPED = "skipped";
+  public static final String NOT_UNDERSTOOD_DISPOSITION = "not_understood";
 
   private DicomUnderstandingOracle() {}
 
@@ -90,14 +97,14 @@ public final class DicomUnderstandingOracle {
   public static Verdict evaluate(Path path) {
     String shown = path == null ? "" : path.toString();
     if (path == null || !Files.isRegularFile(path)) {
-      return closed(shown);
+      return closed(shown, reason(NOT_UNDERSTOOD, "path missing or not a regular file"));
     }
     File file = path.toFile();
     DicomMediaIO io;
     try {
       io = DicomMediaIO.open(file);
     } catch (Exception e) {
-      return closed(shown);
+      return closed(shown, reason(NOT_UNDERSTOOD, "cannot parse Part-10"));
     }
     Attributes dcm = io.getDataset();
     String tsUid = io.getTransferSyntax();
@@ -105,9 +112,26 @@ public final class DicomUnderstandingOracle {
     String sop = dcm.getString(Tag.SOPClassUID, "");
     String mime = io.mimeType();
     String photo = DicomMediaUtils.photometricInterpretation(dcm);
-    String disposition = disposition(mime);
     Integer rows = dcm.contains(Tag.Rows) ? dcm.getInt(Tag.Rows, 0) : null;
     Integer cols = dcm.contains(Tag.Columns) ? dcm.getInt(Tag.Columns, 0) : null;
+    if (isSkippedMime(mime)) {
+      return new Verdict(
+          shown,
+          true,
+          tsUid,
+          tsName,
+          sop,
+          mime,
+          photo,
+          SKIPPED,
+          false,
+          rows,
+          cols,
+          null,
+          null,
+          null,
+          reason(NOT_UNDERSTOOD, skippedMimeDetail(mime)));
+    }
     if (!io.isExplicitVrLeMonochrome2()) {
       return new Verdict(
           shown,
@@ -117,14 +141,14 @@ public final class DicomUnderstandingOracle {
           sop,
           mime,
           photo,
-          disposition,
+          NOT_UNDERSTOOD_DISPOSITION,
           false,
           rows,
           cols,
           null,
           null,
           null,
-          NOT_UNDERSTOOD);
+          reason(NOT_UNDERSTOOD, unsupportedRasterDetail(tsName, photo)));
     }
     WindLevelParameters wl = DicomMediaUtils.windowLevel(dcm, 400, 40);
     try {
@@ -165,24 +189,46 @@ public final class DicomUnderstandingOracle {
           wl.getWindow(),
           wl.getLevel(),
           null,
-          NOT_UNDERSTOOD);
+          reason(NOT_UNDERSTOOD, "window/level paint failed"));
     }
   }
 
-  static String disposition(String mime) {
-    if (mime == null
+  static boolean isSkippedMime(String mime) {
+    return mime == null
         || DicomMime.UNREADABLE_DICOM.equals(mime)
         || DicomMime.ENCAP_DICOM.equals(mime)
         || DicomMime.VIDEO_DICOM.equals(mime)
         || DicomMime.PR_DICOM.equals(mime)
         || DicomMime.KO_DICOM.equals(mime)
-        || DicomMime.SEG_DICOM.equals(mime)) {
-      return SKIPPED;
-    }
-    return ACCEPTED;
+        || DicomMime.SEG_DICOM.equals(mime);
   }
 
-  static Verdict closed(String path) {
+  static String skippedMimeDetail(String mime) {
+    if (mime == null || DicomMime.UNREADABLE_DICOM.equals(mime)) {
+      return "unreadable or unknown MIME";
+    }
+    if (DicomMime.ENCAP_DICOM.equals(mime)) {
+      return "encapsulated document (non-raster)";
+    }
+    return "non-raster MIME " + mime;
+  }
+
+  static String unsupportedRasterDetail(String transferSyntax, String photometric) {
+    return "only explicit VR LE MONOCHROME2 window/level is implemented (got "
+        + transferSyntax
+        + ", photometric="
+        + photometric
+        + ")";
+  }
+
+  static String reason(String prefix, String detail) {
+    if (detail == null || detail.isBlank()) {
+      return prefix;
+    }
+    return prefix + ": " + detail;
+  }
+
+  static Verdict closed(String path, String reason) {
     return new Verdict(
         path,
         false,
@@ -198,7 +244,7 @@ public final class DicomUnderstandingOracle {
         null,
         null,
         null,
-        NOT_UNDERSTOOD);
+        reason);
   }
 
   /**
@@ -207,7 +253,8 @@ public final class DicomUnderstandingOracle {
    */
   public static int run(String[] args, PrintStream out, PrintStream err) {
     if (args == null || args.length < 1 || args[0] == null || args[0].isBlank()) {
-      err.println("usage: DicomUnderstandingOracle <part-10-path>");
+      err.println(
+          "usage: DicomUnderstandingOracle <part-10-path>  (one JSON verdict on stdout; no PHI)");
       return 2;
     }
     Verdict verdict = evaluate(Path.of(args[0]));

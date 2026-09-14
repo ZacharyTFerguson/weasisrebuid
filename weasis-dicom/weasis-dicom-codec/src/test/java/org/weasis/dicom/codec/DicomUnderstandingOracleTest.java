@@ -74,8 +74,9 @@ class DicomUnderstandingOracleTest {
     assertFalse(v.opened());
     assertFalse(v.understood());
     assertEquals(DicomUnderstandingOracle.SKIPPED, v.disposition());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
-    assertTrue(v.toJson().contains("\"reason\":\"not understood\""));
+    assertTrue(v.reason().startsWith(DicomUnderstandingOracle.NOT_UNDERSTOOD));
+    assertTrue(v.reason().contains("missing"));
+    assertTrue(v.toJson().contains("\"disposition\":\"skipped\""));
   }
 
   @Test
@@ -84,7 +85,7 @@ class DicomUnderstandingOracleTest {
     Files.writeString(file, "not a dicom file");
     Verdict v = DicomUnderstandingOracle.evaluate(file);
     assertFalse(v.opened());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertTrue(v.reason().contains("cannot parse Part-10"));
   }
 
   @Test
@@ -97,7 +98,7 @@ class DicomUnderstandingOracleTest {
     assertEquals(DicomUnderstandingOracle.SKIPPED, v.disposition());
     assertEquals(DicomMime.ENCAP_DICOM, v.mime());
     assertEquals(UID.EncapsulatedPDFStorage, v.sopClassUid());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertTrue(v.reason().contains("encapsulated document"));
     assertNull(v.samples());
   }
 
@@ -108,10 +109,11 @@ class DicomUnderstandingOracleTest {
     Verdict v = DicomUnderstandingOracle.evaluate(file);
     assertTrue(v.opened());
     assertFalse(v.understood());
-    assertEquals(DicomUnderstandingOracle.ACCEPTED, v.disposition());
+    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION, v.disposition());
     assertEquals("RGB", v.photometric());
     assertEquals(UID.ExplicitVRLittleEndian, v.transferSyntaxUid());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertTrue(v.reason().contains("MONOCHROME2"));
+    assertFalse(v.toJson().contains("\"disposition\":\"accepted\""));
     assertNull(v.samples());
   }
 
@@ -125,7 +127,8 @@ class DicomUnderstandingOracleTest {
     assertEquals(UID.ImplicitVRLittleEndian, v.transferSyntaxUid());
     assertEquals("IMPLICIT_VR_LE", v.transferSyntax());
     assertEquals("MONOCHROME2", v.photometric());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION, v.disposition());
+    assertTrue(v.reason().contains("IMPLICIT_VR_LE"));
   }
 
   @Test
@@ -136,7 +139,23 @@ class DicomUnderstandingOracleTest {
     assertTrue(v.opened());
     assertFalse(v.understood());
     assertEquals("JPEG_BASELINE", v.transferSyntax());
-    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD, v.reason());
+    assertEquals(DicomUnderstandingOracle.NOT_UNDERSTOOD_DISPOSITION, v.disposition());
+    assertTrue(v.reason().contains("JPEG_BASELINE"));
+  }
+
+  @Test
+  void acceptedDispositionRequiresUnderstood(@TempDir Path dir) throws Exception {
+    Path rgb = dir.resolve("rgb.dcm");
+    writeRgb(rgb.toFile());
+    Verdict rgbVerdict = DicomUnderstandingOracle.evaluate(rgb);
+    assertFalse(rgbVerdict.understood());
+    assertFalse(DicomUnderstandingOracle.ACCEPTED.equals(rgbVerdict.disposition()));
+
+    Path ct = dir.resolve("ct.dcm");
+    SyntheticCtWriter.write(ct.toFile(), 8, 40, 400);
+    Verdict ctVerdict = DicomUnderstandingOracle.evaluate(ct);
+    assertTrue(ctVerdict.understood());
+    assertEquals(DicomUnderstandingOracle.ACCEPTED, ctVerdict.disposition());
   }
 
   @Test
