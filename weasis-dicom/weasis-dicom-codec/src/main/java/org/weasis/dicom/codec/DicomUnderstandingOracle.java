@@ -22,7 +22,8 @@ import org.weasis.dicom.codec.utils.DicomMediaUtils;
 /**
  * Headless DICOM-understanding oracle. Reads a Part-10 path (Composer / Dicom Light TS output) and
  * prints one JSON object on stdout. No PHI is emitted. Pixel gate: {@link DicomUnderstandingLimits}
- * (uncompressed EVR LE MONOCHROME2 W/L). See {@code docs/architecture/clean-room-and-understanding.md}.
+ * (uncompressed EVR LE MONOCHROME2 W/L). See {@code
+ * docs/architecture/clean-room-and-understanding.md}.
  *
  * <p>{@code disposition} is the oracle outcome, not a viewer success flag: {@value #ACCEPTED} only
  * when {@code understood} is true. Opened-but-unsupported raster objects use {@value
@@ -230,20 +231,7 @@ public final class DicomUnderstandingOracle {
 
   static Verdict closed(String path, String reason) {
     return new Verdict(
-        path,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
-        SKIPPED,
-        false,
-        null,
-        null,
-        null,
-        null,
-        null,
+        path, false, null, null, null, null, null, SKIPPED, false, null, null, null, null, null,
         reason);
   }
 
