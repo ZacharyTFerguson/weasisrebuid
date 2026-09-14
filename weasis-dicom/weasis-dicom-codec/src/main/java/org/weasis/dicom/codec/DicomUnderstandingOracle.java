@@ -21,8 +21,9 @@ import org.weasis.dicom.codec.utils.DicomMediaUtils;
 
 /**
  * Headless DICOM-understanding oracle. Reads a Part-10 path (Composer / Dicom Light TS output) and
- * prints one JSON object on stdout. No PHI is emitted. Pixel understanding is EVR LE MONOCHROME2
- * W/L only; every other case is explicit {@code not understood}.
+ * prints one JSON object on stdout. No PHI is emitted. Pixel gate: {@link DicomUnderstandingLimits}
+ * (uncompressed EVR LE MONOCHROME2 W/L); every other case is explicit {@code not understood}. See
+ * {@code docs/architecture/clean-room-and-understanding.md}.
  */
 public final class DicomUnderstandingOracle {
 
@@ -108,7 +109,7 @@ public final class DicomUnderstandingOracle {
     String disposition = disposition(mime);
     Integer rows = dcm.contains(Tag.Rows) ? dcm.getInt(Tag.Rows, 0) : null;
     Integer cols = dcm.contains(Tag.Columns) ? dcm.getInt(Tag.Columns, 0) : null;
-    if (!io.isExplicitVrLeMonochrome2()) {
+    if (!DicomUnderstandingLimits.canPaintWindowLevel(tsUid, dcm)) {
       return new Verdict(
           shown,
           true,

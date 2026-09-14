@@ -20,8 +20,8 @@ import org.weasis.dicom.codec.utils.DicomMediaUtils;
 import org.weasis.dicom.codec.utils.LutPipeline;
 
 /**
- * Applies the View2d W/L node to Explicit VR LE MONOCHROME2 pixels and paints 8-bit grey.
- * Uncompressed path is pure Java (OpenCV not required).
+ * Applies the View2d W/L node to pixels that pass {@link DicomUnderstandingLimits} and paints 8-bit
+ * grey. Uncompressed path is pure Java (OpenCV not required).
  */
 public final class WindowLevelPainter {
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 # Headless DICOM-understanding oracle. JSON verdict on stdout. No GUI.
+# Gate: DicomUnderstandingLimits (uncompressed EVR LE MONOCHROME2). See
+# docs/architecture/clean-room-and-understanding.md
 # Usage: scripts/dicom-oracle.sh <part-10-path>
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
