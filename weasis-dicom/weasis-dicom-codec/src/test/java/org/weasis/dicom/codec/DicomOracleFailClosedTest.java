@@ -36,14 +36,15 @@ class DicomOracleFailClosedTest {
   @Test
   void cliExitsOneWhenOpenedButNotUnderstood_rgb(@TempDir Path dir) throws Exception {
     Path file = dir.resolve("rgb.dcm");
-    DicomUnderstandingOracleTest.writeRgb(file.toFile());
+    org.weasis.dicom.codec.utils.SyntheticDicomFixtures.writeRgb(file.toFile());
     assertEquals(1, runCli(file));
   }
 
   @Test
   void cliExitsOneWhenJpegTransferSyntax(@TempDir Path dir) throws Exception {
     Path file = dir.resolve("jpeg.dcm");
-    DicomUnderstandingOracleTest.writeWithTransferSyntax(file.toFile(), UID.JPEGBaseline8Bit);
+    org.weasis.dicom.codec.utils.SyntheticDicomFixtures.writeMonochrome2WithTransferSyntax(
+        file.toFile(), UID.JPEGBaseline8Bit);
     assertEquals(1, runCli(file));
   }
 
