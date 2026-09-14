@@ -3,15 +3,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-if [[ -z "${JAVA_HOME:-}" ]]; then
-  if command -v java >/dev/null 2>&1; then
-    JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v java)")")")"
-  else
-    echo "gogo-smoke.sh: set JAVA_HOME or install JDK 25+" >&2
-    exit 1
-  fi
-fi
-export JAVA_HOME
+export JAVA_HOME="${JAVA_HOME:-$HOME/tools/jdk-25}"
 export PATH="$JAVA_HOME/bin:$PATH"
 PORT="${GOSH_PORT:-17179}"
 CACHE="${TMPDIR:-/tmp}/weasis-wp0-cache-$$"
