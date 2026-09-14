@@ -160,8 +160,7 @@ public final class SyntheticDicomFixtures {
     return fmi;
   }
 
-  public static void write(File dest, Attributes fmi, Attributes dcm, String ts)
-      throws Exception {
+  public static void write(File dest, Attributes fmi, Attributes dcm, String ts) throws Exception {
     try (DicomOutputStream out =
         new DicomOutputStream(new FileOutputStream(dest), UID.ExplicitVRLittleEndian)) {
       out.writeDataset(fmi, dcm);
