@@ -36,6 +36,11 @@
       <version>${weasis-dicom-tools.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.dcm4che</groupId>
+      <artifactId>dcm4che-image</artifactId>
+      <version>${weasis-dicom-tools.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.weasis.imageio</groupId>
       <artifactId>weasis-imageio-codec</artifactId>
       <version>${project.version}</version>
@@ -71,7 +76,7 @@
               <goal>unpack-dependencies</goal>
             </goals>
             <configuration>
-              <includeArtifactIds>weasis-dicom-tools,dcm4che-core,dcm4che-dict</includeArtifactIds>
+              <includeArtifactIds>weasis-dicom-tools,dcm4che-core,dcm4che-dict,dcm4che-image</includeArtifactIds>
               <outputDirectory>${project.build.outputDirectory}</outputDirectory>
               <excludes>META-INF/MANIFEST.MF,META-INF/maven/**,module-info.class,META-INF/*.SF,META-INF/*.DSA,META-INF/*.RSA,org/dcm4che3/json/**,org/dcm4che3/net/**,org/dcm4che3/tool/**,org/weasis/dicom/op/**,org/weasis/dicom/web/**,org/weasis/dicom/tool/**</excludes>
               <overWrite>false</overWrite>
@@ -87,7 +92,7 @@
 Bundle-SymbolicName: org.weasis.dicom.codec
 Bundle-Name: Weasis DICOM Codec
 -dsannotations: *
-Private-Package: org.dcm4che3.data,org.dcm4che3.io,org.dcm4che3.util,org.dcm4che3.imageio.codec,org.dcm4che3.imageio.codec.*,org.dcm4che3.img,org.dcm4che3.img.*,org.dcm4che3.media,org.weasis.dicom.geom,org.weasis.dicom.macro,org.weasis.dicom.mf,org.weasis.dicom.param,org.weasis.dicom.ref,org.weasis.dicom.hp,org.weasis.dicom.hp.*,org.weasis.dicom.util
+Private-Package: org.dcm4che3.data,org.dcm4che3.io,org.dcm4che3.util,org.dcm4che3.image,org.dcm4che3.image.*,org.dcm4che3.imageio.codec,org.dcm4che3.imageio.codec.*,org.dcm4che3.img,org.dcm4che3.img.*,org.dcm4che3.media,org.weasis.dicom.geom,org.weasis.dicom.macro,org.weasis.dicom.mf,org.weasis.dicom.param,org.weasis.dicom.ref,org.weasis.dicom.hp,org.weasis.dicom.hp.*,org.weasis.dicom.util
 Export-Package: !org.weasis.dicom.codec.internal.*, org.weasis.dicom.codec.*, org.dcm4che3.data, org.dcm4che3.io, org.dcm4che3.media, org.dcm4che3.util
 Import-Package: !jakarta.json,!jakarta.json.*,!org.dcm4che3.net.*,!org.dcm4che3.tool.*,!org.dcm4che3.json.*,!org.weasis.dicom.op,!org.weasis.dicom.web.*,!org.weasis.dicom.tool,org.weasis.core.api.*,org.weasis.core.ui.*,org.slf4j;version=!,org.osgi.service.component;resolution:=optional,*
 ]]></bnd>
