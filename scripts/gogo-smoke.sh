@@ -94,6 +94,10 @@ mig_swing = bundle_state(lb, "MiGLayout Swing") == "Active"
 if not mig_core or not mig_swing:
     sys.exit("lb did not list MigLayout Core+Swing ACTIVE @7: %r" % lb)
 print("gogo-smoke: MigLayout Active @7 (have)")
+jaxb_ok = bundle_state(lb, "jaxb package for weasis") == "Active" or bundle_state(lb, "jaxb-osgi") == "Active"
+if not jaxb_ok:
+    sys.exit("lb did not list JAXB-OSGi ACTIVE @7: %r" % lb)
+print("gogo-smoke: JAXB-OSGi Active @7 (have)")
 if not opencv_ok:
     sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
 i18n_state = bundle_state(lb, "Weasis Core i18n")

@@ -241,6 +241,11 @@
         <artifactId>docking-frames</artifactId>
         <version>${dockingframes.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.weasis.thirdparty</groupId>
+        <artifactId>jaxb-osgi</artifactId>
+        <version>${jaxb.osgi.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

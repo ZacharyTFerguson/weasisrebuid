@@ -28,4 +28,18 @@ class DicomPrintTest {
     assertEquals(2, print.buildFilmSession().getInt(Tag.NumberOfCopies, 0));
     assertEquals("PRINT_SCP", print.buildFilmSession().getString(Tag.RetrieveAETitle));
   }
+
+  @Test
+  void dialogOptionPaneBuildsFilmSession() {
+    DefaultDicomNode printer = new DefaultDicomNode("printer", "PRINT_SCP", "127.0.0.1", 104);
+    DicomPrintDialog dialog = DicomPrintDialog.open(null, printer);
+    assertEquals("DICOM Print", dialog.getTitle());
+    DicomPrintOptions options = new DicomPrintOptions();
+    options.setCopies(3);
+    options.setFilmSize(DicomPrintOptions.FilmSize.SIZE_14INX17IN);
+    dialog.getOptionPane().setOptions(options);
+    assertEquals(3, dialog.getPrint().buildFilmSession().getInt(Tag.NumberOfCopies, 0));
+    dialog.getOptionPane().resetToDefaultValues();
+    assertEquals(1, dialog.getOptionPane().getOptions().copies());
+  }
 }

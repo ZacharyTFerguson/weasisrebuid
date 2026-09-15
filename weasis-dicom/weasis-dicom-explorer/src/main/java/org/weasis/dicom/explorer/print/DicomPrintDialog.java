@@ -9,4 +9,36 @@
  */
 package org.weasis.dicom.explorer.print;
 
-public class DicomPrintDialog {}
+import java.awt.BorderLayout;
+import java.awt.Frame;
+import javax.swing.JDialog;
+import org.weasis.dicom.explorer.pref.node.DefaultDicomNode;
+
+/** File &gt; Print DICOM dialog. Builds an N-ACTION film session; no SCP required for Have. */
+public class DicomPrintDialog extends JDialog {
+
+  private final DefaultDicomNode printer;
+  private final DicomPrintOptionPane options = new DicomPrintOptionPane();
+
+  public DicomPrintDialog(Frame owner, DefaultDicomNode printer) {
+    super(owner, "DICOM Print", true);
+    this.printer = printer;
+    getContentPane().setLayout(new BorderLayout());
+    getContentPane().add(options, BorderLayout.CENTER);
+    setSize(420, 240);
+  }
+
+  public DicomPrintOptionPane getOptionPane() {
+    return options;
+  }
+
+  public DicomPrint getPrint() {
+    DicomPrint print = new DicomPrint(printer);
+    print.setOptions(options.getOptions());
+    return print;
+  }
+
+  public static DicomPrintDialog open(Frame owner, DefaultDicomNode printer) {
+    return new DicomPrintDialog(owner, printer);
+  }
+}

@@ -21,7 +21,7 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | 3D VR | 9 | GL 3.3; refuse llvmpipe | tutorial |
 | SR / AU / ECG / RT / SEG | 10 | factories + MIME | tutorial |
 | Q/R, DICOMweb, send, ISO, print | 11 | DIMSE/QIDO/STOW Have tests | tutorial |
-| Dicomizer | 12 | acquire explorer/editor, Gogo 17181 | tutorial |
+| Dicomizer | 12 | acquire explorer/editor, Gogo 17181 smoke | tutorial |
 | `weasis://` `$dicom:get` `$dicom:rs` | 13 | protocol parser | tutorial |
 | i18n ≥30 %, native zip | 14 | fragment @13 + compressXZ zip | tutorial |
 | ViewerHub / IID | 15 | `/display` 302 `weasis://` | tutorial |

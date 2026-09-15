@@ -129,6 +129,29 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.weasis.thirdparty</groupId>
+      <artifactId>jaxb-osgi</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.base</groupId>
+      <artifactId>weasis-base-explorer</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.acquire</groupId>
+      <artifactId>weasis-acquire-explorer</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.acquire</groupId>
+      <artifactId>weasis-acquire-editor</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.weasis.imageio</groupId>
       <artifactId>weasis-imageio-codec</artifactId>
       <version>${project.version}</version>

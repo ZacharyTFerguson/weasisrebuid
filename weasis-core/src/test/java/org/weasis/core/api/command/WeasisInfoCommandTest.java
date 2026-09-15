@@ -24,6 +24,7 @@ class WeasisInfoCommandTest {
       WeasisInfoCommand command = new WeasisInfoCommand();
       assertEquals("4.7.3", command.info("-v"));
       assertTrue(command.info("-a").contains("Felix"));
+      assertTrue(command.info("-a").contains("weasis.profile"));
       assertTrue(command.info("--help").contains("Usage: weasis:info"));
     } finally {
       if (previous == null) {

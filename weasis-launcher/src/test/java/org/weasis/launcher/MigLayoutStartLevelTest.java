@@ -16,17 +16,26 @@ import java.nio.file.Path;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** ARCHITECTURE start 7: MigLayout core + swing. */
+/** ARCHITECTURE start 7: MigLayout core + swing + JAXB-OSGi. */
 class MigLayoutStartLevelTest {
 
   @Test
-  void startLevel7ListsMigLayoutJars() throws Exception {
+  void startLevel7ListsMigLayoutAndJaxbJars() throws Exception {
     Path base = Mx03ShippingPrefsTest.moduleRoot().resolve("conf/base.json");
     ConfigData data =
-        ConfigData.load(base, Map.of("app.version", "4.7.3", "miglayout.version", "11.4.3"));
+        ConfigData.load(
+            base,
+            Map.of(
+                "app.version",
+                "4.7.3",
+                "miglayout.version",
+                "11.4.3",
+                "jaxb.osgi.version",
+                "4.0.3"));
     String start7 = data.value("felix.auto.start.7");
     assertTrue(start7.contains("miglayout-core-11.4.3.jar"));
     assertTrue(start7.contains("miglayout-swing-11.4.3.jar"));
+    assertTrue(start7.contains("jaxb-osgi-4.0.3.jar"));
     boolean found = false;
     for (ConfigData.AutoBundle auto : data.autoBundles()) {
       if (auto.startLevel() != 7) {
@@ -34,7 +43,7 @@ class MigLayoutStartLevelTest {
       }
       found = true;
       assertTrue(auto.start());
-      assertTrue(auto.files().size() >= 2);
+      assertTrue(auto.files().size() >= 3);
       for (Path jar : auto.files()) {
         assertTrue(Files.isRegularFile(jar), jar.toString());
       }

@@ -81,8 +81,8 @@
     },
     {
       "code": "felix.auto.start.7",
-      "value": "file:${maven.localRepository}/com/miglayout/miglayout-core/${miglayout.version}/miglayout-core-${miglayout.version}.jar file:${maven.localRepository}/com/miglayout/miglayout-swing/${miglayout.version}/miglayout-swing-${miglayout.version}.jar",
-      "description": "MigLayout (JAXB-OSGi in later WPs)",
+      "value": "file:${maven.localRepository}/com/miglayout/miglayout-core/${miglayout.version}/miglayout-core-${miglayout.version}.jar file:${maven.localRepository}/com/miglayout/miglayout-swing/${miglayout.version}/miglayout-swing-${miglayout.version}.jar file:${maven.localRepository}/org/weasis/thirdparty/jaxb-osgi/${jaxb.osgi.version}/jaxb-osgi-${jaxb.osgi.version}.jar",
+      "description": "MigLayout + JAXB-OSGi 4.0.3",
       "type": "A",
       "category": "FELIX_INSTALL"
     },
