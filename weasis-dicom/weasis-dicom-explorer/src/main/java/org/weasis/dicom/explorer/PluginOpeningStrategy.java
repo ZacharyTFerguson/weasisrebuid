@@ -19,6 +19,7 @@ import java.util.Map;
 import org.weasis.core.api.gui.util.GuiExecutor;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
+import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
 import org.weasis.core.ui.editor.ViewerPluginBuilder;
@@ -194,10 +195,8 @@ public class PluginOpeningStrategy {
     }
     String patient = patientKey(bucket);
     if (kind == Kind.IMAGE) {
-      ViewerPlugin<?> existing = pluginToReuse(patient, mime);
+      ViewerPlugin<?> existing = openExistingImage(bucket, patient, mime);
       if (existing != null) {
-        addSeries(existing, handler.toMediaSeries(bucket));
-        core.setSelectedViewerPlugin(existing);
         return existing;
       }
     }
@@ -257,6 +256,51 @@ public class PluginOpeningStrategy {
       return "";
     }
     return bucket.instances().getFirst().modality();
+  }
+
+  ViewerPlugin<?> openExistingImage(
+      DicomSeriesHandler.SeriesBucket bucket, String patient, String mime) {
+    ViewerPlugin<?> shown = pluginShowing(bucket);
+    if (shown != null) {
+      return shown;
+    }
+    ViewerPlugin<?> existing = pluginToReuse(patient, mime);
+    if (existing == null) {
+      return null;
+    }
+    addSeries(existing, handler.toMediaSeries(bucket));
+    core.setSelectedViewerPlugin(existing);
+    return existing;
+  }
+
+  ViewerPlugin<?> pluginShowing(DicomSeriesHandler.SeriesBucket bucket) {
+    return firstShowing(bucket == null ? "" : bucket.seriesUid());
+  }
+
+  ViewerPlugin<?> firstShowing(String uid) {
+    if (uid == null || uid.isBlank()) {
+      return null;
+    }
+    for (ViewerPlugin<?> plugin : core.getOpenViewerPlugins()) {
+      if (showsUid(plugin, uid)) {
+        return plugin;
+      }
+    }
+    return null;
+  }
+
+  static boolean showsUid(ViewerPlugin<?> plugin, String uid) {
+    for (MediaSeries<?> series : plugin.getOpenSeries()) {
+      if (uid.equals(seriesUid(series))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static String seriesUid(MediaSeries<?> series) {
+    Object v = series == null ? null : series.getTagValue(TagW.SeriesInstanceUID);
+    return v == null ? "" : v.toString();
   }
 
   private ViewerPlugin<?> pluginToReuse(String patient, String mime) {

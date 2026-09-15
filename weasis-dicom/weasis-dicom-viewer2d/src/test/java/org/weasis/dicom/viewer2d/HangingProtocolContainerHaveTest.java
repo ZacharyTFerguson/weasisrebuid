@@ -11,6 +11,7 @@ package org.weasis.dicom.viewer2d;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.awt.GridLayout;
@@ -39,6 +40,16 @@ class HangingProtocolContainerHaveTest {
   }
 
   @Test
+  void applyHangingAfterPrimaryLeavesExtraCellEmpty() {
+    View2dContainer container = new View2dContainer();
+    Series<MediaElement> pa = series("2.25.dx.pa");
+    container.addSeries(pa);
+    container.applyHanging(1, 2);
+    assertSame(pa, container.getLayoutViews().get(0).getSeries());
+    assertNull(container.getLayoutViews().get(1).getSeries());
+  }
+
+  @Test
   void hangSeriesPutsDifferentSeriesInExtraCells() {
     View2dContainer container = new View2dContainer();
     Series<MediaElement> pa = series("2.25.dx.pa");
@@ -62,7 +73,7 @@ class HangingProtocolContainerHaveTest {
     container.applyHanging(1, 2);
     container.addSeries(pa);
     assertSame(pa, container.getLayoutViews().get(0).getSeries());
-    assertSame(pa, container.getLayoutViews().get(1).getSeries());
+    assertNull(container.getLayoutViews().get(1).getSeries());
     container.addSeries(lat);
     assertSame(pa, container.getLayoutViews().get(0).getSeries());
     assertSame(lat, container.getLayoutViews().get(1).getSeries());
@@ -77,7 +88,7 @@ class HangingProtocolContainerHaveTest {
     container.applyHanging(1, 2);
     container.addSeries(pa);
     container.addSeries(paAgain);
-    assertSame(pa, container.getLayoutViews().get(1).getSeries());
+    assertNull(container.getLayoutViews().get(1).getSeries());
     container.addSeries(lat);
     assertSame(pa, container.getLayoutViews().get(0).getSeries());
     assertSame(lat, container.getLayoutViews().get(1).getSeries());

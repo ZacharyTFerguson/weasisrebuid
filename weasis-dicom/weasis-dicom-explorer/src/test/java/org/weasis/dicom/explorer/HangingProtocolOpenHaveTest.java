@@ -12,6 +12,7 @@ package org.weasis.dicom.explorer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.List;
@@ -39,6 +40,7 @@ class HangingProtocolOpenHaveTest {
       assertInstanceOf(View2dContainer.class, first);
       View2dContainer container = (View2dContainer) first;
       assertEquals(2, container.getLayoutCount());
+      assertNull(container.getLayoutViews().get(1).getSeries());
       ViewerPlugin<?> same = opening.open(dx("DX", "1", "2.25.dx.lat"));
       assertSame(first, same);
       assertNotEquals(

@@ -135,13 +135,33 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     }
   }
 
+  @Override
+  public void applyHanging(int rows, int columns) {
+    int count = Math.max(1, rows) * Math.max(1, columns);
+    growEmptyLayout(count);
+    shrinkLayout(count);
+    layoutIndex = Math.min(layoutIndex, layout.size() - 1);
+    relayoutViews();
+  }
+
+  void growEmptyLayout(int count) {
+    while (layout.size() < count) {
+      layout.add(emptyView2d());
+    }
+  }
+
   View2d newView2d() {
+    View2d extra = emptyView2d();
+    copyPrimaryInto(extra, view2d.getSeries());
+    return extra;
+  }
+
+  View2d emptyView2d() {
     View2d extra = new View2d();
     extra.setSynchManager(synchManager);
     synchManager.add(extra);
     extra.putClientProperty(View2dContainer.class, this);
     View2dRegistry.register(extra);
-    copyPrimaryInto(extra, view2d.getSeries());
     return extra;
   }
 
@@ -300,7 +320,6 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   void putPrimary(MediaSeries<MediaElement> sequence) {
     view2d.setSeries(sequence);
     loadFirstMedia(sequence);
-    fillOtherLayoutViews(sequence);
   }
 
   int nextHangSlot() {
@@ -329,9 +348,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (a == null || b == null) {
       return false;
     }
-    if (a == b) {
-      return true;
-    }
+    return a == b || sameUid(a, b);
+  }
+
+  static boolean sameUid(MediaSeries<?> a, MediaSeries<?> b) {
     String uid = seriesUid(a);
     return !uid.isEmpty() && uid.equals(seriesUid(b));
   }
@@ -370,15 +390,6 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
       cell.load(new File(uri));
     } catch (Exception e) {
       cell.setGeometryWarning("Unable to open DICOM");
-    }
-  }
-
-  void fillOtherLayoutViews(MediaSeries<MediaElement> sequence) {
-    MediaSeries<?> primary = view2d.getSeries();
-    for (View2d v : layout) {
-      if (v != view2d && isCloneSlot(v, primary)) {
-        copyPrimaryInto(v, sequence);
-      }
     }
   }
 
