@@ -9,21 +9,45 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.Component;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
+import org.weasis.core.api.media.data.MediaSeries;
+import org.weasis.core.api.media.data.SeriesThumbnail;
 import org.weasis.core.ui.util.UriListFlavor;
 
-/** Drop files / URI-list onto a view (series import). Not bound to the 2×2 grid. */
+/**
+ * Drop files / URI-list / explorer series onto a view. Explorer thumbnails drag {@link MediaSeries}
+ * onto the selected {@link ImageViewerPlugin} (hang slot, not a new tab).
+ */
 public class ViewTransferHandler extends TransferHandler {
 
+  public static final DataFlavor SERIES_FLAVOR = new DataFlavor(MediaSeries.class, "MediaSeries");
+
   private List<File> lastFiles = List.of();
+  private MediaSeries<?> lastSeries;
 
   @Override
   public boolean canImport(JComponent comp, DataFlavor[] flavors) {
-    return fileFlavor(flavors) || uriFlavor(flavors);
+    return canImportFlavors(flavors);
+  }
+
+  @Override
+  public boolean canImport(TransferSupport support) {
+    return support != null && canImportFlavors(support.getDataFlavors());
+  }
+
+  boolean canImportFlavors(DataFlavor[] flavors) {
+    return seriesFlavor(flavors) || fileFlavor(flavors) || uriFlavor(flavors);
+  }
+
+  boolean seriesFlavor(DataFlavor[] flavors) {
+    return ImageTransferHandler.flavorIn(flavors, SERIES_FLAVOR);
   }
 
   boolean fileFlavor(DataFlavor[] flavors) {
@@ -32,6 +56,90 @@ public class ViewTransferHandler extends TransferHandler {
 
   boolean uriFlavor(DataFlavor[] flavors) {
     return ImageTransferHandler.flavorIn(flavors, UriListFlavor.flavor);
+  }
+
+  @Override
+  public int getSourceActions(JComponent c) {
+    return c instanceof SeriesThumbnail ? COPY : NONE;
+  }
+
+  @Override
+  protected Transferable createTransferable(JComponent c) {
+    if (c instanceof SeriesThumbnail thumb) {
+      return seriesTransferable(thumb.getSeries());
+    }
+    return super.createTransferable(c);
+  }
+
+  public Transferable seriesTransferable(MediaSeries<?> series) {
+    return new SeriesSelection(series);
+  }
+
+  @Override
+  public boolean importData(TransferSupport support) {
+    if (!canImport(support)) {
+      return false;
+    }
+    return importTransferable(support.getComponent(), support.getTransferable());
+  }
+
+  boolean importTransferable(Component comp, Transferable t) {
+    MediaSeries<?> series = seriesFrom(t);
+    if (series != null && comp instanceof JComponent jc) {
+      return dropSeries(jc, series);
+    }
+    return importFilesFrom(t) > 0;
+  }
+
+  public boolean dropSeries(JComponent target, MediaSeries<?> series) {
+    if (series == null) {
+      return false;
+    }
+    lastSeries = series;
+    addToPlugin(pluginOf(target), series);
+    return true;
+  }
+
+  static ImageViewerPlugin<?> pluginOf(JComponent comp) {
+    if (comp instanceof ImageViewerPlugin<?> plugin) {
+      return plugin;
+    }
+    return pluginProperty(comp);
+  }
+
+  static ImageViewerPlugin<?> pluginProperty(JComponent comp) {
+    if (comp == null) {
+      return null;
+    }
+    Object host = comp.getClientProperty(ImageViewerPlugin.class);
+    return host instanceof ImageViewerPlugin<?> plugin ? plugin : null;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  static void addToPlugin(ImageViewerPlugin<?> plugin, MediaSeries<?> series) {
+    if (plugin != null) {
+      ((ImageViewerPlugin) plugin).addSeries(series);
+    }
+  }
+
+  MediaSeries<?> seriesFrom(Transferable t) {
+    if (t == null || !t.isDataFlavorSupported(SERIES_FLAVOR)) {
+      return null;
+    }
+    return readSeries(t);
+  }
+
+  MediaSeries<?> readSeries(Transferable t) {
+    try {
+      Object data = t.getTransferData(SERIES_FLAVOR);
+      return data instanceof MediaSeries<?> series ? series : null;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  int importFilesFrom(Transferable t) {
+    return 0;
   }
 
   public int importFiles(List<File> files) {
@@ -44,5 +152,35 @@ public class ViewTransferHandler extends TransferHandler {
 
   public List<File> lastFiles() {
     return lastFiles;
+  }
+
+  public MediaSeries<?> lastSeries() {
+    return lastSeries;
+  }
+
+  static final class SeriesSelection implements Transferable {
+    private final MediaSeries<?> series;
+
+    SeriesSelection(MediaSeries<?> series) {
+      this.series = series;
+    }
+
+    @Override
+    public DataFlavor[] getTransferDataFlavors() {
+      return new DataFlavor[] {SERIES_FLAVOR};
+    }
+
+    @Override
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+      return SERIES_FLAVOR.equals(flavor);
+    }
+
+    @Override
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+      if (!isDataFlavorSupported(flavor)) {
+        throw new UnsupportedFlavorException(flavor);
+      }
+      return series;
+    }
   }
 }

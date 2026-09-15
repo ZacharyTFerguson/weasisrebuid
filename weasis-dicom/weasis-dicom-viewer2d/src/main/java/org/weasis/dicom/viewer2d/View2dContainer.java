@@ -15,6 +15,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
@@ -24,6 +25,7 @@ import org.weasis.core.ui.editor.image.MeasureToolBar;
 import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ScreenshotToolBar;
 import org.weasis.core.ui.editor.image.SynchView;
+import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.util.ToolBarContainer;
@@ -49,6 +51,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final CineToolBar cineToolBar = new CineToolBar();
   private final MeasureToolBar measureToolBar = new MeasureToolBar();
   private final KeyObjectToolBar keyObjectToolBar = new KeyObjectToolBar();
+  private final ViewTransferHandler seriesDrop = new ViewTransferHandler();
   private int layoutIndex;
 
   public View2dContainer() {
@@ -57,12 +60,19 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     bindToolBars();
     add(toolbars, BorderLayout.NORTH);
     add(viewGrid, BorderLayout.CENTER);
-    view2d.putClientProperty(View2dContainer.class, this);
+    bindDrop(this);
+    bindDrop(view2d);
     view2d.setSynchManager(synchManager);
     synchManager.add(view2d);
     View2dRegistry.register(view2d);
     View2dRegistry.select(view2d);
     relayoutViews();
+  }
+
+  void bindDrop(JComponent c) {
+    c.setTransferHandler(seriesDrop);
+    c.putClientProperty(ImageViewerPlugin.class, this);
+    c.putClientProperty(View2dContainer.class, this);
   }
 
   void bindToolBars() {
@@ -140,7 +150,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     View2d extra = new View2d();
     extra.setSynchManager(synchManager);
     synchManager.add(extra);
-    extra.putClientProperty(View2dContainer.class, this);
+    bindDrop(extra);
     View2dRegistry.register(extra);
     return extra;
   }

@@ -45,6 +45,7 @@ class DisplayLutTransferHaveTest {
 
     ViewTransferHandler views = new ViewTransferHandler();
     assertTrue(views.canImport(host, new DataFlavor[] {DataFlavor.javaFileListFlavor}));
+    assertTrue(views.canImport(host, new DataFlavor[] {ViewTransferHandler.SERIES_FLAVOR}));
     assertFalse(views.canImport(host, new DataFlavor[] {DataFlavor.imageFlavor}));
     assertEquals(1, views.importFiles(List.of(new File("a.dcm"))));
     assertEquals("a.dcm", views.lastFiles().getFirst().getName());
