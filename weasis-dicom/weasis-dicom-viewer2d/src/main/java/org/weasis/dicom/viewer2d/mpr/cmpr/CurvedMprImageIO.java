@@ -9,4 +9,15 @@
  */
 package org.weasis.dicom.viewer2d.mpr.cmpr;
 
-public class CurvedMprImageIO {}
+import org.weasis.dicom.viewer2d.mpr.Volume;
+
+/** Rasterizes a {@link CurvedMprAxis} against a volume. */
+public class CurvedMprImageIO {
+
+  public double[][] read(Volume volume, CurvedMprAxis axis) {
+    if (volume == null || axis == null) {
+      return new double[0][0];
+    }
+    return axis.rebuild(volume);
+  }
+}

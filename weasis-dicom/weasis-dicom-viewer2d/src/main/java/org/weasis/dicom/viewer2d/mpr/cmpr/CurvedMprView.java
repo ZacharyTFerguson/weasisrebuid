@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.viewer2d.mpr.cmpr;
 
-public class CurvedMprView {}
+import org.weasis.dicom.viewer2d.mpr.MprView;
+import org.weasis.dicom.viewer2d.mpr.Volume;
+
+/** Hosts a straightened CPR image rebuilt from {@link CurvedMprAxis}. */
+public class CurvedMprView extends MprView {
+
+  private CurvedMprAxis curvedAxis = new CurvedMprAxis();
+
+  public CurvedMprAxis getCurvedAxis() {
+    return curvedAxis;
+  }
+
+  public void setCurvedAxis(CurvedMprAxis curvedAxis) {
+    this.curvedAxis = curvedAxis == null ? new CurvedMprAxis() : curvedAxis;
+  }
+
+  @Override
+  public double[][] rebuild(Volume volume) {
+    return new CurvedMprImageIO().read(volume, curvedAxis);
+  }
+}

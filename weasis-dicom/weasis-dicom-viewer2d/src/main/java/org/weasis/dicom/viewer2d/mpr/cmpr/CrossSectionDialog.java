@@ -9,4 +9,22 @@
  */
 package org.weasis.dicom.viewer2d.mpr.cmpr;
 
-public class CrossSectionDialog {}
+import org.weasis.dicom.viewer2d.mpr.Volume;
+
+/** Holds {@link CrossSectionParams} used to preview a curve-perpendicular plane. */
+public class CrossSectionDialog {
+
+  private CrossSectionParams params = new CrossSectionParams();
+
+  public CrossSectionParams getParams() {
+    return params;
+  }
+
+  public void setParams(CrossSectionParams params) {
+    this.params = params == null ? new CrossSectionParams() : params;
+  }
+
+  public double[][] preview(Volume volume) {
+    return new CrossSectionImageIO().slice(volume, params);
+  }
+}

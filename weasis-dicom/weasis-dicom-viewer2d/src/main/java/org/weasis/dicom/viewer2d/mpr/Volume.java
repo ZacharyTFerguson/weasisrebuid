@@ -40,6 +40,17 @@ public abstract class Volume {
 
   public abstract void setValue(int x, int y, int z, double value);
 
+  /** Nearest voxel; out-of-volume samples are 0 (not clamped). */
+  public double sampleNearest(double x, double y, double z) {
+    int ix = (int) Math.round(x);
+    int iy = (int) Math.round(y);
+    int iz = (int) Math.round(z);
+    if (ix < 0 || iy < 0 || iz < 0 || ix >= sizeX || iy >= sizeY || iz >= sizeZ) {
+      return 0;
+    }
+    return value(ix, iy, iz);
+  }
+
   protected int idx(int x, int y, int z) {
     x = Math.max(0, Math.min(sizeX - 1, x));
     y = Math.max(0, Math.min(sizeY - 1, y));

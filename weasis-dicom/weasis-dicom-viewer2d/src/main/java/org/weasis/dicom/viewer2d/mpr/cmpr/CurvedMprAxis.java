@@ -9,4 +9,42 @@
  */
 package org.weasis.dicom.viewer2d.mpr.cmpr;
 
-public class CurvedMprAxis {}
+import java.awt.geom.Point2D;
+import java.util.List;
+import org.weasis.dicom.viewer2d.mpr.Volume;
+
+/** Curve + slice index used to rebuild a straightened CPR image. */
+public class CurvedMprAxis {
+
+  private List<Point2D.Double> curve = List.of();
+  private int z;
+  private int halfWidth = 8;
+
+  public List<Point2D.Double> getCurve() {
+    return curve;
+  }
+
+  public void setCurve(List<Point2D.Double> curve) {
+    this.curve = curve == null ? List.of() : List.copyOf(curve);
+  }
+
+  public int getZ() {
+    return z;
+  }
+
+  public void setZ(int z) {
+    this.z = z;
+  }
+
+  public int getHalfWidth() {
+    return halfWidth;
+  }
+
+  public void setHalfWidth(int halfWidth) {
+    this.halfWidth = Math.max(0, halfWidth);
+  }
+
+  public double[][] rebuild(Volume volume) {
+    return new CurvedMprBuilder().build(volume, curve, z, halfWidth);
+  }
+}

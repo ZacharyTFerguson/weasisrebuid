@@ -9,4 +9,42 @@
  */
 package org.weasis.dicom.viewer2d.mpr;
 
-public class AxesControl {}
+/** Origin plus in-plane axes for an oblique MPR slice. */
+public class AxesControl {
+
+  private double originX;
+  private double originY;
+  private double originZ;
+  private AxisDirection u = new AxisDirection(1, 0, 0);
+  private AxisDirection v = new AxisDirection(0, 1, 0);
+
+  public double[] origin() {
+    return new double[] {originX, originY, originZ};
+  }
+
+  public void setOrigin(double x, double y, double z) {
+    this.originX = x;
+    this.originY = y;
+    this.originZ = z;
+  }
+
+  public AxisDirection u() {
+    return u;
+  }
+
+  public void setU(AxisDirection u) {
+    this.u = u == null ? new AxisDirection(1, 0, 0) : u;
+  }
+
+  public AxisDirection v() {
+    return v;
+  }
+
+  public void setV(AxisDirection v) {
+    this.v = v == null ? new AxisDirection(0, 1, 0) : v;
+  }
+
+  public AxisDirection normal() {
+    return u.cross(v).normalized();
+  }
+}
