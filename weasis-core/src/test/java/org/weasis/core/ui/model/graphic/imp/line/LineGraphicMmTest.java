@@ -49,7 +49,7 @@ class LineGraphicMmTest {
   @Test
   void threeFourFiveAnisotropic() {
     LineGraphic line = axisAlignedLine(0, 0, 3, 4);
-    double expected = Math.hypot(3 * ANISO.colMmPerPixel(), 4 * ANISO.rowMmPerPixel());
+    double expected = Math.hypot(3 * ANISO.colMm(), 4 * ANISO.rowMm());
     assertEquals(expected, line.getLengthMm(ANISO).orElseThrow(), 1e-9);
   }
 
