@@ -128,6 +128,26 @@ public final class SyntheticDicomFixtures {
     write(dest, fmi, dcm, ts);
   }
 
+  /** Three frames in one PixelData array; frame 0/1/2 filled with distinct constants (10, 20, 30). */
+  public static Attributes ctMultiframe3Attributes(int rows, int cols) {
+    Attributes dcm = monochrome2Dataset(UIDUtils.createUID("2.25"), rows, cols);
+    dcm.setInt(Tag.NumberOfFrames, VR.IS, 3);
+    int frameLen = rows * cols;
+    int[] all = new int[frameLen * 3];
+    java.util.Arrays.fill(all, 0, frameLen, 10);
+    java.util.Arrays.fill(all, frameLen, frameLen * 2, 20);
+    java.util.Arrays.fill(all, frameLen * 2, all.length, 30);
+    dcm.setInt(Tag.PixelData, VR.OW, all);
+    return dcm;
+  }
+
+  public static void writeCtMultiframe3(File dest, int rows, int cols) throws Exception {
+    Attributes dcm = ctMultiframe3Attributes(rows, cols);
+    String sop = dcm.getString(Tag.SOPInstanceUID);
+    Attributes fmi = fmi(UID.CTImageStorage, sop, UID.ExplicitVRLittleEndian);
+    write(dest, fmi, dcm, UID.ExplicitVRLittleEndian);
+  }
+
   public static void writeCtWithPixelSpacing(File dest, double rowMm, double colMm)
       throws Exception {
     String sop = UIDUtils.createUID("2.25");
