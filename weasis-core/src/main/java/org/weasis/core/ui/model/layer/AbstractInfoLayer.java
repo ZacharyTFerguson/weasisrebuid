@@ -9,9 +9,7 @@
  */
 package org.weasis.core.ui.model.layer;
 
-/**
- * Annotation overlay state. SHORTCUTS.md: Space/I cycle three states (full → minimal → hidden).
- */
+/** Annotation overlay state. SHORTCUTS.md: Space/I cycle three states (full → minimal → hidden). */
 public class AbstractInfoLayer {
 
   public enum Visibility {

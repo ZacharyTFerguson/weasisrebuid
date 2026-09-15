@@ -46,7 +46,8 @@ class AnnotationVisibilityHaveTest {
     ShortcutManager shortcuts = new ShortcutManager();
     assertEquals(
         ActionW.ANNOTATIONS, shortcuts.getAction(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0)));
-    assertEquals(ActionW.ANNOTATIONS, shortcuts.getAction(KeyStroke.getKeyStroke(KeyEvent.VK_I, 0)));
+    assertEquals(
+        ActionW.ANNOTATIONS, shortcuts.getAction(KeyStroke.getKeyStroke(KeyEvent.VK_I, 0)));
     assertEquals(ActionW.ANNOTATIONS, ActionW.getAction("annotations"));
   }
 }

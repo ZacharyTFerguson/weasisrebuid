@@ -15,7 +15,9 @@ import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 
-/** Pixel overlay: patient/study/image annotations on {@link View2d}. Space/I cycles three states. */
+/**
+ * Pixel overlay: patient/study/image annotations on {@link View2d}. Space/I cycles three states.
+ */
 public class InfoLayer extends AbstractInfoLayer {
 
   public String overlayText(String patient, String modality, double window, double level) {
