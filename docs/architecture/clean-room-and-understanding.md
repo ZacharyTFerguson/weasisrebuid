@@ -36,6 +36,36 @@ scripts/dicom-oracle.sh <part-10-path>   # JSON on stdout; exit 0 = understood
 
 Implementation: `org.weasis.dicom.codec.DicomUnderstandingOracle`.
 
+## One measurement path (millimetres and HU)
+
+Added by the 2026-09-15 measurement run (slices 1–5, PRs #27, #26, #28, #29 on this branch). Same
+default-deny posture as the pixel path: no tag, no number.
+
+```text
+instance Attributes (the dataset at View2d.getFrameIndex(), re-read on every page)
+  → InstanceSpacing.resolve(Attributes)                      ← (0028,0030) PixelSpacing row\col
+      CT/MR: exactly two finite values > 0, else empty       ← never ImagerPixelSpacing as a CT fallback
+      CR/DX: PixelSpacing wins (PIXEL_SPACING_CALIBRATED, never ÷ M again)
+             else ImagerPixelSpacing ÷ M  (M = ERMF, or SID/SOD)  → IMAGER_OBJECT_ESTIMATE + caveat
+             ERMF and SID/SOD disagree > 1e-2                     → IMAGER_DETECTOR + MAG_CONFLICT
+             no M                                                  → IMAGER_DETECTOR + detector-plane warning
+  → LineGraphic.getLengthMm(ImageSpacing) = hypot(Δx·col, Δy·row); getLength() stays pixels
+  → MeasurementLabel.formatLine(...)   "5.0 mm" | "2.0 mm (detector plane)" | "1.25 mm (estimate)" | "10.0 px"
+  → View2d.getGeometryWarning()        resolver warning text, not tag presence
+
+  → RoiStatistics.ellipse(Attributes, Ellipse2D)             ← stored PixelData ints → LutPipeline.modalityValue
+      ModalityLUTSequence present → empty (refused); unit = RescaleType or "stored"; padding excluded and counted
+      no BufferedImage overload exists — the painted 0–255 raster can never be sampled as HU
+  → MeasurementLabel.formatEllipse(RoiStats)  "-1000.0 HU (n=12)"
+```
+
+Stack paging (`View2d.loadStack`) is **instance** paging: one `SeriesInstanceUID`, `NumberOfFrames > 1`
+refused, sorted by `InstanceNumber`. Frame-offset scroll inside one object is not implemented.
+
+Fixture note: both round-trip CTs carry `PixelSpacing 0.80\0.80`, so the tests that prove spacing is read
+(not hard-coded) are the synthetic anisotropic / two-file cases in `InstanceSpacingTest`,
+`LineGraphicMmTest`, `View2dMeasureLabelTest`. No spacing or rescale literal lives in `src/main`.
+
 ## Explicit limits (default deny)
 
 Documented in code: `DicomUnderstandingLimits`. Summary:
