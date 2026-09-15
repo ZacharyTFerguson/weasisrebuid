@@ -9,11 +9,16 @@
  */
 package org.weasis.dicom.viewer2d.mpr;
 
+/** Derived orthogonal MPR series built from {@link VolImageIO} into {@link RawImageIO}. */
 public class DerivedStack extends AbstractStack {
 
   public DerivedStack() {}
 
   public DerivedStack(Volume volume) {
     super(volume);
+  }
+
+  public RawImageIO rawSlice(MprAxis axis, int index) {
+    return new VolImageIO(getVolume(), axis, index).toRaw();
   }
 }

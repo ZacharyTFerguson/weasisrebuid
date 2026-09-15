@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.viewer2d.mpr;
 
-public class CopyPixelsTask {}
+/** Deep-copies reconstructed MPR samples into a derived raw cache. */
+public class CopyPixelsTask {
+
+  public double[][] copy(double[][] src) {
+    if (src == null) {
+      return null;
+    }
+    double[][] dest = new double[src.length][];
+    for (int y = 0; y < src.length; y++) {
+      dest[y] = src[y] == null ? null : src[y].clone();
+    }
+    return dest;
+  }
+
+  public void copyTo(double[][] src, RawImageIO dest) {
+    if (dest == null) {
+      return;
+    }
+    dest.setSamples(copy(src));
+  }
+}

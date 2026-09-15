@@ -78,6 +78,10 @@ public class MprView extends View2d {
   }
 
   public double[][] rebuild(Volume volume) {
-    return MPRGenerator.orthogonal(volume, axis, sliceIndex, mip.getType(), mip.getThickness());
+    return new VolImageIO(volume, axis, sliceIndex, mip.getType(), mip.getThickness()).samples();
+  }
+
+  public BufferedImage rebuildImage(Volume volume) {
+    return new VolImageIO(volume, axis, sliceIndex, mip.getType(), mip.getThickness()).getImage();
   }
 }
