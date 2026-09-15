@@ -9,4 +9,22 @@
  */
 package org.weasis.dicom.rt;
 
-public class PolynomialFunction {}
+/** Polynomial a0 + a1 x + a2 x^2 + … */
+public class PolynomialFunction {
+
+  private final double[] coefficients;
+
+  public PolynomialFunction(double[] coefficients) {
+    this.coefficients = coefficients == null ? new double[] {0} : coefficients.clone();
+  }
+
+  public double value(double x) {
+    double acc = 0;
+    double pow = 1;
+    for (double c : coefficients) {
+      acc += c * pow;
+      pow *= x;
+    }
+    return acc;
+  }
+}

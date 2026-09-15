@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.rt;
 
-public class RTElementFactory {}
+import org.weasis.dicom.codec.DcmMediaReader;
+import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.codec.DicomSpecialElement;
+import org.weasis.dicom.codec.DicomSpecialElementFactory;
+
+public class RTElementFactory implements DicomSpecialElementFactory {
+
+  @Override
+  public String getSeriesMimeType() {
+    return DicomMime.RT_DICOM;
+  }
+
+  @Override
+  public String getModality() {
+    return "RTSTRUCT";
+  }
+
+  @Override
+  public DicomSpecialElement buildInstance(DcmMediaReader mediaIO) {
+    return new RtSpecialElement(mediaIO);
+  }
+}

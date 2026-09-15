@@ -16,7 +16,9 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
+import org.weasis.dicom.codec.DcmMediaReader;
 import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.codec.DicomSpecialElement;
 import org.weasis.dicom.codec.DicomSpecialElementFactory;
 
 @Component(service = SeriesViewerFactory.class, immediate = true)
@@ -37,6 +39,11 @@ public class RtDisplayToolFactory implements SeriesViewerFactory, DicomSpecialEl
   @Override
   public SeriesViewer<?> createSeriesViewer(Hashtable<String, Object> properties) {
     return new RtDisplayTool();
+  }
+
+  @Override
+  public DicomSpecialElement buildInstance(DcmMediaReader mediaIO) {
+    return new RTElementFactory().buildInstance(mediaIO);
   }
 
   @Override

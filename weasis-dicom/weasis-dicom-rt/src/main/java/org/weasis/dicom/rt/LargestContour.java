@@ -9,4 +9,21 @@
  */
 package org.weasis.dicom.rt;
 
-public class LargestContour {}
+import java.util.List;
+
+/** Selects the contour with the most points (typical “largest” ROI slice). */
+public class LargestContour {
+
+  public static StructContour of(List<StructContour> contours) {
+    if (contours == null || contours.isEmpty()) {
+      return null;
+    }
+    StructContour best = contours.get(0);
+    for (StructContour contour : contours) {
+      if (contour.pointCount() > best.pointCount()) {
+        best = contour;
+      }
+    }
+    return best;
+  }
+}

@@ -9,4 +9,34 @@
  */
 package org.weasis.dicom.rt;
 
-public class RtSet {}
+/** Linked RT Structure Set, Plan, and Dose for one treatment. */
+public class RtSet {
+
+  private StructureSet structureSet;
+  private Plan plan;
+  private Dose dose;
+
+  public StructureSet structureSet() {
+    return structureSet;
+  }
+
+  public void setStructureSet(StructureSet structureSet) {
+    this.structureSet = structureSet;
+  }
+
+  public Plan plan() {
+    return plan;
+  }
+
+  public void setPlan(Plan plan) {
+    this.plan = plan;
+  }
+
+  public Dose dose() {
+    return dose;
+  }
+
+  public void setDose(Dose dose) {
+    this.dose = dose;
+  }
+}

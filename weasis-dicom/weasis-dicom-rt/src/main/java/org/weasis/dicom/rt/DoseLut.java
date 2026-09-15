@@ -9,4 +9,21 @@
  */
 package org.weasis.dicom.rt;
 
-public class DoseLut {}
+import java.awt.Color;
+
+/** Display color for an isodose percent. */
+public class DoseLut {
+
+  public Color colorForPercent(double percent) {
+    if (percent >= 95) {
+      return Color.RED;
+    }
+    if (percent >= 70) {
+      return Color.ORANGE;
+    }
+    if (percent >= 50) {
+      return Color.YELLOW;
+    }
+    return Color.CYAN;
+  }
+}

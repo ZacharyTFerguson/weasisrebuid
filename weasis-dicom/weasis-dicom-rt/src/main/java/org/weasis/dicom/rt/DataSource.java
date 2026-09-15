@@ -9,4 +9,27 @@
  */
 package org.weasis.dicom.rt;
 
-public class DataSource {}
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+
+/** Dataset wrapper for RT SOP instances. */
+public class DataSource {
+
+  private final Attributes dataset;
+
+  public DataSource(Attributes dataset) {
+    this.dataset = dataset;
+  }
+
+  public Attributes dataset() {
+    return dataset;
+  }
+
+  public String modality() {
+    return dataset == null ? "" : dataset.getString(Tag.Modality, "");
+  }
+
+  public String sopClassUid() {
+    return dataset == null ? "" : dataset.getString(Tag.SOPClassUID, "");
+  }
+}

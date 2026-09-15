@@ -9,4 +9,29 @@
  */
 package org.weasis.dicom.rt;
 
-public class PolynomialSplineFunction {}
+/** Piecewise polynomials between knots (DVH bin interpolation). */
+public class PolynomialSplineFunction {
+
+  private final double[] knots;
+  private final PolynomialFunction[] pieces;
+
+  public PolynomialSplineFunction(double[] knots, PolynomialFunction[] pieces) {
+    this.knots = knots == null ? new double[0] : knots.clone();
+    this.pieces = pieces == null ? new PolynomialFunction[0] : pieces.clone();
+  }
+
+  public double value(double x) {
+    if (pieces.length == 0) {
+      return 0;
+    }
+    int i = 0;
+    while (i + 1 < knots.length && x >= knots[i + 1]) {
+      i++;
+    }
+    if (i >= pieces.length) {
+      i = pieces.length - 1;
+    }
+    double local = x - (i < knots.length ? knots[i] : 0);
+    return pieces[i].value(local);
+  }
+}

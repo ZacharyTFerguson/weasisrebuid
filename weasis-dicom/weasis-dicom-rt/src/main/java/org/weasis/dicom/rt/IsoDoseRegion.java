@@ -9,4 +9,22 @@
  */
 package org.weasis.dicom.rt;
 
-public class IsoDoseRegion {}
+/** One isodose line as a percent of the prescription. */
+public class IsoDoseRegion {
+
+  private final double percent;
+  private final double doseGy;
+
+  public IsoDoseRegion(double percent, double doseGy) {
+    this.percent = percent;
+    this.doseGy = doseGy;
+  }
+
+  public double percent() {
+    return percent;
+  }
+
+  public double doseGy() {
+    return doseGy;
+  }
+}

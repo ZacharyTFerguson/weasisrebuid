@@ -9,4 +9,39 @@
  */
 package org.weasis.dicom.rt;
 
-public class KeyDouble {}
+/** Patient-coordinate Z (mm) used as a plane map key. */
+public final class KeyDouble implements Comparable<KeyDouble> {
+
+  static final double EPSILON_MM = 1e-3;
+
+  private final double value;
+
+  public KeyDouble(double value) {
+    this.value = value;
+  }
+
+  public double value() {
+    return value;
+  }
+
+  @Override
+  public int compareTo(KeyDouble other) {
+    return Double.compare(value, other == null ? 0 : other.value);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof KeyDouble other)) {
+      return false;
+    }
+    return Math.abs(value - other.value) < EPSILON_MM;
+  }
+
+  @Override
+  public int hashCode() {
+    return Long.hashCode(Math.round(value / EPSILON_MM));
+  }
+}

@@ -9,4 +9,53 @@
  */
 package org.weasis.dicom.rt;
 
-public class Dvh {}
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+
+/** One DVH Sequence item. */
+public class Dvh {
+
+  private final String type;
+  private final double minDose;
+  private final double maxDose;
+  private final double meanDose;
+  private final double[] data;
+
+  public Dvh(String type, double minDose, double maxDose, double meanDose, double[] data) {
+    this.type = type == null ? "" : type;
+    this.minDose = minDose;
+    this.maxDose = maxDose;
+    this.meanDose = meanDose;
+    this.data = data == null ? new double[0] : data.clone();
+  }
+
+  public static Dvh from(Attributes item) {
+    Attributes src = item == null ? new Attributes() : item;
+    return new Dvh(
+        src.getString(Tag.DVHType, ""),
+        src.getDouble(Tag.DVHMinimumDose, 0),
+        src.getDouble(Tag.DVHMaximumDose, 0),
+        src.getDouble(Tag.DVHMeanDose, 0),
+        src.getDoubles(Tag.DVHData));
+  }
+
+  public String type() {
+    return type;
+  }
+
+  public double minDose() {
+    return minDose;
+  }
+
+  public double maxDose() {
+    return maxDose;
+  }
+
+  public double meanDose() {
+    return meanDose;
+  }
+
+  public double[] data() {
+    return data.clone();
+  }
+}

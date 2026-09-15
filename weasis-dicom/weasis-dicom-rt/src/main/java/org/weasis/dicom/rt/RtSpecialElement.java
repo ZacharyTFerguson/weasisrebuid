@@ -9,4 +9,14 @@
  */
 package org.weasis.dicom.rt;
 
-public class RtSpecialElement {}
+import org.weasis.dicom.codec.DcmMediaReader;
+import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.codec.DicomSpecialElement;
+
+public class RtSpecialElement extends DicomSpecialElement {
+
+  public RtSpecialElement(DcmMediaReader mediaIO) {
+    super(mediaIO);
+    setMimeType(DicomMime.RT_DICOM);
+  }
+}

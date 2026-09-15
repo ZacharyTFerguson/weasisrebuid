@@ -9,4 +9,30 @@
  */
 package org.weasis.dicom.rt;
 
-public class StructRegionTree {}
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+
+/** Patient RT ROI list (name + number). */
+public class StructRegionTree extends JTree {
+
+  public StructRegionTree() {
+    super(new DefaultTreeModel(new DefaultMutableTreeNode("RT")));
+  }
+
+  public void setStructureSet(StructureSet structureSet) {
+    DefaultMutableTreeNode root =
+        new DefaultMutableTreeNode(
+            structureSet == null || structureSet.label().isBlank() ? "RT" : structureSet.label());
+    if (structureSet != null) {
+      for (StructRegion region : structureSet.regions()) {
+        root.add(new DefaultMutableTreeNode(region.name() + " [" + region.number() + "]"));
+      }
+    }
+    setModel(new DefaultTreeModel(root));
+  }
+
+  public int regionCount() {
+    return ((DefaultMutableTreeNode) getModel().getRoot()).getChildCount();
+  }
+}

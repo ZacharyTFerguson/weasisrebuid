@@ -9,4 +9,16 @@
  */
 package org.weasis.dicom.rt;
 
-public class Image {}
+/** Referenced RT image SOP used by a contour. */
+public class Image {
+
+  private final String sopInstanceUid;
+
+  public Image(String sopInstanceUid) {
+    this.sopInstanceUid = sopInstanceUid == null ? "" : sopInstanceUid;
+  }
+
+  public String sopInstanceUid() {
+    return sopInstanceUid;
+  }
+}
