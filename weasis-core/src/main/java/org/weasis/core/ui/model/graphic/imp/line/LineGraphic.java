@@ -40,7 +40,8 @@ public class LineGraphic extends AbstractDragGraphic {
 
   public List<MeasureItem> computeMeasurements(MeasurementsAdapter adapter) {
     MeasurementsAdapter used = adapter == null ? new MeasurementsAdapter(1.0, Unit.PIXEL) : adapter;
-    return List.of(new MeasureItem(LENGTH, used.getLength(getLength()), used.getUnit().getSymbol()));
+    return List.of(
+        new MeasureItem(LENGTH, used.getLength(getLength()), used.getUnit().getSymbol()));
   }
 
   @Override
