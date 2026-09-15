@@ -11,6 +11,7 @@ package org.weasis.base.ui.gui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,6 +24,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.util.Hashtable;
 import java.util.List;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -41,6 +43,7 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.TabPlacement;
+import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.core.ui.util.WtoolBar;
@@ -138,6 +141,10 @@ class WeasisWinChromeHaveTest {
       Object center =
           ((BorderLayout) win.getContentPane().getLayout()).getLayoutComponent(BorderLayout.CENTER);
       assertTrue(center.getClass().getName().contains("CContentArea"));
+      assertInstanceOf(ViewTransferHandler.class, ((JComponent) center).getTransferHandler());
+      assertInstanceOf(ViewTransferHandler.class, win.getViewerTabs().getTransferHandler());
+      assertInstanceOf(
+          ViewTransferHandler.class, ((JComponent) win.getGlassPane()).getTransferHandler());
       win.attachExplorer();
       assertTrue(
           SwingUtilities.isDescendingFrom(

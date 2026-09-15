@@ -9,6 +9,7 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.Point;
 import java.util.List;
 import javax.swing.JComponent;
 import org.weasis.core.api.image.OpManager;
@@ -56,6 +57,11 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
    */
   public void dropSeries(MediaSeries<E> sequence, JComponent onto) {
     addSeries(sequence);
+  }
+
+  /** View cell under a drop point in this plugin's coordinates; default is the plugin itself. */
+  public JComponent dropCellAt(Point p) {
+    return this;
   }
 
   /** True when hanging layout still has a clone or empty cell for another series. */

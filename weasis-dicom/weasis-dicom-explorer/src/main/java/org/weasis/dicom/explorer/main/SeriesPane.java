@@ -141,9 +141,11 @@ public class SeriesPane extends JPanel {
 
   static void exportThumb(SeriesThumbnail thumb, MouseEvent e) {
     TransferHandler handler = thumb.getTransferHandler();
-    if (handler != null) {
-      handler.exportAsDrag(thumb, e, TransferHandler.COPY);
+    if (handler == null) {
+      return;
     }
+    ViewTransferHandler.beginDrag(thumb.getSeries());
+    handler.exportAsDrag(thumb, e, TransferHandler.COPY);
   }
 
   /** One {@link TransferHandler#exportAsDrag} per press; repeating drag events abort Swing DnD. */

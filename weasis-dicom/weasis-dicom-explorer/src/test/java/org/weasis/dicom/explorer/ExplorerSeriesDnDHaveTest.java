@@ -16,11 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.dcm4che3.data.UID;
 import org.junit.jupiter.api.Test;
@@ -77,6 +80,64 @@ class ExplorerSeriesDnDHaveTest {
     } finally {
       HangingProtocolOpenHaveTest.close(core, factory);
     }
+  }
+
+  @Test
+  void emptyNativeFlavorsFill2x2BottomLeftWithoutNewTab() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      View2d bottomLeft = container.getLayoutViews().get(2);
+      assertNull(bottomLeft.getSeries());
+      assertNull(container.getLayoutViews().get(1).getSeries());
+
+      SeriesPane pane = new SeriesPane();
+      pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+      SeriesThumbnail thumb = pane.thumbnails().getFirst();
+      Transferable transferable = new ViewTransferHandler().seriesTransferable(thumb.getSeries());
+      ViewTransferHandler drop = (ViewTransferHandler) bottomLeft.getTransferHandler();
+      ViewTransferHandler.beginDrag(thumb.getSeries());
+      try {
+        assertTrue(drop.canImport(bottomLeft, new DataFlavor[0]));
+        assertSame(bottomLeft, container.dropCellAt(cellCenter(container, 2)));
+        assertTrue(drop.importData(bottomLeft, transferable));
+      } finally {
+        ViewTransferHandler.endDrag();
+      }
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertNull(container.getLayoutViews().get(1).getSeries());
+      assertEquals("2.25.dx.lat", seriesUid(bottomLeft.getSeries()));
+      assertNull(container.getLayoutViews().get(3).getSeries());
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  static void layoutPlugin(View2dContainer container) {
+    container.setSize(480, 400);
+    container.doLayout();
+    List<View2d> views = container.getLayoutViews();
+    int w = 200;
+    int h = 160;
+    for (int i = 0; i < views.size(); i++) {
+      views.get(i).setBounds((i % 2) * w, (i / 2) * h, w, h);
+    }
+  }
+
+  static Point cellCenter(View2dContainer container, int index) {
+    View2d cell = container.getLayoutViews().get(index);
+    Rectangle b = cell.getBounds();
+    Point mid = new Point(b.x + b.width / 2, b.y + b.height / 2);
+    if (cell.getParent() == null) {
+      return SwingUtilities.convertPoint(cell, new Point(b.width / 2, b.height / 2), container);
+    }
+    return SwingUtilities.convertPoint(cell.getParent(), mid, container);
   }
 
   static int dragExports(SeriesThumbnail thumb) {

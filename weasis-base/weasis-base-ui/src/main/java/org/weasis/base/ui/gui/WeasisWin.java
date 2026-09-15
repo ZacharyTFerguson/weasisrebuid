@@ -13,8 +13,10 @@ import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.CLocation;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import bibliothek.gui.dock.security.GlassedPane;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -39,6 +41,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
@@ -49,6 +52,7 @@ import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.RotationToolBar;
+import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ScreenshotToolBar;
 import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
@@ -105,6 +109,54 @@ public class WeasisWin extends JFrame {
     viewerDock = uncloseableDock("viewer", "Viewer", viewerTabs);
     deployExplorerAndViewer();
     add(dockingControl.getContentArea(), BorderLayout.CENTER);
+    bindSeriesDrop();
+  }
+
+  void bindSeriesDrop() {
+    stealIfJc(dockingControl.getContentArea());
+    bindDropPath(viewerTabs);
+    stealIfJc(getGlassPane());
+    stealGlassedTree(dockingControl.getContentArea());
+  }
+
+  void bindDropPath(Component start) {
+    Component c = start;
+    while (c instanceof JComponent jc) {
+      stealDrop(jc);
+      stealGlassed(jc);
+      c = jc.getParent();
+    }
+  }
+
+  void stealGlassed(JComponent c) {
+    if (c instanceof GlassedPane gp) {
+      stealIfJc(gp.getGlassPane());
+    }
+  }
+
+  void stealGlassedTree(Component c) {
+    if (c instanceof JComponent jc) {
+      stealGlassed(jc);
+    }
+    if (c instanceof Container box) {
+      for (Component child : box.getComponents()) {
+        stealGlassedTree(child);
+      }
+    }
+  }
+
+  void stealIfJc(Component c) {
+    if (c instanceof JComponent jc) {
+      stealDrop(jc);
+    }
+  }
+
+  void stealDrop(JComponent c) {
+    TransferHandler keep = c.getTransferHandler();
+    c.setTransferHandler(null);
+    c.setDropTarget(null);
+    c.setTransferHandler(
+        keep instanceof ViewTransferHandler ? keep : new ViewTransferHandler());
   }
 
   static DefaultSingleCDockable uncloseableDock(String id, String title, Component content) {

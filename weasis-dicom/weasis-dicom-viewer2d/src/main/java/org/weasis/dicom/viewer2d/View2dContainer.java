@@ -10,13 +10,17 @@
 package org.weasis.dicom.viewer2d;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
@@ -72,6 +76,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   void bindDrop(JComponent c) {
+    c.setDropTarget(null);
     c.setTransferHandler(seriesDrop);
     c.putClientProperty(ImageViewerPlugin.class, this);
     c.putClientProperty(View2dContainer.class, this);
@@ -177,8 +182,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     viewGrid.removeAll();
     viewGrid.setLayout(gridForCount(layout.size()));
     for (View2d v : layout) {
+      bindDrop(v);
       viewGrid.add(v);
     }
+    bindDrop(viewGrid);
     viewGrid.revalidate();
     viewGrid.repaint();
   }
@@ -275,7 +282,53 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   boolean isEmptyHang(View2d cell) {
-    return cell != view2d && layout.contains(cell) && isCloneSlot(cell, view2d.getSeries());
+    return cell != null
+        && cell != view2d
+        && layout.contains(cell)
+        && isCloneSlot(cell, view2d.getSeries());
+  }
+
+  @Override
+  public JComponent dropCellAt(Point p) {
+    JComponent cell = cellAt(p);
+    return cell != null ? cell : this;
+  }
+
+  JComponent cellAt(Point p) {
+    if (p == null) {
+      return null;
+    }
+    JComponent byBounds = cellContaining(p);
+    if (byBounds != null) {
+      return byBounds;
+    }
+    return layoutCell(SwingUtilities.getDeepestComponentAt(this, p.x, p.y));
+  }
+
+  JComponent cellContaining(Point p) {
+    for (View2d v : layout) {
+      if (cellBounds(v).contains(p)) {
+        return v;
+      }
+    }
+    return null;
+  }
+
+  Rectangle cellBounds(View2d v) {
+    if (v.getParent() == null) {
+      return v.getBounds();
+    }
+    return SwingUtilities.convertRectangle(v.getParent(), v.getBounds(), this);
+  }
+
+  JComponent layoutCell(Component c) {
+    while (c != null) {
+      if (c instanceof View2d view && layout.contains(view)) {
+        return view;
+      }
+      c = c.getParent();
+    }
+    return this;
   }
 
   @Override

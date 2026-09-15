@@ -10,15 +10,18 @@
 package org.weasis.core.ui.editor.image;
 
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.util.List;
 import javax.swing.JComponent;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.SeriesThumbnail;
+import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.util.UriListFlavor;
 
 /**
@@ -29,17 +32,19 @@ public class ViewTransferHandler extends TransferHandler {
 
   public static final DataFlavor SERIES_FLAVOR = new DataFlavor(MediaSeries.class, "MediaSeries");
 
+  private static MediaSeries<?> dragging;
+
   private List<File> lastFiles = List.of();
   private MediaSeries<?> lastSeries;
 
   @Override
   public boolean canImport(JComponent comp, DataFlavor[] flavors) {
-    return canImportFlavors(flavors);
+    return dragging != null || canImportFlavors(flavors);
   }
 
   @Override
   public boolean canImport(TransferSupport support) {
-    return support != null && canImportFlavors(support.getDataFlavors());
+    return support != null && (dragging != null || canImportFlavors(support.getDataFlavors()));
   }
 
   boolean canImportFlavors(DataFlavor[] flavors) {
@@ -66,9 +71,28 @@ public class ViewTransferHandler extends TransferHandler {
   @Override
   protected Transferable createTransferable(JComponent c) {
     if (c instanceof SeriesThumbnail thumb) {
+      beginDrag(thumb.getSeries());
       return seriesTransferable(thumb.getSeries());
     }
     return super.createTransferable(c);
+  }
+
+  public static void beginDrag(MediaSeries<?> series) {
+    dragging = series;
+  }
+
+  public static void endDrag() {
+    dragging = null;
+  }
+
+  public static MediaSeries<?> dragging() {
+    return dragging;
+  }
+
+  @Override
+  protected void exportDone(JComponent source, Transferable data, int action) {
+    endDrag();
+    super.exportDone(source, data, action);
   }
 
   public Transferable seriesTransferable(MediaSeries<?> series) {
@@ -85,11 +109,61 @@ public class ViewTransferHandler extends TransferHandler {
     if (support == null || !canImport(support)) {
       return false;
     }
-    return importTransferable(support.getComponent(), support.getTransferable());
+    Component onto = cellOf(support);
+    return importTransferable(onto, support.getTransferable());
+  }
+
+  Component cellOf(TransferSupport support) {
+    Component host = support.getComponent();
+    JComponent view = viewUnder(host);
+    if (view != null) {
+      return view;
+    }
+    if (!support.isDrop()) {
+      return host;
+    }
+    return viewAt(host, support.getDropLocation().getDropPoint());
+  }
+
+  static JComponent viewAt(Component host, Point p) {
+    if (host == null || p == null) {
+      return null;
+    }
+    JComponent view = viewUnder(SwingUtilities.getDeepestComponentAt(host, p.x, p.y));
+    if (view != null) {
+      return view;
+    }
+    return cellInPlugin(pluginOf(asJc(host)), host, p);
+  }
+
+  static JComponent cellInPlugin(ImageViewerPlugin<?> plugin, Component host, Point p) {
+    if (plugin == null) {
+      return asJc(host);
+    }
+    Point inPlugin = SwingUtilities.convertPoint(host, p, plugin);
+    JComponent cell = plugin.dropCellAt(inPlugin);
+    return cell != null ? cell : plugin;
+  }
+
+  static JComponent asJc(Component c) {
+    return c instanceof JComponent jc ? jc : null;
+  }
+
+  static JComponent viewUnder(Component c) {
+    while (c != null) {
+      if (c instanceof DefaultView2d<?>) {
+        return (JComponent) c;
+      }
+      c = c.getParent();
+    }
+    return null;
   }
 
   boolean importTransferable(Component comp, Transferable t) {
     MediaSeries<?> series = seriesFrom(t);
+    if (series == null) {
+      series = dragging;
+    }
     if (series != null && comp instanceof JComponent jc) {
       return dropSeries(jc, series);
     }
@@ -116,15 +190,23 @@ public class ViewTransferHandler extends TransferHandler {
     if (comp instanceof ImageViewerPlugin<?> plugin) {
       return plugin;
     }
-    return pluginProperty(comp);
+    ImageViewerPlugin<?> fromProp = pluginProperty(comp);
+    if (fromProp != null) {
+      return fromProp;
+    }
+    return UICore.getInstance().getFocusedImagePlugin();
   }
 
   static ImageViewerPlugin<?> pluginProperty(JComponent comp) {
-    if (comp == null) {
-      return null;
+    Component c = comp;
+    while (c instanceof JComponent jc) {
+      Object host = jc.getClientProperty(ImageViewerPlugin.class);
+      if (host instanceof ImageViewerPlugin<?> plugin) {
+        return plugin;
+      }
+      c = jc.getParent();
     }
-    Object host = comp.getClientProperty(ImageViewerPlugin.class);
-    return host instanceof ImageViewerPlugin<?> plugin ? plugin : null;
+    return null;
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -133,10 +215,13 @@ public class ViewTransferHandler extends TransferHandler {
   }
 
   MediaSeries<?> seriesFrom(Transferable t) {
-    if (t == null || !t.isDataFlavorSupported(SERIES_FLAVOR)) {
+    if (t == null) {
       return null;
     }
-    return readSeries(t);
+    if (t.isDataFlavorSupported(SERIES_FLAVOR)) {
+      return readSeries(t);
+    }
+    return dragging;
   }
 
   MediaSeries<?> readSeries(Transferable t) {
