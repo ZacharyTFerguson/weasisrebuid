@@ -74,17 +74,14 @@ final class StackPagingFixtures {
   }
 
   static File writeOtherSeriesCt(File dest) throws Exception {
-    return writeCtInstance(
-        dest, UIDUtils.createUID("2.25"), 1, 0.80, 0.80, 10.0, 500);
+    return writeCtInstance(dest, UIDUtils.createUID("2.25"), 1, 0.80, 0.80, 10.0, 500);
   }
 
   static File writeMultiframeCt(File dest) throws Exception {
     String seriesUid = UIDUtils.createUID("2.25");
-    File single =
-        writeCtInstance(dest, seriesUid, 1, 0.80, 0.80, 0.0, 100);
+    File single = writeCtInstance(dest, seriesUid, 1, 0.80, 0.80, 0.0, 100);
     Attributes dcm;
-    try (org.dcm4che3.io.DicomInputStream in =
-        new org.dcm4che3.io.DicomInputStream(single)) {
+    try (org.dcm4che3.io.DicomInputStream in = new org.dcm4che3.io.DicomInputStream(single)) {
       dcm = in.readDataset();
     }
     int size = 8;
@@ -103,8 +100,7 @@ final class StackPagingFixtures {
     Attributes fmi = new Attributes();
     fmi.setBytes(Tag.FileMetaInformationVersion, VR.OB, new byte[] {0, 1});
     fmi.setString(Tag.MediaStorageSOPClassUID, VR.UI, UID.CTImageStorage);
-    fmi.setString(
-        Tag.MediaStorageSOPInstanceUID, VR.UI, dcm.getString(Tag.SOPInstanceUID));
+    fmi.setString(Tag.MediaStorageSOPInstanceUID, VR.UI, dcm.getString(Tag.SOPInstanceUID));
     fmi.setString(Tag.TransferSyntaxUID, VR.UI, UID.ExplicitVRLittleEndian);
     try (DicomOutputStream out =
         new DicomOutputStream(new FileOutputStream(dest), UID.ExplicitVRLittleEndian)) {

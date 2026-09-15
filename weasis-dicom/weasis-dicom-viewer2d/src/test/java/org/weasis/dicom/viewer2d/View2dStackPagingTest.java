@@ -35,11 +35,11 @@ import org.weasis.dicom.codec.utils.InstanceSpacing;
  * changes.
  *
  * <p><b>Tags:</b> (0020,000E) {@code SeriesInstanceUID} — one stack is one series; mixing UIDs
- * would juxtapose unrelated slices as if they were a volume. (0020,0013) {@code InstanceNumber}
- * — primary sort key for instance order within that series (filename order is only a tie-break when
+ * would juxtapose unrelated slices as if they were a volume. (0020,0013) {@code InstanceNumber} —
+ * primary sort key for instance order within that series (filename order is only a tie-break when
  * the tag repeats). (0020,0032) {@code ImagePositionPatient} — lets tests prove the view bound the
- * dataset for the chosen index, not a stale handle. (0028,0008) {@code NumberOfFrames} — read
- * only to refuse values &gt; 1: this slice pages <em>instances</em> (separate objects), not frame
+ * dataset for the chosen index, not a stale handle. (0028,0008) {@code NumberOfFrames} — read only
+ * to refuse values &gt; 1: this slice pages <em>instances</em> (separate objects), not frame
  * offsets inside one object's {@code PixelData}; showing frame 0 under another index would lie
  * about which anatomy is on screen.
  *
@@ -53,9 +53,9 @@ import org.weasis.dicom.codec.utils.InstanceSpacing;
  * frame; a failed {@code loadStack} leaves the previous stack visible.
  *
  * <p><b>Why not copy Weasis:</b> upstream {@code SeriesComparator} and stack builders handle KO,
- * multiframe cine, and missing {@code InstanceNumber} heuristics we do not need for this oracle;
- * a minimal sort-by-{@code InstanceNumber} plus explicit refusal matches the honesty contract
- * without importing comparator logic.
+ * multiframe cine, and missing {@code InstanceNumber} heuristics we do not need for this oracle; a
+ * minimal sort-by-{@code InstanceNumber} plus explicit refusal matches the honesty contract without
+ * importing comparator logic.
  *
  * <p>This is <em>instance paging</em>, not multi-frame scroll; the tracker row for stack scroll
  * stays partial until a later slice paints frame N from byte offsets.
@@ -150,8 +150,7 @@ class View2dStackPagingTest {
     int instanceBefore = view.getDataset().getInt(Tag.InstanceNumber, -1);
     byte[] paintedBefore = paintedBytes(view);
 
-    assertThrows(
-        IllegalArgumentException.class, () -> view.loadStack(List.of(s01, other)));
+    assertThrows(IllegalArgumentException.class, () -> view.loadStack(List.of(s01, other)));
     assertEquals(instanceBefore, view.getDataset().getInt(Tag.InstanceNumber, -1));
     assertArrayEquals(paintedBefore, paintedBytes(view));
   }
@@ -181,13 +180,11 @@ class View2dStackPagingTest {
 
     View2d view = new View2d();
     view.loadStack(List.of(s01, iso));
-    double row0 =
-        InstanceSpacing.resolve(view.getDataset()).orElseThrow().spacing().rowMm();
+    double row0 = InstanceSpacing.resolve(view.getDataset()).orElseThrow().spacing().rowMm();
     assertEquals(0.80, row0, 1e-9);
 
     view.setFrameIndex(1);
-    double row1 =
-        InstanceSpacing.resolve(view.getDataset()).orElseThrow().spacing().rowMm();
+    double row1 = InstanceSpacing.resolve(view.getDataset()).orElseThrow().spacing().rowMm();
     assertEquals(0.50, row1, 1e-9);
   }
 

@@ -110,8 +110,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (stackDatasets.isEmpty()) {
       return;
     }
-    int clamped =
-        Math.max(0, Math.min(requestedIndex, stackDatasets.size() - 1));
+    int clamped = Math.max(0, Math.min(requestedIndex, stackDatasets.size() - 1));
     super.setFrameIndex(clamped);
     this.dataset = stackDatasets.get(clamped);
     if (!stackFiles.isEmpty()) {
