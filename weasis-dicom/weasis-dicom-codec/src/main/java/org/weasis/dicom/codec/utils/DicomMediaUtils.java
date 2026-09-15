@@ -26,8 +26,8 @@ public final class DicomMediaUtils {
   }
 
   /**
-   * Interprets a dcm4che {@code getInts(PixelData)} sample using {@code PixelRepresentation}, {@code
-   * BitsAllocated}, and {@code BitsStored}. Unsigned 8-bit values must not sign-wrap.
+   * Interprets a dcm4che {@code getInts(PixelData)} sample using {@code PixelRepresentation},
+   * {@code BitsAllocated}, and {@code BitsStored}. Unsigned 8-bit values must not sign-wrap.
    */
   public static int storedPixel(Attributes dcm, int raw) {
     int allocated = dcm == null ? 16 : dcm.getInt(Tag.BitsAllocated, 16);
