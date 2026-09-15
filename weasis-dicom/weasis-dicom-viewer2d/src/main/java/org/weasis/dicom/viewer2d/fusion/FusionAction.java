@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionAction {}
+/** Applies LUT / window / opacity to a {@link FusionState}. */
+public class FusionAction {
+
+  public void applyLut(FusionState state, String lut) {
+    if (state != null) {
+      state.setLut(lut);
+    }
+  }
+
+  public void applyWindow(FusionState state, FusionWindow window) {
+    if (state != null) {
+      state.setWindow(window);
+    }
+  }
+
+  public void applyOpacity(FusionState state, double opacity) {
+    if (state != null) {
+      state.setOpacity(opacity);
+    }
+  }
+}

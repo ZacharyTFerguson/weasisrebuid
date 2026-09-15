@@ -9,4 +9,36 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionColorBar {}
+import java.awt.Color;
+
+/** Maps a windowed overlay sample through {@link FusionColorScale}. */
+public class FusionColorBar {
+
+  private FusionWindow window = new FusionWindow();
+  private final FusionColorScale scale = new FusionColorScale();
+  private String lut = FusionColorScale.HOT_IRON;
+
+  public FusionWindow getWindow() {
+    return window;
+  }
+
+  public void setWindow(FusionWindow window) {
+    this.window = window == null ? new FusionWindow() : window;
+  }
+
+  public String getLut() {
+    return lut;
+  }
+
+  public void setLut(String lut) {
+    this.lut = lut == null || lut.isBlank() ? FusionColorScale.HOT_IRON : lut;
+  }
+
+  public Color colorFor(double value) {
+    return scale.color(lut, window.indexOf(value));
+  }
+
+  public byte[][] rgbBar() {
+    return scale.rgb(lut);
+  }
+}

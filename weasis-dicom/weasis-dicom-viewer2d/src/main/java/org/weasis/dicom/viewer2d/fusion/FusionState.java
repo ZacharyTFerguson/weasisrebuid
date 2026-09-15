@@ -9,4 +9,34 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionState {}
+/** Overlay window, LUT name, and opacity applied to {@code FusionController.targetViews}. */
+public class FusionState {
+
+  private FusionWindow window = new FusionWindow();
+  private String lut = FusionColorScale.HOT_IRON;
+  private double opacity = 0.4;
+
+  public FusionWindow getWindow() {
+    return window;
+  }
+
+  public void setWindow(FusionWindow window) {
+    this.window = window == null ? new FusionWindow() : window;
+  }
+
+  public String getLut() {
+    return lut;
+  }
+
+  public void setLut(String lut) {
+    this.lut = lut == null || lut.isBlank() ? FusionColorScale.HOT_IRON : lut;
+  }
+
+  public double getOpacity() {
+    return opacity;
+  }
+
+  public void setOpacity(double opacity) {
+    this.opacity = Math.max(0, Math.min(1, opacity));
+  }
+}

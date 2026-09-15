@@ -9,4 +9,46 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionWindow {}
+import org.weasis.dicom.codec.utils.LutPipeline;
+
+/** Linear VOI window/level for a PET overlay (SUV or stored activity). */
+public class FusionWindow {
+
+  private double window = 1;
+  private double level;
+
+  public FusionWindow() {}
+
+  public FusionWindow(double window, double level) {
+    setWindow(window);
+    setLevel(level);
+  }
+
+  public double getWindow() {
+    return window;
+  }
+
+  public void setWindow(double window) {
+    this.window = Math.max(1, window);
+  }
+
+  public double getLevel() {
+    return level;
+  }
+
+  public void setLevel(double level) {
+    this.level = level;
+  }
+
+  public double getLower() {
+    return level - window / 2.0;
+  }
+
+  public double getUpper() {
+    return level + window / 2.0;
+  }
+
+  public int indexOf(double value) {
+    return LutPipeline.applyVoiLinear(value, window, level);
+  }
+}
