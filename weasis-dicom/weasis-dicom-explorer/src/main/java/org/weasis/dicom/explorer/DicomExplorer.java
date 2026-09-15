@@ -10,6 +10,7 @@
 package org.weasis.dicom.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -18,10 +19,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.DefaultListModel;
+import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
@@ -53,6 +58,9 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final StudyPane studyPane;
   private final SeriesFilter seriesFilter = new SeriesFilter();
   private final PluginOpeningStrategy opening = new PluginOpeningStrategy();
+  private final JComboBox<String> filterMode =
+      new JComboBox<>(new String[] {SeriesFilter.TEXT, SeriesFilter.DATE, SeriesFilter.MODALITY});
+  private final JTextField filterQuery = new JTextField();
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
@@ -69,12 +77,67 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     JPanel hierarchy = new JPanel(new BorderLayout());
     hierarchy.add(patientPane, BorderLayout.NORTH);
     hierarchy.add(studyPane, BorderLayout.CENTER);
-    add(hierarchy, BorderLayout.NORTH);
+    JPanel north = new JPanel(new BorderLayout());
+    north.add(filterBar(), BorderLayout.NORTH);
+    north.add(hierarchy, BorderLayout.CENTER);
+    add(north, BorderLayout.NORTH);
     add(new JScrollPane(list), BorderLayout.CENTER);
     add(DicomTaskManager.getInstance().getLoadingPanel(), BorderLayout.SOUTH);
     list.setName("explorer-series");
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     list.addMouseListener(seriesRowPress());
+  }
+
+  JPanel filterBar() {
+    JPanel bar = new JPanel(new BorderLayout());
+    bindFilterMode();
+    bindFilterQuery();
+    bar.add(filterMode, BorderLayout.WEST);
+    bar.add(filterQuery, BorderLayout.CENTER);
+    return bar;
+  }
+
+  void bindFilterMode() {
+    filterMode.setName("explorer-filter-mode");
+    filterMode.setSelectedItem(seriesFilter.getMode());
+    filterMode.addItemListener(this::onFilterMode);
+  }
+
+  void bindFilterQuery() {
+    filterQuery.setName("explorer-filter-query");
+    filterQuery.getDocument().addDocumentListener(queryListener());
+  }
+
+  void onFilterMode(ItemEvent e) {
+    if (e.getStateChange() != ItemEvent.SELECTED) {
+      return;
+    }
+    seriesFilter.setMode(String.valueOf(filterMode.getSelectedItem()));
+    refresh();
+  }
+
+  DocumentListener queryListener() {
+    return new DocumentListener() {
+      @Override
+      public void insertUpdate(DocumentEvent e) {
+        applyQueryField();
+      }
+
+      @Override
+      public void removeUpdate(DocumentEvent e) {
+        applyQueryField();
+      }
+
+      @Override
+      public void changedUpdate(DocumentEvent e) {
+        applyQueryField();
+      }
+    };
+  }
+
+  void applyQueryField() {
+    seriesFilter.setQuery(filterQuery.getText());
+    refresh();
   }
 
   MouseAdapter seriesRowPress() {
@@ -126,6 +189,14 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
 
   public SeriesFilter seriesFilter() {
     return seriesFilter;
+  }
+
+  public JComboBox<String> filterModeCombo() {
+    return filterMode;
+  }
+
+  public JTextField filterQueryField() {
+    return filterQuery;
   }
 
   public PluginOpeningStrategy openingStrategy() {

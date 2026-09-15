@@ -31,6 +31,7 @@ import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.explorer.exp.ExplorerTask;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
 import org.weasis.dicom.explorer.main.LoadingTaskPanel;
+import org.weasis.dicom.explorer.main.SeriesFilter;
 import org.weasis.dicom.viewer2d.View2dContainer;
 import org.weasis.dicom.viewer2d.View2dFactory;
 
@@ -177,11 +178,43 @@ class ImportExplorerHaveTest {
             "image/dicom"));
     DicomExplorer explorer = new DicomExplorer(model);
     assertEquals(1, explorer.seriesSelection().getItems().size());
+    explorer.seriesFilter().setMode(SeriesFilter.MODALITY);
     explorer.seriesFilter().setQuery("mr");
     explorer.refresh();
     assertEquals(0, explorer.seriesSelection().getItems().size());
     explorer.seriesFilter().setQuery("ct");
     explorer.refresh();
+    assertEquals(1, explorer.seriesSelection().getItems().size());
+  }
+
+  @Test
+  void explorerFilterChromeAppliesPrefModesWithoutRenamingSeriesList() {
+    DicomModel model = new DicomModel();
+    model.addInstance(
+        new ImportedInstance(
+            "SYNTHETIC^A",
+            "SYN-1",
+            "2.25.1",
+            "2.25.s1",
+            "2.25.i1",
+            "1.2.840.10008.10.0.2.2.1.2",
+            "CT",
+            "chest",
+            "20260101",
+            1,
+            1,
+            null,
+            "image/dicom"));
+    DicomExplorer explorer = new DicomExplorer(model);
+    assertEquals("explorer-series", explorer.seriesList().getName());
+    assertEquals("explorer-filter-mode", explorer.filterModeCombo().getName());
+    assertEquals("explorer-filter-query", explorer.filterQueryField().getName());
+    explorer.filterModeCombo().setSelectedItem(SeriesFilter.TEXT);
+    assertEquals(SeriesFilter.TEXT, explorer.seriesFilter().getMode());
+    explorer.filterModeCombo().setSelectedItem(SeriesFilter.DATE);
+    explorer.filterQueryField().setText("20251231");
+    assertEquals(0, explorer.seriesSelection().getItems().size());
+    explorer.filterQueryField().setText("20260101");
     assertEquals(1, explorer.seriesSelection().getItems().size());
   }
 }
