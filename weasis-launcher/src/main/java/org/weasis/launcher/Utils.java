@@ -105,6 +105,65 @@ public final class Utils {
     return s.startsWith("weasis:config");
   }
 
+  public static String gogoLine(String command) {
+    if (command == null) {
+      return "";
+    }
+    String s = command.trim();
+    if (s.startsWith("$")) {
+      s = s.substring(1);
+    }
+    return s.trim();
+  }
+
+  public static List<String> gogoLines(LaunchRequest request) {
+    if (request == null) {
+      return List.of();
+    }
+    List<String> lines = new ArrayList<>();
+    for (String command : request.commands()) {
+      String line = gogoLine(command);
+      if (!line.isEmpty()) {
+        lines.add(line);
+      }
+    }
+    return List.copyOf(lines);
+  }
+
+  public static String[] commandArgs(String gogoLine) {
+    List<String> tokens = tokenize(gogoLine(gogoLine));
+    if (tokens.size() <= 1) {
+      return new String[0];
+    }
+    return tokens.subList(1, tokens.size()).toArray(String[]::new);
+  }
+
+  public static String commandFunction(String gogoLine) {
+    List<String> tokens = tokenize(gogoLine(gogoLine));
+    if (tokens.isEmpty()) {
+      return "";
+    }
+    String scopeFn = tokens.getFirst();
+    int colon = scopeFn.indexOf(':');
+    return colon < 0 ? scopeFn : scopeFn.substring(colon + 1);
+  }
+
+  public static List<String> dispatch(LaunchRequest request, CommandSink sink) throws Exception {
+    List<String> lines = gogoLines(request);
+    if (sink == null) {
+      return lines;
+    }
+    for (String line : lines) {
+      sink.execute(line);
+    }
+    return lines;
+  }
+
+  @FunctionalInterface
+  public interface CommandSink {
+    void execute(String gogoLine) throws Exception;
+  }
+
   public static LaunchRequest parseLaunch(String[] args) {
     Map<String, String> properties = new LinkedHashMap<>();
     List<String> commands = new ArrayList<>();

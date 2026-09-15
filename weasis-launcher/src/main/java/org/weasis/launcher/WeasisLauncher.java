@@ -72,6 +72,7 @@ public class WeasisLauncher {
     BundleInstaller.raiseStartLevel(framework, config);
     LauncherGogo.register(framework);
     GogoTelnet.start(framework, System.getProperty(GOGO_PORT_PROPERTY));
+    dispatchLaunchCommands(framework, request);
     LOGGER.info(
         "Felix {} started; Gogo {} ; weasis {}",
         framework.getSymbolicName(),
@@ -104,6 +105,11 @@ public class WeasisLauncher {
 
   static void ensureGogoPort() {
     System.setProperty(GOGO_PORT_PROPERTY, resolveGogoPort(System.getProperty(GOGO_PORT_PROPERTY)));
+  }
+
+  static void dispatchLaunchCommands(Framework framework, Utils.LaunchRequest request)
+      throws Exception {
+    GogoTelnet.executeLines(framework, Utils.gogoLines(request));
   }
 
   static Path resolveExtendedJson(Path baseJson) {
