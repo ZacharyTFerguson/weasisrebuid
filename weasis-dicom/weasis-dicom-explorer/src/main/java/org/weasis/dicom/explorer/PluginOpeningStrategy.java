@@ -174,9 +174,7 @@ public class PluginOpeningStrategy {
   }
 
   boolean canOpen(DicomModel model) {
-    return model != null
-        && !model.getInstances().isEmpty()
-        && core.getApplicationWindow() != null;
+    return model != null && !model.getInstances().isEmpty() && core.getApplicationWindow() != null;
   }
 
   public ViewerPlugin<?> open(DicomSeriesHandler.SeriesBucket bucket) {
