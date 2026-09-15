@@ -11,8 +11,8 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | Tutorial | WP | Have (clone) | Pass |
 |---|---|---|---|
 | GUI overview / prefs | 0–1 | Felix + dummy viewer | headed UI |
-| DICOM Import / Explorer | 3 | DICOMDIR + filters + CD detect; File>Export files/ZIP/DICOMDIR; thumbnail multi-select; PatientPane/StudyPane hierarchy | tutorial |
-| DICOM 2D / LUT / Zoom | 4 | W/L paints; zoom −200/−100; screenshot PNG/JPEG; T/W/S/Z/R/C/Q/P keys; series/image nav; Ctrl-drag accelerate; Alt+R/L/F; Ctrl+Space; Ctrl+/-; Tab layout; Lut/Reset chrome; `ViewCanvas`/`Canvas` | tutorial |
+| DICOM Import / Explorer | 3 | DICOMDIR + filters + CD detect; File>Export files/ZIP/DICOMDIR; thumbnail multi-select; PatientPane/StudyPane hierarchy; `LoadDicom`/`LoadDicomDir` Part-10/DICOMDIR into `DicomModel`; `DicomSeriesHandler`; `HangingProtocols`; `MimeSystemAppFactory` PDF/video | tutorial |
+| DICOM 2D / LUT / Zoom | 4 | W/L paints; zoom −200/−100; screenshot PNG/JPEG (headless-safe `ScreenshotDialog`); T/W/S/Z/R/C/Q/P keys; series/image nav; Ctrl-drag accelerate; Alt+R/L/F; Ctrl+Space; Ctrl+/-; Tab layout; Lut/Reset chrome; `ViewCanvas`/`Canvas` | tutorial |
 | Draw & Measure | 5 | graphic geometry + shortcuts D/A/Y; select/delete map; ROI stats | tutorial |
 | Build KO and PR | 5 | KO/PR objects with root UID 2.25; star/filter + K | tutorial |
 | Docking / sync / 3D cursor / histogram / lens | 6 | docking start + FoR vs manual; histogram bind/RGB/ROI; 3D cursor H/PixelInfo; Mini Tool + panner; central-panel docking keys | tutorial |
