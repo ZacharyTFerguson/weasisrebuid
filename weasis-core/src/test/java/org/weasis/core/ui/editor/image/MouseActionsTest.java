@@ -10,6 +10,7 @@
 package org.weasis.core.ui.editor.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -20,5 +21,9 @@ class MouseActionsTest {
     MouseActions actions = new MouseActions();
     actions.setLeft("drawings");
     assertEquals(MouseActions.DRAW, actions.getLeft());
+    actions.setLeft("series");
+    assertEquals(MouseActions.SEQUENCE, actions.getLeft());
+    assertTrue(MouseActions.isScroll("sequence"));
+    assertTrue(MouseActions.isScroll("scroll"));
   }
 }

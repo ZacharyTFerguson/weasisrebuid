@@ -19,10 +19,14 @@ public final class MouseActions {
   public static final String PAN = "pan";
   public static final String ZOOM = "zoom";
   public static final String SCROLL = "scroll";
+  public static final String SEQUENCE = "sequence";
+  public static final String ROTATION = "rotation";
   public static final String DRAW = "draw";
   public static final String DRAWINGS = "drawings";
   public static final String MEASURE = "measure";
   public static final String CROSSHAIR = "crosshair";
+  public static final String CONTEXT_MENU = "contextMenu";
+  public static final String NONE = "none";
 
   private String left = WINLEVEL;
   private String middle = PAN;
@@ -68,6 +72,14 @@ public final class MouseActions {
     if (DRAWINGS.equalsIgnoreCase(action) || "drawing".equalsIgnoreCase(action)) {
       return DRAW;
     }
+    if ("series".equalsIgnoreCase(action) || SEQUENCE.equalsIgnoreCase(action)) {
+      return SEQUENCE;
+    }
     return action;
+  }
+
+  public static boolean isScroll(String action) {
+    String a = normalize(action);
+    return SCROLL.equalsIgnoreCase(a) || SEQUENCE.equalsIgnoreCase(a);
   }
 }

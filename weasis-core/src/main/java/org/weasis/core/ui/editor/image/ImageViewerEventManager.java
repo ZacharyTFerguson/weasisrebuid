@@ -50,20 +50,28 @@ public class ImageViewerEventManager {
     String action = MouseActions.normalize(view.getMouseActions().getWheel());
     if (MouseActions.ZOOM.equals(action)) {
       view.increaseZoom(-e.getWheelRotation());
-    } else if (MouseActions.SCROLL.equals(action)) {
+    } else if (MouseActions.isScroll(action)) {
       view.setFrameIndex(view.getFrameIndex() + e.getWheelRotation());
     }
   }
 
   public void apply(String action, int dx, int dy) {
     String a = MouseActions.normalize(action);
+    if (MouseActions.isScroll(a)) {
+      view.setFrameIndex(view.getFrameIndex() + (dy > 0 ? 1 : -1));
+      return;
+    }
     switch (a) {
       case MouseActions.PAN -> view.setPan(view.getPanX() + dx, view.getPanY() + dy);
       case MouseActions.ZOOM -> view.increaseZoom(dy < 0 ? 1 : dy > 0 ? -1 : 0);
-      case MouseActions.SCROLL -> view.setFrameIndex(view.getFrameIndex() + (dy > 0 ? 1 : -1));
+      case MouseActions.ROTATION -> view.setRotation(view.getRotation() + dx);
       case MouseActions.WINLEVEL -> applyWindowLevel(dx, dy);
-      case MouseActions.CROSSHAIR, MouseActions.DRAW -> {
-        // draw / crosshair handled by graphics tools (WP-5/6)
+      case MouseActions.CROSSHAIR,
+          MouseActions.DRAW,
+          MouseActions.MEASURE,
+          MouseActions.CONTEXT_MENU,
+          MouseActions.NONE -> {
+        // draw / measure / menu handled by graphics tools (WP-5)
       }
       default -> {
         // unknown

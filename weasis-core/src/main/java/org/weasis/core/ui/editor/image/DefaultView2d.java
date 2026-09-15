@@ -24,7 +24,9 @@ import javax.swing.JPanel;
 import org.weasis.core.api.image.AffineTransformOp;
 import org.weasis.core.api.image.OpManager;
 import org.weasis.core.api.image.SimpleOpManager;
+import org.weasis.core.api.media.data.ImageElement;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.model.graphic.Graphic;
 
 /**
@@ -46,6 +48,9 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private volatile double panY;
   private volatile double rotation;
   private volatile int frameIndex;
+  private volatile int frameCount;
+  private MediaSeries<? extends MediaElement> series;
+  private volatile SynchCineEvent lastCineEvent;
   private volatile SynchView synch = SynchView.STACK;
   private volatile SynchData synchData = new SynchData();
   private volatile SynchManager synchManager;
@@ -184,14 +189,53 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     return frameIndex;
   }
 
+  public int getFrameCount() {
+    if (series != null && series.size() > 0) {
+      return series.size();
+    }
+    return frameCount > 0 ? frameCount : 1;
+  }
+
+  public void setFrameCount(int frameCount) {
+    this.frameCount = Math.max(0, frameCount);
+  }
+
+  public MediaSeries<? extends MediaElement> getSeries() {
+    return series;
+  }
+
+  public void setSeries(MediaSeries<? extends MediaElement> series) {
+    this.series = series;
+  }
+
+  public SynchCineEvent lastCineEvent() {
+    return lastCineEvent;
+  }
+
   public void setFrameIndex(int frameIndex) {
     setFrameIndex(frameIndex, true);
   }
 
   public void setFrameIndex(int frameIndex, boolean propagate) {
     this.frameIndex = Math.max(0, frameIndex);
+    applyFramePixels();
+    lastCineEvent = new SynchCineEvent(this, this.frameIndex);
     if (propagate && synchManager != null && synch != SynchView.NONE) {
       synchManager.onFrame(this);
+    }
+  }
+
+  void applyFramePixels() {
+    if (series == null) {
+      return;
+    }
+    List<? extends MediaElement> medias = series.getMedias();
+    if (frameIndex < 0 || frameIndex >= medias.size()) {
+      return;
+    }
+    MediaElement media = medias.get(frameIndex);
+    if (media instanceof ImageElement image && image.getImage() != null) {
+      setSourceImage(image.getImage());
     }
   }
 

@@ -6,7 +6,7 @@
 | 1 | Core SDK, dummy `SeriesViewerFactory` | blank `ViewerPlugin` |
 | 2 | OpenCV fragment, imageio, dicom-codec | EVR LE MONOCHROME2 CT W/L paints |
 | 3 | Import + Explorer | synthetic DICOMDIR; File>Import DICOM and DICOM CD; File>Export DICOM files/ZIP/DICOMDIR |
-| 4 | View2d LUT chain, `dcmview2d:*` | W/L paints; zoom −200/−100 toolbar + screenshot PNG/JPEG Have; rotation 0/90/180/270 chrome; **no MPR** |
+| 4 | View2d LUT chain, `dcmview2d:*` | W/L paints; zoom −200/−100 toolbar + screenshot PNG/JPEG Have; rotation 0/90/180/270 chrome; ViewerToolBar mouseLeftAction tokens; cine Play/Stop frame advance + loop; **no MPR** |
 | 5 | Draw & Measure, KO, PR/GSPS | every graphic `buildShape` non-null when complete; KO/PR files; `XmlGraphicModel` JAXB round-trip (`@XmlRootElement` types, JAXB-OSGi @7) |
 | 6 | Docking Frames, FoR+manual sync, lens, 2D 3D-cursor | FoR vs MANUAL MX-14; docking-frames **Active** @10 (FlatLaf extras on system classpath); MigLayout Core+Swing **Active** @7; JAXB-OSGi **Active** @7; 2D lens `ZoomWin` factor Have |
 | 7 | MPR / CPR / MIP | `mpr` types; MIP None/Min/Mean/Max |
@@ -15,7 +15,7 @@
 | 10 | SR AU ECG RT SEG | MIME + factories Active on `lb` |
 | 11 | QR C-FIND/MOVE/GET, WADO, QIDO/STOW, send, ISO, print | network Have tests; XML/JSON WADO manifest + WADO-RS retrieve + MX-10/11 caps; DICOM Print N-CREATE Film Session/Box/Image Box + N-ACTION Print (type 1); film-session dialog Have |
 | 12 | Dicomizer profile | `dicomizer.json` overlay; acquire convert Have; Gogo **17181** smoke (`scripts/dicomizer-gogo-smoke.sh`) when overlay is applied; desktop Gogo stays **17179** |
-| 13 | `weasis://`, `$dicom:get`/`-rs`, non-DICOM profile | URI + `$weasis:config` parser; `dicom:get`/`rs`/`close`; `image:get`/`close` Have (local `-f` ImageIO, remote `-u` no fetch); `non-dicom-explorer.json` |
+| 13 | `weasis://`, `$dicom:get`/`-rs`, non-DICOM profile | URI + `$weasis:config` parser; `dicom:get`/`rs`/`close`; `image:get`/`close` Have (local `-f` ImageIO, remote `-u` no fetch); ImportToolBar stills via ImageIO; `non-dicom-explorer.json` |
 | 14 | i18n fragments, ≥30 % lang pref, native zip | `weasis-core-i18n` fragment (name ends in i18n) Installed @13; language list ≥ 30 %; `weasis-native.zip` via `-P compressXZ` |
 | 15 | ViewerHub `/display`, dcm4chee IID | `/display` and `/display/IHEInvokeImageDisplay` 302 `weasis://`; dcm4chee IID templates |
 

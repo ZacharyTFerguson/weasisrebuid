@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.util.List;
 import java.util.Objects;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -23,6 +24,7 @@ import org.weasis.core.api.image.ShutterOp;
 import org.weasis.core.api.image.WindowAndPresetsOp;
 import org.weasis.core.api.image.util.WindLevelParameters;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.dicom.codec.DicomMediaIO;
@@ -209,6 +211,36 @@ public class View2d extends DefaultView2d<MediaElement> {
       return n.intValue();
     }
     return fallback;
+  }
+
+  @Override
+  public void setFrameIndex(int frameIndex, boolean propagate) {
+    super.setFrameIndex(frameIndex, propagate);
+    loadFrameMedia();
+  }
+
+  void loadFrameMedia() {
+    MediaSeries<? extends MediaElement> series = getSeries();
+    if (series == null) {
+      return;
+    }
+    List<? extends MediaElement> medias = series.getMedias();
+    int index = getFrameIndex();
+    if (index < 0 || index >= medias.size()) {
+      return;
+    }
+    MediaElement media = medias.get(index);
+    if (media == null || media.getMediaURI() == null) {
+      return;
+    }
+    try {
+      File file = new File(media.getMediaURI());
+      if (file.isFile()) {
+        load(file);
+      }
+    } catch (Exception ignored) {
+      // stills with decoded pixels are applied in DefaultView2d.applyFramePixels
+    }
   }
 
   @Override

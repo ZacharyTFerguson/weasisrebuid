@@ -48,6 +48,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
       return;
     }
     MediaElement first = medias.getFirst();
+    view2d.setSeries(sequence);
     if (first instanceof ImageElement image && image.getImage() != null) {
       view2d.setSourceImage(image.getImage());
     }

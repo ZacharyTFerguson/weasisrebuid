@@ -89,6 +89,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (medias.isEmpty()) {
       return;
     }
+    view2d.setSeries(sequence);
     URI uri = medias.getFirst().getMediaURI();
     if (uri == null) {
       return;
