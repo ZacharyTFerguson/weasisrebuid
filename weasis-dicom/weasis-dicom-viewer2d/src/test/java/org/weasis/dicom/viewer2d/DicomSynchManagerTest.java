@@ -63,4 +63,31 @@ class DicomSynchManagerTest {
     assertEquals(3, b.getFrameIndex());
     assertFalse(a.getFrameOfReferenceUID().equals(b.getFrameOfReferenceUID()));
   }
+
+  @Test
+  void crosshairFollowsFrameOfReferenceNotManualPeer() {
+    DicomSynchManager mgr = new DicomSynchManager();
+    View2d a = new View2d();
+    View2d b = new View2d();
+    View2d c = new View2d();
+    a.setFrameOfReferenceUID("1.2.840.for");
+    b.setFrameOfReferenceUID("1.2.840.for");
+    c.setFrameOfReferenceUID("1.2.840.other");
+    a.getSynchData().setKind(SynchData.Kind.FRAME_OF_REFERENCE);
+    b.getSynchData().setKind(SynchData.Kind.FRAME_OF_REFERENCE);
+    c.getSynchData().setKind(SynchData.Kind.MANUAL);
+    a.setSynch(SynchView.STACK);
+    b.setSynch(SynchView.STACK);
+    c.setSynch(SynchView.STACK);
+    mgr.add(a);
+    mgr.add(b);
+    mgr.add(c);
+    a.setSynchManager(mgr);
+    b.setSynchManager(mgr);
+    c.setSynchManager(mgr);
+    a.setCrosshair(6, 7);
+    assertEquals(6, b.getCrosshairX());
+    assertEquals(7, b.getCrosshairY());
+    assertFalse(c.hasCrosshair());
+  }
 }

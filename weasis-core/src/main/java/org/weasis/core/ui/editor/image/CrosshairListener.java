@@ -9,4 +9,8 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public interface CrosshairListener {}
+/** Receives 3D-cursor (crosshair) moves from a bound 2D view. */
+public interface CrosshairListener {
+
+  void crosshairMoved(DefaultView2d<?> view, PixelInfo info);
+}

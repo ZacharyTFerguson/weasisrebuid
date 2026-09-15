@@ -43,22 +43,36 @@ public class DicomSynchManager implements SynchManager {
       return;
     }
     int frame = source.getFrameIndex();
-    SynchData.Kind kind = source.getSynchData().getKind();
     for (DefaultView2d<?> view : views) {
-      if (view == source || view.getSynch() == SynchView.NONE) {
-        continue;
-      }
-      if (kind == SynchData.Kind.FRAME_OF_REFERENCE) {
-        if (view.getSynchData().getKind() == SynchData.Kind.FRAME_OF_REFERENCE
-            && Objects.equals(source.getFrameOfReferenceUID(), view.getFrameOfReferenceUID())
-            && !source.getFrameOfReferenceUID().isBlank()) {
-          view.setFrameIndex(frame, false);
-        }
-      } else if (kind == SynchData.Kind.MANUAL
-          && view.getSynchData().getKind() == SynchData.Kind.MANUAL) {
+      if (follows(source, view)) {
         view.setFrameIndex(frame, false);
       }
     }
+  }
+
+  @Override
+  public void onCrosshair(DefaultView2d<?> source) {
+    if (source == null || source.getSynch() == SynchView.NONE) {
+      return;
+    }
+    for (DefaultView2d<?> view : views) {
+      if (follows(source, view)) {
+        view.setCrosshair(source.getCrosshairX(), source.getCrosshairY(), false);
+      }
+    }
+  }
+
+  boolean follows(DefaultView2d<?> source, DefaultView2d<?> view) {
+    if (view == source || view.getSynch() == SynchView.NONE) {
+      return false;
+    }
+    SynchData.Kind kind = source.getSynchData().getKind();
+    if (kind == SynchData.Kind.FRAME_OF_REFERENCE) {
+      return view.getSynchData().getKind() == SynchData.Kind.FRAME_OF_REFERENCE
+          && Objects.equals(source.getFrameOfReferenceUID(), view.getFrameOfReferenceUID())
+          && !source.getFrameOfReferenceUID().isBlank();
+    }
+    return kind == SynchData.Kind.MANUAL && view.getSynchData().getKind() == SynchData.Kind.MANUAL;
   }
 
   public List<DefaultView2d<?>> getViews() {

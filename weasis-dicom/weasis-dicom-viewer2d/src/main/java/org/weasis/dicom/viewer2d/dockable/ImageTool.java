@@ -46,15 +46,20 @@ public class ImageTool extends PluginTool {
     }
     int w = view.getSourceImage() == null ? 0 : view.getSourceImage().getWidth();
     int h = view.getSourceImage() == null ? 0 : view.getSourceImage().getHeight();
-    return "W:"
-        + (int) view.getWindow()
-        + " L:"
-        + (int) view.getLevel()
-        + " zoom="
-        + view.getZoom()
-        + " "
-        + w
-        + "x"
-        + h;
+    String base =
+        "W:"
+            + (int) view.getWindow()
+            + " L:"
+            + (int) view.getLevel()
+            + " zoom="
+            + view.getZoom()
+            + " "
+            + w
+            + "x"
+            + h;
+    if (view.hasCrosshair() && view.getPixelInfo() != null) {
+      return base + " " + view.getPixelInfo().getText();
+    }
+    return base;
   }
 }

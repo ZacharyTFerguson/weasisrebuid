@@ -16,6 +16,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
+import org.weasis.core.ui.model.layer.LayerAnnotation;
+import org.weasis.core.ui.model.layer.LayerType;
 import org.weasis.dicom.viewer2d.dockable.DisplayTool;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
 
@@ -50,5 +52,20 @@ class InfoLayerHaveTest {
     image.bind(view);
     assertTrue(image.summaryText().contains("W:400"));
     assertEquals(Insertable.Type.TOOL, image.getType());
+  }
+
+  @Test
+  void layerAnnotationCanHidePatientAndDisplayTogglesCrosslines() {
+    InfoLayer layer = new InfoLayer();
+    layer.getLayerAnnotation().setItemVisible(LayerAnnotation.PATIENT, false);
+    String full = layer.overlayText("TEST^A", "CT", 400, 40);
+    assertFalse(full.contains("TEST^A"));
+    assertTrue(full.contains("W:400"));
+    View2d view = new View2d();
+    DisplayTool display = new DisplayTool();
+    display.bind(view);
+    assertEquals(5, display.layerItems().size());
+    display.setLayerVisible(LayerType.CROSSLINES, false);
+    assertFalse(view.isLayerVisible(LayerType.CROSSLINES));
   }
 }

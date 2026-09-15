@@ -10,10 +10,14 @@
 package org.weasis.base.viewer2d.dockable;
 
 import java.awt.BorderLayout;
+import java.util.List;
 import javax.swing.JComboBox;
 import org.weasis.core.ui.docking.PluginTool;
+import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
+import org.weasis.core.ui.model.layer.LayerItem;
+import org.weasis.core.ui.model.layer.LayerType;
 
 /** Display dock for non-DICOM 2D: annotation visibility FULL / MINIMAL / HIDDEN. */
 public class DisplayTool extends PluginTool {
@@ -22,6 +26,7 @@ public class DisplayTool extends PluginTool {
 
   private final JComboBox<Visibility> visibility = new JComboBox<>(Visibility.values());
   private AbstractInfoLayer layer;
+  private DefaultView2d<?> view;
 
   public DisplayTool() {
     super(NAME, 10);
@@ -33,6 +38,26 @@ public class DisplayTool extends PluginTool {
     this.layer = layer;
     if (layer != null) {
       visibility.setSelectedItem(layer.getVisibility());
+    }
+  }
+
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+    if (view != null) {
+      bind(view.getInfoLayer());
+    }
+  }
+
+  public List<LayerItem> layerItems() {
+    if (view != null) {
+      return view.displayLayers();
+    }
+    return List.of();
+  }
+
+  public void setLayerVisible(LayerType type, boolean visible) {
+    if (view != null) {
+      view.setLayerVisible(type, visible);
     }
   }
 

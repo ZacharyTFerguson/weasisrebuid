@@ -17,4 +17,6 @@ public interface SynchManager {
   void remove(DefaultView2d<?> view);
 
   void onFrame(DefaultView2d<?> source);
+
+  void onCrosshair(DefaultView2d<?> source);
 }

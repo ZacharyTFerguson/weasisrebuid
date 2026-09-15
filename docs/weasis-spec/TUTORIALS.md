@@ -15,7 +15,7 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | DICOM 2D / LUT / Zoom | 4 | W/L paints; zoom −200/−100; screenshot PNG/JPEG | tutorial |
 | Draw & Measure | 5 | graphic geometry + shortcuts D/A/Y | tutorial |
 | Build KO and PR | 5 | KO/PR objects with root UID 2.25; star/filter + K | tutorial |
-| Docking / sync / 3D cursor / histogram / lens | 6 | docking start + FoR vs manual; histogram bind/RGB/ROI | tutorial |
+| Docking / sync / 3D cursor / histogram / lens | 6 | docking start + FoR vs manual; histogram bind/RGB/ROI; 3D cursor H/PixelInfo | tutorial |
 | MPR / CPR / MIP | 7 | isotropic axes, MIP types | tutorial |
 | Fusion / SUV | 8 | FusionController + SUVbw | tutorial |
 | 3D VR | 9 | GL 3.3; refuse llvmpipe | tutorial |

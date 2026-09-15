@@ -19,6 +19,7 @@ public class AbstractInfoLayer {
   }
 
   private Visibility visibility = Visibility.FULL;
+  private final LayerAnnotation annotation = new LayerAnnotation();
 
   public Visibility getVisibility() {
     return visibility;
@@ -51,5 +52,9 @@ public class AbstractInfoLayer {
 
   public boolean isMinimal() {
     return visibility == Visibility.MINIMAL;
+  }
+
+  public LayerAnnotation getLayerAnnotation() {
+    return annotation;
   }
 }

@@ -43,7 +43,12 @@ public class ImageViewerEventManager {
   public void mousePressed(MouseEvent e) {
     lastX = e.getX();
     lastY = e.getY();
-    if (drawingAction(buttonAction(e))) {
+    String action = buttonAction(e);
+    if (MouseActions.CROSSHAIR.equals(MouseActions.normalize(action))) {
+      view.setCrosshairFromView(e.getX(), e.getY());
+      return;
+    }
+    if (drawingAction(action)) {
       onDrawPressed(e);
     }
   }
@@ -54,6 +59,10 @@ public class ImageViewerEventManager {
     lastX = e.getX();
     lastY = e.getY();
     String action = buttonAction(e);
+    if (MouseActions.CROSSHAIR.equals(MouseActions.normalize(action))) {
+      view.setCrosshairFromView(e.getX(), e.getY());
+      return;
+    }
     if (drawingAction(action)) {
       onDrawDragged(e);
       return;
@@ -87,6 +96,8 @@ public class ImageViewerEventManager {
       view.cycleAnnotations();
     } else if (action == ActionW.KO) {
       view.toggleKeyImage();
+    } else if (action == ActionW.CROSSHAIR) {
+      view.getMouseActions().setLeft(MouseActions.CROSSHAIR);
     }
   }
 
@@ -101,7 +112,8 @@ public class ImageViewerEventManager {
       case MouseActions.ZOOM -> view.increaseZoom(dy < 0 ? 1 : dy > 0 ? -1 : 0);
       case MouseActions.ROTATION -> view.setRotation(view.getRotation() + dx);
       case MouseActions.WINLEVEL -> applyWindowLevel(dx, dy);
-      case MouseActions.CROSSHAIR, MouseActions.CONTEXT_MENU, MouseActions.NONE -> {
+      case MouseActions.CROSSHAIR -> view.setCrosshairFromView(view.getCrosshairX() + dx, view.getCrosshairY() + dy);
+      case MouseActions.CONTEXT_MENU, MouseActions.NONE -> {
         // menu / idle
       }
       case MouseActions.DRAW, MouseActions.MEASURE -> {

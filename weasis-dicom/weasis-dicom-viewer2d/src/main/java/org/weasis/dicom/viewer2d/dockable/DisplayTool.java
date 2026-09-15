@@ -10,18 +10,23 @@
 package org.weasis.dicom.viewer2d.dockable;
 
 import java.awt.BorderLayout;
+import java.util.List;
 import javax.swing.JComboBox;
 import org.weasis.core.ui.docking.PluginTool;
+import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
+import org.weasis.core.ui.model.layer.LayerItem;
+import org.weasis.core.ui.model.layer.LayerType;
 
-/** Display dock: annotation visibility FULL / MINIMAL / HIDDEN (Space/I). */
+/** Display dock: annotation visibility FULL / MINIMAL / HIDDEN and layer items. */
 public class DisplayTool extends PluginTool {
 
   public static final String NAME = "Display";
 
   private final JComboBox<Visibility> visibility = new JComboBox<>(Visibility.values());
   private AbstractInfoLayer layer;
+  private DefaultView2d<?> view;
 
   public DisplayTool() {
     super(NAME, 10);
@@ -36,8 +41,32 @@ public class DisplayTool extends PluginTool {
     }
   }
 
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+    if (view != null) {
+      bind(view.getInfoLayer());
+    }
+  }
+
+  public DefaultView2d<?> boundView() {
+    return view;
+  }
+
   public AbstractInfoLayer boundLayer() {
     return layer;
+  }
+
+  public List<LayerItem> layerItems() {
+    if (view != null) {
+      return view.displayLayers();
+    }
+    return List.of();
+  }
+
+  public void setLayerVisible(LayerType type, boolean visible) {
+    if (view != null) {
+      view.setLayerVisible(type, visible);
+    }
   }
 
   public void apply() {

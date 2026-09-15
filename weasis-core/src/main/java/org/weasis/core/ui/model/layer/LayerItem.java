@@ -9,4 +9,43 @@
  */
 package org.weasis.core.ui.model.layer;
 
-public class LayerItem {}
+/** Named Display-dock item (image, crosslines, annotations, drawings, measurements). */
+public class LayerItem {
+
+  private LayerType type = LayerType.IMAGE;
+  private String name = LayerType.IMAGE.name();
+  private boolean selected = true;
+
+  public LayerItem() {}
+
+  public LayerItem(LayerType type) {
+    setType(type);
+  }
+
+  public LayerType getType() {
+    return type;
+  }
+
+  public void setType(LayerType type) {
+    this.type = type == null ? LayerType.IMAGE : type;
+    if (name == null || name.isBlank() || name.equals(LayerType.IMAGE.name())) {
+      this.name = this.type.name();
+    }
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name == null || name.isBlank() ? type.name() : name;
+  }
+
+  public boolean isSelected() {
+    return selected;
+  }
+
+  public void setSelected(boolean selected) {
+    this.selected = selected;
+  }
+}

@@ -19,8 +19,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.List;
 import javax.swing.JPanel;
 import org.weasis.core.api.image.AffineTransformOp;
@@ -32,6 +34,10 @@ import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
+import org.weasis.core.ui.model.layer.GraphicLayer;
+import org.weasis.core.ui.model.layer.Layer;
+import org.weasis.core.ui.model.layer.LayerItem;
+import org.weasis.core.ui.model.layer.LayerType;
 
 /**
  * Shared 2D canvas. Downstream DICOM {@code View2d} binds pixels; affine (zoom/rotation) is last.
@@ -77,6 +83,12 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private volatile double modalityLutSlope = 1.0;
 
   private volatile double modalityLutIntercept;
+  private final EnumMap<LayerType, Layer> layers = new EnumMap<>(LayerType.class);
+  private volatile int crosshairX;
+  private volatile int crosshairY;
+  private volatile boolean crosshairSet;
+  private PixelInfo pixelInfo = new PixelInfo();
+  private CrosshairListener crosshairListener;
 
   public DefaultView2d() {
     setBackground(Color.BLACK);
@@ -115,6 +127,17 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
             eventManager.keyPressed(e);
           }
         });
+    initLayers();
+  }
+
+  private void initLayers() {
+    for (LayerType type : LayerType.values()) {
+      layers.put(
+          type,
+          type == LayerType.MEASURE || type == LayerType.DRAW
+              ? new GraphicLayer(type)
+              : new Layer(type));
+    }
   }
 
   public OpManager getDisplayOpManager() {
@@ -385,6 +408,121 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     this.modalityLutIntercept = intercept;
   }
 
+  public Layer getLayer(LayerType type) {
+    return layers.get(type == null ? LayerType.IMAGE : type);
+  }
+
+  public boolean isLayerVisible(LayerType type) {
+    Layer layer = getLayer(type);
+    return layer != null && layer.isVisible();
+  }
+
+  public void setLayerVisible(LayerType type, boolean visible) {
+    Layer layer = getLayer(type);
+    if (layer != null) {
+      layer.setVisible(visible);
+      if (type == LayerType.ANNOTATION) {
+        infoLayer.setVisible(visible);
+      }
+      repaint();
+    }
+  }
+
+  public List<LayerItem> displayLayers() {
+    List<LayerItem> items = new ArrayList<>();
+    for (LayerType type :
+        List.of(
+            LayerType.IMAGE,
+            LayerType.CROSSLINES,
+            LayerType.ANNOTATION,
+            LayerType.DRAW,
+            LayerType.MEASURE)) {
+      LayerItem item = new LayerItem(type);
+      item.setSelected(isLayerVisible(type));
+      items.add(item);
+    }
+    return items;
+  }
+
+  public int getCrosshairX() {
+    return crosshairX;
+  }
+
+  public int getCrosshairY() {
+    return crosshairY;
+  }
+
+  public boolean hasCrosshair() {
+    return crosshairSet;
+  }
+
+  public boolean isCrosshairPainted() {
+    return crosshairSet && isLayerVisible(LayerType.CROSSLINES);
+  }
+
+  public PixelInfo getPixelInfo() {
+    return pixelInfo;
+  }
+
+  public void setCrosshairListener(CrosshairListener crosshairListener) {
+    this.crosshairListener = crosshairListener;
+  }
+
+  public void setCrosshairFromView(int viewX, int viewY) {
+    Point2D.Double img = viewToImage(viewX, viewY);
+    setCrosshair((int) Math.round(img.x), (int) Math.round(img.y), true);
+  }
+
+  public void setCrosshair(int x, int y) {
+    setCrosshair(x, y, true);
+  }
+
+  public void setCrosshair(int x, int y, boolean propagate) {
+    this.crosshairX = x;
+    this.crosshairY = y;
+    this.crosshairSet = true;
+    this.pixelInfo = PixelInfo.from(source, x, y, modalityLutSlope, modalityLutIntercept);
+    if (crosshairListener != null) {
+      crosshairListener.crosshairMoved(this, pixelInfo);
+    }
+    if (propagate && synchManager != null && synch != SynchView.NONE) {
+      synchManager.onCrosshair(this);
+    }
+    repaint();
+  }
+
+  public Point2D.Double viewToImage(double viewX, double viewY) {
+    if (source == null || getWidth() <= 0 || getHeight() <= 0) {
+      return new Point2D.Double(viewX, viewY);
+    }
+    try {
+      Point2D.Double out = new Point2D.Double();
+      imageTransform(getWidth(), getHeight()).inverseTransform(new Point2D.Double(viewX, viewY), out);
+      return out;
+    } catch (Exception e) {
+      return new Point2D.Double(viewX, viewY);
+    }
+  }
+
+  public Point2D.Double imageToView(double imageX, double imageY) {
+    if (source == null || getWidth() <= 0 || getHeight() <= 0) {
+      return new Point2D.Double(imageX, imageY);
+    }
+    Point2D.Double out = new Point2D.Double();
+    imageTransform(getWidth(), getHeight()).transform(new Point2D.Double(imageX, imageY), out);
+    return out;
+  }
+
+  AffineTransform imageTransform(int w, int h) {
+    double scale = resolvedScale(w, h);
+    AffineTransform tx = new AffineTransform();
+    tx.translate(w / 2.0 + panX, h / 2.0 + panY);
+    tx.rotate(Math.toRadians(rotation));
+    tx.scale(scale, scale);
+    tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
+    return tx;
+  }
+
   /** Key image (K). DICOM {@code View2d} toggles the SOP in {@code KOManager}. */
   public boolean toggleKeyImage() {
     return false;
@@ -480,14 +618,29 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   }
 
   protected void paintDecorations(Graphics2D g) {
-    g.setColor(Color.YELLOW);
-    int y = 16;
-    if (!lossyLabel.isBlank()) {
-      g.drawString(lossyLabel, 8, y);
-      y += 14;
+    if (isLayerVisible(LayerType.ANNOTATION)) {
+      g.setColor(Color.YELLOW);
+      int y = 16;
+      if (!lossyLabel.isBlank()) {
+        g.drawString(lossyLabel, 8, y);
+        y += 14;
+      }
+      if (!geometryWarning.isBlank()) {
+        g.drawString(geometryWarning, 8, y);
+      }
     }
-    if (!geometryWarning.isBlank()) {
-      g.drawString(geometryWarning, 8, y);
+    if (isCrosshairPainted()) {
+      Point2D.Double p = imageToView(crosshairX, crosshairY);
+      int px = (int) Math.round(p.x);
+      int py = (int) Math.round(p.y);
+      int w = Math.max(1, getWidth());
+      int h = Math.max(1, getHeight());
+      g.setColor(Color.CYAN);
+      g.drawLine(0, py, w, py);
+      g.drawLine(px, 0, px, h);
+    }
+    if (!isLayerVisible(LayerType.MEASURE) && !isLayerVisible(LayerType.DRAW)) {
+      return;
     }
     for (Graphic graphic : graphics) {
       if (graphic.getShape() == null) {

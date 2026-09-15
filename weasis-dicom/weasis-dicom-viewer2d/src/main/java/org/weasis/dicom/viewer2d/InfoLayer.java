@@ -14,6 +14,7 @@ import java.awt.Graphics2D;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
+import org.weasis.core.ui.model.layer.LayerAnnotation;
 
 /**
  * Pixel overlay: patient/study/image annotations on {@link View2d}. Space/I cycles three states.
@@ -28,7 +29,10 @@ public class InfoLayer extends AbstractInfoLayer {
     if (isMinimal()) {
       return wl;
     }
-    String name = patient == null ? "" : patient;
+    String name =
+        getLayerAnnotation().isItemVisible(LayerAnnotation.PATIENT)
+            ? (patient == null ? "" : patient)
+            : "";
     String mod = modality == null ? "" : modality;
     return (name + "  " + mod + "  " + wl).trim();
   }

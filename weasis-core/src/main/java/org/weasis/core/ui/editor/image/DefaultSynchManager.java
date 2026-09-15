@@ -48,6 +48,24 @@ public class DefaultSynchManager implements SynchManager {
     }
   }
 
+  @Override
+  public void onCrosshair(DefaultView2d<?> source) {
+    if (source == null || source.getSynch() == SynchView.NONE) {
+      return;
+    }
+    if (source.getSynchData().getKind() != SynchData.Kind.MANUAL) {
+      return;
+    }
+    for (DefaultView2d<?> view : views) {
+      if (view == source || view.getSynch() == SynchView.NONE) {
+        continue;
+      }
+      if (view.getSynchData().getKind() == SynchData.Kind.MANUAL) {
+        view.setCrosshair(source.getCrosshairX(), source.getCrosshairY(), false);
+      }
+    }
+  }
+
   public List<DefaultView2d<?>> getViews() {
     return List.copyOf(views);
   }
