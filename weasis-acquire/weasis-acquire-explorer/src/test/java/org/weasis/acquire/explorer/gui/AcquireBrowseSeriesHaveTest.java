@@ -63,8 +63,7 @@ class AcquireBrowseSeriesHaveTest {
   }
 
   @Test
-  void importPanelKicksGroupingIntoAlbumAndSeriesButtonsSwitch(@TempDir Path dir)
-      throws Exception {
+  void importPanelKicksGroupingIntoAlbumAndSeriesButtonsSwitch(@TempDir Path dir) throws Exception {
     Path a1 = file(dir, "seriesA1.png");
     Path a2 = file(dir, "seriesA2.png");
     Path other = file(dir, "other.png");

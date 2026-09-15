@@ -26,10 +26,7 @@ public class ImportTask implements Runnable {
   private final List<Path> files;
 
   public ImportTask(
-      AcquireImportDialog dialog,
-      AcquireManager manager,
-      AcquireTabPanel album,
-      List<Path> files) {
+      AcquireImportDialog dialog, AcquireManager manager, AcquireTabPanel album, List<Path> files) {
     this.dialog = dialog == null ? new AcquireImportDialog() : dialog;
     this.manager = manager == null ? new AcquireManager() : manager;
     this.album = album;

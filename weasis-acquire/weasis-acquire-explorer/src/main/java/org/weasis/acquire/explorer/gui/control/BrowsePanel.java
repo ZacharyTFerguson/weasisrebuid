@@ -28,7 +28,8 @@ import org.weasis.acquire.explorer.media.MediaSource;
 public class BrowsePanel extends JPanel {
 
   private final ItemList<MediaSource> sources = new ItemList<>();
-  private final ItemListComboBoxModel<MediaSource> comboModel = new ItemListComboBoxModel<>(sources);
+  private final ItemListComboBoxModel<MediaSource> comboModel =
+      new ItemListComboBoxModel<>(sources);
   private final JComboBox<MediaSource> combo = new JComboBox<>(comboModel);
   private final ChangePathSelectionAction changePath = new ChangePathSelectionAction(this);
   private final AcquireThumbnailListPane thumbnails = new AcquireThumbnailListPane();
