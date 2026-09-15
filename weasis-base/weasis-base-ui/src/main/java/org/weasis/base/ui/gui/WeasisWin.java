@@ -52,9 +52,9 @@ import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.RotationToolBar;
-import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ScreenshotToolBar;
 import org.weasis.core.ui.editor.image.TabPlacement;
+import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
@@ -155,8 +155,7 @@ public class WeasisWin extends JFrame {
     TransferHandler keep = c.getTransferHandler();
     c.setTransferHandler(null);
     c.setDropTarget(null);
-    c.setTransferHandler(
-        keep instanceof ViewTransferHandler ? keep : new ViewTransferHandler());
+    c.setTransferHandler(keep instanceof ViewTransferHandler ? keep : new ViewTransferHandler());
   }
 
   static DefaultSingleCDockable uncloseableDock(String id, String title, Component content) {
