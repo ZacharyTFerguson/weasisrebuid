@@ -15,10 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
+import java.awt.GraphicsEnvironment;
 import java.util.List;
 import javax.swing.JFrame;
 import org.dcm4che3.data.UID;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
+import org.weasis.base.ui.gui.WeasisWin;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.api.service.UICore;
@@ -77,6 +80,36 @@ class HangingProtocolOpenHaveTest {
   }
 
   @Test
+  void chestThenKneeOnWeasisWinStaysOneTabNotEastSplit() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    close(core, null);
+    core.setApplicationWindow(win);
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    DicomModel model = new DicomModel();
+    try {
+      model.addInstance(dx("CHEST", "P-CHEST", "2.25.chest"));
+      new PluginOpeningStrategy(core).openIfWindow(model);
+      model.addInstance(dx("KNEE", "P-KNEE", "2.25.knee"));
+      new PluginOpeningStrategy(core).openIfWindow(model);
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertEquals(0, win.seriesDockCount());
+      View2dContainer container = (View2dContainer) core.getSelectedViewerPlugin();
+      assertEquals(2, container.getLayoutCount());
+      assertEquals("2.25.chest", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertEquals("2.25.knee", seriesUid(container.getLayoutViews().get(1).getSeries()));
+      assertSame(container, win.getViewerTabs().getComponentAt(0));
+    } finally {
+      close(core, factory);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
   void ctOpenStaysOneByOne() {
     UICore core = new UICore();
     View2dFactory factory = new View2dFactory();
@@ -93,10 +126,15 @@ class HangingProtocolOpenHaveTest {
   }
 
   static void close(UICore core, View2dFactory factory) {
+    if (core == null) {
+      return;
+    }
     for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
       core.closeViewerPlugin(plugin);
     }
-    core.unregisterSeriesViewerFactory(factory);
+    if (factory != null) {
+      core.unregisterSeriesViewerFactory(factory);
+    }
   }
 
   static String seriesUid(MediaSeries<?> series) {

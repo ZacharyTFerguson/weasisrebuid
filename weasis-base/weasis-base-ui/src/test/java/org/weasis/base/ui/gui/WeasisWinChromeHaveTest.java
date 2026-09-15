@@ -109,12 +109,13 @@ class WeasisWinChromeHaveTest {
     try {
       core.openViewerPlugin(first);
       core.openViewerPlugin(second);
-      assertEquals(2, win.seriesDockCount());
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertSame(first, win.getViewerTabs().getComponentAt(0));
+      assertSame(second, win.getViewerTabs().getComponentAt(1));
       assertSame(second, core.getSelectedViewerPlugin());
-      assertSame(win.getViewerWork(), win.seriesDockOf(first).getWorkingArea());
-      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
+      assertEquals(0, win.seriesDockCount());
       core.closeViewerPlugin(first);
-      assertEquals(1, win.seriesDockCount());
+      assertEquals(1, win.getViewerTabs().getTabCount());
       assertSame(second, core.getSelectedViewerPlugin());
     } finally {
       for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
@@ -135,7 +136,7 @@ class WeasisWinChromeHaveTest {
     try {
       assertEquals("viewer-tabs", win.getViewerTabs().getName());
       assertEquals(TabPlacement.TOP, win.getViewerTabs().getTabPlacement());
-      assertEquals(2, win.getDockingControl().getCDockableCount());
+      assertEquals(3, win.getDockingControl().getCDockableCount());
       assertFalse(win.getExplorerDock().isCloseable());
       assertFalse(win.getViewerDock().isCloseable());
       assertFalse(win.getViewerWork().isCloseable());
@@ -253,18 +254,19 @@ class WeasisWinChromeHaveTest {
     try {
       core.openViewerPlugin(first);
       core.openViewerPlugin(second);
-      assertEquals(2, win.seriesDockCount());
-      assertEquals(4, win.getDockingControl().getCDockableCount());
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertEquals(0, win.seriesDockCount());
       core.externalizeSelectedPlugin();
       assertEquals(ViewerPlugin.DockingState.EXTERNALIZED, second.getDockingState());
-      assertEquals(4, win.getDockingControl().getCDockableCount());
-      assertSame(win.getViewerWork(), win.seriesDockOf(first).getWorkingArea());
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertEquals(1, win.seriesDockCount());
+      assertSame(first, win.getViewerTabs().getComponentAt(0));
       assertSame(second, core.getSelectedViewerPlugin());
       core.normalizeSelectedPlugin();
       assertEquals(ViewerPlugin.DockingState.NORMAL, second.getDockingState());
-      assertEquals(2, win.seriesDockCount());
-      assertEquals(4, win.getDockingControl().getCDockableCount());
-      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertEquals(0, win.seriesDockCount());
+      assertSame(second, win.getViewerTabs().getSelectedComponent());
     } finally {
       closeOpen(core);
       core.setApplicationWindow(null);
@@ -284,10 +286,11 @@ class WeasisWinChromeHaveTest {
     try {
       core.openViewerPlugin(first);
       core.openViewerPlugin(second);
+      assertEquals(2, win.getViewerTabs().getTabCount());
       win.splitSeries(second);
-      assertTrue(win.seriesDockOf(first).isVisible());
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertSame(first, win.getViewerTabs().getComponentAt(0));
       assertTrue(win.seriesDockOf(second).isVisible());
-      assertSame(win.getViewerWork(), win.seriesDockOf(first).getWorkingArea());
       assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
       assertEquals(ViewerPlugin.DockingState.NORMAL, first.getDockingState());
       assertEquals(ViewerPlugin.DockingState.NORMAL, second.getDockingState());

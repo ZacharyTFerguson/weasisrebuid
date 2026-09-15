@@ -110,19 +110,13 @@ public class WeasisWin extends JFrame {
         });
     dockingControl = new CControl(this);
     explorerDock = uncloseableDock("explorer", "Explorer", explorerHost);
-    viewerDock = uncloseableDock("viewer", "Viewer", new JPanel());
+    viewerDock = uncloseableDock("viewer", "Viewer", viewerTabs);
     viewerWork = dockingControl.createWorkingArea("viewer-work");
     viewerWork.setTitleText("Viewer");
-    stashViewerTabs();
     deployExplorerAndViewer();
     add(dockingControl.getContentArea(), BorderLayout.CENTER);
     bindSeriesDrop();
     bindWorkingFocus();
-  }
-
-  void stashViewerTabs() {
-    viewerTabs.setVisible(false);
-    explorerHost.add(viewerTabs, BorderLayout.SOUTH);
   }
 
   void bindSeriesDrop() {
@@ -207,6 +201,7 @@ public class WeasisWin extends JFrame {
     grid.add(0, 0, 1, 1, explorerDock);
     grid.add(1, 0, 3, 1, viewerWork);
     dockingControl.getContentArea().deploy(grid);
+    viewerWork.show(viewerDock);
   }
 
   void addImportButton() {
@@ -266,17 +261,6 @@ public class WeasisWin extends JFrame {
     plugin.putClientProperty("dockingBound", Boolean.TRUE);
     plugin.addPropertyChangeListener("dockingState", e -> applyDockingState(plugin));
     plugin.addPropertyChangeListener("closed", e -> removeSeriesDock(plugin));
-    placeInWorkingArea(plugin);
-  }
-
-  void placeInWorkingArea(ViewerPlugin<?> plugin) {
-    if (viewerWork == null) {
-      return;
-    }
-    viewerTabs.remove(plugin);
-    viewerWork.show(ensureSeriesDock(plugin));
-    UICore.getInstance().setSelectedViewerPlugin(plugin);
-    rebindToolBars(plugin);
   }
 
   DefaultSingleCDockable ensureSeriesDock(ViewerPlugin<?> plugin) {
@@ -286,6 +270,9 @@ public class WeasisWin extends JFrame {
     }
     dock = seriesDock(plugin);
     seriesDocks.put(plugin.getDockableUID(), dock);
+    if (dockingControl != null) {
+      dockingControl.addDockable(dock);
+    }
     return dock;
   }
 
@@ -324,20 +311,20 @@ public class WeasisWin extends JFrame {
   }
 
   void restorePlugin(ViewerPlugin<?> plugin) {
-    DefaultSingleCDockable dock = seriesDockOf(plugin);
-    if (dock == null || viewerWork == null) {
+    if (plugin == null) {
       return;
     }
-    dock.setWorkingArea(viewerWork);
-    dock.setLocation(CLocation.working(viewerWork).stack());
-    dock.setVisible(true);
+    removeSeriesDock(plugin);
+    reinsertTab(plugin);
   }
 
   void splitSeries(ViewerPlugin<?> plugin) {
-    DefaultSingleCDockable dock = seriesDockOf(plugin);
-    if (dock == null || viewerWork == null) {
+    if (plugin == null || viewerWork == null) {
       return;
     }
+    viewerTabs.remove(plugin);
+    DefaultSingleCDockable dock = ensureSeriesDock(plugin);
+    dock.setWorkingArea(viewerWork);
     dock.setLocation(CLocation.working(viewerWork).east(0.5));
     dock.setVisible(true);
   }

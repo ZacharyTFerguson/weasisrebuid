@@ -49,6 +49,22 @@
       <version>${project.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.weasis.base</groupId>
+      <artifactId>weasis-base-ui</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.thirdparty</groupId>
+      <artifactId>docking-frames</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
