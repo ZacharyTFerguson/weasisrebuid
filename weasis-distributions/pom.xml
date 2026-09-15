@@ -67,7 +67,7 @@
                     <argument>--out</argument>
                     <argument>${project.build.directory}/weasis-native.zip</argument>
                     <argument>--launcher</argument>
-                    <argument>${maven.localRepository}/org/weasis/weasis-launcher/${app.version}/weasis-launcher-${app.version}.jar</argument>
+                    <argument>${settings.localRepository}/org/weasis/weasis-launcher/${app.version}/weasis-launcher-${app.version}.jar</argument>
                     <argument>--etc</argument>
                     <argument>${project.basedir}/etc/config</argument>
                     <argument>--bin</argument>
