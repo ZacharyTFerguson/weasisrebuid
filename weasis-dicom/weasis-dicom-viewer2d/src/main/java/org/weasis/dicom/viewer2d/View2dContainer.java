@@ -484,8 +484,29 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (cell == null || sequence == null) {
       return;
     }
-    cell.setSeries(sequence);
-    loadInto(cell, sequence);
+    MediaSeries<MediaElement> loaded = loadable(sequence);
+    cell.setSeries(loaded);
+    loadInto(cell, loaded);
+  }
+
+  MediaSeries<MediaElement> loadable(MediaSeries<MediaElement> sequence) {
+    return hasUri(sequence) ? sequence : hungSameUid(sequence);
+  }
+
+  static boolean hasUri(MediaSeries<?> sequence) {
+    if (sequence == null || sequence.getMedias().isEmpty()) {
+      return false;
+    }
+    return sequence.getMedias().getFirst().getMediaURI() != null;
+  }
+
+  MediaSeries<MediaElement> hungSameUid(MediaSeries<MediaElement> sequence) {
+    for (View2d v : layout) {
+      if (sameSeries(v.getSeries(), sequence) && hasUri(v.getSeries())) {
+        return v.getSeries();
+      }
+    }
+    return sequence;
   }
 
   void loadFirstMedia(MediaSeries<MediaElement> sequence) {

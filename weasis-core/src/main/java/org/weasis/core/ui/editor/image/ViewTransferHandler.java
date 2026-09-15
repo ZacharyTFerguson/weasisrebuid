@@ -10,7 +10,9 @@
 package org.weasis.core.ui.editor.image;
 
 import java.awt.Component;
+import java.awt.MouseInfo;
 import java.awt.Point;
+import java.awt.PointerInfo;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -91,6 +93,11 @@ public class ViewTransferHandler extends TransferHandler {
     dragging = null;
   }
 
+  public static void clearDragged() {
+    dragging = null;
+    lastDragged = null;
+  }
+
   public static MediaSeries<?> dragging() {
     return dragging;
   }
@@ -105,8 +112,36 @@ public class ViewTransferHandler extends TransferHandler {
 
   @Override
   protected void exportDone(JComponent source, Transferable data, int action) {
+    hangAtPointer();
     endDrag();
     super.exportDone(source, data, action);
+  }
+
+  public static boolean hangAtPointer() {
+    try {
+      PointerInfo info = MouseInfo.getPointerInfo();
+      if (info == null) {
+        return false;
+      }
+      return new ViewTransferHandler().hangAtScreen(info.getLocation());
+    } catch (Exception e) {
+      return false;
+    }
+  }
+
+  /** Headed X11: native drop often never fires; hang the View2d under the pointer. */
+  public boolean hangAtScreen(Point screen) {
+    MediaSeries<?> series = dragged();
+    JComponent cell = screenView(screen);
+    return series != null && cell != null && dropSeries(cell, series);
+  }
+
+  static JComponent screenView(Point screen) {
+    ImageViewerPlugin<?> plugin = UICore.getInstance().getFocusedImagePlugin();
+    if (plugin == null || screen == null) {
+      return null;
+    }
+    return plugin.dropCellAtScreen(screen);
   }
 
   public Transferable seriesTransferable(MediaSeries<?> series) {
@@ -318,7 +353,11 @@ public class ViewTransferHandler extends TransferHandler {
     }
 
     boolean fill(DropTargetDropEvent e) {
-      return new ViewTransferHandler().importAt(host, e.getLocation(), e.getTransferable());
+      ViewTransferHandler handler = new ViewTransferHandler();
+      if (host.isShowing()) {
+        return handler.hangAtScreen(toScreen(host, e.getLocation()));
+      }
+      return handler.importAt(host, e.getLocation(), e.getTransferable());
     }
 
     static int dropAction(DropTargetDropEvent e) {

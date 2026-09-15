@@ -297,7 +297,26 @@ class ExplorerSeriesDnDHaveTest {
   }
 
   @Test
-  void leftDragBelowThresholdDoesNotExport() {
+  void thumbMouseReleasedHangsAtScreenWithoutThrowing() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+    SeriesThumbnail thumb = pane.thumbnails().getFirst();
+    ViewTransferHandler.beginDrag(thumb.getSeries());
+    thumb.dispatchEvent(
+        new MouseEvent(
+            thumb,
+            MouseEvent.MOUSE_RELEASED,
+            0L,
+            InputEvent.BUTTON1_DOWN_MASK,
+            0,
+            0,
+            40,
+            40,
+            1,
+            false,
+            MouseEvent.BUTTON1));
+    ViewTransferHandler.endDrag();
+  }
     SeriesPane pane = new SeriesPane();
     pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
     SeriesThumbnail thumb = pane.thumbnails().getFirst();
