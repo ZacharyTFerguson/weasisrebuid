@@ -36,6 +36,7 @@ import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
+import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.util.ToolBarContainer;
 
@@ -123,6 +124,7 @@ class WeasisWinChromeHaveTest {
     core.registerExplorerFactory(factory);
     try {
       assertEquals("viewer-tabs", win.getViewerTabs().getName());
+      assertEquals(TabPlacement.TOP, win.getViewerTabs().getTabPlacement());
       assertEquals(2, win.getDockingControl().getCDockableCount());
       assertFalse(win.getExplorerDock().isCloseable());
       assertFalse(win.getViewerDock().isCloseable());

@@ -44,6 +44,7 @@ import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ScreenshotToolBar;
+import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
@@ -83,6 +84,7 @@ public class WeasisWin extends JFrame {
 
   void installDockingHost() {
     viewerTabs.setName("viewer-tabs");
+    TabPlacement.apply(viewerTabs, TabPlacement.TOP);
     viewerTabs.addChangeListener(e -> onViewerTabChanged());
     dockingControl = new CControl(this);
     explorerDock = uncloseableDock("explorer", "Explorer", explorerHost);

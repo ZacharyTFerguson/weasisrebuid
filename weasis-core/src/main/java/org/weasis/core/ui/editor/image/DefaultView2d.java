@@ -66,6 +66,8 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   private final List<GraphicSelectionListener> selectionListeners = new ArrayList<>();
   private final List<GraphicModelChangeListener> modelListeners = new ArrayList<>();
   private final ImageViewerEventManager eventManager;
+  private final List<ViewButton> viewButtons = new ArrayList<>();
+  private final PlayViewButton playButton = new PlayViewButton();
 
   private BufferedImage source;
   private volatile double zoom = ZOOM_BEST_FIT;
@@ -154,6 +156,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
           }
         });
     initLayers();
+    viewButtons.add(playButton);
   }
 
   private void initLayers() {
@@ -768,6 +771,30 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     contextMenuHandler.show(this, x, y);
   }
 
+  public List<ViewButton> getViewButtons() {
+    return List.copyOf(viewButtons);
+  }
+
+  public PlayViewButton getPlayButton() {
+    return playButton;
+  }
+
+  public void addViewButton(ViewButton button) {
+    if (button != null) {
+      viewButtons.add(button);
+    }
+  }
+
+  public boolean clickViewButton(int x, int y) {
+    for (ViewButton button : viewButtons) {
+      if (button.hit(x, y)) {
+        button.apply(this);
+        return true;
+      }
+    }
+    return false;
+  }
+
   public SliderCineListener cineListener() {
     int max = Math.max(0, getFrameCount() - 1);
     if (cine == null) {
@@ -791,6 +818,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     } else {
       listener.start();
     }
+    playButton.sync(this);
   }
 
   public ImagePrint getLastPrint() {
