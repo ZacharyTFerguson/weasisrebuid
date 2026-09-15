@@ -124,7 +124,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   void growLayout(int count) {
     while (layout.size() < count) {
-      layout.add(newView2d());
+      layout.add(emptyView2d());
     }
   }
 
@@ -136,27 +136,6 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     }
   }
 
-  @Override
-  public void applyHanging(int rows, int columns) {
-    int count = Math.max(1, rows) * Math.max(1, columns);
-    growEmptyLayout(count);
-    shrinkLayout(count);
-    layoutIndex = Math.min(layoutIndex, layout.size() - 1);
-    relayoutViews();
-  }
-
-  void growEmptyLayout(int count) {
-    while (layout.size() < count) {
-      layout.add(emptyView2d());
-    }
-  }
-
-  View2d newView2d() {
-    View2d extra = emptyView2d();
-    copyPrimaryInto(extra, view2d.getSeries());
-    return extra;
-  }
-
   View2d emptyView2d() {
     View2d extra = new View2d();
     extra.setSynchManager(synchManager);
@@ -164,15 +143,6 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     extra.putClientProperty(View2dContainer.class, this);
     View2dRegistry.register(extra);
     return extra;
-  }
-
-  void copyPrimaryInto(View2d extra, MediaSeries<? extends MediaElement> sequence) {
-    if (sequence != null) {
-      extra.setSeries(sequence);
-    }
-    if (view2d.getDataset() != null) {
-      extra.load(view2d.getDataset());
-    }
   }
 
   void relayoutViews() {
