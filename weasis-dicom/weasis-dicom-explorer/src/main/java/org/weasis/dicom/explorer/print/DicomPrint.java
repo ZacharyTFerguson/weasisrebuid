@@ -92,7 +92,9 @@ public final class DicomPrint {
   }
 
   public String printManagementMetaSopClass() {
-    return options.color() ? UID.BasicColorPrintManagementMeta : UID.BasicGrayscalePrintManagementMeta;
+    return options.color()
+        ? UID.BasicColorPrintManagementMeta
+        : UID.BasicGrayscalePrintManagementMeta;
   }
 
   public String filmSessionSopClass() {
