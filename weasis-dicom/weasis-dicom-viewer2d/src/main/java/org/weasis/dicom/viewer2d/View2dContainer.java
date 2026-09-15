@@ -191,6 +191,16 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     return view2d;
   }
 
+  @Override
+  public void selectAllGraphics() {
+    focusedLayoutView().selectAllGraphics();
+  }
+
+  @Override
+  public void deselectAllGraphics() {
+    focusedLayoutView().deselectAllGraphics();
+  }
+
   public int getLayoutIndex() {
     return layoutIndex;
   }

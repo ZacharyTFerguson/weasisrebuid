@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Hashtable;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -38,6 +39,7 @@ import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.explorer.DicomImportFactory;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.gui.util.AppProperties;
+import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.RotationToolBar;
@@ -46,6 +48,7 @@ import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.pref.PreferenceDialog;
+import org.weasis.core.ui.util.TitleMenuItem;
 import org.weasis.core.ui.util.ToolBarContainer;
 
 /** Main window for {@code weasis.main.ui = weasis-base-ui}. */
@@ -207,9 +210,44 @@ public class WeasisWin extends JFrame {
   public JMenuBar createMenuBar() {
     JMenuBar bar = new JMenuBar();
     bar.add(createFileMenu());
+    bar.add(createEditMenu());
     bar.add(createViewMenu());
+    bar.add(createToolsMenu());
+    bar.add(createWindowMenu());
     bar.add(createHelpMenu());
     return bar;
+  }
+
+  public JMenu menuNamed(String name) {
+    return menuAt(getJMenuBar(), name);
+  }
+
+  static JMenu menuAt(JMenuBar bar, String name) {
+    if (missingBar(bar, name)) {
+      return null;
+    }
+    return firstNamed(bar, name);
+  }
+
+  static boolean missingBar(JMenuBar bar, String name) {
+    return bar == null || name == null;
+  }
+
+  static JMenu firstNamed(JMenuBar bar, String name) {
+    for (int i = 0; i < bar.getMenuCount(); i++) {
+      JMenu menu = matchMenu(bar.getMenu(i), name);
+      if (menu != null) {
+        return menu;
+      }
+    }
+    return null;
+  }
+
+  static JMenu matchMenu(JMenu menu, String name) {
+    if (menu == null || !name.equals(menu.getText())) {
+      return null;
+    }
+    return menu;
   }
 
   JMenu createFileMenu() {
@@ -232,6 +270,100 @@ public class WeasisWin extends JFrame {
         });
     file.add(prefs);
     return file;
+  }
+
+  JMenu createEditMenu() {
+    JMenu edit = new JMenu("Edit");
+    edit.add(accelItem("Select All", KeyEvent.VK_A, this::selectAllGraphics));
+    edit.add(accelItem("Deselect All", KeyEvent.VK_D, this::deselectAllGraphics));
+    return edit;
+  }
+
+  void selectAllGraphics() {
+    ImageViewerPlugin<?> image = focusedImagePlugin();
+    if (image != null) {
+      image.selectAllGraphics();
+    }
+  }
+
+  void deselectAllGraphics() {
+    ImageViewerPlugin<?> image = focusedImagePlugin();
+    if (image != null) {
+      image.deselectAllGraphics();
+    }
+  }
+
+  JMenu createToolsMenu() {
+    JMenu tools = new JMenu("Tools");
+    JMenuItem monitor = new JMenuItem("Resource Monitor");
+    monitor.setName("resource-monitor");
+    monitor.addActionListener(e -> showResourceMonitor());
+    tools.add(monitor);
+    return tools;
+  }
+
+  void showResourceMonitor() {
+    ResourceMonitorDialog dialog = new ResourceMonitorDialog(this);
+    dialog.setVisible(true);
+  }
+
+  JMenu createWindowMenu() {
+    return new DynamicMenu("Window") {
+      @Override
+      public void popupMenuWillBecomeVisible() {
+        fillWindowMenu(this);
+      }
+    };
+  }
+
+  void fillWindowMenu(JMenu menu) {
+    if (menu == null) {
+      return;
+    }
+    menu.removeAll();
+    addWindowCommands(menu);
+    addOpenPluginItems(menu);
+  }
+
+  void addWindowCommands(JMenu menu) {
+    UICore core = UICore.getInstance();
+    menu.add(namedItem("Maximize", core::toggleMaximizeSelectedPlugin));
+    menu.add(namedItem("Close", core::closeSelectedPlugin));
+    menu.add(namedItem("Externalize", core::externalizeSelectedPlugin));
+    menu.add(namedItem("Normalize", core::normalizeSelectedPlugin));
+    menu.add(namedItem("Docking List", core::showDockingList));
+  }
+
+  void addOpenPluginItems(JMenu menu) {
+    List<ViewerPlugin<?>> plugins = UICore.getInstance().getOpenViewerPlugins();
+    if (plugins.isEmpty()) {
+      return;
+    }
+    menu.addSeparator();
+    menu.add(new TitleMenuItem("Open"));
+    for (ViewerPlugin<?> plugin : plugins) {
+      menu.add(pluginItem(plugin));
+    }
+  }
+
+  JMenuItem pluginItem(ViewerPlugin<?> plugin) {
+    String name = plugin == null ? "Viewer" : plugin.getPluginName();
+    return namedItem(name, () -> UICore.getInstance().setSelectedViewerPlugin(plugin));
+  }
+
+  JMenuItem accelItem(String text, int key, Runnable action) {
+    JMenuItem item = namedItem(text, action);
+    item.setAccelerator(KeyStroke.getKeyStroke(key, InputEvent.CTRL_DOWN_MASK));
+    return item;
+  }
+
+  JMenuItem namedItem(String text, Runnable action) {
+    JMenuItem item = new JMenuItem(text);
+    item.setName(text);
+    if (action != null) {
+      item.addActionListener(e -> action.run());
+    }
+    return item;
   }
 
   JMenu createViewMenu() {
@@ -289,6 +421,9 @@ public class WeasisWin extends JFrame {
     JMenuItem about = new JMenuItem("About");
     about.addActionListener(e -> new WeasisAboutBox(this).setVisible(true));
     help.add(about);
+    JMenuItem licenses = new JMenuItem("Licenses");
+    licenses.addActionListener(e -> new LicencesDialog(this).setVisible(true));
+    help.add(licenses);
     return help;
   }
 

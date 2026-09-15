@@ -22,6 +22,7 @@ import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.Assumptions;
@@ -31,6 +32,7 @@ import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.gui.util.AppProperties;
+import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
@@ -49,19 +51,39 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
-  void headedWindowHasFileViewHelpMenus() {
+  void menuAtFindsEditBetweenFileAndView() {
+    JMenuBar bar = new JMenuBar();
+    bar.add(new JMenu("File"));
+    bar.add(new JMenu("Edit"));
+    bar.add(new JMenu("View"));
+    assertEquals("Edit", WeasisWin.menuAt(bar, "Edit").getText());
+    assertEquals("View", WeasisWin.menuAt(bar, "View").getText());
+    assertEquals(null, WeasisWin.menuAt(bar, "Tools"));
+  }
+
+  @Test
+  void headedWindowHasFileEditViewToolsWindowHelpMenus() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();
     try {
       assertEquals(WeasisWin.windowTitle(), win.getTitle());
-      assertEquals(3, win.getJMenuBar().getMenuCount());
+      assertEquals(6, win.getJMenuBar().getMenuCount());
       assertEquals("File", win.getJMenuBar().getMenu(0).getText());
-      assertEquals("View", win.getJMenuBar().getMenu(1).getText());
-      assertEquals("Help", win.getJMenuBar().getMenu(2).getText());
+      assertEquals("Edit", win.getJMenuBar().getMenu(1).getText());
+      assertEquals("View", win.getJMenuBar().getMenu(2).getText());
+      assertEquals("Tools", win.getJMenuBar().getMenu(3).getText());
+      assertEquals("Window", win.getJMenuBar().getMenu(4).getText());
+      assertEquals("Help", win.getJMenuBar().getMenu(5).getText());
       assertTrue(win.getToolBarContainer().getComponentCount() >= 5);
-      JMenu view = win.getJMenuBar().getMenu(1);
+      JMenu view = win.menuNamed("View");
       assertEquals(4, view.getItemCount());
       assertEquals("Reset", view.getItem(3).getText());
+      JMenu edit = win.menuNamed("Edit");
+      assertEquals("Select All", edit.getItem(0).getText());
+      assertEquals("Deselect All", edit.getItem(1).getText());
+      assertEquals("Resource Monitor", win.menuNamed("Tools").getItem(0).getText());
+      assertEquals("About", win.menuNamed("Help").getItem(0).getText());
+      assertEquals("Licenses", win.menuNamed("Help").getItem(1).getText());
     } finally {
       win.dispose();
     }
@@ -132,7 +154,7 @@ class WeasisWinChromeHaveTest {
       core.openViewerPlugin(other);
       win.getViewerTabs().addTab("DICOM 2D", image);
       win.getViewerTabs().setSelectedComponent(image);
-      win.getJMenuBar().getMenu(1).getItem(2).doClick();
+      win.menuNamed("View").getItem(2).doClick();
       assertEquals(4, image.layout);
       JPanel dockHost = new JPanel();
       KeyEvent digit = new KeyEvent(dockHost, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_7, '7');
@@ -143,6 +165,35 @@ class WeasisWinChromeHaveTest {
       assertNotNull(key1);
       key1.actionPerformed(null);
       assertEquals(1, image.lastPreset);
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void editAndWindowMenusDispatchToFocusedPlugin() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    LayoutPlugin image = new LayoutPlugin();
+    try {
+      core.openViewerPlugin(image);
+      win.getViewerTabs().setSelectedComponent(image);
+      win.menuNamed("Edit").getItem(0).doClick();
+      assertTrue(image.selectedAll);
+      win.menuNamed("Edit").getItem(1).doClick();
+      assertTrue(image.deselectedAll);
+      JMenu window = win.menuNamed("Window");
+      assertTrue(window instanceof DynamicMenu);
+      ((DynamicMenu) window).popupMenuWillBecomeVisible();
+      assertEquals("Maximize", window.getItem(0).getText());
+      window.getItem(0).doClick();
+      assertEquals(ViewerPlugin.DockingState.MAXIMIZED, image.getDockingState());
+      assertTrue(window.getItemCount() >= 7);
     } finally {
       closeOpen(core);
       core.setApplicationWindow(null);
@@ -163,6 +214,8 @@ class WeasisWinChromeHaveTest {
   static final class LayoutPlugin extends ImageViewerPlugin<MediaElement> {
     int layout = 1;
     int lastPreset = -1;
+    boolean selectedAll;
+    boolean deselectedAll;
 
     LayoutPlugin() {
       super("layout");
@@ -181,6 +234,16 @@ class WeasisWinChromeHaveTest {
     @Override
     public void applyPreset(int index) {
       lastPreset = index;
+    }
+
+    @Override
+    public void selectAllGraphics() {
+      selectedAll = true;
+    }
+
+    @Override
+    public void deselectAllGraphics() {
+      deselectedAll = true;
     }
   }
 

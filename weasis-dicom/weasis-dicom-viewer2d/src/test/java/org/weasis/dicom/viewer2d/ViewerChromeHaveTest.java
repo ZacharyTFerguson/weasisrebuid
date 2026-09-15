@@ -18,10 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.GridLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Point2D;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.dicom.viewer2d.mpr.MprContainer;
 
 class ViewerChromeHaveTest {
@@ -127,6 +129,19 @@ class ViewerChromeHaveTest {
     assertEquals(2, twoByTwo.getColumns());
     container.setLayoutCount(1);
     assertEquals(1, container.getViewGrid().getComponentCount());
+  }
+
+  @Test
+  void editSelectAllSelectsDrawingsOnFocusedView() {
+    View2dContainer container = new View2dContainer();
+    LineGraphic line = new LineGraphic();
+    line.setHandlePoint(0, new Point2D.Double(0, 0));
+    line.setHandlePoint(1, new Point2D.Double(4, 0));
+    container.getView2d().addGraphic(line);
+    container.selectAllGraphics();
+    assertTrue(Boolean.TRUE.equals(line.getSelected()));
+    container.deselectAllGraphics();
+    assertTrue(container.getView2d().getSelectedGraphics().isEmpty());
   }
 
   static KeyEvent tab(View2d view, int mods) {

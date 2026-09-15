@@ -36,4 +36,10 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
   public void resetDisplay() {}
 
   public void applyPreset(int index) {}
+
+  /** Edit > Select All (graphics). */
+  public void selectAllGraphics() {}
+
+  /** Edit > Deselect All (graphics). */
+  public void deselectAllGraphics() {}
 }
