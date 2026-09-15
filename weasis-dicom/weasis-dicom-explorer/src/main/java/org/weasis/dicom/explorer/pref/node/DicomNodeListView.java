@@ -50,6 +50,12 @@ public class DicomNodeListView extends AbstractItemDialogPage {
     return node != null && model.removeElement(node);
   }
 
+  public void replaceAt(int index, AbstractDicomNode node) {
+    if (node != null && index >= 0 && index < model.size()) {
+      model.set(index, node);
+    }
+  }
+
   public void select(int index) {
     if (index >= 0 && index < model.size()) {
       list.setSelectedIndex(index);

@@ -9,4 +9,40 @@
  */
 package org.weasis.dicom.explorer.pref.node;
 
-public class AuthenticationEditor {}
+import org.weasis.core.api.net.auth.AuthMethod;
+import org.weasis.core.api.service.WProperties;
+
+/** List of DICOMweb authentication methods, persisted through {@link AuthenticationPersistence}. */
+public class AuthenticationEditor extends AbstractListEditor<AuthMethod> {
+
+  private final AuthMethodDialog dialog = new AuthMethodDialog();
+
+  public AuthMethodDialog dialog() {
+    return dialog;
+  }
+
+  @Override
+  public AuthMethod createItem() {
+    return dialog.apply();
+  }
+
+  @Override
+  public AuthMethod modifyItem(AuthMethod current) {
+    if (current != null
+        && (dialog.idField().getText() == null || dialog.idField().getText().isBlank())) {
+      dialog.load(current);
+    }
+    return dialog.apply();
+  }
+
+  public void loadFrom(WProperties prefs) {
+    clearItems();
+    for (AuthMethod method : AuthenticationPersistence.load(prefs)) {
+      addElement(method);
+    }
+  }
+
+  public void saveTo(WProperties prefs) {
+    AuthenticationPersistence.save(prefs, items());
+  }
+}

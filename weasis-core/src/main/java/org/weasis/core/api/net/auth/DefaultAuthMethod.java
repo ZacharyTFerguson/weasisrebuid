@@ -27,6 +27,14 @@ public class DefaultAuthMethod implements AuthMethod {
     return id;
   }
 
+  public String header() {
+    return header;
+  }
+
+  public String token() {
+    return token;
+  }
+
   @Override
   public Map<String, String> authorizationHeaders() {
     if (token.isBlank()) {
