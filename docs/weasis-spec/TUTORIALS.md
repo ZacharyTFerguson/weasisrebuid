@@ -12,14 +12,14 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 |---|---|---|---|
 | GUI overview / prefs | 0–1 | Felix + dummy viewer | headed UI |
 | DICOM Import / Explorer | 3 | DICOMDIR + filters + CD detect; File>Export files/ZIP/DICOMDIR; thumbnail multi-select; PatientPane/StudyPane hierarchy | tutorial |
-| DICOM 2D / LUT / Zoom | 4 | W/L paints; zoom −200/−100; screenshot PNG/JPEG; T/W/S/Z/R/C/Q/P keys; series/image nav; Ctrl-drag accelerate; Alt+R/L/F; Ctrl+Space; Ctrl+/-; Tab layout; Lut/Reset chrome | tutorial |
+| DICOM 2D / LUT / Zoom | 4 | W/L paints; zoom −200/−100; screenshot PNG/JPEG; T/W/S/Z/R/C/Q/P keys; series/image nav; Ctrl-drag accelerate; Alt+R/L/F; Ctrl+Space; Ctrl+/-; Tab layout; Lut/Reset chrome; `ViewCanvas`/`Canvas` | tutorial |
 | Draw & Measure | 5 | graphic geometry + shortcuts D/A/Y; select/delete map; ROI stats | tutorial |
 | Build KO and PR | 5 | KO/PR objects with root UID 2.25; star/filter + K | tutorial |
 | Docking / sync / 3D cursor / histogram / lens | 6 | docking start + FoR vs manual; histogram bind/RGB/ROI; 3D cursor H/PixelInfo; Mini Tool + panner; central-panel docking keys | tutorial |
-| MPR / CPR / MIP | 7 | isotropic axes, MIP types; MPR Alt+X/C/V and Ctrl+Alt+B / Alt+wheel; Basic3DToolBar opens MPR; CPR arc-length + straightened image; oblique plane; curve cross-section; ArcBall `u`/`v`; `VolImageIO`/`RawImageIO` derived slices | tutorial |
+| MPR / CPR / MIP | 7 | isotropic axes, MIP types; MPR Alt+X/C/V and Ctrl+Alt+B / Alt+wheel; Basic3DToolBar opens MPR; CPR arc-length + straightened image; oblique plane; curve cross-section; ArcBall `u`/`v`; `VolImageIO`/`RawImageIO` derived slices; `BuildContext`/`SliceCanvas`; `SegVolumeBuilder`; `MprGeometryModule` | tutorial |
 | Fusion / SUV | 8 | FusionController + SUVbw; IPP-Z stack; nearest-Z PET→CT resample; Hot Iron/PET window LUT | tutorial |
 | 3D VR | 9 | GL 3.3; refuse llvmpipe | tutorial |
-| SR / AU / ECG / RT / SEG | 10 | factories + MIME; SR Content Sequence display; ECG millivolt leads; AU PCM play/pause/stop; RT STRUCT contours by Z | tutorial |
+| SR / AU / ECG / RT / SEG | 10 | factories + MIME; SR Content Sequence display; ECG millivolt leads; AU PCM play/pause/stop; RT STRUCT contours by Z; SEG overlay tool/factory/prefs | tutorial |
 | Q/R, DICOMweb, send, ISO, print | 11 | DIMSE/QIDO/STOW Have tests; Q/R import chrome; send C-STORE/STOW chrome | tutorial |
 | Dicomizer | 12 | acquire explorer/editor, Gogo 17181 smoke; photo editor rotate/crop/contrast; calibration mm/pixel; metadata display/edit/required; PersonName/AnatomicRegion cell editors; editor annotate (WP-5 graphics); MetadataAction; AcquireActionButton chrome; import/central thumbnails; import grouping; publish tree/dialog; browse/series chrome; EditionToolFactory; SeriesGroup/NAME dialog; MediaImporterFactory; Global/DefaultTaggable; AcquireImageStatus; AutoLevelListener | tutorial |
 | `weasis://` `$dicom:get` `$dicom:rs` | 13 | protocol parser | tutorial |
