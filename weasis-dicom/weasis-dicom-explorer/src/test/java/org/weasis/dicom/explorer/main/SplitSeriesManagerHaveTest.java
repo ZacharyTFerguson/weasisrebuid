@@ -80,7 +80,9 @@ class SplitSeriesManagerHaveTest {
     assertEquals(2, model.getInstances().size());
     assertEquals(
         Set.of("1", "2"),
-        model.getInstances().stream().map(ImportedInstance::echoNumber).collect(Collectors.toSet()));
+        model.getInstances().stream()
+            .map(ImportedInstance::echoNumber)
+            .collect(Collectors.toSet()));
     assertEquals(2, new DicomSeriesHandler().group(model).size());
   }
 
