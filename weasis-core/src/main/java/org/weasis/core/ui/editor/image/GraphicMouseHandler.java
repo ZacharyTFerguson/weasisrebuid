@@ -37,7 +37,7 @@ public class GraphicMouseHandler {
       rubber = null;
       return true;
     }
-    if (ImageViewerEventManager.drawingAction(view.getMouseActions().getLeft())) {
+    if (!MouseActions.NONE.equals(MouseActions.normalize(view.getMouseActions().getLeft()))) {
       return false;
     }
     if (!e.isShiftDown()) {

@@ -22,6 +22,7 @@ import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
+import org.weasis.core.ui.util.PrintOptions;
 
 /** Mouse → pan / zoom / W/L / scroll / crosshair. Zoom is centered on the view, not the cursor. */
 public class ImageViewerEventManager {
@@ -49,6 +50,10 @@ public class ImageViewerEventManager {
     String action = buttonAction(e);
     if (MouseActions.CROSSHAIR.equals(MouseActions.normalize(action))) {
       view.setCrosshairFromView(e.getX(), e.getY());
+      return;
+    }
+    if (MouseActions.CONTEXT_MENU.equals(MouseActions.normalize(action))) {
+      view.showContextMenu(e.getX(), e.getY());
       return;
     }
     if (view.getDrawing() == null
@@ -112,21 +117,36 @@ public class ImageViewerEventManager {
       return;
     }
     ActionW action = shortcuts.getAction(KeyStroke.getKeyStroke(e.getKeyCode(), 0));
+    if (action == null) {
+      return;
+    }
     if (action == ActionW.ANNOTATIONS) {
       view.cycleAnnotations();
     } else if (action == ActionW.KO) {
       view.toggleKeyImage();
-    } else if (action == ActionW.CROSSHAIR) {
-      view.getMouseActions().setLeft(MouseActions.CROSSHAIR);
-    } else if (action == ActionW.NONE) {
-      view.getMouseActions().setLeft(MouseActions.NONE);
-    } else if (action == ActionW.MEASURE) {
-      view.getMouseActions().setLeft(MouseActions.MEASURE);
-    } else if (action == ActionW.DRAW) {
-      view.getMouseActions().setLeft(MouseActions.DRAW);
+    } else if (action == ActionW.CINE) {
+      view.toggleCine();
+    } else if (action == ActionW.CONTEXTMENU) {
+      view.showContextMenu(0, 0);
+    } else if (action == ActionW.PRINT) {
+      view.requestPrint(new PrintOptions());
     } else if (action == ActionW.RESET) {
       view.resetView("-a");
+    } else if (mouseLeftAction(action)) {
+      view.getMouseActions().setLeft(action.cmd());
     }
+  }
+
+  static boolean mouseLeftAction(ActionW action) {
+    return action == ActionW.PAN
+        || action == ActionW.WINLEVEL
+        || action == ActionW.SCROLL_SERIES
+        || action == ActionW.ZOOM
+        || action == ActionW.ROTATION
+        || action == ActionW.CROSSHAIR
+        || action == ActionW.NONE
+        || action == ActionW.MEASURE
+        || action == ActionW.DRAW;
   }
 
   public void apply(String action, int dx, int dy) {

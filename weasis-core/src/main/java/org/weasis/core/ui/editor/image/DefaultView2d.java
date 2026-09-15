@@ -23,11 +23,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import javax.swing.JPanel;
+import org.weasis.core.api.gui.util.ActionW;
+import org.weasis.core.api.gui.util.SliderCineListener;
 import org.weasis.core.api.image.AffineTransformOp;
 import org.weasis.core.api.image.OpManager;
 import org.weasis.core.api.image.SimpleOpManager;
@@ -43,6 +46,8 @@ import org.weasis.core.ui.model.layer.GraphicModelChangeListener;
 import org.weasis.core.ui.model.layer.Layer;
 import org.weasis.core.ui.model.layer.LayerItem;
 import org.weasis.core.ui.model.layer.LayerType;
+import org.weasis.core.ui.util.ImagePrint;
+import org.weasis.core.ui.util.PrintOptions;
 
 /**
  * Shared 2D canvas. Downstream DICOM {@code View2d} binds pixels; affine (zoom/rotation) is last.
@@ -96,6 +101,10 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private volatile boolean crosshairSet;
   private PixelInfo pixelInfo = new PixelInfo();
   private CrosshairListener crosshairListener;
+  private PannerListener pannerListener;
+  private final ContextMenuHandler contextMenuHandler = new ContextMenuHandler();
+  private SliderCineListener cine;
+  private ImagePrint lastPrint;
 
   public DefaultView2d() {
     setBackground(Color.BLACK);
@@ -222,7 +231,29 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     this.panY = y;
     displayOp.setParamValue("op.affine", AffineTransformOp.P_PAN_X, x);
     displayOp.setParamValue("op.affine", AffineTransformOp.P_PAN_Y, y);
+    if (pannerListener != null) {
+      pannerListener.panChanged(this, panX, panY);
+    }
     repaint();
+  }
+
+  /**
+   * Place an image point at the view center (panner click). Rotation is applied in the same order
+   * as {@link #imageTransform(int, int)}.
+   */
+  public void centerOnImage(double imgX, double imgY) {
+    if (source == null) {
+      return;
+    }
+    int w = Math.max(1, getWidth());
+    int h = Math.max(1, getHeight());
+    double scale = resolvedScale(w, h);
+    double dx = (imgX - source.getWidth() / 2.0) * scale;
+    double dy = (imgY - source.getHeight() / 2.0) * scale;
+    double rad = Math.toRadians(rotation);
+    double cos = Math.cos(rad);
+    double sin = Math.sin(rad);
+    setPan(-(dx * cos - dy * sin), -(dx * sin + dy * cos));
   }
 
   public double getRotation() {
@@ -475,6 +506,62 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     this.crosshairListener = crosshairListener;
   }
 
+  public void setPannerListener(PannerListener pannerListener) {
+    this.pannerListener = pannerListener;
+  }
+
+  public ContextMenuHandler getContextMenuHandler() {
+    return contextMenuHandler;
+  }
+
+  public void showContextMenu(int x, int y) {
+    contextMenuHandler.show(this, x, y);
+  }
+
+  public SliderCineListener cineListener() {
+    int max = Math.max(0, getFrameCount() - 1);
+    if (cine == null) {
+      cine =
+          new SliderCineListener(ActionW.CINE, 0, max, frameIndex) {
+            @Override
+            public void stateChanged(int value) {
+              setFrameIndex(value);
+            }
+          };
+    } else {
+      cine.getSlider().setMaximum(max);
+    }
+    return cine;
+  }
+
+  public void toggleCine() {
+    SliderCineListener listener = cineListener();
+    if (listener.isCineRunning()) {
+      listener.stop();
+    } else {
+      listener.start();
+    }
+  }
+
+  public ImagePrint getLastPrint() {
+    return lastPrint;
+  }
+
+  public ImagePrint requestPrint(PrintOptions options) {
+    PrintOptions opts = options == null ? new PrintOptions() : options;
+    int w = Math.max(1, getWidth() <= 0 ? (source == null ? 1 : source.getWidth()) : getWidth());
+    int h = Math.max(1, getHeight() <= 0 ? (source == null ? 1 : source.getHeight()) : getHeight());
+    BufferedImage page = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = page.createGraphics();
+    try {
+      paintView(g, opts.isShowingAnnotations());
+    } finally {
+      g.dispose();
+    }
+    lastPrint = new ImagePrint(page, opts);
+    return lastPrint;
+  }
+
   public void setCrosshairFromView(int viewX, int viewY) {
     Point2D.Double img = viewToImage(viewX, viewY);
     setCrosshair((int) Math.round(img.x), (int) Math.round(img.y), true);
@@ -625,12 +712,12 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     if (area == null || area.getShape() == null) {
       return;
     }
-    Shape bounds = area.getShape();
+    Rectangle2D box = area.getShape().getBounds2D();
     for (Graphic graphic : graphics) {
       if (graphic == area || graphic.getShape() == null) {
         continue;
       }
-      if (bounds.intersects(graphic.getShape().getBounds2D())) {
+      if (graphic.getShape().intersects(box)) {
         graphic.setSelected(true);
       }
     }

@@ -9,4 +9,70 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class CalibrationView {}
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import org.weasis.core.api.image.util.Unit;
+import org.weasis.core.ui.model.graphic.Graphic;
+import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
+
+/**
+ * Session Manual Calibration (MX-07). A known real-world length on a distance line sets mm/pixel on
+ * the view without touching Prefs &gt; Monitors spatial calibration.
+ */
+public class CalibrationView extends JPanel {
+
+  private final DefaultView2d<?> view;
+  private LineGraphic line;
+  private double knownLength = 10.0;
+  private Unit unit = Unit.MILLIMETER;
+
+  public CalibrationView(DefaultView2d<?> view) {
+    super(new BorderLayout());
+    this.view = view;
+    add(new JLabel("Manual Calibration"), BorderLayout.NORTH);
+  }
+
+  public DefaultView2d<?> getView() {
+    return view;
+  }
+
+  public void setLine(LineGraphic line) {
+    this.line = line;
+  }
+
+  public LineGraphic getLine() {
+    return line;
+  }
+
+  public void setKnownLength(double knownLength, Unit unit) {
+    this.knownLength = knownLength;
+    this.unit = unit == null ? Unit.MILLIMETER : unit;
+  }
+
+  public double getKnownLength() {
+    return knownLength;
+  }
+
+  public Unit getUnit() {
+    return unit;
+  }
+
+  public double apply() {
+    LineGraphic target = line;
+    if (target == null && view != null) {
+      for (Graphic graphic : view.getSelectedGraphics()) {
+        if (graphic instanceof LineGraphic distance) {
+          target = distance;
+          break;
+        }
+      }
+    }
+    if (view == null || target == null || target.getLength() <= 0 || unit == Unit.PIXEL) {
+      return view == null ? 0.0 : view.getSessionManualCalibrationMmPerPixel();
+    }
+    double mmPerPixel = (knownLength * unit.getConvMm()) / target.getLength();
+    view.setSessionManualCalibrationMmPerPixel(mmPerPixel);
+    return mmPerPixel;
+  }
+}

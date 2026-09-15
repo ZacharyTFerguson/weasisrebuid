@@ -9,4 +9,8 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public interface PannerListener {}
+/** Notified when the bound 2D view pan origin changes (navigator / Mini Tool). */
+public interface PannerListener {
+
+  void panChanged(DefaultView2d<?> view, double panX, double panY);
+}
