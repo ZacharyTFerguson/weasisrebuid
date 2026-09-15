@@ -61,6 +61,14 @@ public class DicomModel implements DataExplorerModel {
     return map;
   }
 
+  public Map<String, List<ImportedInstance>> studies(String patientKey) {
+    Map<String, List<ImportedInstance>> map = new LinkedHashMap<>();
+    for (ImportedInstance inst : patients().getOrDefault(patientKey, List.of())) {
+      map.computeIfAbsent(inst.studyUid(), k -> new ArrayList<>()).add(inst);
+    }
+    return map;
+  }
+
   public static boolean samePatient(ImportedInstance a, ImportedInstance b) {
     return a != null
         && b != null

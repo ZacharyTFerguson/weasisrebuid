@@ -72,6 +72,7 @@ public class MainWindowActivator implements BundleActivator {
             }
           }
           UICore.getInstance().setApplicationWindow(window);
+          UICore.getInstance().installDockingKeyDispatcher();
           window.setLocationRelativeTo(null);
           window.setVisible(true);
         });

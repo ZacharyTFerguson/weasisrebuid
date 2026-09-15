@@ -14,13 +14,16 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.docking.PluginTool;
+import org.weasis.dicom.explorer.main.PatientPane;
 import org.weasis.dicom.explorer.main.SeriesSelectionModel;
+import org.weasis.dicom.explorer.main.StudyPane;
 import org.weasis.dicom.explorer.main.ThumbnailMouseAndKeyAdapter;
 
 /** DICOM Explorer tree/list. Instances created on demand from {@link DicomExplorerFactory}. */
@@ -33,19 +36,38 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final JList<String> list = new JList<>(listModel);
   private final SeriesSelectionModel selection = new SeriesSelectionModel();
   private final ThumbnailMouseAndKeyAdapter thumbs = new ThumbnailMouseAndKeyAdapter(selection);
+  private final PatientPane patientPane;
+  private final StudyPane studyPane;
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
     this.model = model == null ? new DicomModel() : model;
+    this.patientPane = new PatientPane(this.model);
+    this.studyPane = new StudyPane(patientPane.getSelectionManager());
+    JPanel hierarchy = new JPanel(new BorderLayout());
+    hierarchy.add(patientPane, BorderLayout.NORTH);
+    hierarchy.add(studyPane, BorderLayout.CENTER);
+    add(hierarchy, BorderLayout.NORTH);
     add(new JScrollPane(list), BorderLayout.CENTER);
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     list.addKeyListener(thumbs.keyAdapter());
     refresh();
   }
 
+  public PatientPane patientPane() {
+    return patientPane;
+  }
+
+  public StudyPane studyPane() {
+    return studyPane;
+  }
+
   public void refresh() {
+    patientPane.refresh();
+    studyPane.refresh();
     listModel.clear();
-    for (ImportedInstance inst : DicomSorter.sortSeries(model.getInstances())) {
+    for (ImportedInstance inst :
+        DicomSorter.sortSeries(patientPane.getSelectionManager().selectedInstances())) {
       listModel.addElement(
           inst.patientName()
               + " / "

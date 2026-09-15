@@ -86,7 +86,12 @@ public class ImageViewerEventManager {
       onDrawDragged(e);
       return;
     }
-    apply(action, dx, dy);
+    int mods = e.getModifiersEx();
+    int factor = 1;
+    if ((mods & InputEvent.CTRL_DOWN_MASK) != 0) {
+      factor = (mods & InputEvent.SHIFT_DOWN_MASK) != 0 ? 4 : 2;
+    }
+    apply(action, dx * factor, dy * factor);
   }
 
   public void mouseReleased(MouseEvent e) {
@@ -120,7 +125,13 @@ public class ImageViewerEventManager {
     if (handleNavigation(e)) {
       return;
     }
-    ActionW action = shortcuts.getAction(KeyStroke.getKeyStroke(e.getKeyCode(), 0));
+    int mods =
+        e.getModifiersEx()
+            & (InputEvent.CTRL_DOWN_MASK
+                | InputEvent.ALT_DOWN_MASK
+                | InputEvent.SHIFT_DOWN_MASK
+                | InputEvent.META_DOWN_MASK);
+    ActionW action = shortcuts.getAction(KeyStroke.getKeyStroke(e.getKeyCode(), mods));
     if (action == null) {
       return;
     }

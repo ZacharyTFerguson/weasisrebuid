@@ -40,6 +40,11 @@ public class WeasisWin extends JFrame {
     setSize(960, 640);
     setLayout(new BorderLayout());
     setJMenuBar(createMenuBar());
+    UICore.getInstance().installDockingKeyDispatcher();
+  }
+
+  public boolean handleDockingKey(KeyEvent e) {
+    return UICore.getInstance().handleDockingKey(e);
   }
 
   public JMenuBar createMenuBar() {

@@ -92,6 +92,38 @@ class ViewerActionKeysHaveTest {
   }
 
   @Test
+  void ctrlAndAltDoNotStealLetterActionsExceptAltP() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    assertEquals(MouseActions.WINLEVEL, view.getMouseActions().getLeft());
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK));
+    assertEquals(MouseActions.WINLEVEL, view.getMouseActions().getLeft());
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK));
+    assertFalse(view.cineListener().isCineRunning());
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_P, InputEvent.ALT_DOWN_MASK));
+    assertNotNull(view.getLastPrint());
+  }
+
+  @Test
+  void ctrlDragAcceleratesCurrentAction() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    view.getMouseActions().setLeft(MouseActions.PAN);
+    view.getEventManager().mousePressed(mouse(view, 10, 10, 1, false));
+    view.getEventManager().mouseDragged(drag(view, 20, 10, InputEvent.CTRL_DOWN_MASK));
+    assertEquals(20.0, view.getPanX(), 1e-9);
+    view.setPan(0, 0);
+    view.getEventManager().mousePressed(mouse(view, 10, 10, 1, false));
+    view.getEventManager()
+        .mouseDragged(
+            drag(view, 20, 10, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+    assertEquals(40.0, view.getPanX(), 1e-9);
+    view.getMouseActions().setLeft(MouseActions.NONE);
+    view.setPan(0, 0);
+    view.getEventManager().mousePressed(mouse(view, 20, 20, 1, false));
+    view.getEventManager().mouseDragged(drag(view, 30, 25, InputEvent.CTRL_DOWN_MASK));
+    assertEquals(0.0, view.getPanX(), 1e-9);
+  }
+
+  @Test
   void miniToolSlidersAndPannerMoveTheView() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setSize(200, 200);
@@ -159,6 +191,19 @@ class ViewerActionKeysHaveTest {
     int mods = InputEvent.BUTTON1_DOWN_MASK | (shift ? InputEvent.SHIFT_DOWN_MASK : 0);
     return new MouseEvent(
         view, MouseEvent.MOUSE_PRESSED, 0L, mods, x, y, clicks, false, MouseEvent.BUTTON1);
+  }
+
+  static MouseEvent drag(DefaultView2d<?> view, int x, int y, int extraMods) {
+    return new MouseEvent(
+        view,
+        MouseEvent.MOUSE_DRAGGED,
+        0L,
+        InputEvent.BUTTON1_DOWN_MASK | extraMods,
+        x,
+        y,
+        1,
+        false,
+        MouseEvent.BUTTON1);
   }
 
   static KeyEvent key(DefaultView2d<?> view, int code, int mods) {

@@ -9,6 +9,8 @@
  */
 package org.weasis.dicom.viewer2d.mpr;
 
+import java.awt.image.BufferedImage;
+import org.weasis.core.ui.model.layer.LayerType;
 import org.weasis.dicom.viewer2d.View2d;
 import org.weasis.dicom.viewer2d.mip.MipView;
 
@@ -18,6 +20,8 @@ public class MprView extends View2d {
   private MprAxis axis = MprAxis.AXIAL;
   private final MipView mip = new MipView();
   private int sliceIndex;
+  private MprController controller;
+  private boolean crosshairCenterVisible = true;
 
   public MprAxis getAxis() {
     return axis;
@@ -37,6 +41,40 @@ public class MprView extends View2d {
 
   public void setSliceIndex(int sliceIndex) {
     this.sliceIndex = Math.max(0, sliceIndex);
+  }
+
+  public MprController getController() {
+    return controller;
+  }
+
+  public void setController(MprController controller) {
+    this.controller = controller;
+  }
+
+  public boolean isCrosshairCenterVisible() {
+    return crosshairCenterVisible;
+  }
+
+  public void setCrosshairCenterVisible(boolean visible) {
+    this.crosshairCenterVisible = visible;
+  }
+
+  public void toggleCrosshairCenter() {
+    crosshairCenterVisible = !crosshairCenterVisible;
+  }
+
+  public void toggleCrosshair() {
+    setLayerVisible(LayerType.CROSSLINES, !isLayerVisible(LayerType.CROSSLINES));
+  }
+
+  public void centerCrosshair() {
+    BufferedImage src = getSourceImage();
+    if (src == null) {
+      setCrosshair(0, 0);
+    } else {
+      setCrosshair(src.getWidth() / 2, src.getHeight() / 2);
+    }
+    setPan(0, 0);
   }
 
   public double[][] rebuild(Volume volume) {

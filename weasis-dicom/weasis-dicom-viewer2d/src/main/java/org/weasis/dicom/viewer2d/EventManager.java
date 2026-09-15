@@ -9,7 +9,12 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
+import org.weasis.dicom.viewer2d.mpr.MprController;
+import org.weasis.dicom.viewer2d.mpr.MprView;
 
 /** DICOM 2D event manager (Weasis type name). Applies W/L on the bound {@link View2d}. */
 public class EventManager extends ImageViewerEventManager {
@@ -23,6 +28,85 @@ public class EventManager extends ImageViewerEventManager {
 
   public View2d getView2d() {
     return view2d;
+  }
+
+  @Override
+  public void keyPressed(KeyEvent e) {
+    if (handleMprShortcut(e)) {
+      return;
+    }
+    super.keyPressed(e);
+  }
+
+  @Override
+  public void mouseWheelMoved(MouseWheelEvent e) {
+    if (handleMprWheel(e)) {
+      return;
+    }
+    super.mouseWheelMoved(e);
+  }
+
+  boolean handleMprShortcut(KeyEvent e) {
+    if (!(view2d instanceof MprView mpr) || e == null) {
+      return false;
+    }
+    MprController controller = mpr.getController();
+    if (controller == null) {
+      return false;
+    }
+    int mods = e.getModifiersEx();
+    boolean alt = (mods & InputEvent.ALT_DOWN_MASK) != 0;
+    boolean ctrl = (mods & InputEvent.CTRL_DOWN_MASK) != 0;
+    if (!alt) {
+      return false;
+    }
+    controller.setSelectedView(mpr);
+    int code = e.getKeyCode();
+    if (ctrl && code == KeyEvent.VK_B) {
+      controller.cycleMipType();
+      return true;
+    }
+    if (code == KeyEvent.VK_X) {
+      if (ctrl) {
+        controller.centerAll();
+      } else {
+        controller.centerSelected();
+      }
+      return true;
+    }
+    if (code == KeyEvent.VK_C) {
+      if (ctrl) {
+        controller.toggleCenterAll();
+      } else {
+        controller.toggleCenterSelected();
+      }
+      return true;
+    }
+    if (code == KeyEvent.VK_V) {
+      if (ctrl) {
+        controller.toggleCrosshairAll();
+      } else {
+        controller.toggleCrosshairSelected();
+      }
+      return true;
+    }
+    return false;
+  }
+
+  boolean handleMprWheel(MouseWheelEvent e) {
+    if (!(view2d instanceof MprView mpr) || e == null) {
+      return false;
+    }
+    if ((e.getModifiersEx() & InputEvent.ALT_DOWN_MASK) == 0) {
+      return false;
+    }
+    MprController controller = mpr.getController();
+    if (controller == null) {
+      return false;
+    }
+    controller.setSelectedView(mpr);
+    controller.addSelectedThickness(-e.getWheelRotation());
+    return true;
   }
 
   @Override

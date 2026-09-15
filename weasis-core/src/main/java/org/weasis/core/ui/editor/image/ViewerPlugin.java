@@ -23,11 +23,18 @@ import org.weasis.core.ui.editor.SeriesViewer;
 public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
     implements SeriesViewer<E> {
 
+  public enum DockingState {
+    NORMAL,
+    MAXIMIZED,
+    EXTERNALIZED
+  }
+
   private final String dockableUID;
   private final String pluginName;
   private final List<MediaSeries<E>> openSeries = new ArrayList<>();
   private MediaSeries<E> selectedSeries;
   private boolean selected;
+  private DockingState dockingState = DockingState.NORMAL;
 
   protected ViewerPlugin(String pluginName) {
     super(new BorderLayout());
@@ -85,5 +92,25 @@ public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
   @Override
   public boolean isSelected() {
     return selected;
+  }
+
+  public DockingState getDockingState() {
+    return dockingState;
+  }
+
+  /** Ctrl+M maximize; a second Ctrl+M restores. */
+  public void maximize() {
+    dockingState =
+        dockingState == DockingState.MAXIMIZED ? DockingState.NORMAL : DockingState.MAXIMIZED;
+  }
+
+  /** Ctrl+E externalize (when multiple screens). */
+  public void externalize() {
+    dockingState = DockingState.EXTERNALIZED;
+  }
+
+  /** Ctrl+N normalize. */
+  public void normalize() {
+    dockingState = DockingState.NORMAL;
   }
 }

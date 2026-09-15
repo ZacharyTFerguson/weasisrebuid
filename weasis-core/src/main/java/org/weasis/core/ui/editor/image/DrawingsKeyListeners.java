@@ -50,6 +50,9 @@ public class DrawingsKeyListeners {
     if (ctrl) {
       return false;
     }
+    if ((e.getModifiersEx() & InputEvent.ALT_DOWN_MASK) != 0) {
+      return false;
+    }
     return switch (code) {
       case KeyEvent.VK_N -> {
         view.getMouseActions().setLeft(MouseActions.NONE);
