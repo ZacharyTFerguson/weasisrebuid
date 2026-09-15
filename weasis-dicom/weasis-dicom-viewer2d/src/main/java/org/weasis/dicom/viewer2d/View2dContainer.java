@@ -263,7 +263,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   @Override
   public void dropSeries(MediaSeries<MediaElement> sequence, JComponent onto) {
-    if (sequence == null || sequence.getMedias().isEmpty()) {
+    if (sequence == null) {
       return;
     }
     rememberOpen(sequence);
@@ -275,11 +275,28 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   void dropOnto(JComponent onto, MediaSeries<MediaElement> sequence) {
-    if (onto instanceof View2d cell && isEmptyHang(cell)) {
+    View2d cell = emptyHang(onto);
+    if (cell != null) {
       hangCell(cell, sequence);
       return;
     }
     placeSeries(sequence);
+  }
+
+  View2d emptyHang(JComponent onto) {
+    if (onto instanceof View2d cell && isEmptyHang(cell)) {
+      return cell;
+    }
+    return firstEmptyExtra();
+  }
+
+  View2d firstEmptyExtra() {
+    for (int i = 1; i < layout.size(); i++) {
+      if (layout.get(i).getSeries() == null) {
+        return layout.get(i);
+      }
+    }
+    return null;
   }
 
   boolean isEmptyHang(View2d cell) {
@@ -293,6 +310,28 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   public JComponent dropCellAt(Point p) {
     JComponent cell = cellAt(p);
     return cell != null ? cell : this;
+  }
+
+  @Override
+  public JComponent dropCellAtScreen(Point screen) {
+    return screen == null ? null : viewOnScreen(screen);
+  }
+
+  View2d viewOnScreen(Point screen) {
+    for (View2d v : layout) {
+      if (shownContains(v, screen)) {
+        return v;
+      }
+    }
+    return null;
+  }
+
+  static boolean shownContains(JComponent c, Point screen) {
+    return c != null && c.isShowing() && screenBox(c).contains(screen);
+  }
+
+  static Rectangle screenBox(JComponent c) {
+    return new Rectangle(c.getLocationOnScreen(), c.getSize());
   }
 
   JComponent cellAt(Point p) {
@@ -440,7 +479,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   void hangCell(View2d cell, MediaSeries<MediaElement> sequence) {
-    if (sequence == null) {
+    if (cell == null || sequence == null) {
       return;
     }
     cell.setSeries(sequence);

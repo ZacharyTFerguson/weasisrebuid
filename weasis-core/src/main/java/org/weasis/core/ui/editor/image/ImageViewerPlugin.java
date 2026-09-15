@@ -64,6 +64,14 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
     return this;
   }
 
+  /**
+   * View cell whose on-screen bounds contain {@code screen}. Default is null so docking glass
+   * drops fall through to {@link #dropCellAt}.
+   */
+  public JComponent dropCellAtScreen(Point screen) {
+    return null;
+  }
+
   /** True when hanging layout still has a clone or empty cell for another series. */
   public boolean hasHangSlot() {
     return false;

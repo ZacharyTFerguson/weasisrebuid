@@ -188,6 +188,81 @@ class ExplorerSeriesDnDHaveTest {
     }
   }
 
+  @Test
+  void lastDraggedSurvivesExportDoneAndFillsBottomLeft() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      JPanel glass = hostOver(container);
+      MediaSeries<?> chest = container.getLayoutViews().get(0).getSeries();
+      View2d bottomLeft = container.getLayoutViews().get(2);
+      ViewTransferHandler drop = new ViewTransferHandler();
+      ViewTransferHandler.beginDrag(chest);
+      ViewTransferHandler.endDrag();
+      assertNull(ViewTransferHandler.dragging());
+      assertSame(chest, ViewTransferHandler.lastDragged());
+      assertTrue(drop.canImport(glass, new DataFlavor[0]));
+      assertTrue(drop.importAt(glass, overCell(container, glass, 2), stringOnly(chest)));
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertEquals("2.25.dx.pa", seriesUid(bottomLeft.getSeries()));
+      assertNull(container.getLayoutViews().get(1).getSeries());
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  @Test
+  void missedDropPointFillsFirstEmptyExtraNotAlreadyHungNoop() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      MediaSeries<?> chest = container.getLayoutViews().get(0).getSeries();
+      ViewTransferHandler drop = new ViewTransferHandler();
+      ViewTransferHandler.beginDrag(chest);
+      try {
+        assertTrue(drop.importAt(container, new Point(470, 390), stringOnly(chest)));
+      } finally {
+        ViewTransferHandler.endDrag();
+      }
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(1).getSeries()));
+      assertNull(container.getLayoutViews().get(2).getSeries());
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  @Test
+  void dropCellAtFindsBottomLeftThroughToolbarInsets() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      container.setBorder(javax.swing.BorderFactory.createEmptyBorder(48, 12, 8, 8));
+      container.doLayout();
+      View2d bottomLeft = container.getLayoutViews().get(2);
+      assertSame(bottomLeft, container.dropCellAt(cellCenter(container, 2)));
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
   static JPanel hostOver(View2dContainer container) {
     JPanel glass = new JPanel(null);
     container.setBounds(0, 0, 480, 400);
@@ -310,6 +385,33 @@ class ExplorerSeriesDnDHaveTest {
   static String seriesUid(MediaSeries<?> series) {
     Object v = series == null ? null : series.getTagValue(TagW.SeriesInstanceUID);
     return v == null ? "" : v.toString();
+  }
+
+  static Transferable stringOnly(MediaSeries<?> series) {
+    return new StringOnly(series);
+  }
+
+  static final class StringOnly implements Transferable {
+    private final MediaSeries<?> series;
+
+    StringOnly(MediaSeries<?> series) {
+      this.series = series;
+    }
+
+    @Override
+    public DataFlavor[] getTransferDataFlavors() {
+      return new DataFlavor[] {DataFlavor.stringFlavor};
+    }
+
+    @Override
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+      return DataFlavor.stringFlavor.equals(flavor);
+    }
+
+    @Override
+    public Object getTransferData(DataFlavor flavor) {
+      return String.valueOf(series);
+    }
   }
 
   static ImportedInstance dx(String name, String id, String seriesUid) {
