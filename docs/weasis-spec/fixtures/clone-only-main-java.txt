@@ -75,3 +75,13 @@ weasis-acquire/weasis-acquire-explorer/src/main/java/org/weasis/acquire/explorer
 weasis-acquire/weasis-acquire-explorer/src/main/java/org/weasis/acquire/explorer/VideoToDicom.java
 weasis-dicom/weasis-dicom-explorer/src/main/java/org/weasis/dicom/explorer/DicomCommands.java
 weasis-launcher/src/main/java/org/weasis/launcher/NativeDistribution.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/DateFilters.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/DisplayQuery.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/GroupPolicy.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/IidMatrix.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/ManifestCache.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/PackageTab.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/VersionCompatibility.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/ViewerHub.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/ViewerSelectionRules.java
+weasis-pacs-connector/src/main/java/org/weasis/connector/WeasisLaunch.java

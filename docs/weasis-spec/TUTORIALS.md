@@ -24,6 +24,6 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | Dicomizer | 12 | acquire explorer/editor, Gogo 17181 | tutorial |
 | `weasis://` `$dicom:get` `$dicom:rs` | 13 | protocol parser | tutorial |
 | i18n ≥30 %, native zip | 14 | fragment @13 + compressXZ zip | tutorial |
-| ViewerHub / IID | 15 | `/display` opens via `weasis://` | tutorial |
+| ViewerHub / IID | 15 | `/display` 302 `weasis://` | tutorial |
 
 Import sources: DnD, file association, Local Device, DICOMDIR, Q/R, commands. 4.7.0 skip-unsupported SOP **Information** popup (silence checkbox).
