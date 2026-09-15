@@ -120,6 +120,12 @@ public class DicomMediaIO implements DcmMediaReader {
     if (DicomMime.ENCAP_DICOM.equals(mime)) {
       return new DicomEncapDocElement(this);
     }
+    if (DicomMime.SR_DICOM.equals(mime)
+        || DicomMime.AU_DICOM.equals(mime)
+        || DicomMime.WAVE_DICOM.equals(mime)
+        || DicomMime.RT_DICOM.equals(mime)) {
+      return new DicomSpecialElement(this);
+    }
     return new DicomImageElement(this);
   }
 

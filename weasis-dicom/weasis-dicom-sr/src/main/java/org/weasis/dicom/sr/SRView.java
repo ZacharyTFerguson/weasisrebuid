@@ -9,4 +9,48 @@
  */
 package org.weasis.dicom.sr;
 
-public class SRView {}
+import java.awt.BorderLayout;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import org.dcm4che3.data.Attributes;
+import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.dicom.codec.DicomElement;
+
+/** Displays DICOM SR Content Sequence as plain text. */
+public class SRView extends JPanel {
+
+  private final JEditorPane editor = new JEditorPane("text/plain", "");
+  private final SRReader reader = new SRReader();
+
+  public SRView() {
+    super(new BorderLayout());
+    editor.setEditable(false);
+    add(new JScrollPane(editor), BorderLayout.CENTER);
+  }
+
+  public void display(Attributes dataset) {
+    editor.setText(reader.displayText(dataset));
+    editor.setCaretPosition(0);
+  }
+
+  public void display(MediaElement media) {
+    if (media instanceof DicomElement dicom) {
+      display(dicom.getDicomObject());
+    } else {
+      display((Attributes) null);
+    }
+  }
+
+  public String displayedText() {
+    return editor.getText();
+  }
+
+  public SRReader reader() {
+    return reader;
+  }
+
+  public JEditorPane editor() {
+    return editor;
+  }
+}

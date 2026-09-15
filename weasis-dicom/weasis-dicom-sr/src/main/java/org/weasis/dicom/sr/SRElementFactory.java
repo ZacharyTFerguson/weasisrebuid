@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.sr;
 
-public class SRElementFactory {}
+import org.weasis.dicom.codec.DcmMediaReader;
+import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.codec.DicomSpecialElement;
+import org.weasis.dicom.codec.DicomSpecialElementFactory;
+
+public class SRElementFactory implements DicomSpecialElementFactory {
+
+  @Override
+  public String getSeriesMimeType() {
+    return DicomMime.SR_DICOM;
+  }
+
+  @Override
+  public String getModality() {
+    return "SR";
+  }
+
+  @Override
+  public DicomSpecialElement buildInstance(DcmMediaReader mediaIO) {
+    return new SRSpecialElement(mediaIO);
+  }
+}

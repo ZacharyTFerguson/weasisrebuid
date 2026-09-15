@@ -9,4 +9,22 @@
  */
 package org.weasis.dicom.qr;
 
-public class GracefulCancel {}
+import java.util.concurrent.atomic.AtomicBoolean;
+
+/** Cooperative cancel for a retrieve without tearing down DIMSE sockets in Have tests. */
+public class GracefulCancel {
+
+  private final AtomicBoolean cancelled = new AtomicBoolean();
+
+  public void cancel() {
+    cancelled.set(true);
+  }
+
+  public boolean isCancelled() {
+    return cancelled.get();
+  }
+
+  public void reset() {
+    cancelled.set(false);
+  }
+}

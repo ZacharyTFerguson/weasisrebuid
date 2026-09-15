@@ -9,4 +9,42 @@
  */
 package org.weasis.dicom.sr;
 
-public class SRDocumentContentModule {}
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/** SR Document Content Module: document title plus Content Sequence items. */
+public class SRDocumentContentModule {
+
+  private String title = "";
+  private final List<SRDocumentContent> contents = new ArrayList<>();
+
+  public String getTitle() {
+    return title;
+  }
+
+  public void setTitle(String title) {
+    this.title = title == null ? "" : title;
+  }
+
+  public void add(SRDocumentContent content) {
+    if (content != null) {
+      contents.add(content);
+    }
+  }
+
+  public List<SRDocumentContent> getContents() {
+    return Collections.unmodifiableList(contents);
+  }
+
+  public String asText() {
+    StringBuilder builder = new StringBuilder();
+    if (!title.isBlank()) {
+      builder.append(title).append('\n');
+    }
+    for (SRDocumentContent content : contents) {
+      builder.append(content.asText());
+    }
+    return builder.toString();
+  }
+}

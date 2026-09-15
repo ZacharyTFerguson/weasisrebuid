@@ -9,4 +9,12 @@
  */
 package org.weasis.dicom.sr;
 
-public class SRSpecialElement {}
+import org.weasis.dicom.codec.DcmMediaReader;
+import org.weasis.dicom.codec.DicomSpecialElement;
+
+public class SRSpecialElement extends DicomSpecialElement {
+
+  public SRSpecialElement(DcmMediaReader mediaIO) {
+    super(mediaIO);
+  }
+}

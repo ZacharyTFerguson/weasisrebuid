@@ -44,16 +44,32 @@ public final class SearchParameters {
     this.level = level == null ? QueryRetrieveLevel.STUDY : level;
   }
 
+  public String patientId() {
+    return patientId;
+  }
+
   public void setPatientId(String patientId) {
     this.patientId = patientId;
+  }
+
+  public String patientName() {
+    return patientName;
   }
 
   public void setPatientName(String patientName) {
     this.patientName = patientName;
   }
 
+  public String studyInstanceUid() {
+    return studyInstanceUid;
+  }
+
   public void setStudyInstanceUid(String studyInstanceUid) {
     this.studyInstanceUid = studyInstanceUid;
+  }
+
+  public String modality() {
+    return modality;
   }
 
   public void setModality(String modality) {

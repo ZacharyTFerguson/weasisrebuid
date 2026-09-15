@@ -9,6 +9,7 @@
  */
 package org.weasis.dicom.qr;
 
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -27,11 +28,29 @@ public final class RetrieveSelection {
   private final Set<String> checkedSeries = new LinkedHashSet<>();
 
   public void checkStudy(String studyUid) {
-    checkedStudies.add(studyUid);
+    if (studyUid != null && !studyUid.isBlank()) {
+      checkedStudies.add(studyUid);
+    }
   }
 
   public void checkSeries(String studyUid, String seriesUid) {
+    if (studyUid == null || seriesUid == null) {
+      return;
+    }
     checkedSeries.add(studyUid + "/" + seriesUid);
+  }
+
+  public void clear() {
+    checkedStudies.clear();
+    checkedSeries.clear();
+  }
+
+  public Set<String> checkedStudies() {
+    return Collections.unmodifiableSet(checkedStudies);
+  }
+
+  public Set<String> checkedSeries() {
+    return Collections.unmodifiableSet(checkedSeries);
   }
 
   public Level levelFor(String studyUid) {

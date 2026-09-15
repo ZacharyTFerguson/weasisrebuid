@@ -9,12 +9,33 @@
  */
 package org.weasis.dicom.sr;
 
+import java.awt.BorderLayout;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 
 public class SRContainer extends ViewerPlugin<MediaElement> {
 
+  private final SRView srView = new SRView();
+
   public SRContainer() {
     super("DICOM SR Viewer");
+    add(srView, BorderLayout.CENTER);
+  }
+
+  public SRView getSRView() {
+    return srView;
+  }
+
+  @Override
+  public synchronized void addSeries(MediaSeries<MediaElement> sequence) {
+    super.addSeries(sequence);
+    if (sequence == null) {
+      return;
+    }
+    for (MediaElement media : sequence.getMedias()) {
+      srView.display(media);
+      break;
+    }
   }
 }

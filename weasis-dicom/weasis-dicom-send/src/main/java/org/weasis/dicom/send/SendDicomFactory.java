@@ -24,4 +24,8 @@ public class SendDicomFactory {
   public Protocol protocolFor(boolean dicomWebNode) {
     return dicomWebNode ? Protocol.STOW_RS : Protocol.C_STORE;
   }
+
+  public SendDicomView newView() {
+    return new SendDicomView();
+  }
 }
