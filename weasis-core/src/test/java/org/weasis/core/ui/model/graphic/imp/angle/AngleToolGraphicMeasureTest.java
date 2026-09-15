@@ -18,19 +18,20 @@ import org.junit.jupiter.api.Test;
 import org.weasis.core.api.image.measure.ImageSpacing;
 
 /**
- * Why angle is dimensionless: the included angle depends only on direction in image pixel space (two
- * arms from the vertex handle). Scaling row/column mm per axis changes arm lengths but not the angle
- * between the same pixel vectors — so {@link AngleToolGraphic#getAngleDegrees()} uses raw pixel deltas,
- * never mm-scaled vectors.
+ * Why angle is dimensionless: the included angle depends only on direction in image pixel space
+ * (two arms from the vertex handle). Scaling row/column mm per axis changes arm lengths but not the
+ * angle between the same pixel vectors — so {@link AngleToolGraphic#getAngleDegrees()} uses raw
+ * pixel deltas, never mm-scaled vectors.
  *
- * <p>Why arms use row/col spacing: each arm is a single segment from the vertex (handle 1) to an end
- * handle; mm length applies the same rule as {@link org.weasis.core.ui.model.graphic.imp.line.LineGraphic#getLengthMm}
- * — column spacing on horizontal delta, row spacing on vertical (PS3.3 row-first PixelSpacing).
+ * <p>Why arms use row/col spacing: each arm is a single segment from the vertex (handle 1) to an
+ * end handle; mm length applies the same rule as {@link
+ * org.weasis.core.ui.model.graphic.imp.line.LineGraphic#getLengthMm} — column spacing on horizontal
+ * delta, row spacing on vertical (PS3.3 row-first PixelSpacing).
  *
  * <p>Why no spacing → px arms / degrees still ok: {@link AngleToolGraphic#getArmLengthPx(int)} and
  * {@link AngleToolGraphic#getAngleDegrees()} remain defined from handle geometry; {@link
- * AngleToolGraphic#getArmLengthMm(int, ImageSpacing)} returns empty when spacing is null or invalid,
- * without blocking the dimensionless angle or pixel arm lengths.
+ * AngleToolGraphic#getArmLengthMm(int, ImageSpacing)} returns empty when spacing is null or
+ * invalid, without blocking the dimensionless angle or pixel arm lengths.
  *
  * <p>Why not copy Weasis {@code MeasureTool}: upstream bundles drawing, calibration overrides, and
  * presentation; this rebuild keeps three image-space handles on {@link AngleToolGraphic} and adds
@@ -54,8 +55,8 @@ class AngleToolGraphicMeasureTest {
     assertEquals(d1, angle.getAngleDegrees().orElseThrow(), 1e-9);
     assertEquals(2.5, angle.getArmLengthMm(0, ANISO).orElseThrow(), 1e-9);
     assertEquals(5.0, angle.getArmLengthMm(1, ANISO).orElseThrow(), 1e-9);
-    assertEquals(10.0, angle.getArmLengthMm(0, OTHER).orElseThrow(), 1e-9);
-    assertEquals(20.0, angle.getArmLengthMm(1, OTHER).orElseThrow(), 1e-9);
+    assertEquals(20.0, angle.getArmLengthMm(0, OTHER).orElseThrow(), 1e-9);
+    assertEquals(10.0, angle.getArmLengthMm(1, OTHER).orElseThrow(), 1e-9);
   }
 
   @Test
