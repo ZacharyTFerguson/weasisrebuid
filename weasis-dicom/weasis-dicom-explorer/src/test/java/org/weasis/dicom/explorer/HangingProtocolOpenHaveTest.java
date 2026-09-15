@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.util.List;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import org.dcm4che3.data.UID;
 import org.junit.jupiter.api.Assumptions;
@@ -171,11 +172,13 @@ class HangingProtocolOpenHaveTest {
       container.doLayout();
       assertEquals(4, container.getLayoutCount());
       View2d bottomLeft = container.getLayoutViews().get(2);
-      Point screen = bottomLeft.getLocationOnScreen();
+      JComponent grid = (JComponent) bottomLeft.getParent();
+      Point screen = grid.getLocationOnScreen();
       screen.translate(
-          Math.max(1, bottomLeft.getWidth() / 2), Math.max(1, bottomLeft.getHeight() / 2));
+          Math.max(1, grid.getWidth() / 4), Math.max(1, (grid.getHeight() * 3) / 4));
       ViewTransferHandler.beginDrag(container.getLayoutViews().get(0).getSeries());
-      assertTrue(new ViewTransferHandler().hangAtScreen(screen));
+      ViewTransferHandler.overAt(screen);
+      assertTrue(ViewTransferHandler.hangAtPointer());
       assertEquals("2.25.chest", seriesUid(bottomLeft.getSeries()));
       assertEquals("2.25.knee", seriesUid(container.getLayoutViews().get(1).getSeries()));
       assertEquals(1, core.getOpenViewerPlugins().size());

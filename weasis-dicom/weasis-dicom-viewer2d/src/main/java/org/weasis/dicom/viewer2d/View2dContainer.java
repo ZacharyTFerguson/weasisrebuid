@@ -12,8 +12,10 @@ package org.weasis.dicom.viewer2d;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
@@ -25,6 +27,7 @@ import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.TagW;
+import org.weasis.core.ui.editor.image.GridMouseHandler;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MeasureToolBar;
 import org.weasis.core.ui.editor.image.RotationToolBar;
@@ -316,7 +319,74 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   @Override
   public JComponent dropCellAtScreen(Point screen) {
-    return screen == null ? null : viewOnScreen(screen);
+    if (screen == null) {
+      return null;
+    }
+    return firstView(viewOnScreen(screen), gridView(screen), localView(screen));
+  }
+
+  View2d gridView(Point screen) {
+    Rectangle box = showingBox(viewGrid);
+    if (box == null || !box.contains(screen)) {
+      return null;
+    }
+    return layoutCellAt(screen.x - box.x, screen.y - box.y, box.width, box.height);
+  }
+
+  View2d layoutCellAt(int x, int y, int w, int h) {
+    int n = layout.size();
+    int cols = Math.min(2, Math.max(1, n));
+    int rows = (n + cols - 1) / cols;
+    int idx = new GridMouseHandler().cellAt(w, h, rows, cols, x, y);
+    return idx >= 0 && idx < n ? layout.get(idx) : null;
+  }
+
+  View2d localView(Point screen) {
+    Point local = fromScreen(this, screen);
+    if (local == null) {
+      return null;
+    }
+    JComponent cell = cellAt(local);
+    return cell instanceof View2d v ? v : null;
+  }
+
+  static View2d firstView(View2d a, View2d b, View2d c) {
+    if (a != null) {
+      return a;
+    }
+    return b != null ? b : c;
+  }
+
+  static Rectangle showingBox(JComponent c) {
+    if (c == null || !c.isShowing()) {
+      return null;
+    }
+    try {
+      return new Rectangle(c.getLocationOnScreen(), c.getSize());
+    } catch (IllegalComponentStateException e) {
+      return null;
+    }
+  }
+
+  static Point fromScreen(JComponent c, Point screen) {
+    if (missingShow(c, screen)) {
+      return null;
+    }
+    return convertFromScreen(c, screen);
+  }
+
+  static boolean missingShow(JComponent c, Point screen) {
+    return c == null || screen == null || !c.isShowing();
+  }
+
+  static Point convertFromScreen(JComponent c, Point screen) {
+    try {
+      Point local = new Point(screen);
+      SwingUtilities.convertPointFromScreen(local, c);
+      return local;
+    } catch (IllegalComponentStateException e) {
+      return null;
+    }
   }
 
   View2d viewOnScreen(Point screen) {
@@ -329,11 +399,8 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   static boolean shownContains(JComponent c, Point screen) {
-    return c != null && c.isShowing() && screenBox(c).contains(screen);
-  }
-
-  static Rectangle screenBox(JComponent c) {
-    return new Rectangle(c.getLocationOnScreen(), c.getSize());
+    Rectangle box = showingBox(c);
+    return box != null && screen != null && box.contains(screen);
   }
 
   JComponent cellAt(Point p) {
@@ -484,9 +551,36 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (cell == null || sequence == null) {
       return;
     }
-    MediaSeries<MediaElement> loaded = loadable(sequence);
-    cell.setSeries(loaded);
-    loadInto(cell, loaded);
+    View2d from = paintedView(sequence);
+    cell.setSeries(seriesToHang(sequence, from));
+    copyPaint(cell, from);
+    loadInto(cell, cell.getSeries());
+  }
+
+  MediaSeries<MediaElement> seriesToHang(MediaSeries<MediaElement> sequence, View2d from) {
+    if (from != null && from.getSeries() != null) {
+      return asMedia(from.getSeries());
+    }
+    return loadable(sequence);
+  }
+
+  View2d paintedView(MediaSeries<MediaElement> sequence) {
+    for (View2d v : layout) {
+      if (sameSeries(v.getSeries(), sequence) && v.getSourceImage() != null) {
+        return v;
+      }
+    }
+    return null;
+  }
+
+  static void copyPaint(View2d cell, View2d from) {
+    if (from == null || cell == from) {
+      return;
+    }
+    BufferedImage image = from.getSourceImage();
+    if (image != null) {
+      cell.setSourceImage(image);
+    }
   }
 
   MediaSeries<MediaElement> loadable(MediaSeries<MediaElement> sequence) {

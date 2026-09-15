@@ -198,7 +198,7 @@ public class SeriesPane extends JPanel {
 
     @Override
     public void mouseReleased(MouseEvent e) {
-      new ViewTransferHandler().hangAtScreen(new Point(e.getXOnScreen(), e.getYOnScreen()));
+      ViewTransferHandler.hangAtPointer();
     }
 
     boolean armed(MouseEvent e) {

@@ -9,17 +9,28 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.AWTEvent;
 import java.awt.Component;
+import java.awt.IllegalComponentStateException;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DragSource;
+import java.awt.dnd.DragSourceAdapter;
+import java.awt.dnd.DragSourceDragEvent;
+import java.awt.dnd.DragSourceDropEvent;
+import java.awt.dnd.DragSourceMotionListener;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
+import java.awt.event.AWTEventListener;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.List;
 import javax.swing.JComponent;
@@ -40,6 +51,7 @@ public class ViewTransferHandler extends TransferHandler {
 
   private static MediaSeries<?> dragging;
   private static MediaSeries<?> lastDragged;
+  private static Point lastOver;
 
   private List<File> lastFiles = List.of();
   private MediaSeries<?> lastSeries;
@@ -87,6 +99,8 @@ public class ViewTransferHandler extends TransferHandler {
   public static void beginDrag(MediaSeries<?> series) {
     dragging = series;
     lastDragged = series;
+    lastOver = null;
+    DragFill.arm();
   }
 
   public static void endDrag() {
@@ -96,6 +110,7 @@ public class ViewTransferHandler extends TransferHandler {
   public static void clearDragged() {
     dragging = null;
     lastDragged = null;
+    lastOver = null;
   }
 
   public static MediaSeries<?> dragging() {
@@ -119,17 +134,37 @@ public class ViewTransferHandler extends TransferHandler {
 
   public static boolean hangAtPointer() {
     try {
-      PointerInfo info = MouseInfo.getPointerInfo();
-      if (info == null) {
-        return false;
-      }
-      return new ViewTransferHandler().hangAtScreen(info.getLocation());
+      return hangScreen(overOrPointer());
     } catch (Exception e) {
       return false;
     }
   }
 
-  /** Headed X11: native drop often never fires; hang the View2d under the pointer. */
+  static Point overOrPointer() {
+    return lastOver != null ? lastOver : pointerLocation();
+  }
+
+  static Point pointerLocation() {
+    PointerInfo info = MouseInfo.getPointerInfo();
+    return info == null ? null : info.getLocation();
+  }
+
+  static boolean hangScreen(Point screen) {
+    return screen != null && new ViewTransferHandler().hangAtScreen(screen);
+  }
+
+  public static void overAt(Point screen) {
+    lastOver = screen;
+  }
+
+  public static Point lastOver() {
+    return lastOver;
+  }
+
+  /**
+   * Headed X11: {@code mouseReleased} is swallowed after {@code exportAsDrag}; hang the layout cell
+   * under the pointer (view-grid bounds, not glass-local View2d boxes).
+   */
   public boolean hangAtScreen(Point screen) {
     MediaSeries<?> series = dragged();
     JComponent cell = screenView(screen);
@@ -137,11 +172,45 @@ public class ViewTransferHandler extends TransferHandler {
   }
 
   static JComponent screenView(Point screen) {
-    ImageViewerPlugin<?> plugin = UICore.getInstance().getFocusedImagePlugin();
-    if (plugin == null || screen == null) {
+    ImageViewerPlugin<?> plugin = pluginAt(screen);
+    if (plugin == null) {
       return null;
     }
-    return plugin.dropCellAtScreen(screen);
+    JComponent cell = plugin.dropCellAtScreen(screen);
+    return cell != null ? cell : plugin;
+  }
+
+  static ImageViewerPlugin<?> pluginAt(Point screen) {
+    ImageViewerPlugin<?> focused = UICore.getInstance().getFocusedImagePlugin();
+    if (covers(focused, screen)) {
+      return focused;
+    }
+    return coveredOpen(screen);
+  }
+
+  static ImageViewerPlugin<?> coveredOpen(Point screen) {
+    for (ViewerPlugin<?> p : UICore.getInstance().getOpenViewerPlugins()) {
+      if (p instanceof ImageViewerPlugin<?> image && covers(image, screen)) {
+        return image;
+      }
+    }
+    return null;
+  }
+
+  static boolean covers(JComponent c, Point screen) {
+    Rectangle box = screenBox(c);
+    return box != null && screen != null && box.contains(screen);
+  }
+
+  static Rectangle screenBox(JComponent c) {
+    if (c == null || !c.isShowing()) {
+      return null;
+    }
+    try {
+      return new Rectangle(c.getLocationOnScreen(), c.getSize());
+    } catch (IllegalComponentStateException e) {
+      return null;
+    }
   }
 
   public Transferable seriesTransferable(MediaSeries<?> series) {
@@ -343,7 +412,14 @@ public class ViewTransferHandler extends TransferHandler {
 
     @Override
     public void dragOver(DropTargetDragEvent e) {
+      rememberOver(e);
       acceptIfDragging(e);
+    }
+
+    void rememberOver(DropTargetDragEvent e) {
+      if (host.isShowing() && takes(e)) {
+        lastOver = toScreen(host, e.getLocation());
+      }
     }
 
     @Override
@@ -376,6 +452,60 @@ public class ViewTransferHandler extends TransferHandler {
     static boolean takes(DropTargetDragEvent e) {
       return dragged() != null
           || ImageTransferHandler.flavorIn(e.getCurrentDataFlavors(), SERIES_FLAVOR);
+    }
+  }
+
+  static final class DragFill extends DragSourceAdapter
+      implements DragSourceMotionListener, AWTEventListener {
+    static final DragFill INSTANCE = new DragFill();
+    private boolean armed;
+
+    static void arm() {
+      INSTANCE.armOnce();
+    }
+
+    void armOnce() {
+      if (armed) {
+        return;
+      }
+      armed = true;
+      DragSource src = DragSource.getDefaultDragSource();
+      src.addDragSourceListener(this);
+      src.addDragSourceMotionListener(this);
+      Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK);
+    }
+
+    @Override
+    public void dragDropEnd(DragSourceDropEvent e) {
+      if (dragged() == null) {
+        return;
+      }
+      hangScreen(lastOver != null ? lastOver : dropPoint(e));
+    }
+
+    static Point dropPoint(DragSourceDropEvent e) {
+      return e == null ? pointerLocation() : new Point(e.getX(), e.getY());
+    }
+
+    @Override
+    public void dragMouseMoved(DragSourceDragEvent e) {
+      if (e != null) {
+        lastOver = new Point(e.getX(), e.getY());
+      }
+    }
+
+    @Override
+    public void eventDispatched(AWTEvent event) {
+      if (releaseWhileDrag(event) instanceof MouseEvent me) {
+        hangScreen(me.getLocationOnScreen());
+      }
+    }
+
+    static MouseEvent releaseWhileDrag(AWTEvent event) {
+      if (dragging() == null || !(event instanceof MouseEvent me)) {
+        return null;
+      }
+      return me.getID() == MouseEvent.MOUSE_RELEASED ? me : null;
     }
   }
 

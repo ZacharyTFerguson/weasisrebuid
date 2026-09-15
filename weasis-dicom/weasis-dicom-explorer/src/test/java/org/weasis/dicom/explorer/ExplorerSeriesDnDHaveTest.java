@@ -23,13 +23,16 @@ import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DragSource;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.dcm4che3.data.UID;
 import org.junit.jupiter.api.Test;
+import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
+import org.weasis.core.api.media.data.Series;
 import org.weasis.core.api.media.data.SeriesThumbnail;
 import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.api.service.UICore;
@@ -215,6 +218,46 @@ class ExplorerSeriesDnDHaveTest {
     } finally {
       HangingProtocolOpenHaveTest.close(core, factory);
     }
+  }
+
+  @Test
+  void explorerSeriesWithoutUriCopiesPaintedImageOntoBottomLeft() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      JPanel glass = hostOver(container);
+      View2d primary = container.getLayoutViews().get(0);
+      BufferedImage img = new BufferedImage(4, 4, BufferedImage.TYPE_BYTE_GRAY);
+      primary.setSourceImage(img);
+      View2d bottomLeft = container.getLayoutViews().get(2);
+      Series<MediaElement> explorer = new Series<>(seriesUid(primary.getSeries()));
+      explorer.addMedia(new MediaElement());
+      ViewTransferHandler drop = new ViewTransferHandler();
+      ViewTransferHandler.beginDrag(explorer);
+      try {
+        assertTrue(
+            drop.importAt(glass, overCell(container, glass, 2), drop.seriesTransferable(explorer)));
+      } finally {
+        ViewTransferHandler.endDrag();
+      }
+      assertSame(img, bottomLeft.getSourceImage());
+      assertEquals("2.25.dx.pa", seriesUid(bottomLeft.getSeries()));
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  @Test
+  void overAtIsUsedByHangAtPointer() {
+    Point screen = new Point(12, 34);
+    ViewTransferHandler.overAt(screen);
+    assertEquals(screen, ViewTransferHandler.lastOver());
+    ViewTransferHandler.clearDragged();
   }
 
   @Test
