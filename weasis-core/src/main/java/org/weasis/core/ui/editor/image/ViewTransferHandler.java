@@ -32,8 +32,12 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.AWTEventListener;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import javax.swing.JComponent;
+import javax.swing.JList;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.weasis.core.api.media.data.MediaSeries;
@@ -48,6 +52,11 @@ import org.weasis.core.ui.util.UriListFlavor;
 public class ViewTransferHandler extends TransferHandler {
 
   public static final DataFlavor SERIES_FLAVOR = new DataFlavor(MediaSeries.class, "MediaSeries");
+
+  /** Client property on explorer {@link JList} rows: {@code List<MediaSeries<?>>}. */
+  public static final String SERIES_ROWS = "weasis.series.rows";
+
+  static final String DND_LOG = "/tmp/weasis-dnd.log";
 
   private static MediaSeries<?> dragging;
   private static MediaSeries<?> lastDragged;
@@ -106,6 +115,22 @@ public class ViewTransferHandler extends TransferHandler {
     lastDragged = series;
     lastOver = null;
     DragFill.arm();
+    dndLog("beginDrag", series);
+  }
+
+  /** Left-press on an explorer series {@link JList} arms {@link #dragging()} without native DnD. */
+  public static void pressSeries(JList<?> list, MouseEvent e) {
+    if (!leftSeriesPress(list, e)) {
+      return;
+    }
+    MediaSeries<?> series = DragFill.seriesInList(list, e.getPoint());
+    if (series != null) {
+      beginDrag(series);
+    }
+  }
+
+  static boolean leftSeriesPress(JList<?> list, MouseEvent e) {
+    return list != null && e != null && SwingUtilities.isLeftMouseButton(e);
   }
 
   public static void endDrag() {
@@ -181,6 +206,7 @@ public class ViewTransferHandler extends TransferHandler {
   public boolean hangAtScreen(Point screen) {
     MediaSeries<?> series = dragged();
     JComponent cell = screenView(screen);
+    dndLog("hangAtScreen", "pointer=" + screen + " series=" + series + " cell=" + cell);
     if (series != null && cell != null && dropSeries(cell, series)) {
       lastMiss = "";
       return true;
@@ -193,7 +219,33 @@ public class ViewTransferHandler extends TransferHandler {
 
   static void dumpMiss(Point screen, JComponent cell, MediaSeries<?> series) {
     lastMiss = missText(screen, cell, series);
-    System.err.println(lastMiss);
+    dndLog("lastMiss", lastMiss);
+  }
+
+  static void dndLog(String kind, Object detail) {
+    String line = kind + " " + detail;
+    System.err.println(line);
+    appendDnd(line);
+  }
+
+  static void appendDnd(String line) {
+    try {
+      Files.writeString(
+          Path.of(DND_LOG),
+          line + System.lineSeparator(),
+          StandardOpenOption.CREATE,
+          StandardOpenOption.APPEND);
+    } catch (Exception ignored) {
+      // headed greps this file; ignore a missing /tmp
+    }
+  }
+
+  static void resetDndLog() {
+    try {
+      Files.writeString(Path.of(DND_LOG), "arm DragFill" + System.lineSeparator());
+    } catch (Exception ignored) {
+      // headed greps this file; ignore a missing /tmp
+    }
   }
 
   static String missText(Point screen, JComponent cell, MediaSeries<?> series) {
@@ -516,6 +568,7 @@ public class ViewTransferHandler extends TransferHandler {
         return;
       }
       armed = true;
+      resetDndLog();
       DragSource src = DragSource.getDefaultDragSource();
       src.addDragSourceListener(this);
       src.addDragSourceMotionListener(this);
@@ -561,9 +614,65 @@ public class ViewTransferHandler extends TransferHandler {
       if (me.getID() != MouseEvent.MOUSE_PRESSED || !SwingUtilities.isLeftMouseButton(me)) {
         return;
       }
-      if (me.getComponent() instanceof SeriesThumbnail thumb) {
-        beginDrag(thumb.getSeries());
+      MediaSeries<?> series = seriesAt(me.getComponent(), me.getPoint());
+      if (series != null) {
+        beginDrag(series);
       }
+    }
+
+    static MediaSeries<?> seriesAt(Component start, Point p) {
+      return start == null ? null : seriesFrom(start, p);
+    }
+
+    static MediaSeries<?> seriesFrom(Component c, Point p) {
+      MediaSeries<?> here = seriesOf(c, p);
+      if (here != null || c.getParent() == null) {
+        return here;
+      }
+      return seriesFrom(c.getParent(), convertPoint(c, p));
+    }
+
+    static Point convertPoint(Component c, Point p) {
+      return p == null || c.getParent() == null
+          ? p
+          : SwingUtilities.convertPoint(c, p, c.getParent());
+    }
+
+    static MediaSeries<?> seriesOf(Component c, Point p) {
+      if (c instanceof SeriesThumbnail thumb) {
+        return thumb.getSeries();
+      }
+      return c instanceof JList<?> list ? seriesInList(list, p) : null;
+    }
+
+    static MediaSeries<?> seriesInList(JList<?> list, Point p) {
+      return list == null ? null : seriesAtIndex(seriesRows(list), rowIndex(list, p));
+    }
+
+    static MediaSeries<?> seriesAtIndex(List<?> rows, int i) {
+      if (rows == null || i < 0 || i >= rows.size()) {
+        return null;
+      }
+      return asSeries(rows.get(i));
+    }
+
+    static List<?> seriesRows(JList<?> list) {
+      Object rows = list.getClientProperty(SERIES_ROWS);
+      return rows instanceof List<?> listRows ? listRows : null;
+    }
+
+    static int rowIndex(JList<?> list, Point p) {
+      if (p != null) {
+        int i = list.locationToIndex(p);
+        if (i >= 0) {
+          return i;
+        }
+      }
+      return list.getSelectedIndex();
+    }
+
+    static MediaSeries<?> asSeries(Object row) {
+      return row instanceof MediaSeries<?> series ? series : null;
     }
 
     static void trackMove(MouseEvent me) {

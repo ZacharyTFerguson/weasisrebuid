@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
@@ -26,6 +27,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
@@ -384,6 +386,84 @@ class ExplorerSeriesDnDHaveTest {
   }
 
   @Test
+  void explorerSeriesRowLeftPressBeginsSeriesDragWithoutExportAsDrag() {
+    DicomExplorer explorer = explorerWith(dx("DX", "1", "2.25.dx.lat"));
+    JList<String> list = explorer.seriesList();
+    assertEquals("explorer-series", list.getName());
+    list.setSelectedIndex(0);
+    list.dispatchEvent(leftPress(list));
+    assertNotNull(ViewTransferHandler.dragging());
+    assertEquals("2.25.dx.lat", seriesUid(ViewTransferHandler.lastDragged()));
+    ViewTransferHandler.clearDragged();
+  }
+
+  @Test
+  void awtPressOnExplorerSeriesRowBeginsDragWithoutExportAsDrag() {
+    DicomExplorer explorer = explorerWith(dx("DX", "1", "2.25.dx.lat"));
+    JList<String> list = explorer.seriesList();
+    list.setSelectedIndex(0);
+    ViewTransferHandler.clearDragged();
+    ViewTransferHandler.hangFromAwt(leftPress(list));
+    assertNotNull(ViewTransferHandler.dragging());
+    assertEquals("2.25.dx.lat", seriesUid(ViewTransferHandler.lastDragged()));
+    ViewTransferHandler.clearDragged();
+  }
+
+  @Test
+  void awtPressOnSeriesThumbnailBeginsDrag() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+    SeriesThumbnail thumb = pane.thumbnails().getFirst();
+    ViewTransferHandler.clearDragged();
+    ViewTransferHandler.hangFromAwt(leftPress(thumb));
+    assertSame(thumb.getSeries(), ViewTransferHandler.dragging());
+    ViewTransferHandler.clearDragged();
+  }
+
+  @Test
+  void awtPressOnPlainListDoesNotBeginDrag() {
+    JList<String> list = new JList<>(new String[] {"x"});
+    list.setSelectedIndex(0);
+    ViewTransferHandler.clearDragged();
+    ViewTransferHandler.hangFromAwt(leftPress(list));
+    assertNull(ViewTransferHandler.dragging());
+  }
+
+  @Test
+  void explorerSeriesRowPressThenDropFills2x2BottomLeftWithoutNewTab() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      View2d bottomLeft = container.getLayoutViews().get(2);
+      DicomExplorer explorer = explorerWith(dx("DX", "1", "2.25.dx.lat"));
+      JList<String> list = explorer.seriesList();
+      list.setSelectedIndex(0);
+      list.dispatchEvent(leftPress(list));
+      assertNotNull(ViewTransferHandler.dragging());
+      Transferable transferable =
+          new ViewTransferHandler().seriesTransferable(ViewTransferHandler.dragging());
+      ViewTransferHandler drop = (ViewTransferHandler) bottomLeft.getTransferHandler();
+      try {
+        assertTrue(drop.importData(bottomLeft, transferable));
+      } finally {
+        ViewTransferHandler.endDrag();
+      }
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertNull(container.getLayoutViews().get(1).getSeries());
+      assertEquals("2.25.dx.lat", seriesUid(bottomLeft.getSeries()));
+      assertNull(container.getLayoutViews().get(3).getSeries());
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  @Test
   void leftDragBelowThresholdDoesNotExport() {
     SeriesPane pane = new SeriesPane();
     pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
@@ -449,6 +529,25 @@ class ExplorerSeriesDnDHaveTest {
             far());
     assertEquals(0, right.exports);
     ViewTransferHandler.clearDragged();
+  }
+
+  static DicomExplorer explorerWith(ImportedInstance inst) {
+    DicomModel model = new DicomModel();
+    model.addInstance(inst);
+    return new DicomExplorer(model);
+  }
+
+  static MouseEvent leftPress(Component c) {
+    return new MouseEvent(
+        c,
+        MouseEvent.MOUSE_PRESSED,
+        0L,
+        InputEvent.BUTTON1_DOWN_MASK,
+        0,
+        0,
+        1,
+        false,
+        MouseEvent.BUTTON1);
   }
 
   static CountExport dragAt(

@@ -12,6 +12,8 @@ package org.weasis.dicom.explorer;
 import java.awt.BorderLayout;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -24,7 +26,9 @@ import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.gui.util.GuiExecutor;
+import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.docking.PluginTool;
+import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.explorer.main.DicomPaneManager;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
@@ -68,7 +72,26 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     add(hierarchy, BorderLayout.NORTH);
     add(new JScrollPane(list), BorderLayout.CENTER);
     add(DicomTaskManager.getInstance().getLoadingPanel(), BorderLayout.SOUTH);
+    list.setName("explorer-series");
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+    list.addMouseListener(seriesRowPress());
+  }
+
+  MouseAdapter seriesRowPress() {
+    return new MouseAdapter() {
+      @Override
+      public void mousePressed(MouseEvent e) {
+        onSeriesRowPress(e);
+      }
+    };
+  }
+
+  void onSeriesRowPress(MouseEvent e) {
+    int i = list.locationToIndex(e.getPoint());
+    if (i >= 0) {
+      thumbs.pressed(i, e);
+    }
+    ViewTransferHandler.pressSeries(list, e);
   }
 
   void bindModel() {
@@ -112,25 +135,44 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   public void refresh() {
     panes.refresh();
     listModel.clear();
+    List<String> labels = new ArrayList<>();
+    List<MediaSeries<?>> rows = new ArrayList<>();
+    for (ImportedInstance inst : filteredInstances()) {
+      labels.add(labelOf(inst));
+      rows.add(seriesOf(inst));
+      listModel.addElement(labels.getLast());
+    }
+    list.putClientProperty(ViewTransferHandler.SERIES_ROWS, List.copyOf(rows));
+    selection.setItems(labels);
+  }
+
+  List<ImportedInstance> filteredInstances() {
+    List<ImportedInstance> out = new ArrayList<>();
     for (ImportedInstance inst :
         DicomSorter.sortSeries(patientPane.getSelectionManager().selectedInstances())) {
-      if (!seriesFilter.accept(inst)) {
-        continue;
+      if (seriesFilter.accept(inst)) {
+        out.add(inst);
       }
-      listModel.addElement(
-          inst.patientName()
-              + " / "
-              + inst.modality()
-              + " #"
-              + inst.seriesNumber()
-              + " "
-              + inst.seriesDescription());
     }
-    List<String> labels = new ArrayList<>();
-    for (int i = 0; i < listModel.size(); i++) {
-      labels.add(listModel.get(i));
-    }
-    selection.setItems(labels);
+    return out;
+  }
+
+  static String labelOf(ImportedInstance inst) {
+    return inst.patientName()
+        + " / "
+        + inst.modality()
+        + " #"
+        + inst.seriesNumber()
+        + " "
+        + inst.seriesDescription();
+  }
+
+  MediaSeries<?> seriesOf(ImportedInstance inst) {
+    return studyPane.getSeriesPane().seriesFor(inst);
+  }
+
+  public JList<String> seriesList() {
+    return list;
   }
 
   public List<ViewerPlugin<?>> openSelected() {

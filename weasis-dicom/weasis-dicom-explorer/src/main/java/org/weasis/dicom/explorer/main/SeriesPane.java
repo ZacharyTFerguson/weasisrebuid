@@ -97,7 +97,7 @@ public class SeriesPane extends JPanel {
     return thumb;
   }
 
-  Series<MediaElement> seriesFor(ImportedInstance inst) {
+  public Series<MediaElement> seriesFor(ImportedInstance inst) {
     Series<MediaElement> series = new Series<>(inst.seriesUid());
     series.setMimeType(inst.mime());
     series.addMedia(mediaOf(inst));
