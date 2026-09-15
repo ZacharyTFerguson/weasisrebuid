@@ -31,9 +31,26 @@ public class LineGraphic extends AbstractDragGraphic {
     return a.distance(b);
   }
 
-  /** Physical length in mm using row spacing for vertical delta and column spacing for horizontal. */
+  /**
+   * Physical length in mm using row spacing for vertical delta and column spacing for horizontal.
+   */
   public Optional<Double> getLengthMm(ImageSpacing spacing) {
-    return Optional.empty();
+    if (spacing == null) {
+      return Optional.empty();
+    }
+    double row = spacing.rowMmPerPixel();
+    double col = spacing.colMmPerPixel();
+    if (row <= 0 || col <= 0 || !Double.isFinite(row) || !Double.isFinite(col)) {
+      return Optional.empty();
+    }
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double b = getHandlePoint(1);
+    if (a == null || b == null) {
+      return Optional.empty();
+    }
+    double dx = Math.abs(b.x - a.x);
+    double dy = Math.abs(b.y - a.y);
+    return Optional.of(Math.hypot(dx * col, dy * row));
   }
 
   @Override

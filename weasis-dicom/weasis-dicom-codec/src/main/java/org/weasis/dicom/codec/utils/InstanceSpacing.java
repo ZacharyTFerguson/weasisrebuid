@@ -11,6 +11,7 @@ package org.weasis.dicom.codec.utils;
 
 import java.util.Optional;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
 import org.weasis.core.api.image.measure.ImageSpacing;
 
 /** Resolves CT/MR patient-plane spacing from (0028,0030) PixelSpacing on one instance. */
@@ -25,6 +26,23 @@ public final class InstanceSpacing {
   private InstanceSpacing() {}
 
   public static Optional<Resolved> resolve(Attributes dataset) {
-    return Optional.empty();
+    if (dataset == null) {
+      return Optional.empty();
+    }
+    double[] values = dataset.getDoubles(Tag.PixelSpacing);
+    if (values == null || values.length != 2) {
+      return Optional.empty();
+    }
+    double row = values[0];
+    double col = values[1];
+    if (!isUsable(row) || !isUsable(col)) {
+      return Optional.empty();
+    }
+    ImageSpacing spacing = new ImageSpacing(row, col);
+    return Optional.of(new Resolved(spacing, Source.PIXEL_SPACING, ""));
+  }
+
+  private static boolean isUsable(double mm) {
+    return Double.isFinite(mm) && mm > 0;
   }
 }

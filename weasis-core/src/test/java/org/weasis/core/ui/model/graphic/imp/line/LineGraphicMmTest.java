@@ -21,8 +21,8 @@ import org.weasis.core.api.image.measure.ImageSpacing;
  * Why (0028,0030): row spacing scales vertical pixel delta, column spacing scales horizontal delta
  * (PS3.3 ordering).
  *
- * <p>Why fail-closed: {@link LineGraphic#getLengthMm} returns empty when spacing is null or
- * invalid — pixel length remains the only number.
+ * <p>Why fail-closed: {@link LineGraphic#getLengthMm} returns empty when spacing is null or invalid
+ * — pixel length remains the only number.
  *
  * <p>Why not copy Weasis: {@link LineGraphic#getLength()} stays pure pixels; mm is an additive API
  * on tag-agnostic {@link ImageSpacing}.

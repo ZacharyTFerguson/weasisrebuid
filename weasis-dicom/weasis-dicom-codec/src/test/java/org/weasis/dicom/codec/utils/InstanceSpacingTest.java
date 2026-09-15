@@ -16,12 +16,12 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import org.junit.jupiter.api.Assumptions;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.util.UIDUtils;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.api.image.measure.ImageSpacing;
@@ -33,8 +33,8 @@ import org.weasis.dicom.codec.utils.InstanceSpacing.Source;
  * Why (0028,0030) PixelSpacing: PS3.3 C.7.6.2 gives row then column spacing per instance for
  * patient-plane measurements on CT/MR.
  *
- * <p>Why fail-closed: one value, non-finite, or non-positive spacing yields empty — a guessed square
- * pixel silently doubles error on anisotropic data.
+ * <p>Why fail-closed: one value, non-finite, or non-positive spacing yields empty — a guessed
+ * square pixel silently doubles error on anisotropic data.
  *
  * <p>Why not copy Weasis: precedence and axis map are derived from the standard, not from upstream
  * calibration helpers.
@@ -76,8 +76,10 @@ class InstanceSpacingTest {
     File b = dir.resolve("b.dcm").toFile();
     SyntheticDicomFixtures.writeCtWithPixelSpacing(a, 0.50, 0.50);
     SyntheticDicomFixtures.writeCtWithPixelSpacing(b, 1.00, 1.00);
-    ImageSpacing spacingA = InstanceSpacing.resolve(readDataset(a.toPath())).orElseThrow().spacing();
-    ImageSpacing spacingB = InstanceSpacing.resolve(readDataset(b.toPath())).orElseThrow().spacing();
+    ImageSpacing spacingA =
+        InstanceSpacing.resolve(readDataset(a.toPath())).orElseThrow().spacing();
+    ImageSpacing spacingB =
+        InstanceSpacing.resolve(readDataset(b.toPath())).orElseThrow().spacing();
     double mmA = horizontalLineMm(spacingA, 10);
     double mmB = horizontalLineMm(spacingB, 10);
     assertEquals(5.0, mmA, 1e-9);
