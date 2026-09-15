@@ -20,8 +20,8 @@ import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.util.Toolbar;
 
 /**
- * Measure/draw chrome. Buttons are SHORTCUTS.md tools (D distance, A angle, Y polyline, B textbox, G
- * draw rectangle). Selecting a tool sets the left mouse action to {@code measure}.
+ * Measure/draw chrome. Buttons are SHORTCUTS.md tools (D distance, A angle, Y polyline, B textbox,
+ * G draw rectangle). Selecting a tool sets the left mouse action to {@code measure}.
  */
 public class MeasureToolBar implements Toolbar {
 
