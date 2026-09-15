@@ -9,4 +9,38 @@
  */
 package org.weasis.acquire;
 
-public class AcquireObject {}
+import java.awt.image.BufferedImage;
+import org.weasis.acquire.explorer.AcquireImageInfo;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+/** Bound photo-editor session: current image, info, and pending values. */
+public class AcquireObject {
+
+  private AcquireImageInfo imageInfo;
+  private AcquireImageValues values = new AcquireImageValues();
+  private BufferedImage image;
+
+  public AcquireImageInfo getImageInfo() {
+    return imageInfo;
+  }
+
+  public void setImageInfo(AcquireImageInfo imageInfo) {
+    this.imageInfo = imageInfo;
+  }
+
+  public AcquireImageValues getImageValues() {
+    return values;
+  }
+
+  public void setImageValues(AcquireImageValues values) {
+    this.values = values == null ? new AcquireImageValues() : values;
+  }
+
+  public BufferedImage getImage() {
+    return image;
+  }
+
+  public void setImage(BufferedImage image) {
+    this.image = image;
+  }
+}

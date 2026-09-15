@@ -9,4 +9,32 @@
  */
 package org.weasis.acquire.explorer.util;
 
-public class AbstractBean {}
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+/** Property-change bean used by acquire tag/series models. */
+public class AbstractBean<T> {
+
+  private final PropertyChangeSupport support = new PropertyChangeSupport(this);
+
+  public void addPropertyChangeListener(PropertyChangeListener listener) {
+    support.addPropertyChangeListener(listener);
+  }
+
+  public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+    support.addPropertyChangeListener(propertyName, listener);
+  }
+
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+    support.removePropertyChangeListener(listener);
+  }
+
+  public void firePropertyChange(T property, Object oldValue, Object newValue) {
+    String name = property == null ? null : property.toString();
+    support.firePropertyChange(name, oldValue, newValue);
+  }
+
+  public void firePropertyChange(String propertyName, Object oldValue, Object newValue) {
+    support.firePropertyChange(propertyName, oldValue, newValue);
+  }
+}

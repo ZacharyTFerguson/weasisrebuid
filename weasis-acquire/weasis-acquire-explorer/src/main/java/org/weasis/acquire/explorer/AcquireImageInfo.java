@@ -9,22 +9,11 @@
  */
 package org.weasis.acquire.explorer;
 
-import java.nio.file.Path;
+public class AcquireImageInfo extends AcquireMediaInfo {
 
-public class AcquireImageInfo {
-
-  private Path file;
   private String comments = "";
   private String anatomicRegionCode = "";
   private String anatomicRegionLabel = "";
-
-  public Path getFile() {
-    return file;
-  }
-
-  public void setFile(Path file) {
-    this.file = file;
-  }
 
   public String getComments() {
     return comments;

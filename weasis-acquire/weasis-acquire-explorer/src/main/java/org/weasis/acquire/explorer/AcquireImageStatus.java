@@ -9,4 +9,8 @@
  */
 package org.weasis.acquire.explorer;
 
-public class AcquireImageStatus {}
+/** Publish state for an imported acquire item. */
+public enum AcquireImageStatus {
+  TO_PUBLISH,
+  PUBLISHED
+}

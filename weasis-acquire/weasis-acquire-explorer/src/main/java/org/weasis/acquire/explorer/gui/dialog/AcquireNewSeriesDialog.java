@@ -9,4 +9,44 @@
  */
 package org.weasis.acquire.explorer.gui.dialog;
 
-public class AcquireNewSeriesDialog {}
+import java.util.List;
+import javax.swing.JTextField;
+import org.weasis.acquire.explorer.AcquireMediaInfo;
+import org.weasis.acquire.explorer.core.bean.SeriesGroup;
+
+/** Chrome that creates a {@link SeriesGroup} using NAME grouping. */
+public class AcquireNewSeriesDialog {
+
+  private final JTextField nameField = new JTextField(24);
+
+  public AcquireNewSeriesDialog() {
+    nameField.setName("seriesName");
+  }
+
+  public JTextField nameField() {
+    return nameField;
+  }
+
+  public void setSeriesName(String name) {
+    nameField.setText(name == null ? "" : name);
+  }
+
+  public String seriesName() {
+    String text = nameField.getText();
+    return text == null ? "" : text.trim();
+  }
+
+  public SeriesGroup createSeries() {
+    return new SeriesGroup(SeriesGroup.Type.NAME, seriesName());
+  }
+
+  public SeriesGroup createSeries(List<? extends AcquireMediaInfo> media) {
+    SeriesGroup group = createSeries();
+    if (media != null) {
+      for (AcquireMediaInfo item : media) {
+        group.add(item);
+      }
+    }
+    return group;
+  }
+}

@@ -9,4 +9,50 @@
  */
 package org.weasis.acquire.explorer.core.bean;
 
-public class DefaultTaggable {}
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.weasis.acquire.explorer.util.AbstractBean;
+import org.weasis.core.api.media.data.TagW;
+import org.weasis.core.api.media.data.Taggable;
+
+/** Mutable {@link Taggable} that notifies listeners when a tag changes. */
+public class DefaultTaggable extends AbstractBean<TagW> implements Taggable {
+
+  private final Map<TagW, Object> tags = new LinkedHashMap<>();
+
+  @Override
+  public void setTag(TagW tag, Object value) {
+    if (tag == null) {
+      return;
+    }
+    Object old;
+    if (value == null) {
+      old = tags.remove(tag);
+    } else {
+      old = tags.put(tag, value);
+    }
+    firePropertyChange(tag, old, value);
+  }
+
+  @Override
+  public void setTagNoNull(TagW tag, Object value) {
+    if (value != null) {
+      setTag(tag, value);
+    }
+  }
+
+  @Override
+  public boolean containTagKey(TagW tag) {
+    return tags.containsKey(tag);
+  }
+
+  @Override
+  public Object getTagValue(TagW tag) {
+    return tags.get(tag);
+  }
+
+  public Map<TagW, Object> getTagEntrySet() {
+    return Collections.unmodifiableMap(tags);
+  }
+}

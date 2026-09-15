@@ -9,4 +9,10 @@
  */
 package org.weasis.acquire.explorer.gui.central;
 
-public interface SeriesDataListener {}
+import org.weasis.acquire.explorer.core.bean.SeriesGroup;
+
+/** Notified when a {@link SeriesGroup} gains or loses media. */
+public interface SeriesDataListener {
+
+  void seriesChanged(SeriesGroup series);
+}

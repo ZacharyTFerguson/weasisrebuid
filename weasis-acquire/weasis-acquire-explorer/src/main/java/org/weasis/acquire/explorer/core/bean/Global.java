@@ -9,4 +9,35 @@
  */
 package org.weasis.acquire.explorer.core.bean;
 
-public class Global {}
+import org.weasis.acquire.explorer.PatientDemographics;
+import org.weasis.core.api.media.data.TagW;
+
+/** Patient-level tags shared by every series in the dicomizer album. */
+public class Global extends DefaultTaggable {
+
+  public void init(PatientDemographics demographics) {
+    PatientDemographics demo = demographics == null ? PatientDemographics.empty() : demographics;
+    putPatient(TagW.PatientName, demo.patientName());
+    putPatient(TagW.PatientID, demo.patientId());
+    putPatient(TagW.PatientBirthDate, demo.birthDate());
+    putPatient(TagW.PatientSex, demo.sex());
+    putPatient(TagW.AccessionNumber, demo.accessionNumber());
+  }
+
+  public boolean hasPatientTags() {
+    return nonBlank(TagW.PatientName) || nonBlank(TagW.PatientID);
+  }
+
+  private void putPatient(TagW tag, String value) {
+    if (value == null || value.isBlank()) {
+      setTag(tag, null);
+    } else {
+      setTag(tag, value);
+    }
+  }
+
+  private boolean nonBlank(TagW tag) {
+    Object value = getTagValue(tag);
+    return value != null && !value.toString().isBlank();
+  }
+}

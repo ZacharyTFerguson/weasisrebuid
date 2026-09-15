@@ -9,4 +9,8 @@
  */
 package org.weasis.acquire.operations;
 
-public class OpValueChanged {}
+/** Editor op that writes pending acquire values. */
+public interface OpValueChanged {
+
+  void apply();
+}
