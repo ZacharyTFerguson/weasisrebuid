@@ -231,6 +231,37 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void externalizeSelectedPluginAddsPerSeriesDockable() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    ViewerPlugin<?> second = plugin("B");
+    try {
+      core.openViewerPlugin(first);
+      core.openViewerPlugin(second);
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertEquals(2, win.getDockingControl().getCDockableCount());
+      core.externalizeSelectedPlugin();
+      assertEquals(ViewerPlugin.DockingState.EXTERNALIZED, second.getDockingState());
+      assertEquals(3, win.getDockingControl().getCDockableCount());
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertSame(first, win.getViewerTabs().getSelectedComponent());
+      assertSame(second, core.getSelectedViewerPlugin());
+      core.normalizeSelectedPlugin();
+      assertEquals(ViewerPlugin.DockingState.NORMAL, second.getDockingState());
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertEquals(2, win.getDockingControl().getCDockableCount());
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
   void toolbarsFollowFocusedTabSeriesViewerUi() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();

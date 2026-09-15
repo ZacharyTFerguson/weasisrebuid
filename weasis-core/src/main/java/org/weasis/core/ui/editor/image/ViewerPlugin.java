@@ -74,6 +74,7 @@ public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
   public void close() {
     openSeries.clear();
     selectedSeries = null;
+    firePropertyChange("closed", false, true);
   }
 
   @Override
@@ -107,17 +108,23 @@ public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
 
   /** Ctrl+M maximize; a second Ctrl+M restores. */
   public void maximize() {
+    DockingState old = dockingState;
     dockingState =
         dockingState == DockingState.MAXIMIZED ? DockingState.NORMAL : DockingState.MAXIMIZED;
+    firePropertyChange("dockingState", old, dockingState);
   }
 
   /** Ctrl+E externalize (when multiple screens). */
   public void externalize() {
+    DockingState old = dockingState;
     dockingState = DockingState.EXTERNALIZED;
+    firePropertyChange("dockingState", old, dockingState);
   }
 
   /** Ctrl+N normalize. */
   public void normalize() {
+    DockingState old = dockingState;
     dockingState = DockingState.NORMAL;
+    firePropertyChange("dockingState", old, dockingState);
   }
 }

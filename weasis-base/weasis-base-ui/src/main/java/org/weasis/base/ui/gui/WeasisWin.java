@@ -11,16 +11,21 @@ package org.weasis.base.ui.gui;
 
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
+import bibliothek.gui.dock.common.CLocation;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
+import java.awt.event.ContainerAdapter;
+import java.awt.event.ContainerEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -63,6 +68,7 @@ public class WeasisWin extends JFrame {
   private DefaultSingleCDockable explorerDock;
   private DefaultSingleCDockable viewerDock;
   private DataExplorerView explorerView;
+  private final Map<String, DefaultSingleCDockable> seriesDocks = new LinkedHashMap<>();
 
   public WeasisWin() {
     super(windowTitle());
@@ -87,6 +93,13 @@ public class WeasisWin extends JFrame {
     viewerTabs.setName("viewer-tabs");
     TabPlacement.apply(viewerTabs, TabPlacement.TOP);
     viewerTabs.addChangeListener(e -> onViewerTabChanged());
+    viewerTabs.addContainerListener(
+        new ContainerAdapter() {
+          @Override
+          public void componentAdded(ContainerEvent e) {
+            bindPluginDocking(e.getChild());
+          }
+        });
     dockingControl = new CControl(this);
     explorerDock = uncloseableDock("explorer", "Explorer", explorerHost);
     viewerDock = uncloseableDock("viewer", "Viewer", viewerTabs);
@@ -135,6 +148,74 @@ public class WeasisWin extends JFrame {
       return;
     }
     toolbars.replaceViewerBars(plugin.getSeriesViewerUI().getToolBar(), plugin);
+  }
+
+  void bindPluginDocking(Component child) {
+    if (!(child instanceof ViewerPlugin<?> plugin) || dockingBound(plugin)) {
+      return;
+    }
+    plugin.putClientProperty("dockingBound", Boolean.TRUE);
+    plugin.addPropertyChangeListener("dockingState", e -> applyDockingState(plugin));
+    plugin.addPropertyChangeListener("closed", e -> removeSeriesDock(plugin));
+  }
+
+  static boolean dockingBound(ViewerPlugin<?> plugin) {
+    return Boolean.TRUE.equals(plugin.getClientProperty("dockingBound"));
+  }
+
+  void applyDockingState(ViewerPlugin<?> plugin) {
+    if (plugin.getDockingState() == ViewerPlugin.DockingState.EXTERNALIZED) {
+      floatPlugin(plugin);
+      return;
+    }
+    if (plugin.getDockingState() == ViewerPlugin.DockingState.NORMAL) {
+      restorePlugin(plugin);
+    }
+  }
+
+  void floatPlugin(ViewerPlugin<?> plugin) {
+    if (plugin == null || seriesDocks.containsKey(plugin.getDockableUID())) {
+      return;
+    }
+    viewerTabs.remove(plugin);
+    DefaultSingleCDockable dock = seriesDock(plugin);
+    seriesDocks.put(plugin.getDockableUID(), dock);
+    dockingControl.addDockable(dock);
+    dock.setLocation(CLocation.external(80, 80, 640, 480));
+    dock.setVisible(true);
+    UICore.getInstance().setSelectedViewerPlugin(plugin);
+  }
+
+  static DefaultSingleCDockable seriesDock(ViewerPlugin<?> plugin) {
+    DefaultSingleCDockable dock =
+        new DefaultSingleCDockable(plugin.getDockableUID(), plugin.getPluginName(), plugin);
+    dock.setCloseable(true);
+    dock.setMinimizable(true);
+    dock.setExternalizable(true);
+    return dock;
+  }
+
+  void restorePlugin(ViewerPlugin<?> plugin) {
+    DefaultSingleCDockable dock = seriesDocks.remove(plugin.getDockableUID());
+    if (dock == null) {
+      return;
+    }
+    dockingControl.removeDockable(dock);
+    reinsertTab(plugin);
+  }
+
+  void reinsertTab(ViewerPlugin<?> plugin) {
+    if (viewerTabs.indexOfComponent(plugin) < 0) {
+      viewerTabs.addTab(plugin.getPluginName(), plugin);
+    }
+    viewerTabs.setSelectedComponent(plugin);
+  }
+
+  void removeSeriesDock(ViewerPlugin<?> plugin) {
+    DefaultSingleCDockable dock = seriesDocks.remove(plugin.getDockableUID());
+    if (dock != null && dockingControl != null) {
+      dockingControl.removeDockable(dock);
+    }
   }
 
   public static String windowTitle() {
