@@ -18,13 +18,14 @@ import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.SynchView;
 
-/** One tab: ImageViewerPlugin holding a {@link View2d}. Not MPR (WP-7). */
+/** One tab: ImageViewerPlugin holding a {@link View2d}. MPR is {@code mpr.MprContainer}. */
 public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public static final String NAME = "DICOM 2D";
 
   private final View2d view2d = new View2d();
   private final List<View2d> layout = new CopyOnWriteArrayList<>();
+  private final DicomSynchManager synchManager = new DicomSynchManager();
   private int layoutIndex;
 
   public View2dContainer() {
@@ -32,12 +33,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     layout.add(view2d);
     add(view2d);
     view2d.putClientProperty(View2dContainer.class, this);
+    view2d.setSynchManager(synchManager);
+    synchManager.add(view2d);
     View2dRegistry.register(view2d);
     View2dRegistry.select(view2d);
   }
 
   public View2d getView2d() {
     return view2d;
+  }
+
+  public DicomSynchManager getSynchManager() {
+    return synchManager;
   }
 
   public List<View2d> getLayoutViews() {
@@ -48,11 +55,14 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     int count = Math.max(1, n);
     while (layout.size() < count) {
       View2d extra = new View2d();
+      extra.setSynchManager(synchManager);
+      synchManager.add(extra);
       layout.add(extra);
       View2dRegistry.register(extra);
     }
     while (layout.size() > count) {
       View2d removed = layout.remove(layout.size() - 1);
+      synchManager.remove(removed);
       View2dRegistry.unregister(removed);
     }
     layoutIndex = Math.min(layoutIndex, layout.size() - 1);

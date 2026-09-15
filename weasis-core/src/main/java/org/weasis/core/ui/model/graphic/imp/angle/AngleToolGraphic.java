@@ -9,18 +9,53 @@
  */
 package org.weasis.core.ui.model.graphic.imp.angle;
 
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
+/** Three-point angle: handle 1 is the vertex. Shortcut A. */
 public class AngleToolGraphic extends AbstractDragGraphic {
 
   public AngleToolGraphic() {
     super(3);
   }
 
+  public double getAngleDegrees() {
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double v = getHandlePoint(1);
+    Point2D.Double b = getHandlePoint(2);
+    if (a == null || v == null || b == null) {
+      return 0;
+    }
+    double ux = a.x - v.x;
+    double uy = a.y - v.y;
+    double vx = b.x - v.x;
+    double vy = b.y - v.y;
+    double nu = Math.hypot(ux, uy);
+    double nv = Math.hypot(vx, vy);
+    if (nu == 0 || nv == 0) {
+      return 0;
+    }
+    double cos = Math.max(-1, Math.min(1, (ux * vx + uy * vy) / (nu * nv)));
+    return Math.toDegrees(Math.acos(cos));
+  }
+
   @Override
   public void buildShape() {
-    setShape(null);
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double v = getHandlePoint(1);
+    Point2D.Double b = getHandlePoint(2);
+    if (a == null || v == null || b == null) {
+      setShape(null);
+      return;
+    }
+    Path2D path = new Path2D.Double();
+    path.moveTo(a.x, a.y);
+    path.lineTo(v.x, v.y);
+    path.lineTo(b.x, b.y);
+    setShape(path);
+    setLabel(new String[] {String.format("%.1f°", getAngleDegrees())});
   }
 
   @Override

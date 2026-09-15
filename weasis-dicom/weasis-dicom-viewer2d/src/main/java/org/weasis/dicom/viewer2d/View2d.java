@@ -55,6 +55,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
     this.window = fileWl.getWindow();
     this.level = fileWl.getLevel();
+    setFrameOfReferenceUID(dataset.getString(Tag.FrameOfReferenceUID, ""));
     applyDatasetFlags();
     render();
   }
@@ -212,20 +213,6 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   @Override
   protected ImageViewerEventManager createEventManager() {
-    return new View2dEventManager(this);
-  }
-
-  static final class View2dEventManager extends ImageViewerEventManager {
-    private final View2d view2d;
-
-    View2dEventManager(View2d view) {
-      super(view);
-      this.view2d = view;
-    }
-
-    @Override
-    protected void applyWindowLevel(int dx, int dy) {
-      view2d.setWindowLevel(view2d.getWindow() + dx, view2d.getLevel() - dy);
-    }
+    return new EventManager(this);
   }
 }

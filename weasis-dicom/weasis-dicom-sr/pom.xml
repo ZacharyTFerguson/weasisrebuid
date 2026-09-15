@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis.dicom</groupId>
+    <artifactId>weasis-dicom-parent</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../weasis-dicom-parent/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>weasis-dicom-sr</artifactId>
+  <name>DICOM SR Viewer</name>
+  <description>DICOM SR Viewer</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.weasis.dicom</groupId>
+      <artifactId>weasis-dicom-codec</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.service.component.annotations</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>osgi.core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd><![CDATA[
+Bundle-SymbolicName: org.weasis.dicom.sr
+Bundle-Name: DICOM SR Viewer
+-dsannotations: *
+Export-Package: !org.weasis.dicom.sr.internal.*, org.weasis.dicom.sr
+Import-Package: org.weasis.core.*,org.weasis.dicom.codec.*,org.osgi.service.component;resolution:=optional,*
+]]></bnd>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

@@ -11,6 +11,7 @@
     <relativePath>../weasis-parent/pom.xml</relativePath>
   </parent>
 
+  <groupId>org.weasis.base</groupId>
   <artifactId>weasis-base</artifactId>
   <packaging>pom</packaging>
   <name>Weasis base</name>
@@ -18,5 +19,7 @@
   <modules>
     <module>weasis-base-parent</module>
     <module>weasis-base-ui</module>
+    <module>weasis-base-explorer</module>
+    <module>weasis-base-viewer2d</module>
   </modules>
 </project>

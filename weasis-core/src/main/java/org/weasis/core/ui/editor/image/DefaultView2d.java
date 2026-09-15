@@ -47,6 +47,9 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private volatile double rotation;
   private volatile int frameIndex;
   private volatile SynchView synch = SynchView.STACK;
+  private volatile SynchData synchData = new SynchData();
+  private volatile SynchManager synchManager;
+  private volatile String frameOfReferenceUID = "";
   private volatile boolean freezeParameters;
   private volatile boolean freezeImage;
   private volatile String lossyLabel = "";
@@ -182,7 +185,14 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   }
 
   public void setFrameIndex(int frameIndex) {
+    setFrameIndex(frameIndex, true);
+  }
+
+  public void setFrameIndex(int frameIndex, boolean propagate) {
     this.frameIndex = Math.max(0, frameIndex);
+    if (propagate && synchManager != null && synch != SynchView.NONE) {
+      synchManager.onFrame(this);
+    }
   }
 
   public SynchView getSynch() {
@@ -191,6 +201,32 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
 
   public void setSynch(SynchView synch) {
     this.synch = synch == null ? SynchView.NONE : synch;
+    synchData.setMode(SynchData.Mode.fromView(this.synch));
+  }
+
+  public SynchData getSynchData() {
+    return synchData;
+  }
+
+  public void setSynchData(SynchData synchData) {
+    this.synchData = synchData == null ? new SynchData() : synchData;
+    this.synch = this.synchData.getMode().toView();
+  }
+
+  public SynchManager getSynchManager() {
+    return synchManager;
+  }
+
+  public void setSynchManager(SynchManager synchManager) {
+    this.synchManager = synchManager;
+  }
+
+  public String getFrameOfReferenceUID() {
+    return frameOfReferenceUID;
+  }
+
+  public void setFrameOfReferenceUID(String frameOfReferenceUID) {
+    this.frameOfReferenceUID = frameOfReferenceUID == null ? "" : frameOfReferenceUID;
   }
 
   public boolean isFreezeParameters() {

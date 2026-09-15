@@ -21,6 +21,10 @@ public final class DicomMime {
   public static final String PR_DICOM = "pr/dicom";
   public static final String KO_DICOM = "ko/dicom";
   public static final String SEG_DICOM = "seg/dicom";
+  public static final String SR_DICOM = "sr/dicom";
+  public static final String AU_DICOM = "au/dicom";
+  public static final String WAVE_DICOM = "wave/dicom";
+  public static final String RT_DICOM = "rt/dicom";
   public static final String ENCAP_DICOM = "encap/dicom";
   public static final String UNREADABLE_DICOM = "unreadable/dicom";
 
@@ -46,7 +50,52 @@ public final class DicomMime {
     if (isVideoSop(sopClassUid)) {
       return VIDEO_DICOM;
     }
+    if (isStructuredReport(sopClassUid)) {
+      return SR_DICOM;
+    }
+    if (isAudio(sopClassUid)) {
+      return AU_DICOM;
+    }
+    if (isWaveform(sopClassUid)) {
+      return WAVE_DICOM;
+    }
+    if (isRt(sopClassUid)) {
+      return RT_DICOM;
+    }
     return IMAGE_DICOM;
+  }
+
+  static boolean isStructuredReport(String uid) {
+    return UID.BasicTextSRStorage.equals(uid)
+        || UID.EnhancedSRStorage.equals(uid)
+        || UID.ComprehensiveSRStorage.equals(uid)
+        || UID.Comprehensive3DSRStorage.equals(uid)
+        || UID.MammographyCADSRStorage.equals(uid)
+        || UID.ChestCADSRStorage.equals(uid)
+        || UID.XRayRadiationDoseSRStorage.equals(uid)
+        || UID.ExtensibleSRStorage.equals(uid);
+  }
+
+  static boolean isAudio(String uid) {
+    return UID.BasicVoiceAudioWaveformStorage.equals(uid)
+        || UID.GeneralAudioWaveformStorage.equals(uid);
+  }
+
+  static boolean isWaveform(String uid) {
+    return UID.TwelveLeadECGWaveformStorage.equals(uid)
+        || UID.GeneralECGWaveformStorage.equals(uid)
+        || UID.AmbulatoryECGWaveformStorage.equals(uid)
+        || UID.HemodynamicWaveformStorage.equals(uid)
+        || UID.CardiacElectrophysiologyWaveformStorage.equals(uid);
+  }
+
+  static boolean isRt(String uid) {
+    return UID.RTStructureSetStorage.equals(uid)
+        || UID.RTPlanStorage.equals(uid)
+        || UID.RTDoseStorage.equals(uid)
+        || UID.RTImageStorage.equals(uid)
+        || UID.RTIonPlanStorage.equals(uid)
+        || UID.RTIonBeamsTreatmentRecordStorage.equals(uid);
   }
 
   static boolean isPresentationState(String uid) {
