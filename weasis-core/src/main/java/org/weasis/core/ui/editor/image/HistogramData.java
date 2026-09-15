@@ -3,7 +3,7 @@
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
- * License, Version 2.0 which is available at https://www.eclipse.org/licenses/LICENSE-2.0.
+ * License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
@@ -275,10 +275,8 @@ public class HistogramData {
     int range = Math.max(1, maxValue - minValue);
     int from = minValue + (int) Math.round(index * (double) range / Math.max(1, bins.length - 1));
     int to =
-        minValue
-            + (int) Math.round((index + 1) * (double) range / Math.max(1, bins.length - 1));
-    return new BinInfo(
-        index, bins[index], from, to, modalityValue(from), modalityValue(to));
+        minValue + (int) Math.round((index + 1) * (double) range / Math.max(1, bins.length - 1));
+    return new BinInfo(index, bins[index], from, to, modalityValue(from), modalityValue(to));
   }
 
   public BinInfo hit(int x, int width) {
@@ -352,12 +350,7 @@ public class HistogramData {
     private final double modalityTo;
 
     public BinInfo(
-        int index,
-        int count,
-        int valueFrom,
-        int valueTo,
-        double modalityFrom,
-        double modalityTo) {
+        int index, int count, int valueFrom, int valueTo, double modalityFrom, double modalityTo) {
       this.index = index;
       this.count = count;
       this.valueFrom = valueFrom;
