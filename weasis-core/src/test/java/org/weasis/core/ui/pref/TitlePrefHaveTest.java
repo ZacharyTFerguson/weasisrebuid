@@ -15,6 +15,9 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+import javax.swing.JFormattedTextField;
+import javax.swing.JSpinner;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.gui.util.AbstractItemDialogPage;
@@ -134,6 +137,31 @@ class TitlePrefHaveTest {
         view.getMonitorCalibrationMmPerPixel(), view.getSessionManualCalibrationMmPerPixel());
     page.resetToDefaultValues();
     assertEquals(ScreenPrefView.DEFAULT_PITCH_MM, page.pitchXmm(), 1e-9);
+  }
+
+  @Test
+  void preferenceOkStoresTypedPitchAndReloadShowsSameValue() {
+    String previous = System.getProperty(ScreenPrefView.PREF_PITCH);
+    try {
+      WProperties prefs = new WProperties();
+      ScreenPrefView page = new ScreenPrefView(new Monitor(null), prefs);
+      assertEquals(ScreenPrefView.DEFAULT_PITCH_MM, page.pitchXmm(), 1e-9);
+      typePitch(page, "0.35");
+      PreferenceDialog dialog = new PreferenceDialog(null, List.of(page));
+      dialog.applyAndClose();
+      assertEquals(0.35, prefs.getDoubleProperty(ScreenPrefView.PREF_PITCH, 0), 1e-9);
+      assertEquals("0.35", System.getProperty(ScreenPrefView.PREF_PITCH));
+      ScreenPrefView reloaded = new ScreenPrefView(new Monitor(null), prefs);
+      assertEquals(0.35, reloaded.pitchXmm(), 1e-9);
+    } finally {
+      restore(ScreenPrefView.PREF_PITCH, previous);
+    }
+  }
+
+  static void typePitch(ScreenPrefView page, String raw) {
+    JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) page.pitchSpinner().getEditor();
+    JFormattedTextField field = editor.getTextField();
+    field.setText(raw);
   }
 
   private static void restore(String key, String previous) {
