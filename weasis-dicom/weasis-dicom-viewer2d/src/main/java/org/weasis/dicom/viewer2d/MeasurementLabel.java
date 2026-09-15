@@ -52,7 +52,10 @@ public final class MeasurementLabel {
     return String.format(Locale.US, "%.1f px", px);
   }
 
-  /** Enough fraction digits for spacing math (e.g. 10 px × 0.15 ÷ 1.2 → 1.25 mm, not 1.3). */
+  /**
+   * Enough fraction digits for spacing math so magnification divides do not round 1.25 mm to 1.3
+   * (e.g. 10 px × 0.15 ÷ 1.2).
+   */
   static String formatMm(double mm) {
     long cents = Math.round(mm * 100.0);
     double value = cents / 100.0;
