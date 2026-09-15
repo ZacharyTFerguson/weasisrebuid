@@ -10,6 +10,7 @@
 package org.weasis.dicom.codec.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Point2D;
@@ -30,19 +31,21 @@ import org.weasis.dicom.codec.utils.InstanceSpacing.Resolved;
 import org.weasis.dicom.codec.utils.InstanceSpacing.Source;
 
 /**
- * Why (0028,0030) PixelSpacing: PS3.3 C.7.6.2 gives row then column spacing per instance for
- * patient-plane measurements on CT/MR.
+ * Why (0028,0030) PixelSpacing / (0018,1164) ImagerPixelSpacing: PS3.3 row-first patient spacing vs
+ * detector pitch; DX magnification divides detector pitch by M when evidence exists.
  *
- * <p>Why fail-closed: one value, non-finite, or non-positive spacing yields empty — a guessed
- * square pixel silently doubles error on anisotropic data.
+ * <p>Why fail-closed: bad PixelSpacing → empty; no mag → detector mm + warn; ERMF vs SID/SOD
+ * conflict → no silent object mm; mag present still warns (SOD ≠ lesion).
  *
- * <p>Why not copy Weasis: precedence and axis map are derived from the standard, not from upstream
+ * <p>Why not copy Weasis: precedence and axis map are derived from the standard, not upstream
  * calibration helpers.
  *
- * <p>Why this fixture: round-trip CTs share isotropic 0.80 mm; anisotropic synthetics (0.50/0.25,
- * 0.50 vs 1.00) are the tests that reject a hard-coded 0.80 in production code.
+ * <p>Why this fixture: round-trip CTs share isotropic 0.80 mm; anisotropic synthetics reject a
+ * hard-coded 0.80 in production code.
  */
 class InstanceSpacingTest {
+
+  // --- Slice 1 (CT/MR PixelSpacing) — landed with #27 ---
 
   @Test
   void ctFixturesResolveRowAndColumnFromPixelSpacing() throws Exception {
@@ -54,8 +57,8 @@ class InstanceSpacingTest {
       Attributes dcm = readDataset(pack.resolve(name));
       Resolved resolved = InstanceSpacing.resolve(dcm).orElseThrow();
       assertEquals(Source.PIXEL_SPACING, resolved.source());
-      assertEquals(0.80, resolved.spacing().rowMmPerPixel(), 1e-9);
-      assertEquals(0.80, resolved.spacing().colMmPerPixel(), 1e-9);
+      assertEquals(0.80, resolved.spacing().rowMm(), 1e-9);
+      assertEquals(0.80, resolved.spacing().colMm(), 1e-9);
       assertTrue(resolved.warning().isEmpty());
     }
   }
@@ -66,8 +69,8 @@ class InstanceSpacingTest {
     SyntheticDicomFixtures.writeCtWithPixelSpacing(file, 0.50, 0.25);
     Attributes dcm = readDataset(file.toPath());
     ImageSpacing spacing = InstanceSpacing.resolve(dcm).orElseThrow().spacing();
-    assertEquals(0.50, spacing.rowMmPerPixel(), 1e-9);
-    assertEquals(0.25, spacing.colMmPerPixel(), 1e-9);
+    assertEquals(0.50, spacing.rowMm(), 1e-9);
+    assertEquals(0.25, spacing.colMm(), 1e-9);
   }
 
   @Test
@@ -114,11 +117,127 @@ class InstanceSpacingTest {
     assertTrue(InstanceSpacing.resolve(dcm).isEmpty());
   }
 
+  // --- Slice 2 (DX/CR imager + magnification) ---
+
+  @Test
+  void dxFixturesImagerOnlyAreDetectorMmWithWarning() throws Exception {
+    Path pack = roundtripDir();
+    Assumptions.assumeTrue(Files.isDirectory(pack));
+    for (String name :
+        new String[] {"dx_chest_pa_256.dcm", "dx_hand_pa_256.dcm", "dx_knee_ap_256.dcm"}) {
+      Path file = pack.resolve(name);
+      Assumptions.assumeTrue(Files.isRegularFile(file), () -> "missing " + file);
+      Attributes dcm = readDataset(file);
+      var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+      assertEquals(0.15, resolved.spacing().rowMm(), 1e-9);
+      assertEquals(0.15, resolved.spacing().colMm(), 1e-9);
+      assertEquals(Source.IMAGER_DETECTOR, resolved.source());
+      assertFalse(resolved.warning().isBlank());
+    }
+  }
+
+  @Test
+  void dxEstimatedMagnificationDividesDetectorPitch() {
+    Attributes dcm = dxImager015();
+    dcm.setDouble(Tag.EstimatedRadiographicMagnificationFactor, VR.DS, 1.2);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(0.125, resolved.spacing().rowMm(), 1e-9);
+    assertEquals(0.125, resolved.spacing().colMm(), 1e-9);
+    assertEquals(Source.IMAGER_OBJECT_ESTIMATE, resolved.source());
+    assertFalse(resolved.warning().isBlank());
+  }
+
+  @Test
+  void dxSidSodComputesMagnificationWhenFactorAbsent() {
+    Attributes dcm = dxImager015();
+    dcm.setDouble(Tag.DistanceSourceToDetector, VR.DS, 1000);
+    dcm.setDouble(Tag.DistanceSourceToPatient, VR.DS, 800);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(0.12, resolved.spacing().rowMm(), 1e-9);
+    assertEquals(0.12, resolved.spacing().colMm(), 1e-9);
+    assertEquals(Source.IMAGER_OBJECT_ESTIMATE, resolved.source());
+    assertFalse(resolved.warning().isBlank());
+  }
+
+  @Test
+  void dxSidWithoutSodStaysDetectorWithWarning() {
+    Attributes dcm = dxImager015();
+    dcm.setDouble(Tag.DistanceSourceToDetector, VR.DS, 1000);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(0.15, resolved.spacing().rowMm(), 1e-9);
+    assertEquals(Source.IMAGER_DETECTOR, resolved.source());
+    assertFalse(resolved.warning().isBlank());
+  }
+
+  @Test
+  void dxMagnificationBelowOneIsRejected() {
+    Attributes dcm = dxImager015();
+    dcm.setDouble(Tag.EstimatedRadiographicMagnificationFactor, VR.DS, 0.9);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(0.15, resolved.spacing().rowMm(), 1e-9);
+    assertEquals(Source.IMAGER_DETECTOR, resolved.source());
+    assertFalse(resolved.warning().isBlank());
+  }
+
+  @Test
+  void dxPixelSpacingPresentWinsAndReportsCalibrationType() {
+    Attributes dcm = dxImager015();
+    dcm.setString(Tag.PixelSpacing, VR.DS, "0.20\\0.20");
+    dcm.setString(Tag.PixelSpacingCalibrationType, VR.CS, "GEOMETRY");
+    dcm.setDouble(Tag.EstimatedRadiographicMagnificationFactor, VR.DS, 1.5);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(0.20, resolved.spacing().rowMm(), 1e-9);
+    assertEquals(Source.PIXEL_SPACING_CALIBRATED, resolved.source());
+    assertTrue(resolved.note().contains("GEOMETRY"));
+  }
+
+  @Test
+  void dxErmfAndSidSodDisagree_staysDetectorWithConflictWarning() {
+    Attributes dcm = dxImager015();
+    dcm.setDouble(Tag.EstimatedRadiographicMagnificationFactor, VR.DS, 1.2);
+    dcm.setDouble(Tag.DistanceSourceToDetector, VR.DS, 1000);
+    dcm.setDouble(Tag.DistanceSourceToPatient, VR.DS, 800);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(0.15, resolved.spacing().rowMm(), 1e-9);
+    assertEquals(Source.IMAGER_DETECTOR, resolved.source());
+    assertTrue(resolved.warning().contains(InstanceSpacing.MAG_CONFLICT));
+  }
+
+  @Test
+  void dxPixelSpacingNotDividedByMagnification() {
+    Attributes dcm = dxImager015();
+    dcm.setString(Tag.PixelSpacing, VR.DS, "0.20\\0.20");
+    dcm.setDouble(Tag.EstimatedRadiographicMagnificationFactor, VR.DS, 1.5);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(0.20, resolved.spacing().colMm(), 1e-9);
+    assertEquals(Source.PIXEL_SPACING, resolved.source());
+  }
+
+  @Test
+  void dxEstimatedObjectKeepsCaveat() {
+    Attributes dcm = dxImager015();
+    dcm.setDouble(Tag.EstimatedRadiographicMagnificationFactor, VR.DS, 1.2);
+    var resolved = InstanceSpacing.resolve(dcm).orElseThrow();
+    assertEquals(Source.IMAGER_OBJECT_ESTIMATE, resolved.source());
+    assertFalse(resolved.warning().isBlank());
+    assertTrue(
+        resolved.warning().toLowerCase().contains("estimate")
+            || resolved.warning().toLowerCase().contains("sod"));
+  }
+
   private static double horizontalLineMm(ImageSpacing spacing, double pixels) {
     LineGraphic line = new LineGraphic();
     line.setHandlePoint(0, new Point2D.Double(0, 0));
     line.setHandlePoint(1, new Point2D.Double(pixels, 0));
     return line.getLengthMm(spacing).orElseThrow();
+  }
+
+  static Attributes dxImager015() {
+    Attributes dcm = new Attributes();
+    dcm.setString(Tag.SOPInstanceUID, VR.UI, UIDUtils.createUID("2.25"));
+    dcm.setString(Tag.Modality, VR.CS, "DX");
+    dcm.setString(Tag.ImagerPixelSpacing, VR.DS, "0.15\\0.15");
+    return dcm;
   }
 
   static Path roundtripDir() {

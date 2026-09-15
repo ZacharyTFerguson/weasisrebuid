@@ -38,8 +38,8 @@ public class LineGraphic extends AbstractDragGraphic {
     if (spacing == null) {
       return Optional.empty();
     }
-    double row = spacing.rowMmPerPixel();
-    double col = spacing.colMmPerPixel();
+    double row = spacing.rowMm();
+    double col = spacing.colMm();
     if (row <= 0 || col <= 0 || !Double.isFinite(row) || !Double.isFinite(col)) {
       return Optional.empty();
     }

@@ -10,4 +10,4 @@
 package org.weasis.core.api.image.measure;
 
 /** Physical spacing in mm between pixel centers: DICOM row then column (0028,0030). */
-public record ImageSpacing(double rowMmPerPixel, double colMmPerPixel) {}
+public record ImageSpacing(double rowMm, double colMm) {}
