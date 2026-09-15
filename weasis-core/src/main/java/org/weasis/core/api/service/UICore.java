@@ -389,8 +389,7 @@ public class UICore {
 
   static boolean presetModifiersBlock(KeyEvent e) {
     int mods = e.getModifiersEx();
-    int block =
-        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK | InputEvent.META_DOWN_MASK;
+    int block = InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK | InputEvent.META_DOWN_MASK;
     return (mods & block) != 0;
   }
 
