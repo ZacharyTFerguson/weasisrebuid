@@ -53,7 +53,7 @@ class ExplorerPaneHaveTest {
     explorer.patientPane().getSelectionManager().selectPatientIndex(1);
     explorer.refresh();
     assertEquals(1, explorer.seriesSelection().getItems().size());
-    assertTrue(explorer.seriesSelection().getItems().get(0).startsWith("B"));
+    assertTrue(explorer.seriesSelection().getItems().get(0).startsWith("SYNTHETIC^B"));
   }
 
   static ImportedInstance inst(String name, String id, String study, int series) {
