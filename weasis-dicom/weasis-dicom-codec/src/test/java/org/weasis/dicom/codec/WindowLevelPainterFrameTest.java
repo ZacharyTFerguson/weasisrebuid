@@ -15,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.awt.image.DataBufferByte;
 import org.dcm4che3.data.Attributes;
-import org.dcm4che3.data.Tag;
 import org.junit.jupiter.api.Test;
 import org.weasis.dicom.codec.utils.SyntheticDicomFixtures;
 
@@ -75,7 +74,10 @@ class WindowLevelPainterFrameTest {
   @Test
   void rejectsFrameIndexOutOfRange() {
     Attributes dcm = SyntheticDicomFixtures.ctMultiframe3Attributes(4, 4);
-    assertThrows(IllegalArgumentException.class, () -> WindowLevelPainter.paintMonochrome2(dcm, 3, 400, 40));
-    assertThrows(IllegalArgumentException.class, () -> WindowLevelPainter.paintMonochrome2(dcm, -1, 400, 40));
+    assertThrows(
+        IllegalArgumentException.class, () -> WindowLevelPainter.paintMonochrome2(dcm, 3, 400, 40));
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> WindowLevelPainter.paintMonochrome2(dcm, -1, 400, 40));
   }
 }

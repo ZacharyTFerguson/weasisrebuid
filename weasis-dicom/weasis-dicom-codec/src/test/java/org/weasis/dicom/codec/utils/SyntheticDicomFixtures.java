@@ -128,7 +128,9 @@ public final class SyntheticDicomFixtures {
     write(dest, fmi, dcm, ts);
   }
 
-  /** Three frames in one PixelData array; frame 0/1/2 filled with distinct constants (10, 20, 30). */
+  /**
+   * Three frames in one PixelData array; frame 0/1/2 filled with distinct constants (10, 20, 30).
+   */
   public static Attributes ctMultiframe3Attributes(int rows, int cols) {
     Attributes dcm = monochrome2Dataset(UIDUtils.createUID("2.25"), rows, cols);
     dcm.setInt(Tag.NumberOfFrames, VR.IS, 3);

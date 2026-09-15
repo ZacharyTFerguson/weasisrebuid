@@ -50,6 +50,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private File file;
   private List<Attributes> stackDatasets = List.of();
   private List<File> stackFiles = List.of();
+  private int pixelFrameIndex;
   private Optional<InstanceSpacing.Resolved> resolvedInstanceSpacing = Optional.empty();
 
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
@@ -70,10 +71,9 @@ public class View2d extends DefaultView2d<MediaElement> {
     for (File f : files) {
       DicomMediaIO io = DicomMediaIO.open(f);
       Attributes dcm = io.getDataset();
-      int frames = dcm.getInt(Tag.NumberOfFrames, 1);
-      if (frames > 1) {
-        setGeometryWarning(MULTI_FRAME_REFUSED + " (NumberOfFrames=" + frames + ")");
-        throw new IllegalArgumentException(MULTI_FRAME_REFUSED);
+      if (files.size() > 1 && dcm.getInt(Tag.NumberOfFrames, 1) > 1) {
+        throw new IllegalArgumentException(
+            "multi-frame instance cannot be combined with other stack files");
       }
       entries.add(new StackEntry(f, dcm));
     }
@@ -116,8 +116,21 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (stackDatasets.isEmpty()) {
       return;
     }
+    if (isMultiframePixelStack()) {
+      Attributes active = stackDatasets.getFirst();
+      this.dataset = active;
+      if (!stackFiles.isEmpty()) {
+        this.file = stackFiles.getFirst();
+      }
+      int frames = active.getInt(Tag.NumberOfFrames, 1);
+      pixelFrameIndex = Math.max(0, Math.min(requestedIndex, frames - 1));
+      super.setFrameIndex(pixelFrameIndex);
+      bindDataset(active);
+      return;
+    }
     int clamped = Math.max(0, Math.min(requestedIndex, stackDatasets.size() - 1));
     super.setFrameIndex(clamped);
+    pixelFrameIndex = 0;
     this.dataset = stackDatasets.get(clamped);
     if (!stackFiles.isEmpty()) {
       this.file = stackFiles.get(clamped);
@@ -125,8 +138,19 @@ public class View2d extends DefaultView2d<MediaElement> {
     bindDataset(this.dataset);
   }
 
+  private boolean isMultiframePixelStack() {
+    return stackDatasets.size() == 1 && stackDatasets.getFirst().getInt(Tag.NumberOfFrames, 1) > 1;
+  }
+
   public int getStackSize() {
+    if (isMultiframePixelStack()) {
+      return stackDatasets.getFirst().getInt(Tag.NumberOfFrames, 1);
+    }
     return stackDatasets.size();
+  }
+
+  int getPixelFrameIndex() {
+    return pixelFrameIndex;
   }
 
   @Override
@@ -194,7 +218,8 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (dataset == null) {
       return;
     }
-    BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, window, level);
+    BufferedImage painted =
+        WindowLevelPainter.paintMonochrome2(dataset, pixelFrameIndex, window, level);
     painted = applyFilterAndColor(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);

@@ -59,8 +59,11 @@ instance Attributes (the dataset at View2d.getFrameIndex(), re-read on every pag
   → MeasurementLabel.formatEllipse(RoiStats)  "-1000.0 HU (n=12)"
 ```
 
-Stack paging (`View2d.loadStack`) is **instance** paging: one `SeriesInstanceUID`, `NumberOfFrames > 1`
-refused, sorted by `InstanceNumber`. Frame-offset scroll inside one object is not implemented.
+Stack paging (`View2d.loadStack`) is **instance** paging when several files share one
+`SeriesInstanceUID`, sorted by `InstanceNumber`. A **lone** multi-frame object
+(`NumberOfFrames > 1`) scrolls by sample offset `frame · rows · columns` in `PixelData` via
+`WindowLevelPainter.paintMonochrome2(dcm, frame, w, l)`; multi-frame cannot be mixed with other
+stack files in one load.
 
 Fixture note: both round-trip CTs carry `PixelSpacing 0.80\0.80`, so the tests that prove spacing is read
 (not hard-coded) are the synthetic anisotropic / two-file cases in `InstanceSpacingTest`,
