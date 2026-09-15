@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.ui.pref;
 
 import java.util.Locale;
@@ -23,7 +22,8 @@ public class JLocaleLanguage extends JComboBox<JLocale> {
     addItem(new JLocale(Locale.JAPANESE));
     addItem(new JLocale(Locale.SIMPLIFIED_CHINESE));
     addItem(new JLocale(Locale.getDefault()));
-    setSelectedItem(new JLocale(Locale.forLanguageTag(System.getProperty("locale.lang.code", "en"))));
+    setSelectedItem(
+        new JLocale(Locale.forLanguageTag(System.getProperty("locale.lang.code", "en"))));
   }
 
   public Locale getSelectedLocale() {

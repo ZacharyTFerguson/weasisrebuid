@@ -7,10 +7,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.launcher;
 
-import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
@@ -26,10 +24,11 @@ public final class Singleton {
     try {
       Files.createDirectories(weasisHome);
       Path lockFile = weasisHome.resolve(".lock");
-      channel = FileChannel.open(
-          lockFile,
-          java.nio.file.StandardOpenOption.CREATE,
-          java.nio.file.StandardOpenOption.WRITE);
+      channel =
+          FileChannel.open(
+              lockFile,
+              java.nio.file.StandardOpenOption.CREATE,
+              java.nio.file.StandardOpenOption.WRITE);
       lock = channel.tryLock();
       return lock != null;
     } catch (Exception e) {

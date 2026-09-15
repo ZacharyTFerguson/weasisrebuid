@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.ui.tp.raven.spinner.render;
 
 import java.awt.Graphics2D;

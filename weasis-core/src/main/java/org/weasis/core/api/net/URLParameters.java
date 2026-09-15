@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.net;
 
 import java.util.Collections;
@@ -23,7 +22,8 @@ public class URLParameters {
   }
 
   public URLParameters(Map<String, String> headers, boolean httpPost) {
-    this.headers = headers == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(headers));
+    this.headers =
+        headers == null ? Map.of() : Collections.unmodifiableMap(new LinkedHashMap<>(headers));
     this.httpPost = httpPost;
   }
 

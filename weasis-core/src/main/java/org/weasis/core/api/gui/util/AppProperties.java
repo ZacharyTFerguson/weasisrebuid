@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.gui.util;
 
 import java.io.File;
@@ -18,8 +17,7 @@ public final class AppProperties {
   public static final String WEASIS_VERSION = System.getProperty("weasis.version", "4.7.3");
   public static final String WEASIS_NAME = System.getProperty("weasis.name", "Weasis");
   public static final String WEASIS_USER = System.getProperty("user.name", "user");
-  public static final File WEASIS_PATH =
-      new File(System.getProperty("user.home"), ".weasis");
+  public static final File WEASIS_PATH = new File(System.getProperty("user.home"), ".weasis");
 
   private AppProperties() {}
 

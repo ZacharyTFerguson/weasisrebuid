@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.launcher;
 
 import java.net.URI;
@@ -35,10 +34,7 @@ public class RemotePrefService {
     }
     try {
       HttpRequest req =
-          HttpRequest.newBuilder(URI.create(baseUrl))
-              .timeout(Duration.ofSeconds(10))
-              .GET()
-              .build();
+          HttpRequest.newBuilder(URI.create(baseUrl)).timeout(Duration.ofSeconds(10)).GET().build();
       HttpResponse<String> resp =
           HttpClient.newHttpClient().send(req, HttpResponse.BodyHandlers.ofString());
       p.setProperty("status", Integer.toString(resp.statusCode()));

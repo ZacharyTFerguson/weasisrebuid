@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.dicom.codec.display;
 
 import java.util.EnumMap;
@@ -26,6 +25,7 @@ public final class ModalityView {
   private ModalityView() {}
 
   public static ModalityInfoData getModalityInfos(Modality modality) {
-    return MAP.getOrDefault(modality == null ? Modality.DEFAULT : modality, MAP.get(Modality.DEFAULT));
+    return MAP.getOrDefault(
+        modality == null ? Modality.DEFAULT : modality, MAP.get(Modality.DEFAULT));
   }
 }

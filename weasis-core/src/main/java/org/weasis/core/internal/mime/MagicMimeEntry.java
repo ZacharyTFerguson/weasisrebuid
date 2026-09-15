@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.internal.mime;
 
 import java.util.Arrays;
@@ -17,7 +16,8 @@ public class MagicMimeEntry {
   private final byte[] magic;
   private final int offset;
 
-  public MagicMimeEntry(String mimeType, int offset, byte[] magic) throws InvalidMagicMimeEntryException {
+  public MagicMimeEntry(String mimeType, int offset, byte[] magic)
+      throws InvalidMagicMimeEntryException {
     if (mimeType == null || mimeType.isBlank() || magic == null || magic.length == 0) {
       throw new InvalidMagicMimeEntryException("invalid magic mime entry");
     }

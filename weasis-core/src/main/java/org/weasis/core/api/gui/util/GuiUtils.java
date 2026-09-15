@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.gui.util;
 
 import java.awt.Component;
@@ -49,7 +48,17 @@ public final class GuiUtils {
 
   public static GridBagConstraints getGridBagConstraints(int x, int y) {
     return new GridBagConstraints(
-        x, y, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(2, 2, 2, 2), 0, 0);
+        x,
+        y,
+        1,
+        1,
+        0,
+        0,
+        GridBagConstraints.WEST,
+        GridBagConstraints.NONE,
+        new Insets(2, 2, 2, 2),
+        0,
+        0);
   }
 
   public static Dimension getDimension(int w, int h) {

@@ -39,7 +39,8 @@ class OptionsTest {
 
   @Test
   void imageGetFileAndUrl() {
-    Option opt = Options.compile("f(file)u(url)").parse("-f", "/tmp/a.jpg", "-u", "https://x/y.jpg");
+    Option opt =
+        Options.compile("f(file)u(url)").parse("-f", "/tmp/a.jpg", "-u", "https://x/y.jpg");
     assertEquals("/tmp/a.jpg", opt.get("f"));
     assertEquals("https://x/y.jpg", opt.get("u"));
   }

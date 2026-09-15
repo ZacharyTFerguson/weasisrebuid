@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.dicom.codec;
 
 import java.util.ArrayList;
@@ -30,7 +29,8 @@ public abstract class AbstractKOSpecialElement extends DicomSpecialElement {
   public static String rootUid() {
     String root = System.getProperty("weasis.dicom.root.uid");
     if (root == null || root.isBlank()) {
-      root = UICore.getInstance().getSystemPreferences().getProperty("weasis.dicom.root.uid", "2.25");
+      root =
+          UICore.getInstance().getSystemPreferences().getProperty("weasis.dicom.root.uid", "2.25");
     }
     return root == null || root.isBlank() ? "2.25" : root;
   }

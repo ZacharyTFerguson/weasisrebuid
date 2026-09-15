@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.dicom.codec;
 
 /** Hidden SOP that is not shown as a thumbnail series (overlays, rejected KO). */

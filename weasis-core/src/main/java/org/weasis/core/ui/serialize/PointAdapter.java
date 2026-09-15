@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.ui.serialize;
 
 import java.awt.geom.Point2D;
@@ -26,7 +25,8 @@ public class PointAdapter {
     }
     String[] p = v.split(",");
     try {
-      return new Point2D.Double(Double.parseDouble(p[0]), p.length > 1 ? Double.parseDouble(p[1]) : 0);
+      return new Point2D.Double(
+          Double.parseDouble(p[0]), p.length > 1 ? Double.parseDouble(p[1]) : 0);
     } catch (NumberFormatException e) {
       return new Point2D.Double();
     }

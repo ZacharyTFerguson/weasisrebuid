@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.ui.editor;
 
 import java.util.Hashtable;
@@ -21,7 +20,8 @@ public class DefaultMimeAppFactory implements SeriesViewerFactory {
 
   @Override
   public boolean canReadMimeType(String mimeType) {
-    return mimeType != null && (mimeType.startsWith("application/pdf") || mimeType.startsWith("video/"));
+    return mimeType != null
+        && (mimeType.startsWith("application/pdf") || mimeType.startsWith("video/"));
   }
 
   @Override

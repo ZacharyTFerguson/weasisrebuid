@@ -7,11 +7,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.dicom.codec.geometry;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.List;
 
 public abstract class LocalizerPoster {

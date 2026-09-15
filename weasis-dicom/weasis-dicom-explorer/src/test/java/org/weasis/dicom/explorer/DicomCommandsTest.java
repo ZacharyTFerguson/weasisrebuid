@@ -21,8 +21,7 @@ class DicomCommandsTest {
   @Test
   void rsBuildsQidoUrl() {
     String out =
-        commands.rs(
-            "--url", "https://demo.orthanc-server.com/dicom-web", "-r", "patientID=5Yp0E");
+        commands.rs("--url", "https://demo.orthanc-server.com/dicom-web", "-r", "patientID=5Yp0E");
     assertTrue(out.contains("/studies"));
     assertTrue(out.contains("patientID=5Yp0E"));
   }
@@ -35,7 +34,8 @@ class DicomCommandsTest {
 
   @Test
   void getRemoteIsParsedWithoutNetwork() {
-    String out = commands.get("-r", "https://example.invalid/a.dcm", "-w", "https://example.invalid/mf.xml");
+    String out =
+        commands.get("-r", "https://example.invalid/a.dcm", "-w", "https://example.invalid/mf.xml");
     assertTrue(out.contains("remote https://example.invalid/a.dcm"));
     assertTrue(out.contains("manifest https://example.invalid/mf.xml"));
   }

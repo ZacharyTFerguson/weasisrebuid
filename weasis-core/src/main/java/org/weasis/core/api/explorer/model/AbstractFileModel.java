@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.explorer.model;
 
 import java.beans.PropertyChangeListener;
@@ -23,8 +22,7 @@ import org.weasis.core.api.media.data.TagW;
 
 public abstract class AbstractFileModel implements DataExplorerModel, TreeModel {
   private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-  private final MediaSeriesGroupNode root =
-      new MediaSeriesGroupNode(TagW.PatientID, "root");
+  private final MediaSeriesGroupNode root = new MediaSeriesGroupNode(TagW.PatientID, "root");
   private final List<Codec> codecs = new ArrayList<>();
 
   public MediaSeriesGroup getRoot() {

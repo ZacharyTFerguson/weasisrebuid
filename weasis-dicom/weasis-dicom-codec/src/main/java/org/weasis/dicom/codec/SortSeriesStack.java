@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.dicom.codec;
 
 import java.util.Comparator;
@@ -47,7 +46,8 @@ public final class SortSeriesStack {
     }
     Object sop = e.getTagValue(TagW.SOPClassUID);
     String uid = sop == null ? "" : sop.toString();
-    return uid.contains("1.2.840.10008.10.0.2.2.1.88") || uid.contains("1.2.840.10008.10.0.2.2.1.104");
+    return uid.contains("1.2.840.10008.10.0.2.2.1.88")
+        || uid.contains("1.2.840.10008.10.0.2.2.1.104");
   }
 
   static int intTag(MediaElement e, TagW tag) {

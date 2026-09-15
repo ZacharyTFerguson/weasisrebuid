@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.ui.util;
 
 import java.util.ArrayList;
@@ -15,7 +14,8 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 import javax.swing.MutableComboBoxModel;
 
-public class ArrayListComboBoxModel<E> extends AbstractListModel<E> implements MutableComboBoxModel<E> {
+public class ArrayListComboBoxModel<E> extends AbstractListModel<E>
+    implements MutableComboBoxModel<E> {
   private final List<E> items = new ArrayList<>();
   private E selected;
 

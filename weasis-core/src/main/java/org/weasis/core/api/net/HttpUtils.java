@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.net;
 
 import java.io.InputStream;
@@ -29,7 +28,8 @@ public final class HttpUtils {
     if (params != null) {
       params.getUnmodifiableHeaders().forEach(b::header);
     }
-    HttpResponse<InputStream> resp = client().send(b.GET().build(), HttpResponse.BodyHandlers.ofInputStream());
+    HttpResponse<InputStream> resp =
+        client().send(b.GET().build(), HttpResponse.BodyHandlers.ofInputStream());
     return resp.body();
   }
 }

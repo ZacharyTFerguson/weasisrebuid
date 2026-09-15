@@ -50,7 +50,8 @@ public class DefaultViewModel implements ViewModel {
 
   @Override
   public void setViewScale(double viewScale) {
-    if (viewScale == AffineTransformOp.ZOOM_BEST_FIT || viewScale == AffineTransformOp.ZOOM_REAL_SIZE) {
+    if (viewScale == AffineTransformOp.ZOOM_BEST_FIT
+        || viewScale == AffineTransformOp.ZOOM_REAL_SIZE) {
       this.viewScale = viewScale;
     } else {
       this.viewScale = Math.max(viewScaleMin, Math.min(viewScaleMax, viewScale));

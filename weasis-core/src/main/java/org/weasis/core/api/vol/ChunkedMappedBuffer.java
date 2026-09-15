@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.vol;
 
 import java.io.File;
@@ -24,7 +23,9 @@ public class ChunkedMappedBuffer implements AutoCloseable {
       return;
     }
     this.raf = new RandomAccessFile(file, "r");
-    this.buffer = raf.getChannel().map(FileChannel.MapMode.READ_ONLY, 0, Math.min(file.length(), Integer.MAX_VALUE));
+    this.buffer =
+        raf.getChannel()
+            .map(FileChannel.MapMode.READ_ONLY, 0, Math.min(file.length(), Integer.MAX_VALUE));
   }
 
   public MappedByteBuffer getBuffer() {

@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.dicom.codec.geometry;
 
 import java.util.Arrays;
@@ -47,7 +46,8 @@ public class GeometryOfSlice {
     double thick = dcm.getDouble(Tag.SliceThickness, 1.0);
     double rows = dcm.getInt(Tag.Rows, 0);
     double cols = dcm.getInt(Tag.Columns, 0);
-    return new GeometryOfSlice(row, col, ipp, new double[] {colSp, rowSp, thick}, new double[] {cols, rows});
+    return new GeometryOfSlice(
+        row, col, ipp, new double[] {colSp, rowSp, thick}, new double[] {cols, rows});
   }
 
   public double[] getRow() {

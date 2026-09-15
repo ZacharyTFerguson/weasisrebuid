@@ -7,11 +7,11 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.net.auth;
 
 public class OAuth2ServiceFactory {
-  public AuthMethod create(AuthProvider provider, AuthRegistration registration, String accessToken) {
+  public AuthMethod create(
+      AuthProvider provider, AuthRegistration registration, String accessToken) {
     String id = provider == null ? "oauth2" : provider.getName();
     return new DefaultAuthMethod(id, "Authorization", accessToken);
   }

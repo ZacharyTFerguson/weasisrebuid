@@ -37,8 +37,7 @@ class UtilsProtocolTest {
   @Test
   void splitsCloseThenGet() {
     List<String> cmds =
-        Utils.commands(
-            "$dicom:close --all $dicom:get -r \"https://example.invalid/a.dcm\"");
+        Utils.commands("$dicom:close --all $dicom:get -r \"https://example.invalid/a.dcm\"");
     assertEquals(2, cmds.size());
     assertTrue(cmds.get(0).contains("dicom:close"));
     assertTrue(cmds.get(1).contains("dicom:get"));

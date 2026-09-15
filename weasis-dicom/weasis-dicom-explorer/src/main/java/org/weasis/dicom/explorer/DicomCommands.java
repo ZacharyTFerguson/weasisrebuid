@@ -41,7 +41,8 @@ public class DicomCommands {
         continue;
       }
       try {
-        LoadLocalDicom.ImportResult result = LoadLocalDicom.importPath(new File(local), null, null, null);
+        LoadLocalDicom.ImportResult result =
+            LoadLocalDicom.importPath(new File(local), null, null, null);
         lines.add("local " + local + " imported=" + result.imported().size());
       } catch (IOException e) {
         lines.add("local " + local + " error=" + e.getMessage());

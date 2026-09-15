@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.net.auth;
 
 import java.net.http.HttpClient;
@@ -20,9 +19,7 @@ public class JavaNetHttpClient {
     if (config != null) {
       b.connectTimeout(config.getTimeout());
       b.followRedirects(
-          config.isFollowRedirects()
-              ? HttpClient.Redirect.NORMAL
-              : HttpClient.Redirect.NEVER);
+          config.isFollowRedirects() ? HttpClient.Redirect.NORMAL : HttpClient.Redirect.NEVER);
     }
     this.client = b.build();
   }

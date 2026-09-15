@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.dicom.codec;
 
 /** Grayscale / color GSPS. Applied only when {@code weasis.apply.latest.pr} is true. */

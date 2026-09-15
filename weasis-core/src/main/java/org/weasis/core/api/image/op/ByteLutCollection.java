@@ -7,7 +7,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-
 package org.weasis.core.api.image.op;
 
 import java.util.ArrayList;
@@ -18,7 +17,8 @@ public class ByteLutCollection {
   public static final String GRAY = "Gray";
   public static final String INVERSE = "Inverse";
 
-  private final List<String> luts = new ArrayList<>(List.of(GRAY, INVERSE, "Hot Iron", "PET", "Rainbow"));
+  private final List<String> luts =
+      new ArrayList<>(List.of(GRAY, INVERSE, "Hot Iron", "PET", "Rainbow"));
 
   public List<String> getLutCollection() {
     return Collections.unmodifiableList(luts);
