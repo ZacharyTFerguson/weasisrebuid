@@ -12,10 +12,10 @@ package org.weasis.core.ui.model.imp;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Point2D;
 import java.nio.file.Path;
 import java.util.List;
-import jakarta.xml.bind.annotation.XmlRootElement;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.ui.model.graphic.Graphic;

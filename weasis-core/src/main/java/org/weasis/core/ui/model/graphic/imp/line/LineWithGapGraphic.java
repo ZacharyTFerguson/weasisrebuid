@@ -9,9 +9,9 @@
  */
 package org.weasis.core.ui.model.graphic.imp.line;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import jakarta.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement(name = "LineWithGapGraphic")
 public class LineWithGapGraphic extends LineGraphic {

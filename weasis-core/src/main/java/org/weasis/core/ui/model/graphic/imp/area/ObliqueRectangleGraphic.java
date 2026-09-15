@@ -9,11 +9,11 @@
  */
 package org.weasis.core.ui.model.graphic.imp.area;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
-import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Three-handle parallelogram used as an oblique rectangle. */
 @XmlRootElement(name = "ObliqueRectangleGraphic")

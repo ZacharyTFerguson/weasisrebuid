@@ -9,11 +9,11 @@
  */
 package org.weasis.core.ui.model.graphic.imp.angle;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
-import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Three-point angle: handle 1 is the vertex. Shortcut A. */
 @XmlRootElement(name = "AngleToolGraphic")

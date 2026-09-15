@@ -9,6 +9,11 @@
  */
 package org.weasis.core.ui.model.graphic;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -17,17 +22,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlTransient;
 
 @XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractGraphic implements Graphic {
 
   private String uuid = UUID.randomUUID().toString();
   private final List<Point2D.Double> pts = new ArrayList<>();
+  private final List<XmlPt> xmlPts = new ArrayList<>();
   private Boolean filled = Boolean.FALSE;
   private Paint colorPaint = Color.YELLOW;
   private Float lineThickness = 1.0f;
@@ -60,21 +61,15 @@ public abstract class AbstractGraphic implements Graphic {
 
   @XmlElement(name = "pt")
   public List<XmlPt> getXmlPts() {
-    List<XmlPt> out = new ArrayList<>();
-    for (Point2D.Double p : pts) {
-      out.add(new XmlPt(p.getX(), p.getY()));
-    }
-    return out;
+    return xmlPts;
   }
 
-  public void setXmlPts(List<XmlPt> xmlPts) {
-    List<Point2D.Double> points = new ArrayList<>();
-    if (xmlPts != null) {
-      for (XmlPt pt : xmlPts) {
-        points.add(new Point2D.Double(pt.x, pt.y));
-      }
+  public void afterUnmarshal(jakarta.xml.bind.Unmarshaller unmarshaller, Object parent) {
+    pts.clear();
+    for (XmlPt pt : xmlPts) {
+      pts.add(new Point2D.Double(pt.x, pt.y));
     }
-    setPts(points);
+    buildShape();
   }
 
   @XmlTransient
@@ -86,9 +81,13 @@ public abstract class AbstractGraphic implements Graphic {
   @Override
   public void setPts(List<Point2D.Double> newPts) {
     pts.clear();
+    xmlPts.clear();
     if (newPts != null) {
       for (Point2D.Double p : newPts) {
-        pts.add(p == null ? new Point2D.Double() : new Point2D.Double(p.getX(), p.getY()));
+        Point2D.Double copy =
+            p == null ? new Point2D.Double() : new Point2D.Double(p.getX(), p.getY());
+        pts.add(copy);
+        xmlPts.add(new XmlPt(copy.getX(), copy.getY()));
       }
     }
     buildShape();

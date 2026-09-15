@@ -9,8 +9,8 @@
  */
 package org.weasis.core.ui.model.graphic.imp.angle;
 
-import org.weasis.core.ui.model.graphic.AbstractGraphic;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
 /** Open angle shares Cobb geometry (two rays). */
 @XmlRootElement(name = "OpenAngleToolGraphic")

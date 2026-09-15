@@ -9,13 +9,6 @@
  */
 package org.weasis.core.ui.model.imp;
 
-import java.awt.geom.Point2D;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -26,6 +19,13 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlElements;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSeeAlso;
+import java.awt.geom.Point2D;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
 import org.w3c.dom.Document;
@@ -94,6 +94,7 @@ public class XmlGraphicModel extends AbstractGraphicModel {
   };
 
   private static JAXBContext jaxbContext;
+  private final List<Graphic> graphics = new ArrayList<>();
 
   @XmlElements({
     @XmlElement(name = "LineGraphic", type = LineGraphic.class),
@@ -118,21 +119,24 @@ public class XmlGraphicModel extends AbstractGraphicModel {
     @XmlElement(name = "SegGraphic", type = SegGraphic.class)
   })
   public List<Graphic> getGraphics() {
-    return new ArrayList<>(getModels());
+    return graphics;
   }
 
-  public void setGraphics(List<Graphic> graphics) {
+  void prepareMarshal() {
+    graphics.clear();
+    graphics.addAll(getModels());
+  }
+
+  void finishUnmarshal() {
     clear();
-    if (graphics == null) {
-      return;
-    }
-    for (Graphic graphic : graphics) {
+    for (Graphic graphic : List.copyOf(graphics)) {
       graphic.buildShape();
       addGraphic(graphic);
     }
   }
 
   public String toXml() {
+    prepareMarshal();
     try {
       Marshaller marshaller = context().createMarshaller();
       marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
@@ -157,9 +161,7 @@ public class XmlGraphicModel extends AbstractGraphicModel {
       Unmarshaller unmarshaller = context().createUnmarshaller();
       Object value = unmarshaller.unmarshal(new StringReader(trimmed));
       if (value instanceof XmlGraphicModel model) {
-        for (Graphic graphic : model.getModels()) {
-          graphic.buildShape();
-        }
+        model.finishUnmarshal();
         return model;
       }
       throw new IllegalArgumentException("graphic xml");

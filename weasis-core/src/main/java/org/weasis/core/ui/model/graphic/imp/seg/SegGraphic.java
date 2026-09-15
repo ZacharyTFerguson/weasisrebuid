@@ -9,8 +9,8 @@
  */
 package org.weasis.core.ui.model.graphic.imp.seg;
 
-import org.weasis.core.ui.model.graphic.imp.NonEditableGraphic;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.weasis.core.ui.model.graphic.imp.NonEditableGraphic;
 
 /** Segmentation overlay graphic wrapping a {@link SegContour}. */
 @XmlRootElement(name = "SegGraphic")

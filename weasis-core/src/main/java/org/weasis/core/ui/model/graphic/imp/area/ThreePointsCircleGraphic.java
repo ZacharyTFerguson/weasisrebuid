@@ -9,11 +9,11 @@
  */
 package org.weasis.core.ui.model.graphic.imp.area;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
-import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Circle through three non-collinear points. */
 @XmlRootElement(name = "ThreePointsCircleGraphic")

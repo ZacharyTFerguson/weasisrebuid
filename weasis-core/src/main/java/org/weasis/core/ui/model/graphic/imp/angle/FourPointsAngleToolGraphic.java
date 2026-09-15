@@ -9,8 +9,8 @@
  */
 package org.weasis.core.ui.model.graphic.imp.angle;
 
-import org.weasis.core.ui.model.graphic.AbstractGraphic;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
 /** Four-point angle: two segments. */
 @XmlRootElement(name = "FourPointsAngleToolGraphic")
