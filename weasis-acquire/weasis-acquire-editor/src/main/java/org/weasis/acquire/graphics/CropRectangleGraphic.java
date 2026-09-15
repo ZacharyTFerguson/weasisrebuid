@@ -9,4 +9,32 @@
  */
 package org.weasis.acquire.graphics;
 
-public class CropRectangleGraphic {}
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import org.weasis.acquire.editor.PhotoEdits;
+
+public class CropRectangleGraphic {
+
+  private Rectangle rectangle = new Rectangle();
+
+  public CropRectangleGraphic() {}
+
+  public CropRectangleGraphic(Rectangle rectangle) {
+    setRectangle(rectangle);
+  }
+
+  public Rectangle getRectangle() {
+    return new Rectangle(rectangle);
+  }
+
+  public void setRectangle(Rectangle rectangle) {
+    this.rectangle = rectangle == null ? new Rectangle() : new Rectangle(rectangle);
+  }
+
+  public BufferedImage crop(BufferedImage src) {
+    if (src == null || rectangle.width <= 0 || rectangle.height <= 0) {
+      return src;
+    }
+    return PhotoEdits.crop(src, rectangle);
+  }
+}

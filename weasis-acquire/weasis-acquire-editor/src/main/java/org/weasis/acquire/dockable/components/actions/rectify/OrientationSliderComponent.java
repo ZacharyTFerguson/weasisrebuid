@@ -9,4 +9,30 @@
  */
 package org.weasis.acquire.dockable.components.actions.rectify;
 
-public class OrientationSliderComponent {}
+import org.weasis.acquire.dockable.components.util.AbstractSliderComponent;
+import org.weasis.acquire.explorer.AcquireImageValues;
+import org.weasis.acquire.operations.impl.RectifyOrientationChangeListener;
+
+public class OrientationSliderComponent extends AbstractSliderComponent {
+
+  public OrientationSliderComponent() {
+    super(0, 270, 0);
+  }
+
+  public int degrees() {
+    return getValue() / 90 * 90;
+  }
+
+  public void applyTo(AcquireImageValues values) {
+    applyTo(values, null);
+  }
+
+  public void applyTo(AcquireImageValues values, RectifyOrientationChangeListener listener) {
+    if (values != null) {
+      values.setRotation(degrees());
+    }
+    if (listener != null) {
+      listener.orientationChanged(degrees());
+    }
+  }
+}

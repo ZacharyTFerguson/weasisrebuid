@@ -9,4 +9,19 @@
  */
 package org.weasis.acquire.dockable.components.actions.contrast;
 
-public class ContrastAction {}
+import java.awt.image.BufferedImage;
+import org.weasis.acquire.editor.PhotoEdits;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+public class ContrastAction {
+
+  public BufferedImage apply(BufferedImage src, AcquireImageValues values) {
+    if (src == null) {
+      return null;
+    }
+    if (values == null) {
+      return src;
+    }
+    return PhotoEdits.contrast(src, values.getContrast(), values.getBrightness());
+  }
+}

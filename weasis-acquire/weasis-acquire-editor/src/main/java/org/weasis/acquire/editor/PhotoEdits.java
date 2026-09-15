@@ -38,6 +38,10 @@ public final class PhotoEdits {
   }
 
   public static BufferedImage contrast(BufferedImage src, float factor) {
+    return contrast(src, factor, 0);
+  }
+
+  public static BufferedImage contrast(BufferedImage src, float factor, float offset) {
     BufferedImage work = src;
     if (src.getType() != BufferedImage.TYPE_3BYTE_BGR
         && src.getType() != BufferedImage.TYPE_BYTE_GRAY) {
@@ -46,7 +50,7 @@ public final class PhotoEdits {
       g.drawImage(src, 0, 0, null);
       g.dispose();
     }
-    RescaleOp op = new RescaleOp(factor, 0, null);
+    RescaleOp op = new RescaleOp(factor, offset, null);
     return op.filter(work, null);
   }
 }

@@ -9,4 +9,8 @@
  */
 package org.weasis.acquire.operations.impl;
 
-public interface RotationActionListener {}
+@FunctionalInterface
+public interface RotationActionListener {
+
+  void rotationChanged(int degrees);
+}

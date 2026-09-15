@@ -9,4 +9,22 @@
  */
 package org.weasis.acquire.dockable.components.actions.contrast.comp;
 
-public class ContrastComponent {}
+import org.weasis.acquire.dockable.components.util.AbstractSliderComponent;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+public class ContrastComponent extends AbstractSliderComponent {
+
+  public ContrastComponent() {
+    super(0, 200, 100);
+  }
+
+  public float factor() {
+    return Math.max(0.01f, getValue() / 100.0f);
+  }
+
+  public void applyTo(AcquireImageValues values) {
+    if (values != null) {
+      values.setContrast(factor());
+    }
+  }
+}

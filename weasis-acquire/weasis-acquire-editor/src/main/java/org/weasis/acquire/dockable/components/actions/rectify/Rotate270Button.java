@@ -9,4 +9,22 @@
  */
 package org.weasis.acquire.dockable.components.actions.rectify;
 
-public class Rotate270Button {}
+import org.weasis.acquire.explorer.AcquireImageValues;
+import org.weasis.acquire.operations.impl.RotationActionListener;
+
+public class Rotate270Button {
+
+  public void apply(AcquireImageValues values) {
+    apply(values, null);
+  }
+
+  public void apply(AcquireImageValues values, RotationActionListener listener) {
+    if (values == null) {
+      return;
+    }
+    values.setRotation(values.getRotation() + 270);
+    if (listener != null) {
+      listener.rotationChanged(values.getRotation());
+    }
+  }
+}

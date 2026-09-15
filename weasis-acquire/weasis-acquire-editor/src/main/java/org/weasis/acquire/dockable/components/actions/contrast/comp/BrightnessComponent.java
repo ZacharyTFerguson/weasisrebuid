@@ -9,4 +9,22 @@
  */
 package org.weasis.acquire.dockable.components.actions.contrast.comp;
 
-public class BrightnessComponent {}
+import org.weasis.acquire.dockable.components.util.AbstractSliderComponent;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+public class BrightnessComponent extends AbstractSliderComponent {
+
+  public BrightnessComponent() {
+    super(-100, 100, 0);
+  }
+
+  public float offset() {
+    return getValue();
+  }
+
+  public void applyTo(AcquireImageValues values) {
+    if (values != null) {
+      values.setBrightness(offset());
+    }
+  }
+}

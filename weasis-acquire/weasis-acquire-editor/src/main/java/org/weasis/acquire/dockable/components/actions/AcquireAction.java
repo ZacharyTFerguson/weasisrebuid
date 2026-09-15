@@ -9,4 +9,23 @@
  */
 package org.weasis.acquire.dockable.components.actions;
 
-public class AcquireAction {}
+import java.awt.image.BufferedImage;
+import org.weasis.acquire.dockable.components.actions.contrast.ContrastAction;
+import org.weasis.acquire.dockable.components.actions.rectify.RectifyAction;
+import org.weasis.acquire.explorer.AcquireImageValues;
+import org.weasis.acquire.graphics.CropRectangleGraphic;
+
+/** Applies rotation, then crop, then brightness/contrast. */
+public class AcquireAction {
+
+  public BufferedImage apply(BufferedImage src, AcquireImageValues values) {
+    if (src == null) {
+      return null;
+    }
+    BufferedImage out = new RectifyAction().apply(src, values);
+    if (values != null && values.getCrop() != null) {
+      out = new CropRectangleGraphic(values.getCrop()).crop(out);
+    }
+    return new ContrastAction().apply(out, values);
+  }
+}

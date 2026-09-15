@@ -9,4 +9,36 @@
  */
 package org.weasis.acquire.dockable.components.util;
 
-public class AbstractSliderComponent {}
+/** Integer slider used by brightness / contrast / orientation. */
+public class AbstractSliderComponent {
+
+  private final int min;
+  private final int max;
+  private int value;
+
+  public AbstractSliderComponent() {
+    this(0, 100, 0);
+  }
+
+  public AbstractSliderComponent(int min, int max, int value) {
+    this.min = Math.min(min, max);
+    this.max = Math.max(min, max);
+    setValue(value);
+  }
+
+  public int getMin() {
+    return min;
+  }
+
+  public int getMax() {
+    return max;
+  }
+
+  public int getValue() {
+    return value;
+  }
+
+  public void setValue(int value) {
+    this.value = Math.max(min, Math.min(max, value));
+  }
+}

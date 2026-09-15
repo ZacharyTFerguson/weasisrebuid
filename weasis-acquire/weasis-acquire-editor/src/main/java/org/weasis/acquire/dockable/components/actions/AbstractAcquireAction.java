@@ -9,4 +9,33 @@
  */
 package org.weasis.acquire.dockable.components.actions;
 
-public class AbstractAcquireAction {}
+import java.awt.image.BufferedImage;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+/** Editor session: source image plus pending {@link AcquireImageValues}. */
+public class AbstractAcquireAction {
+
+  private final AcquireAction action = new AcquireAction();
+  private AcquireImageValues values = new AcquireImageValues();
+  private BufferedImage source;
+
+  public AcquireImageValues values() {
+    return values;
+  }
+
+  public void setValues(AcquireImageValues values) {
+    this.values = values == null ? new AcquireImageValues() : values;
+  }
+
+  public BufferedImage getSource() {
+    return source;
+  }
+
+  public void setSource(BufferedImage source) {
+    this.source = source;
+  }
+
+  public BufferedImage apply() {
+    return action.apply(source, values);
+  }
+}

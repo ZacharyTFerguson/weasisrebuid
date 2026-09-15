@@ -9,4 +9,8 @@
  */
 package org.weasis.acquire.operations.impl;
 
-public interface RectifyOrientationChangeListener {}
+@FunctionalInterface
+public interface RectifyOrientationChangeListener {
+
+  void orientationChanged(int degrees);
+}

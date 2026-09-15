@@ -9,4 +9,26 @@
  */
 package org.weasis.acquire.dockable.components.actions.contrast;
 
-public class ContrastPanel {}
+import org.weasis.acquire.dockable.components.actions.contrast.comp.BrightnessComponent;
+import org.weasis.acquire.dockable.components.actions.contrast.comp.ContrastComponent;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+/** Brightness and contrast sliders that write pending {@link AcquireImageValues}. */
+public class ContrastPanel {
+
+  private final BrightnessComponent brightness = new BrightnessComponent();
+  private final ContrastComponent contrast = new ContrastComponent();
+
+  public BrightnessComponent brightness() {
+    return brightness;
+  }
+
+  public ContrastComponent contrast() {
+    return contrast;
+  }
+
+  public void applyTo(AcquireImageValues values) {
+    brightness.applyTo(values);
+    contrast.applyTo(values);
+  }
+}

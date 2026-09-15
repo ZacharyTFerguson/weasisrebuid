@@ -9,4 +9,22 @@
  */
 package org.weasis.acquire.dockable.components.actions.rectify;
 
-public class RectifyAction {}
+import java.awt.image.BufferedImage;
+import org.weasis.acquire.editor.PhotoEdits;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+/** 90° rectify steps used by the dicomizer photo editor. */
+public class RectifyAction {
+
+  public BufferedImage apply(BufferedImage src, AcquireImageValues values) {
+    if (src == null) {
+      return null;
+    }
+    int steps = values == null ? 0 : ((values.getRotation() / 90) % 4 + 4) % 4;
+    BufferedImage out = src;
+    for (int i = 0; i < steps; i++) {
+      out = PhotoEdits.rotate90(out);
+    }
+    return out;
+  }
+}
