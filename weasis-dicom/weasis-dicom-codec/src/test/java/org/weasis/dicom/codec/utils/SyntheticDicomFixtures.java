@@ -128,6 +128,14 @@ public final class SyntheticDicomFixtures {
     write(dest, fmi, dcm, ts);
   }
 
+  public static void writeCtWithPixelSpacing(File dest, double rowMm, double colMm) throws Exception {
+    String sop = UIDUtils.createUID("2.25");
+    Attributes fmi = fmi(UID.CTImageStorage, sop, UID.ExplicitVRLittleEndian);
+    Attributes dcm = monochrome2Dataset(sop, 8, 8);
+    dcm.setDouble(Tag.PixelSpacing, VR.DS, rowMm, colMm);
+    write(dest, fmi, dcm, UID.ExplicitVRLittleEndian);
+  }
+
   static Attributes monochrome2Dataset(String sop, int rows, int cols) {
     Attributes dcm = new Attributes();
     dcm.setString(Tag.SOPClassUID, VR.UI, UID.CTImageStorage);
