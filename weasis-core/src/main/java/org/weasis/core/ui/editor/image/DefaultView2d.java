@@ -497,7 +497,8 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     }
     try {
       Point2D.Double out = new Point2D.Double();
-      imageTransform(getWidth(), getHeight()).inverseTransform(new Point2D.Double(viewX, viewY), out);
+      imageTransform(getWidth(), getHeight())
+          .inverseTransform(new Point2D.Double(viewX, viewY), out);
       return out;
     } catch (Exception e) {
       return new Point2D.Double(viewX, viewY);

@@ -112,7 +112,8 @@ public class ImageViewerEventManager {
       case MouseActions.ZOOM -> view.increaseZoom(dy < 0 ? 1 : dy > 0 ? -1 : 0);
       case MouseActions.ROTATION -> view.setRotation(view.getRotation() + dx);
       case MouseActions.WINLEVEL -> applyWindowLevel(dx, dy);
-      case MouseActions.CROSSHAIR -> view.setCrosshairFromView(view.getCrosshairX() + dx, view.getCrosshairY() + dy);
+      case MouseActions.CROSSHAIR ->
+          view.setCrosshairFromView(view.getCrosshairX() + dx, view.getCrosshairY() + dy);
       case MouseActions.CONTEXT_MENU, MouseActions.NONE -> {
         // menu / idle
       }

@@ -30,14 +30,9 @@ public class PixelInfo {
     this.text = x + "," + y + " v=" + pixelValue + " HU=" + modalityValue;
   }
 
-  public static PixelInfo from(
-      BufferedImage image, int x, int y, double slope, double intercept) {
+  public static PixelInfo from(BufferedImage image, int x, int y, double slope, double intercept) {
     int value = 0;
-    if (image != null
-        && x >= 0
-        && y >= 0
-        && x < image.getWidth()
-        && y < image.getHeight()) {
+    if (image != null && x >= 0 && y >= 0 && x < image.getWidth() && y < image.getHeight()) {
       value = image.getRaster().getSample(x, y, 0);
     }
     double m = value * (slope == 0 ? 1.0 : slope) + intercept;
