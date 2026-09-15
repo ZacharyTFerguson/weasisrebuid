@@ -9,6 +9,7 @@
  */
 package org.weasis.core.api.service;
 
+import java.awt.BorderLayout;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
@@ -183,6 +184,12 @@ public class UICore {
       openPlugins.add(plugin);
     }
     setSelectedViewerPlugin(plugin);
+    JFrame win = applicationWindow;
+    if (win != null) {
+      win.getContentPane().add(plugin, BorderLayout.CENTER);
+      win.revalidate();
+      win.repaint();
+    }
   }
 
   public void closeViewerPlugin(ViewerPlugin<?> plugin) {

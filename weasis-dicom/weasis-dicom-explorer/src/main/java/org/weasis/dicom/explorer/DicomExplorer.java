@@ -10,8 +10,11 @@
 package org.weasis.dicom.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -21,7 +24,11 @@ import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.docking.PluginTool;
+import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.dicom.explorer.main.DicomPaneManager;
+import org.weasis.dicom.explorer.main.DicomTaskManager;
 import org.weasis.dicom.explorer.main.PatientPane;
+import org.weasis.dicom.explorer.main.SeriesFilter;
 import org.weasis.dicom.explorer.main.SeriesSelectionModel;
 import org.weasis.dicom.explorer.main.StudyPane;
 import org.weasis.dicom.explorer.main.ThumbnailMouseAndKeyAdapter;
@@ -36,21 +43,37 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final JList<String> list = new JList<>(listModel);
   private final SeriesSelectionModel selection = new SeriesSelectionModel();
   private final ThumbnailMouseAndKeyAdapter thumbs = new ThumbnailMouseAndKeyAdapter(selection);
+  private final DicomPaneManager panes;
   private final PatientPane patientPane;
   private final StudyPane studyPane;
+  private final SeriesFilter seriesFilter = new SeriesFilter();
+  private final PluginOpeningStrategy opening = new PluginOpeningStrategy();
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
     this.model = model == null ? new DicomModel() : model;
-    this.patientPane = new PatientPane(this.model);
-    this.studyPane = new StudyPane(patientPane.getSelectionManager());
+    this.panes = new DicomPaneManager(this.model);
+    this.patientPane = panes.getPatientPane();
+    this.studyPane = panes.getStudyPane();
+    this.studyPane.getSeriesPane().setOnOpen(this::openSelected);
     JPanel hierarchy = new JPanel(new BorderLayout());
     hierarchy.add(patientPane, BorderLayout.NORTH);
     hierarchy.add(studyPane, BorderLayout.CENTER);
     add(hierarchy, BorderLayout.NORTH);
     add(new JScrollPane(list), BorderLayout.CENTER);
+    add(DicomTaskManager.getInstance().getLoadingPanel(), BorderLayout.SOUTH);
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     list.addKeyListener(thumbs.keyAdapter());
+    list.addKeyListener(
+        new KeyAdapter() {
+          @Override
+          public void keyPressed(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+              openSelected();
+            }
+          }
+        });
+    this.model.addPropertyChangeListener(evt -> refresh());
     refresh();
   }
 
@@ -62,12 +85,26 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     return studyPane;
   }
 
+  public DicomPaneManager panes() {
+    return panes;
+  }
+
+  public SeriesFilter seriesFilter() {
+    return seriesFilter;
+  }
+
+  public PluginOpeningStrategy openingStrategy() {
+    return opening;
+  }
+
   public void refresh() {
-    patientPane.refresh();
-    studyPane.refresh();
+    panes.refresh();
     listModel.clear();
     for (ImportedInstance inst :
         DicomSorter.sortSeries(patientPane.getSelectionManager().selectedInstances())) {
+      if (!seriesFilter.accept(inst)) {
+        continue;
+      }
       listModel.addElement(
           inst.patientName()
               + " / "
@@ -82,6 +119,23 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
       labels.add(listModel.get(i));
     }
     selection.setItems(labels);
+  }
+
+  public List<ViewerPlugin<?>> openSelected() {
+    List<ImportedInstance> instances =
+        DicomSorter.sortSeries(patientPane.getSelectionManager().selectedInstances());
+    List<ImportedInstance> chosen = new ArrayList<>();
+    Set<Integer> idxs = selection.selectedIndices();
+    if (idxs.isEmpty()) {
+      chosen.addAll(instances);
+    } else {
+      for (int i : idxs) {
+        if (i >= 0 && i < instances.size()) {
+          chosen.add(instances.get(i));
+        }
+      }
+    }
+    return opening.open(chosen);
   }
 
   public SeriesSelectionModel seriesSelection() {

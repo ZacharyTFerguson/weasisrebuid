@@ -46,7 +46,11 @@ public class DicomExplorerFactory implements DataExplorerViewFactory {
 
   @Override
   public DataExplorerView createInstance(Hashtable<String, Object> properties) {
-    return new DicomExplorer(new DicomModel());
+    DicomModel model = LocalPersistence.getDicomModel();
+    if (properties != null && properties.get("model") instanceof DicomModel persisted) {
+      model = persisted;
+    }
+    return new DicomExplorer(model);
   }
 
   @Override

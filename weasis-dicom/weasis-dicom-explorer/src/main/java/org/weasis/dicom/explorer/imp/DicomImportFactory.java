@@ -16,6 +16,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.service.UICore;
 import org.weasis.dicom.explorer.DicomModel;
+import org.weasis.dicom.explorer.LocalPersistence;
 import org.weasis.dicom.explorer.SkipUnsupportedSopNotifier;
 
 /** Weasis path: File &gt; Import DICOM pages. */
@@ -43,7 +44,7 @@ public class DicomImportFactory implements org.weasis.core.api.explorer.DicomImp
     if (properties != null && properties.get("title") instanceof String s) {
       title = s;
     }
-    DicomModel model = new DicomModel();
+    DicomModel model = LocalPersistence.getDicomModel();
     if (properties != null && properties.get("model") instanceof DicomModel m) {
       model = m;
     }

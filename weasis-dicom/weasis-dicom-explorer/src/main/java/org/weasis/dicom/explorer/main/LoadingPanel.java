@@ -9,4 +9,45 @@
  */
 package org.weasis.dicom.explorer.main;
 
-public class LoadingPanel {}
+import java.util.ArrayList;
+import java.util.List;
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
+import org.weasis.dicom.explorer.exp.ExplorerTask;
+
+/** Stack of {@link LoadingTaskPanel} rows shown at the bottom of the DICOM explorer. */
+public class LoadingPanel extends JPanel {
+
+  private final List<LoadingTaskPanel> rows = new ArrayList<>();
+
+  public LoadingPanel() {
+    setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+  }
+
+  public LoadingTaskPanel addTask(ExplorerTask<?, ?> task) {
+    LoadingTaskPanel row = new LoadingTaskPanel(task);
+    rows.add(row);
+    add(row);
+    revalidate();
+    return row;
+  }
+
+  public void removeTask(LoadingTaskPanel row) {
+    if (row == null) {
+      return;
+    }
+    rows.remove(row);
+    remove(row);
+    revalidate();
+  }
+
+  public List<LoadingTaskPanel> getRows() {
+    return List.copyOf(rows);
+  }
+
+  public void clearTasks() {
+    rows.clear();
+    removeAll();
+    revalidate();
+  }
+}

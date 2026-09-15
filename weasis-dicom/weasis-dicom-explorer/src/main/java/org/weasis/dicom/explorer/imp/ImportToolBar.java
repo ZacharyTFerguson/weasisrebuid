@@ -19,7 +19,12 @@ public class ImportToolBar extends WtoolBar {
   public ImportToolBar() {
     super("Import DICOM", 5);
     JButton button = new JButton("Import DICOM");
-    button.addActionListener(e -> ImportDicomDialog.openFromFactories(null, false));
+    button.setName("import-dicom");
+    button.addActionListener(
+        e -> {
+          ImportDicomDialog dialog = ImportDicomDialog.openFromFactories(null, false);
+          dialog.setVisible(true);
+        });
     add(button);
   }
 }

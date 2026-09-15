@@ -9,4 +9,51 @@
  */
 package org.weasis.dicom.explorer.main;
 
-public class LoadingTaskPanel {}
+import java.awt.BorderLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import org.weasis.dicom.explorer.exp.ExplorerTask;
+
+/** One in-flight explorer load row (message + progress + optional cancel). */
+public class LoadingTaskPanel extends JPanel {
+
+  private final ExplorerTask<?, ?> task;
+  private final JLabel message = new JLabel();
+  private final JProgressBar progress = new JProgressBar();
+  private final JButton cancel = new JButton("Cancel");
+
+  public LoadingTaskPanel() {
+    this(null);
+  }
+
+  public LoadingTaskPanel(ExplorerTask<?, ?> task) {
+    super(new BorderLayout(4, 0));
+    this.task = task;
+    message.setText(task == null ? "" : task.getMessage());
+    progress.setIndeterminate(true);
+    add(message, BorderLayout.CENTER);
+    add(progress, BorderLayout.EAST);
+    if (task != null && task.isInterruptible()) {
+      cancel.addActionListener(e -> task.cancel(true));
+      add(cancel, BorderLayout.WEST);
+    }
+  }
+
+  public ExplorerTask<?, ?> getTask() {
+    return task;
+  }
+
+  public String getMessage() {
+    return message.getText();
+  }
+
+  public JProgressBar getProgressBar() {
+    return progress;
+  }
+
+  public JButton getCancelButton() {
+    return cancel;
+  }
+}

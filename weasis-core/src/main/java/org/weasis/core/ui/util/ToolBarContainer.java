@@ -9,6 +9,7 @@
  */
 package org.weasis.core.ui.util;
 
+import java.awt.Component;
 import java.awt.FlowLayout;
 import javax.swing.JPanel;
 import org.weasis.core.api.gui.Insertable;
@@ -19,8 +20,12 @@ public class ToolBarContainer extends JPanel {
   }
 
   public void registerToolBar(Insertable bar) {
-    if (bar instanceof java.awt.Component c) {
-      add(c);
+    if (bar instanceof Component component) {
+      add(component);
+      return;
+    }
+    if (bar instanceof Toolbar toolbar) {
+      add(toolbar.getComponent());
     }
   }
 }

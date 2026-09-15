@@ -9,4 +9,37 @@
  */
 package org.weasis.dicom.explorer.main;
 
-public class DicomPaneManager {}
+import org.weasis.dicom.explorer.DicomModel;
+
+/** Patient → study → series pane trio used by {@code DicomExplorer}. */
+public class DicomPaneManager {
+
+  private final PatientPane patientPane;
+  private final StudyPane studyPane;
+
+  public DicomPaneManager() {
+    this(new DicomModel());
+  }
+
+  public DicomPaneManager(DicomModel model) {
+    this.patientPane = new PatientPane(model);
+    this.studyPane = new StudyPane(patientPane.getSelectionManager());
+  }
+
+  public PatientPane getPatientPane() {
+    return patientPane;
+  }
+
+  public StudyPane getStudyPane() {
+    return studyPane;
+  }
+
+  public SeriesPane getSeriesPane() {
+    return studyPane.getSeriesPane();
+  }
+
+  public void refresh() {
+    patientPane.refresh();
+    studyPane.refresh();
+  }
+}

@@ -9,4 +9,21 @@
  */
 package org.weasis.dicom.explorer;
 
-public class LocalPersistence {}
+/** Process-wide DICOM explorer model so File &gt; Import and the explorer share one tree. */
+public class LocalPersistence {
+
+  private static DicomModel model = new DicomModel();
+
+  private LocalPersistence() {}
+
+  public static synchronized DicomModel getDicomModel() {
+    if (model == null) {
+      model = new DicomModel();
+    }
+    return model;
+  }
+
+  public static synchronized void reset() {
+    model = new DicomModel();
+  }
+}

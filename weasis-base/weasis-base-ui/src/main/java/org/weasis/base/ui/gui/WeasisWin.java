@@ -15,6 +15,7 @@ import java.awt.Dimension;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Hashtable;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -29,18 +30,55 @@ import org.weasis.core.api.explorer.DicomImportFactory;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.gui.util.AppProperties;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.RotationToolBar;
+import org.weasis.core.ui.editor.image.ScreenshotToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.core.ui.editor.image.ViewerToolBar;
+import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.pref.PreferenceDialog;
+import org.weasis.core.ui.util.ToolBarContainer;
 
 /** Main window for {@code weasis.main.ui = weasis-base-ui}. */
 public class WeasisWin extends JFrame {
+
+  private final ToolBarContainer toolbars;
+  private DataExplorerView explorerView;
+
   public WeasisWin() {
-    super(AppProperties.WEASIS_NAME);
+    super(windowTitle());
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     setSize(960, 640);
     setLayout(new BorderLayout());
     setJMenuBar(createMenuBar());
+    toolbars = createDefaultToolBars();
+    JButton importBtn = new JButton("Import DICOM");
+    importBtn.setName("import-dicom");
+    importBtn.addActionListener(e -> openImportDialog(false));
+    toolbars.add(importBtn);
+    add(toolbars, BorderLayout.NORTH);
+    addWindowListener(new WeasisWinListener(this));
     UICore.getInstance().installDockingKeyDispatcher();
+  }
+
+  public static String windowTitle() {
+    return AppProperties.WEASIS_NAME + " v" + AppProperties.WEASIS_VERSION;
+  }
+
+  public static ToolBarContainer createDefaultToolBars() {
+    ToolBarContainer bars = new ToolBarContainer();
+    bars.registerToolBar(new ViewerToolBar());
+    bars.registerToolBar(new ZoomToolBar());
+    bars.registerToolBar(new RotationToolBar());
+    bars.registerToolBar(new ScreenshotToolBar());
+    return bars;
+  }
+
+  public ToolBarContainer getToolBarContainer() {
+    return toolbars;
+  }
+
+  public DataExplorerView getExplorerView() {
+    return explorerView;
   }
 
   public boolean handleDockingKey(KeyEvent e) {
@@ -79,16 +117,32 @@ public class WeasisWin extends JFrame {
   public void attachViewer(ViewerPlugin<?> plugin) {
     if (plugin != null) {
       add(plugin, BorderLayout.CENTER);
+      revalidate();
+      repaint();
     }
   }
 
   public void attachExplorer() {
+    DataExplorerView chosen = null;
     for (DataExplorerViewFactory explorerFactory : UICore.getInstance().getExplorerFactories()) {
       DataExplorerView explorer = explorerFactory.createInstance(new Hashtable<>());
-      if (explorer instanceof Component component) {
-        component.setPreferredSize(new Dimension(280, 640));
-        add(component, BorderLayout.WEST);
+      if (!(explorer instanceof Component)) {
+        continue;
+      }
+      if (explorer.getClass().getName().contains("dicom.explorer.DicomExplorer")) {
+        chosen = explorer;
         break;
+      }
+      if (chosen == null) {
+        chosen = explorer;
+      }
+    }
+    if (chosen instanceof Component component) {
+      explorerView = chosen;
+      component.setPreferredSize(new Dimension(280, 640));
+      add(component, BorderLayout.WEST);
+      if (chosen.getDataExplorerModel() != null) {
+        chosen.getDataExplorerModel().addPropertyChangeListener(new MainWindowListener(this));
       }
     }
   }
@@ -96,6 +150,9 @@ public class WeasisWin extends JFrame {
   void openImportDialog(boolean cd) {
     Hashtable<String, Object> props = new Hashtable<>();
     props.put("title", cd ? "DICOM CD" : "DICOM");
+    if (explorerView != null && explorerView.getDataExplorerModel() != null) {
+      props.put("model", explorerView.getDataExplorerModel());
+    }
     JDialog dialog = new JDialog(this, cd ? "Import DICOM CD" : "Import DICOM", true);
     JPanel panel = new JPanel(new BorderLayout());
     for (DicomImportFactory factory : UICore.getInstance().getDicomImportFactories()) {

@@ -74,10 +74,12 @@ public class ImportDicomDialog extends JDialog {
   }
 
   public static ImportDicomDialog openFromFactories(Frame owner, boolean cd) {
-    DicomModel model = new DicomModel();
+    DicomModel model = LocalPersistence.getDicomModel();
     if (UICore.getInstance().getDicomImportFactories().isEmpty()) {
       new LocalImportFactory().activate();
     }
-    return new ImportDicomDialog(owner, model, cd);
+    ImportDicomDialog dialog = new ImportDicomDialog(owner, model, cd);
+    dialog.setLocationRelativeTo(owner);
+    return dialog;
   }
 }

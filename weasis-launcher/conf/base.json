@@ -15,6 +15,13 @@
       "category": "FELIX_CONFIG"
     },
     {
+      "code": "org.osgi.framework.bootdelegation",
+      "value": "com.formdev.flatlaf,com.formdev.flatlaf.*",
+      "description": "Let OSGi bundles load FlatLaf UI delegates reflectively (File > Import dialog)",
+      "type": "A",
+      "category": "FELIX_CONFIG"
+    },
+    {
       "code": "felix.cache.rootdir",
       "value": "${user.home}",
       "description": "Base directory of the bundle cache",

@@ -41,5 +41,7 @@ class LookAndFeelsTest {
     assertTrue(extra.contains("com.formdev.flatlaf.extras"));
     assertTrue(extra.contains("com.formdev.flatlaf.ui"));
     assertTrue(extra.contains("com.formdev.flatlaf.util"));
+    String boot = data.value("org.osgi.framework.bootdelegation");
+    assertTrue(boot.contains("com.formdev.flatlaf.*"));
   }
 }

@@ -72,6 +72,17 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void view2dContainerExposesViewerLutResetAndCineToolbars() {
+    View2dContainer container = new View2dContainer();
+    assertTrue(container.getToolBars().getComponentCount() >= 8);
+    assertEquals("Viewer", container.getViewerToolBar().getComponentName());
+    assertEquals("LUT", container.getLutToolBar().getComponentName());
+    assertEquals(Insertable.Type.TOOLBAR, container.getViewerToolBar().getType());
+    assertSame(container.getView2d(), container.getViewerToolBar().boundView());
+    assertSame(container.getView2d(), container.getLutToolBar().boundView());
+  }
+
+  @Test
   void tabCyclesLayoutViewsWhenMoreThanOne() {
     View2dContainer container = new View2dContainer();
     container.setLayoutCount(3);
