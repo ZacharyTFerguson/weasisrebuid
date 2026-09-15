@@ -78,8 +78,8 @@ public final class DicomMediaUtils {
   }
 
   /**
-   * Linear VOI presets from multi-value Window Center/Width (keys 1–9). Empty when the dataset
-   * has no VOI; callers then keep {@link #windowLevel} (data-range or first WindowCenter).
+   * Linear VOI presets from multi-value Window Center/Width (keys 1–9). Empty when the dataset has
+   * no VOI; callers then keep {@link #windowLevel} (data-range or first WindowCenter).
    */
   public static List<WindLevelParameters> voiPresets(Attributes dcm) {
     if (dcm == null) {
