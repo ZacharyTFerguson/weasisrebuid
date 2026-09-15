@@ -9,7 +9,10 @@
  */
 package org.weasis.core.ui.pref;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
+import java.util.Locale;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -55,7 +58,7 @@ public class ScreenPrefView extends ShellPrefPage {
                 Double.valueOf(0.01),
                 Double.valueOf(5.0),
                 Double.valueOf(0.01)));
-    commitOnValidEdit();
+    installUsEditor();
     JPanel form = new JPanel();
     form.add(new JLabel("Pixel pitch (mm)"));
     form.add(pitchSpinner);
@@ -64,7 +67,7 @@ public class ScreenPrefView extends ShellPrefPage {
 
   public double pitchXmm() {
     commitSpinner();
-    return ((Number) pitchSpinner.getValue()).doubleValue();
+    return parseEditorOrModel();
   }
 
   public void setPitchXmm(double pitchXmm) {
@@ -121,14 +124,40 @@ public class ScreenPrefView extends ShellPrefPage {
     try {
       pitchSpinner.commitEdit();
     } catch (ParseException e) {
-      // keep last valid model value
+      // keep last valid model value; editor text still wins in parseEditorOrModel
     }
   }
 
-  void commitOnValidEdit() {
+  void installUsEditor() {
+    JSpinner.NumberEditor editor = new JSpinner.NumberEditor(pitchSpinner, "0.00");
+    DecimalFormat format = editor.getFormat();
+    format.setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Locale.US));
+    pitchSpinner.setEditor(editor);
+    editor.getTextField().setFocusLostBehavior(JFormattedTextField.COMMIT);
+    editor.getTextField().setLocale(Locale.US);
+  }
+
+  double parseEditorOrModel() {
+    double model = ((Number) pitchSpinner.getValue()).doubleValue();
+    return parsePitchText(editorText(), model);
+  }
+
+  String editorText() {
     if (pitchSpinner.getEditor() instanceof JSpinner.DefaultEditor editor) {
-      editor.getTextField().setFocusLostBehavior(JFormattedTextField.COMMIT);
+      return editor.getTextField().getText();
     }
+    return "";
+  }
+
+  static double parsePitchText(String raw, double documented) {
+    if (raw == null || raw.isBlank()) {
+      return documented;
+    }
+    return parseDoubleValue(raw.trim().replace(',', '.'), documented);
+  }
+
+  static void resetSharedPitch() {
+    SHARED.setPitchXmm(DEFAULT_PITCH_MM);
   }
 
   static double parseDouble(String raw, double documented) {

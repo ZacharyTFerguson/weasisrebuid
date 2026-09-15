@@ -10,16 +10,21 @@
 package org.weasis.core.ui.pref;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Window;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFormattedTextField;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JSplitPane;
 import javax.swing.JTree;
 import javax.swing.WindowConstants;
@@ -34,6 +39,7 @@ public class PreferenceDialog extends JDialog {
 
   private final List<AbstractItemDialogPage> pages;
   private AbstractItemDialogPage current;
+  private JButton okButton;
 
   public PreferenceDialog(Window parent) {
     this(parent, instantiatePages(UICore.getInstance().getPreferencesPageFactories()));
@@ -76,10 +82,59 @@ public class PreferenceDialog extends JDialog {
   }
 
   public void applyAndClose() {
+    commitOpenEdits(getContentPane());
     for (AbstractItemDialogPage page : pages) {
       closeTree(page);
     }
     dispose();
+  }
+
+  JButton okButton() {
+    return okButton;
+  }
+
+  static void commitOpenEdits(Component root) {
+    if (commitSpinnerOrField(root)) {
+      return;
+    }
+    commitChildEdits(root);
+  }
+
+  static boolean commitSpinnerOrField(Component root) {
+    if (root instanceof JSpinner spinner) {
+      commitSpinner(spinner);
+      return true;
+    }
+    if (root instanceof JFormattedTextField field) {
+      commitField(field);
+      return true;
+    }
+    return false;
+  }
+
+  static void commitChildEdits(Component root) {
+    if (!(root instanceof Container container)) {
+      return;
+    }
+    for (Component child : container.getComponents()) {
+      commitOpenEdits(child);
+    }
+  }
+
+  static void commitSpinner(JSpinner spinner) {
+    try {
+      spinner.commitEdit();
+    } catch (ParseException ignored) {
+      // page still reads the editor text
+    }
+  }
+
+  static void commitField(JFormattedTextField field) {
+    try {
+      field.commitEdit();
+    } catch (ParseException ignored) {
+      // page still reads the editor text
+    }
   }
 
   public void resetCurrent() {
@@ -122,13 +177,13 @@ public class PreferenceDialog extends JDialog {
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(tree), right);
     split.setDividerLocation(220);
     JPanel buttons = new JPanel();
-    JButton ok = new JButton("OK");
-    ok.addActionListener(e -> applyAndClose());
+    okButton = new JButton("OK");
+    okButton.addActionListener(e -> applyAndClose());
     JButton cancel = new JButton("Cancel");
     cancel.addActionListener(e -> dispose());
     JButton reset = new JButton("Restore defaults");
     reset.addActionListener(e -> resetCurrent());
-    buttons.add(ok);
+    buttons.add(okButton);
     buttons.add(cancel);
     buttons.add(reset);
     add(split, BorderLayout.CENTER);

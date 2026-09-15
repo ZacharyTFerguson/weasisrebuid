@@ -21,6 +21,7 @@ import javax.swing.JSpinner;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.gui.util.AbstractItemDialogPage;
+import org.weasis.core.api.service.UICore;
 import org.weasis.core.api.service.WProperties;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 
@@ -142,19 +143,25 @@ class TitlePrefHaveTest {
   @Test
   void preferenceOkStoresTypedPitchAndReloadShowsSameValue() {
     String previous = System.getProperty(ScreenPrefView.PREF_PITCH);
+    WProperties prefs = UICore.getInstance().getSystemPreferences();
+    String previousPref = prefs.getProperty(ScreenPrefView.PREF_PITCH);
     try {
-      WProperties prefs = new WProperties();
-      ScreenPrefView page = new ScreenPrefView(new Monitor(null), prefs);
+      prefs.remove(ScreenPrefView.PREF_PITCH);
+      System.clearProperty(ScreenPrefView.PREF_PITCH);
+      ScreenPrefView.resetSharedPitch();
+      ScreenPrefView page = new ScreenPrefView();
       assertEquals(ScreenPrefView.DEFAULT_PITCH_MM, page.pitchXmm(), 1e-9);
       typePitch(page, "0.35");
       PreferenceDialog dialog = new PreferenceDialog(null, List.of(page));
-      dialog.applyAndClose();
+      dialog.okButton().doClick();
       assertEquals(0.35, prefs.getDoubleProperty(ScreenPrefView.PREF_PITCH, 0), 1e-9);
       assertEquals("0.35", System.getProperty(ScreenPrefView.PREF_PITCH));
-      ScreenPrefView reloaded = new ScreenPrefView(new Monitor(null), prefs);
+      ScreenPrefView reloaded = new ScreenPrefView();
       assertEquals(0.35, reloaded.pitchXmm(), 1e-9);
     } finally {
+      restorePref(prefs, previousPref);
       restore(ScreenPrefView.PREF_PITCH, previous);
+      ScreenPrefView.resetSharedPitch();
     }
   }
 
@@ -162,6 +169,14 @@ class TitlePrefHaveTest {
     JSpinner.DefaultEditor editor = (JSpinner.DefaultEditor) page.pitchSpinner().getEditor();
     JFormattedTextField field = editor.getTextField();
     field.setText(raw);
+  }
+
+  private static void restorePref(WProperties prefs, String previous) {
+    if (previous == null) {
+      prefs.remove(ScreenPrefView.PREF_PITCH);
+    } else {
+      prefs.setProperty(ScreenPrefView.PREF_PITCH, previous);
+    }
   }
 
   private static void restore(String key, String previous) {
