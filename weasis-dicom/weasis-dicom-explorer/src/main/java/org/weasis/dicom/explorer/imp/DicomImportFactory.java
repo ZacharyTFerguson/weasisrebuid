@@ -54,6 +54,6 @@ public class DicomImportFactory implements org.weasis.core.api.explorer.DicomImp
     if (PAGE_LOCAL.equals(title)) {
       return new LocalImport(model, skip);
     }
-    return new ImportDicom(title, model, skip);
+    return new org.weasis.dicom.explorer.imp.ImportDicom(title, model, skip);
   }
 }
