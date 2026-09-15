@@ -9,4 +9,30 @@
  */
 package org.weasis.dicom.explorer.print;
 
-public class DicomPrint {}
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
+import org.weasis.dicom.explorer.pref.node.DefaultDicomNode;
+
+/** DICOM Print SCP N-ACTION film session builder (headless dataset only). */
+public final class DicomPrint {
+
+  private final DefaultDicomNode printer;
+  private DicomPrintOptions options = new DicomPrintOptions();
+
+  public DicomPrint(DefaultDicomNode printer) {
+    this.printer = printer;
+  }
+
+  public void setOptions(DicomPrintOptions options) {
+    this.options = options == null ? new DicomPrintOptions() : options;
+  }
+
+  public Attributes buildFilmSession() {
+    Attributes session = options.toFilmSessionAttributes();
+    if (printer != null) {
+      session.setString(Tag.RetrieveAETitle, VR.AE, printer.aeTitle());
+    }
+    return session;
+  }
+}

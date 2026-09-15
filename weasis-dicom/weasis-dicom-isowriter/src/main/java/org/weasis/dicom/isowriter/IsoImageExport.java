@@ -9,10 +9,57 @@
  */
 package org.weasis.dicom.isowriter;
 
-/** ISO9660 DICOM CD/DVD writer stub (WP-11). */
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
+/** ISO9660 DICOM CD/DVD export planner (writes a manifest file in tests; no optical burn). */
 public class IsoImageExport {
+
+  private final List<Path> sourceFiles = new ArrayList<>();
+  private boolean includeDicomDir = true;
 
   public boolean isAvailable() {
     return true;
+  }
+
+  public void addSource(Path file) {
+    sourceFiles.add(file);
+  }
+
+  public List<Path> sourceFiles() {
+    return List.copyOf(sourceFiles);
+  }
+
+  public void setIncludeDicomDir(boolean includeDicomDir) {
+    this.includeDicomDir = includeDicomDir;
+  }
+
+  public boolean includeDicomDir() {
+    return includeDicomDir;
+  }
+
+  /**
+   * Prepare export layout: creates parent dirs and writes {@code .weasis-iso-manifest} listing
+   * paths (synthetic local fixture).
+   */
+  public Path writeManifest(Path isoTarget) throws IOException {
+    Path parent = isoTarget.getParent();
+    if (parent != null) {
+      Files.createDirectories(parent);
+    }
+    StringBuilder manifest = new StringBuilder();
+    if (includeDicomDir) {
+      manifest.append("DICOMDIR\n");
+    }
+    for (Path path : sourceFiles) {
+      manifest.append(path.getFileName()).append('\n');
+    }
+    Path manifestPath =
+        parent == null ? Path.of(".weasis-iso-manifest") : parent.resolve(".weasis-iso-manifest");
+    Files.writeString(manifestPath, manifest.toString());
+    return manifestPath;
   }
 }

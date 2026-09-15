@@ -12,7 +12,32 @@ package org.weasis.dicom.qr;
 /** DIMSE C-FIND/MOVE/GET and DICOMweb QIDO factory. */
 public class DicomQrFactory {
 
+  public enum Verb {
+    C_FIND,
+    C_MOVE,
+    C_GET,
+    QIDO_RS,
+    WADO_URI,
+    WADO_RS
+  }
+
   public boolean supportsCFind() {
     return true;
+  }
+
+  public boolean supports(Verb verb) {
+    return verb != null;
+  }
+
+  public RsQuery newRsQuery() {
+    return new RsQuery();
+  }
+
+  public SearchParameters newSearchParameters() {
+    return new SearchParameters();
+  }
+
+  public RetrieveContext newRetrieveContext() {
+    return new RetrieveContext();
   }
 }

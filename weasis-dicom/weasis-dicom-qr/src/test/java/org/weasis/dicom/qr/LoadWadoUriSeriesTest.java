@@ -7,20 +7,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
-package org.weasis.dicom.send;
+package org.weasis.dicom.qr;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-class SendDicomFactoryTest {
+class LoadWadoUriSeriesTest {
 
   @Test
-  void stowAvailableAndProtocolSelection() {
-    SendDicomFactory factory = new SendDicomFactory();
-    assertTrue(factory.stow().isAvailable());
-    assertEquals(SendDicomFactory.Protocol.STOW_RS, factory.protocolFor(true));
-    assertEquals(SendDicomFactory.Protocol.C_STORE, factory.protocolFor(false));
+  void wadoUriQueryString() {
+    String uri =
+        new LoadWadoUriSeries()
+            .buildWadoUri("http://localhost/wado", "1.2.3", "1.2.4", "1.2.5", "application/dicom");
+    assertTrue(uri.contains("requestType=WADO"));
+    assertTrue(uri.contains("studyUID=1.2.3"));
+    assertTrue(uri.contains("objectUID=1.2.5"));
   }
 }

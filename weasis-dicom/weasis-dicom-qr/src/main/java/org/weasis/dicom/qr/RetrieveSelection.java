@@ -9,4 +9,39 @@
  */
 package org.weasis.dicom.qr;
 
-public class RetrieveSelection {}
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+/**
+ * A checked study retrieves STUDY-level (all series). Expand + check some series → SERIES-level. A
+ * checked study wins over its series regardless of click order.
+ */
+public final class RetrieveSelection {
+
+  public enum Level {
+    STUDY,
+    SERIES
+  }
+
+  private final Set<String> checkedStudies = new LinkedHashSet<>();
+  private final Set<String> checkedSeries = new LinkedHashSet<>();
+
+  public void checkStudy(String studyUid) {
+    checkedStudies.add(studyUid);
+  }
+
+  public void checkSeries(String studyUid, String seriesUid) {
+    checkedSeries.add(studyUid + "/" + seriesUid);
+  }
+
+  public Level levelFor(String studyUid) {
+    if (checkedStudies.contains(studyUid)) {
+      return Level.STUDY;
+    }
+    return Level.SERIES;
+  }
+
+  public boolean retrievesAllSeries(String studyUid) {
+    return levelFor(studyUid) == Level.STUDY;
+  }
+}

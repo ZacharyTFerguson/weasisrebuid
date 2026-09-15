@@ -9,4 +9,9 @@
  */
 package org.weasis.dicom.isowriter;
 
-public class ExportIsoFactory {}
+public class ExportIsoFactory {
+
+  public IsoImageExport createExport() {
+    return new IsoImageExport();
+  }
+}

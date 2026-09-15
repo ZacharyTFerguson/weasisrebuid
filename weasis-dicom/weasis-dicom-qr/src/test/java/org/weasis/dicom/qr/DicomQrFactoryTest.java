@@ -9,6 +9,7 @@
  */
 package org.weasis.dicom.qr;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,12 @@ import org.junit.jupiter.api.Test;
 class DicomQrFactoryTest {
 
   @Test
-  void cfindHave() {
-    assertTrue(new DicomQrFactory().supportsCFind());
+  void supportsDimseAndDicomweb() {
+    DicomQrFactory factory = new DicomQrFactory();
+    assertTrue(factory.supportsCFind());
+    assertTrue(factory.supports(DicomQrFactory.Verb.C_MOVE));
+    assertTrue(factory.supports(DicomQrFactory.Verb.QIDO_RS));
+    assertNotNull(factory.newRsQuery());
+    assertNotNull(factory.newSearchParameters());
   }
 }

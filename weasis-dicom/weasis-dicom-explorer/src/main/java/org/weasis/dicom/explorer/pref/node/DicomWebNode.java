@@ -9,4 +9,26 @@
  */
 package org.weasis.dicom.explorer.pref.node;
 
-public class DicomWebNode {}
+/** DICOMweb node (QIDO/WADO/STOW base URL). */
+public final class DicomWebNode {
+
+  private final String description;
+  private final String baseUrl;
+
+  public DicomWebNode(String description, String baseUrl) {
+    this.description = description;
+    this.baseUrl = baseUrl;
+  }
+
+  public String description() {
+    return description;
+  }
+
+  public String baseUrl() {
+    return baseUrl;
+  }
+
+  public boolean dicomWeb() {
+    return true;
+  }
+}

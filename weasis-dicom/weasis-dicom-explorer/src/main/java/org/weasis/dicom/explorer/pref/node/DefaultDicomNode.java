@@ -9,4 +9,38 @@
  */
 package org.weasis.dicom.explorer.pref.node;
 
-public class DefaultDicomNode {}
+/** DIMSE node (calling/called AET, host, port). */
+public final class DefaultDicomNode {
+
+  private final String description;
+  private final String aeTitle;
+  private final String host;
+  private final int port;
+
+  public DefaultDicomNode(String description, String aeTitle, String host, int port) {
+    this.description = description;
+    this.aeTitle = aeTitle;
+    this.host = host;
+    this.port = port;
+  }
+
+  public String description() {
+    return description;
+  }
+
+  public String aeTitle() {
+    return aeTitle;
+  }
+
+  public String host() {
+    return host;
+  }
+
+  public int port() {
+    return port;
+  }
+
+  public boolean dicomWeb() {
+    return false;
+  }
+}

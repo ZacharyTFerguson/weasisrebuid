@@ -12,7 +12,16 @@ package org.weasis.dicom.send;
 /** DICOM C-STORE / STOW export factory. */
 public class SendDicomFactory {
 
+  public enum Protocol {
+    C_STORE,
+    STOW_RS
+  }
+
   public StowRS stow() {
     return new StowRS();
+  }
+
+  public Protocol protocolFor(boolean dicomWebNode) {
+    return dicomWebNode ? Protocol.STOW_RS : Protocol.C_STORE;
   }
 }

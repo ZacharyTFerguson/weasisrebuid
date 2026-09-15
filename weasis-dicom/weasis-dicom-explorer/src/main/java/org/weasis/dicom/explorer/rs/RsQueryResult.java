@@ -9,4 +9,33 @@
  */
 package org.weasis.dicom.explorer.rs;
 
-public class RsQueryResult {}
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/** In-memory QIDO/WADO-RS query outcome (synthetic fixtures in tests). */
+public final class RsQueryResult {
+
+  private int httpStatus;
+  private final List<String> jsonEntries = new ArrayList<>();
+
+  public int httpStatus() {
+    return httpStatus;
+  }
+
+  public void setHttpStatus(int httpStatus) {
+    this.httpStatus = httpStatus;
+  }
+
+  public List<String> jsonEntries() {
+    return Collections.unmodifiableList(jsonEntries);
+  }
+
+  public void addJsonEntry(String entry) {
+    jsonEntries.add(entry);
+  }
+
+  public boolean success() {
+    return httpStatus >= 200 && httpStatus < 300;
+  }
+}

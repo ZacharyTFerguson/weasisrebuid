@@ -13,13 +13,25 @@
 
   <artifactId>weasis-dicom-qr</artifactId>
   <name>Weasis DICOM Q/R</name>
-  <description>C-FIND/MOVE/GET and QIDO (WP-11 Have stub)</description>
+  <description>C-FIND/MOVE/GET and QIDO (WP-11)</description>
 
   <dependencies>
     <dependency>
       <groupId>org.weasis.dicom</groupId>
       <artifactId>weasis-dicom-codec</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.dicom</groupId>
+      <artifactId>weasis-dicom-explorer</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.dcm4che</groupId>
+      <artifactId>dcm4che-core</artifactId>
+      <version>${weasis-dicom-tools.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -45,7 +57,7 @@ Bundle-SymbolicName: org.weasis.dicom.qr
 Bundle-Name: Weasis DICOM Q/R
 -dsannotations: *
 Export-Package: !org.weasis.dicom.qr.internal.*, org.weasis.dicom.qr
-Import-Package: org.weasis.core.*,org.weasis.dicom.codec.*,org.osgi.service.component;resolution:=optional,*
+Import-Package: !jakarta.json,!jakarta.json.*,org.weasis.core.*,org.weasis.dicom.codec.*,org.weasis.dicom.explorer.*,org.dcm4che3.data,org.dcm4che3.util,org.osgi.service.component;resolution:=optional,*
 ]]></bnd>
         </configuration>
       </plugin>

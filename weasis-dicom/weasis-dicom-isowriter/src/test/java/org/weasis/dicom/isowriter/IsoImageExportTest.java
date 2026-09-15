@@ -11,12 +11,25 @@ package org.weasis.dicom.isowriter;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class IsoImageExportTest {
 
+  @TempDir Path temp;
+
   @Test
-  void available() {
-    assertTrue(new IsoImageExport().isAvailable());
+  void manifestListsSources() throws Exception {
+    Path dicom = temp.resolve("image.dcm");
+    Files.writeString(dicom, "SYNTH");
+    IsoImageExport export = new ExportIsoFactory().createExport();
+    export.addSource(dicom);
+    Path manifest = export.writeManifest(temp.resolve("out.iso"));
+    String text = Files.readString(manifest);
+    assertTrue(export.isAvailable());
+    assertTrue(text.contains("DICOMDIR"));
+    assertTrue(text.contains("image.dcm"));
   }
 }
