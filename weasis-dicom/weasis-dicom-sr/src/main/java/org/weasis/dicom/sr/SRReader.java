@@ -35,6 +35,53 @@ public class SRReader {
     return read(dataset).asText();
   }
 
+  public String html(Attributes dataset) {
+    SRDocumentContentModule module = read(dataset);
+    StringBuilder builder = new StringBuilder();
+    builder.append("<html><body>");
+    if (!module.getTitle().isBlank()) {
+      builder.append("<h1>").append(escape(module.getTitle())).append("</h1>");
+    }
+    for (SRDocumentContent content : module.getContents()) {
+      appendHtml(builder, content);
+    }
+    builder.append("</body></html>");
+    return builder.toString();
+  }
+
+  static void appendHtml(StringBuilder builder, SRDocumentContent content) {
+    if (content == null) {
+      return;
+    }
+    builder.append("<p>");
+    if (!content.getConceptName().isBlank()) {
+      builder.append(escape(content.getConceptName()));
+    } else if (!content.getValueType().isBlank()) {
+      builder.append(escape(content.getValueType()));
+    }
+    if (!content.getValue().isBlank()) {
+      if (builder.charAt(builder.length() - 1) != '>') {
+        builder.append(": ");
+      }
+      builder.append(escape(content.getValue()));
+    }
+    builder.append("</p>");
+    for (SRDocumentContent child : content.getChildren()) {
+      appendHtml(builder, child);
+    }
+  }
+
+  static String escape(String value) {
+    if (value == null || value.isEmpty()) {
+      return "";
+    }
+    return value
+        .replace("&", "&amp;")
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\"", "&quot;");
+  }
+
   SRDocumentContent readItem(Attributes item) {
     SRDocumentContent node = new SRDocumentContent();
     if (item == null) {

@@ -9,4 +9,31 @@
  */
 package org.weasis.base.explorer;
 
-public class TreeRenderer {}
+import java.awt.Component;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultTreeCellRenderer;
+
+/** Renders {@link TreeNode} folder names in the non-DICOM explorer tree. */
+public class TreeRenderer extends DefaultTreeCellRenderer {
+
+  public String labelFor(Object value) {
+    if (value instanceof TreeNode node) {
+      return node.name();
+    }
+    return value == null ? "" : value.toString();
+  }
+
+  @Override
+  public Component getTreeCellRendererComponent(
+      JTree tree,
+      Object value,
+      boolean sel,
+      boolean expanded,
+      boolean leaf,
+      int row,
+      boolean hasFocus) {
+    super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+    setText(labelFor(value));
+    return this;
+  }
+}

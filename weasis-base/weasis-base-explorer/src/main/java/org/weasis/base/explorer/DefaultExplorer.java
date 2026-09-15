@@ -26,6 +26,7 @@ public class DefaultExplorer extends PluginTool implements DataExplorerView {
 
   private final JIThumbnailListPane thumbnails =
       new JIThumbnailListPane(new DefaultThumbnailList());
+  private final JIExplorerContext explorerContext = new JIExplorerContext();
 
   private final DataExplorerModel model =
       new DataExplorerModel() {
@@ -60,6 +61,10 @@ public class DefaultExplorer extends PluginTool implements DataExplorerView {
 
   public JIThumbnailListPane thumbnailPane() {
     return thumbnails;
+  }
+
+  public JIExplorerContext explorerContext() {
+    return explorerContext;
   }
 
   @Override

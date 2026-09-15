@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.explorer.pref.node;
 
-public class DicomNodePrefFactory {}
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.PreferencesPageFactory;
+import org.weasis.core.api.gui.util.AbstractItemDialogPage;
+import org.weasis.core.ui.pref.AbstractPreferencesPageFactory;
+
+@Component(service = PreferencesPageFactory.class)
+public class DicomNodePrefFactory extends AbstractPreferencesPageFactory {
+
+  @Override
+  public AbstractItemDialogPage createInstance(Hashtable<String, Object> properties) {
+    return new DicomNodeListView();
+  }
+
+  @Override
+  public boolean isComponentCreatedByThisFactory(Insertable component) {
+    return component instanceof DicomNodeListView;
+  }
+}

@@ -14,12 +14,8 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Stream;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.weasis.base.explorer.JIThumbnailCache;
@@ -75,19 +71,7 @@ public class AThumbnailListPane extends JPanel implements IThumbnailListPane {
 
   @Override
   public void loadDirectory(Path directory) throws IOException {
-    if (directory == null || !Files.isDirectory(directory)) {
-      thumbnailList.setItems(List.of());
-      return;
-    }
-    List<Path> files = new ArrayList<>();
-    try (Stream<Path> stream = Files.list(directory)) {
-      stream
-          .filter(Files::isRegularFile)
-          .filter(path -> !path.getFileName().toString().startsWith("."))
-          .sorted(Comparator.comparing(path -> path.getFileName().toString()))
-          .forEach(files::add);
-    }
-    thumbnailList.setItems(files);
+    thumbnailList.setItems(new DiskFileList().listFiles(directory));
   }
 
   @Override

@@ -9,4 +9,22 @@
  */
 package org.weasis.base.explorer.list;
 
-public class IThumbnailModel {}
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+
+/** Thumbnail list model backed by paths from a directory listing. */
+public interface IThumbnailModel {
+
+  void loadDirectory(Path directory) throws IOException;
+
+  void setItems(List<Path> items);
+
+  int getSize();
+
+  Path getElementAt(int index);
+
+  List<Path> items();
+
+  void clear();
+}

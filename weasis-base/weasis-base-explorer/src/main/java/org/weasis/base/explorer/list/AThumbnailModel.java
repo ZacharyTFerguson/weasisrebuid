@@ -9,6 +9,7 @@
  */
 package org.weasis.base.explorer.list;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,10 +17,25 @@ import java.util.List;
 import javax.swing.AbstractListModel;
 
 /** Swing list model of thumbnail paths for {@link ThumbnailList}. */
-public class AThumbnailModel extends AbstractListModel<Path> {
+public class AThumbnailModel extends AbstractListModel<Path> implements IThumbnailModel {
 
   private final List<Path> items = new ArrayList<>();
+  private final DiskFileList disk;
 
+  public AThumbnailModel() {
+    this(new DiskFileList());
+  }
+
+  public AThumbnailModel(DiskFileList disk) {
+    this.disk = disk == null ? new DiskFileList() : disk;
+  }
+
+  @Override
+  public void loadDirectory(Path directory) throws IOException {
+    setItems(disk.listFiles(directory));
+  }
+
+  @Override
   public void setItems(List<Path> items) {
     int previous = this.items.size();
     this.items.clear();
@@ -43,6 +59,7 @@ public class AThumbnailModel extends AbstractListModel<Path> {
     fireIntervalAdded(this, index, index);
   }
 
+  @Override
   public void clear() {
     int previous = items.size();
     items.clear();
@@ -64,6 +81,7 @@ public class AThumbnailModel extends AbstractListModel<Path> {
     return items.get(index);
   }
 
+  @Override
   public List<Path> items() {
     return Collections.unmodifiableList(items);
   }

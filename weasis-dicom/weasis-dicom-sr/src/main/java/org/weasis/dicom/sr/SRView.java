@@ -22,6 +22,7 @@ public class SRView extends JPanel {
 
   private final JEditorPane editor = new JEditorPane("text/plain", "");
   private final SRReader reader = new SRReader();
+  private Attributes dataset;
 
   public SRView() {
     super(new BorderLayout());
@@ -30,8 +31,18 @@ public class SRView extends JPanel {
   }
 
   public void display(Attributes dataset) {
+    this.dataset = dataset;
+    editor.setContentType("text/plain");
     editor.setText(reader.displayText(dataset));
     editor.setCaretPosition(0);
+  }
+
+  public Attributes dataset() {
+    return dataset;
+  }
+
+  public String html() {
+    return reader.html(dataset);
   }
 
   public void display(MediaElement media) {

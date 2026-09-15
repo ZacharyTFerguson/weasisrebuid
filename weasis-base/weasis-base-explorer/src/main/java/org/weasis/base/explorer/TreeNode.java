@@ -9,4 +9,34 @@
  */
 package org.weasis.base.explorer;
 
-public class TreeNode {}
+import java.nio.file.Files;
+import java.nio.file.Path;
+import javax.swing.tree.DefaultMutableTreeNode;
+
+/** Directory node in the non-DICOM explorer tree. */
+public class TreeNode extends DefaultMutableTreeNode {
+
+  public TreeNode(Path path) {
+    super(path);
+    setAllowsChildren(path != null && Files.isDirectory(path));
+  }
+
+  public Path getNodePath() {
+    Object value = getUserObject();
+    return value instanceof Path path ? path : null;
+  }
+
+  public String name() {
+    Path path = getNodePath();
+    if (path == null) {
+      return "";
+    }
+    Path fileName = path.getFileName();
+    return fileName == null ? path.toString() : fileName.toString();
+  }
+
+  public boolean directory() {
+    Path path = getNodePath();
+    return path != null && Files.isDirectory(path);
+  }
+}
