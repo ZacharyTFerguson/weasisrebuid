@@ -129,7 +129,7 @@ public class ViewTransferHandler extends TransferHandler {
 
   /** Headed glass / CContentArea drops: hit-test the View2d under {@code drop}, then hangCell. */
   public boolean importAt(Component host, Point drop, Transferable t) {
-    MediaSeries<?> series = dragged() != null ? dragged() : seriesFrom(t);
+    MediaSeries<?> series = seriesFrom(t);
     JComponent onto = asJc(cellAt(host, drop));
     return series != null && onto != null ? dropSeries(onto, series) : importFilesFrom(t) > 0;
   }
