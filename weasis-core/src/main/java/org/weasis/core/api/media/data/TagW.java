@@ -30,6 +30,10 @@ public class TagW {
   public static final TagW SeriesDescription = new TagW("SeriesDescription", "Series Description");
   public static final TagW StudyDate = new TagW("StudyDate", "Study Date");
   public static final TagW StudyDescription = new TagW("StudyDescription", "Study Description");
+  public static final TagW StudyID = new TagW("StudyID", "Study ID");
+  public static final TagW OperatorsName = new TagW("OperatorsName", "Operators Name");
+  public static final TagW LocalNamespaceEntityID =
+      new TagW("LocalNamespaceEntityID", "Local Namespace Entity ID");
 
   private final String keyword;
   private final String displayedName;

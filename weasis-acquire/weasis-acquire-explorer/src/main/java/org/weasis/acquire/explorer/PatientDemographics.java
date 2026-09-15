@@ -11,13 +11,33 @@ package org.weasis.acquire.explorer;
 
 /** Inbound patient values from worklist or {@code $acquire:patient}. Not reformatted. */
 public record PatientDemographics(
-    String patientName, String patientId, String birthDate, String sex, String accessionNumber) {
+    String patientName,
+    String patientId,
+    String birthDate,
+    String sex,
+    String accessionNumber,
+    String operatorsName,
+    String studyId,
+    String issuerOfAccessionNumber) {
+
+  public PatientDemographics(
+      String patientName, String patientId, String birthDate, String sex, String accessionNumber) {
+    this(patientName, patientId, birthDate, sex, accessionNumber, "", "", "");
+  }
 
   public static PatientDemographics empty() {
     return new PatientDemographics("", "", "", "", "");
   }
 
   public PatientDemographics withName(String name) {
-    return new PatientDemographics(name, patientId, birthDate, sex, accessionNumber);
+    return new PatientDemographics(
+        name,
+        patientId,
+        birthDate,
+        sex,
+        accessionNumber,
+        operatorsName,
+        studyId,
+        issuerOfAccessionNumber);
   }
 }

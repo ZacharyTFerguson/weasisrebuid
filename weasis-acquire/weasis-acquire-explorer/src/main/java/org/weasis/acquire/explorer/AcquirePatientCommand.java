@@ -109,14 +109,44 @@ public class AcquirePatientCommand {
             .parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
     Element root = doc.getDocumentElement();
     return new PatientDemographics(
-        text(root, "name"),
-        text(root, "id"),
-        text(root, "birthDate"),
-        text(root, "sex"),
-        text(root, "accession"));
+        first(root, "PatientName", "name"),
+        first(root, "PatientID", "id"),
+        first(root, "PatientBirthDate", "birthDate"),
+        first(root, "PatientSex", "sex"),
+        first(root, "AccessionNumber", "accession"),
+        first(root, "OperatorsName"),
+        first(root, "StudyID"),
+        nested(root, "IssuerOfAccessionNumberSequence", "LocalNamespaceEntityID"));
+  }
+
+  static String first(Element root, String... tags) {
+    if (root == null || tags == null) {
+      return "";
+    }
+    for (String tag : tags) {
+      String value = text(root, tag);
+      if (!value.isEmpty()) {
+        return value;
+      }
+    }
+    return "";
+  }
+
+  static String nested(Element root, String sequence, String child) {
+    if (root == null || sequence == null || child == null) {
+      return "";
+    }
+    var nodes = root.getElementsByTagName(sequence);
+    if (nodes.getLength() == 0) {
+      return text(root, child);
+    }
+    return text((Element) nodes.item(0), child);
   }
 
   static String text(Element root, String tag) {
+    if (root == null || tag == null) {
+      return "";
+    }
     var nodes = root.getElementsByTagName(tag);
     if (nodes.getLength() == 0) {
       return "";

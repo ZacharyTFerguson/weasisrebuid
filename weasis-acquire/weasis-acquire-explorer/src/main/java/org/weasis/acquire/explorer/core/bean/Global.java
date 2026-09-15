@@ -22,6 +22,9 @@ public class Global extends DefaultTaggable {
     putPatient(TagW.PatientBirthDate, demo.birthDate());
     putPatient(TagW.PatientSex, demo.sex());
     putPatient(TagW.AccessionNumber, demo.accessionNumber());
+    putPatient(TagW.OperatorsName, demo.operatorsName());
+    putPatient(TagW.StudyID, demo.studyId());
+    putPatient(TagW.LocalNamespaceEntityID, demo.issuerOfAccessionNumber());
   }
 
   public boolean hasPatientTags() {
