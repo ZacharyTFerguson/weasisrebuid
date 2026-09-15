@@ -29,7 +29,9 @@ class ExplorerPaneHaveTest {
     PatientPane patients = new PatientPane(model);
     PatientSelectionManager selection = patients.getSelectionManager();
     assertEquals(2, selection.patientKeys().size());
+    assertEquals("patient-combo", patients.getCombo().getName());
     StudyPane studies = new StudyPane(selection);
+    assertEquals("study-combo", studies.getCombo().getName());
     assertEquals(2, selection.studyUids().size());
     assertEquals(2, studies.getSeriesPane().getSelectionModel().getItems().size());
     selection.selectStudyIndex(1);

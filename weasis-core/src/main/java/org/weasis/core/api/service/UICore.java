@@ -10,7 +10,9 @@
 package org.weasis.core.api.service;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.KeyboardFocusManager;
+import java.awt.LayoutManager;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 import org.osgi.framework.BundleContext;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.explorer.DicomImportFactory;
@@ -184,32 +187,40 @@ public class UICore {
       openPlugins.add(plugin);
     }
     setSelectedViewerPlugin(plugin);
-    JFrame win = applicationWindow;
-    if (win != null) {
-      win.getContentPane().add(plugin, BorderLayout.CENTER);
-      win.revalidate();
-      win.repaint();
-    }
+    attachToWindow(plugin);
   }
 
   public void closeViewerPlugin(ViewerPlugin<?> plugin) {
     if (plugin == null) {
       return;
     }
+    detachFromWindow(plugin);
     int idx = openPlugins.indexOf(plugin);
     openPlugins.remove(plugin);
     plugin.close();
-    if (idx >= 0 && idx < selectedPluginIndex) {
-      selectedPluginIndex--;
-    }
+    repairSelectionAfterClose(idx);
+  }
+
+  void repairSelectionAfterClose(int idx) {
+    shiftSelectedIndex(idx);
     if (openPlugins.isEmpty()) {
       selectedPluginIndex = -1;
       return;
     }
+    clampSelectedIndex();
+    setSelectedViewerPlugin(openPlugins.get(selectedPluginIndex));
+  }
+
+  void shiftSelectedIndex(int idx) {
+    if (idx >= 0 && idx < selectedPluginIndex) {
+      selectedPluginIndex--;
+    }
+  }
+
+  void clampSelectedIndex() {
     if (selectedPluginIndex < 0 || selectedPluginIndex >= openPlugins.size()) {
       selectedPluginIndex = openPlugins.size() - 1;
     }
-    setSelectedViewerPlugin(openPlugins.get(selectedPluginIndex));
   }
 
   public List<ViewerPlugin<?>> getOpenViewerPlugins() {
@@ -250,6 +261,7 @@ public class UICore {
     for (int i = 0; i < openPlugins.size(); i++) {
       openPlugins.get(i).setSelected(i == idx);
     }
+    selectViewerTab(plugin);
   }
 
   public void cycleSelectedPlugin(boolean forward) {
@@ -358,5 +370,53 @@ public class UICore {
     }
     KeyboardFocusManager.getCurrentKeyboardFocusManager()
         .addKeyEventDispatcher(e -> e.getID() == KeyEvent.KEY_PRESSED && handleDockingKey(e));
+  }
+
+  void attachToWindow(ViewerPlugin<?> plugin) {
+    JFrame win = applicationWindow;
+    if (win == null) {
+      return;
+    }
+    JTabbedPane tabs = viewerTabsOf(win);
+    if (tabs != null) {
+      addViewerTab(tabs, plugin);
+      return;
+    }
+    win.getContentPane().add(plugin, BorderLayout.CENTER);
+    win.revalidate();
+    win.repaint();
+  }
+
+  void detachFromWindow(ViewerPlugin<?> plugin) {
+    JTabbedPane tabs = viewerTabsOf(applicationWindow);
+    if (tabs != null && tabs.indexOfComponent(plugin) >= 0) {
+      tabs.remove(plugin);
+    }
+  }
+
+  void selectViewerTab(ViewerPlugin<?> plugin) {
+    JTabbedPane tabs = viewerTabsOf(applicationWindow);
+    if (tabs != null && tabs.indexOfComponent(plugin) >= 0) {
+      tabs.setSelectedComponent(plugin);
+    }
+  }
+
+  static JTabbedPane viewerTabsOf(JFrame win) {
+    if (win == null) {
+      return null;
+    }
+    LayoutManager layout = win.getContentPane().getLayout();
+    if (!(layout instanceof BorderLayout border)) {
+      return null;
+    }
+    Component center = border.getLayoutComponent(BorderLayout.CENTER);
+    return center instanceof JTabbedPane tabs ? tabs : null;
+  }
+
+  static void addViewerTab(JTabbedPane tabs, ViewerPlugin<?> plugin) {
+    if (tabs.indexOfComponent(plugin) < 0) {
+      tabs.addTab(plugin.getPluginName(), plugin);
+    }
+    tabs.setSelectedComponent(plugin);
   }
 }

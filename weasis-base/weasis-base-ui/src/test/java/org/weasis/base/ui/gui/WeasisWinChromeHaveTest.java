@@ -10,12 +10,18 @@
 package org.weasis.base.ui.gui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.GraphicsEnvironment;
+import java.util.List;
+import javax.swing.JMenu;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.util.AppProperties;
+import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.util.ToolBarContainer;
 
 class WeasisWinChromeHaveTest {
@@ -30,17 +36,50 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
-  void headedWindowHasHelpMenuAndImportToolbarButton() {
+  void headedWindowHasFileViewHelpMenus() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();
     try {
       assertEquals(WeasisWin.windowTitle(), win.getTitle());
-      assertEquals(2, win.getJMenuBar().getMenuCount());
+      assertEquals(3, win.getJMenuBar().getMenuCount());
       assertEquals("File", win.getJMenuBar().getMenu(0).getText());
-      assertEquals("Help", win.getJMenuBar().getMenu(1).getText());
+      assertEquals("View", win.getJMenuBar().getMenu(1).getText());
+      assertEquals("Help", win.getJMenuBar().getMenu(2).getText());
       assertTrue(win.getToolBarContainer().getComponentCount() >= 5);
+      JMenu view = win.getJMenuBar().getMenu(1);
+      assertEquals(4, view.getItemCount());
+      assertEquals("Reset", view.getItem(3).getText());
     } finally {
       win.dispose();
     }
+  }
+
+  @Test
+  void secondPluginAddsATabInsteadOfReplacingCenter() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    ViewerPlugin<?> second = plugin("B");
+    try {
+      core.openViewerPlugin(first);
+      core.openViewerPlugin(second);
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertSame(second, win.getViewerTabs().getSelectedComponent());
+      core.closeViewerPlugin(first);
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertSame(second, win.getViewerTabs().getSelectedComponent());
+    } finally {
+      for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
+        core.closeViewerPlugin(plugin);
+      }
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  static ViewerPlugin<?> plugin(String name) {
+    return new ViewerPlugin<MediaElement>(name) {};
   }
 }

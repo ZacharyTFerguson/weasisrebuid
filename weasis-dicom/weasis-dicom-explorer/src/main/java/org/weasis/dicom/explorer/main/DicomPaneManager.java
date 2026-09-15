@@ -24,6 +24,7 @@ public class DicomPaneManager {
   public DicomPaneManager(DicomModel model) {
     this.patientPane = new PatientPane(model);
     this.studyPane = new StudyPane(patientPane.getSelectionManager());
+    this.patientPane.setOnSelect(studyPane::refresh);
   }
 
   public PatientPane getPatientPane() {

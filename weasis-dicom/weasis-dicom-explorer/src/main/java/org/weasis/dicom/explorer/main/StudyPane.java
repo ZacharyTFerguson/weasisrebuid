@@ -3,29 +3,30 @@
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
- * License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ * License, Version 2.0 which is available at https://www.eclipse.org/licenses/LICENSE-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 package org.weasis.dicom.explorer.main;
 
 import java.awt.BorderLayout;
+import java.awt.event.ItemEvent;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import org.weasis.dicom.explorer.DicomSorter;
 import org.weasis.dicom.explorer.ImportedInstance;
 
-/** Explorer study list for the selected patient. */
+/** Explorer study combobox for the selected patient. */
 public class StudyPane extends JPanel {
 
   private final PatientSelectionManager selection;
   private final SeriesPane seriesPane = new SeriesPane();
-  private final DefaultListModel<String> listModel = new DefaultListModel<>();
-  private final JList<String> list = new JList<>(listModel);
+  private final DefaultComboBoxModel<String> comboModel = new DefaultComboBoxModel<>();
+  private final JComboBox<String> combo = new JComboBox<>(comboModel);
+  private boolean syncing;
 
   public StudyPane() {
     this(new PatientSelectionManager());
@@ -34,12 +35,13 @@ public class StudyPane extends JPanel {
   public StudyPane(PatientSelectionManager selection) {
     super(new BorderLayout());
     this.selection = selection == null ? new PatientSelectionManager() : selection;
-    add(new JScrollPane(list), BorderLayout.CENTER);
-    add(seriesPane, BorderLayout.SOUTH);
-    list.addListSelectionListener(
+    combo.setName("study-combo");
+    add(combo, BorderLayout.NORTH);
+    add(seriesPane, BorderLayout.CENTER);
+    combo.addItemListener(
         e -> {
-          if (!e.getValueIsAdjusting()) {
-            this.selection.selectStudyIndex(list.getSelectedIndex());
+          if (!syncing && e.getStateChange() == ItemEvent.SELECTED) {
+            this.selection.selectStudyIndex(combo.getSelectedIndex());
             refreshSeries();
           }
         });
@@ -54,19 +56,24 @@ public class StudyPane extends JPanel {
     return seriesPane;
   }
 
-  public JList<String> getList() {
-    return list;
+  public JComboBox<String> getCombo() {
+    return combo;
   }
 
   public void refresh() {
-    selection.refresh();
-    listModel.clear();
-    for (String label : selection.studyLabels()) {
-      listModel.addElement(label);
-    }
-    int idx = selection.studyUids().indexOf(selection.selectedStudyUid());
-    if (idx >= 0) {
-      list.setSelectedIndex(idx);
+    syncing = true;
+    try {
+      selection.refresh();
+      comboModel.removeAllElements();
+      for (String label : List.copyOf(selection.studyLabels())) {
+        comboModel.addElement(label);
+      }
+      int idx = selection.studyUids().indexOf(selection.selectedStudyUid());
+      if (idx >= 0) {
+        combo.setSelectedIndex(idx);
+      }
+    } finally {
+      syncing = false;
     }
     refreshSeries();
   }

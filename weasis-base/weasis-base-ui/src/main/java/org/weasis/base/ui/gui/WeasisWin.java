@@ -22,6 +22,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
 import org.weasis.core.api.explorer.DataExplorerView;
@@ -30,6 +31,7 @@ import org.weasis.core.api.explorer.DicomImportFactory;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.gui.util.AppProperties;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ScreenshotToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
@@ -42,6 +44,7 @@ import org.weasis.core.ui.util.ToolBarContainer;
 public class WeasisWin extends JFrame {
 
   private final ToolBarContainer toolbars;
+  private final JTabbedPane viewerTabs = new JTabbedPane();
   private DataExplorerView explorerView;
 
   public WeasisWin() {
@@ -49,15 +52,32 @@ public class WeasisWin extends JFrame {
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     setSize(960, 640);
     setLayout(new BorderLayout());
-    setJMenuBar(createMenuBar());
     toolbars = createDefaultToolBars();
+    installChrome();
+    addWindowListener(new WeasisWinListener(this));
+    UICore.getInstance().installDockingKeyDispatcher();
+  }
+
+  void installChrome() {
+    setJMenuBar(createMenuBar());
+    addImportButton();
+    add(toolbars, BorderLayout.NORTH);
+    add(viewerTabs, BorderLayout.CENTER);
+    viewerTabs.addChangeListener(e -> onViewerTabChanged());
+  }
+
+  void addImportButton() {
     JButton importBtn = new JButton("Import DICOM");
     importBtn.setName("import-dicom");
     importBtn.addActionListener(e -> openImportDialog(false));
     toolbars.add(importBtn);
-    add(toolbars, BorderLayout.NORTH);
-    addWindowListener(new WeasisWinListener(this));
-    UICore.getInstance().installDockingKeyDispatcher();
+  }
+
+  void onViewerTabChanged() {
+    Component selected = viewerTabs.getSelectedComponent();
+    if (selected instanceof ViewerPlugin<?> plugin) {
+      UICore.getInstance().setSelectedViewerPlugin(plugin);
+    }
   }
 
   public static String windowTitle() {
@@ -77,6 +97,10 @@ public class WeasisWin extends JFrame {
     return toolbars;
   }
 
+  public JTabbedPane getViewerTabs() {
+    return viewerTabs;
+  }
+
   public DataExplorerView getExplorerView() {
     return explorerView;
   }
@@ -87,6 +111,13 @@ public class WeasisWin extends JFrame {
 
   public JMenuBar createMenuBar() {
     JMenuBar bar = new JMenuBar();
+    bar.add(createFileMenu());
+    bar.add(createViewMenu());
+    bar.add(createHelpMenu());
+    return bar;
+  }
+
+  JMenu createFileMenu() {
     JMenu file = new JMenu("File");
     JMenu importMenu = new JMenu("Import");
     JMenuItem importDicom = new JMenuItem("DICOM");
@@ -105,20 +136,53 @@ public class WeasisWin extends JFrame {
           dialog.setVisible(true);
         });
     file.add(prefs);
-    bar.add(file);
+    return file;
+  }
+
+  JMenu createViewMenu() {
+    JMenu view = new JMenu("View");
+    view.add(layoutItem("1×1", 1));
+    view.add(layoutItem("1×2", 2));
+    view.add(layoutItem("2×2", 4));
+    JMenuItem reset = new JMenuItem("Reset");
+    reset.setName("view-reset");
+    reset.addActionListener(e -> resetSelectedView());
+    view.add(reset);
+    return view;
+  }
+
+  JMenuItem layoutItem(String name, int count) {
+    JMenuItem item = new JMenuItem(name);
+    item.setName("layout-" + count);
+    item.addActionListener(e -> applyLayout(count));
+    return item;
+  }
+
+  void applyLayout(int count) {
+    ViewerPlugin<?> plugin = UICore.getInstance().getSelectedViewerPlugin();
+    if (plugin instanceof ImageViewerPlugin<?> image) {
+      image.setLayoutCount(count);
+    }
+  }
+
+  void resetSelectedView() {
+    ViewerPlugin<?> plugin = UICore.getInstance().getSelectedViewerPlugin();
+    if (plugin instanceof ImageViewerPlugin<?> image) {
+      image.resetDisplay();
+    }
+  }
+
+  JMenu createHelpMenu() {
     JMenu help = new JMenu("Help");
     JMenuItem about = new JMenuItem("About");
     about.addActionListener(e -> new WeasisAboutBox(this).setVisible(true));
     help.add(about);
-    bar.add(help);
-    return bar;
+    return help;
   }
 
   public void attachViewer(ViewerPlugin<?> plugin) {
     if (plugin != null) {
-      add(plugin, BorderLayout.CENTER);
-      revalidate();
-      repaint();
+      UICore.getInstance().openViewerPlugin(plugin);
     }
   }
 

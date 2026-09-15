@@ -26,4 +26,12 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
   public OpManager getDisplayOpManager() {
     return displayOp;
   }
+
+  public void setLayoutCount(int n) {}
+
+  public int getLayoutCount() {
+    return 1;
+  }
+
+  public void resetDisplay() {}
 }

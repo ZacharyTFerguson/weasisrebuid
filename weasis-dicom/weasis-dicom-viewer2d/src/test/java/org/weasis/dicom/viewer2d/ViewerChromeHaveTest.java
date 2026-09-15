@@ -95,6 +95,19 @@ class ViewerChromeHaveTest {
     assertEquals(0, container.getLayoutIndex());
   }
 
+  @Test
+  void viewMenuResetClearsZoomPanRotation() {
+    View2dContainer container = new View2dContainer();
+    container.getView2d().setZoom(2.0);
+    container.getView2d().setPan(4, 5);
+    container.getView2d().setRotation(90);
+    container.setLayoutCount(2);
+    assertEquals(2, container.getLayoutCount());
+    container.resetDisplay();
+    assertEquals(0.0, container.getView2d().getPanX(), 1e-9);
+    assertEquals(0.0, container.getView2d().getRotation(), 1e-9);
+  }
+
   static KeyEvent tab(View2d view, int mods) {
     return new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, mods, KeyEvent.VK_TAB, '\t');
   }

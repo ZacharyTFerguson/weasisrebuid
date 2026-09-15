@@ -103,6 +103,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     return List.copyOf(layout);
   }
 
+  @Override
   public void setLayoutCount(int n) {
     int count = Math.max(1, n);
     while (layout.size() < count) {
@@ -119,6 +120,16 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
       View2dRegistry.unregister(removed);
     }
     layoutIndex = Math.min(layoutIndex, layout.size() - 1);
+  }
+
+  @Override
+  public int getLayoutCount() {
+    return layout.size();
+  }
+
+  @Override
+  public void resetDisplay() {
+    resetTools.apply(org.weasis.core.ui.editor.image.ResetTools.ALL);
   }
 
   public int getLayoutIndex() {
