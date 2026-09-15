@@ -13,40 +13,30 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import javax.swing.JComboBox;
-import org.weasis.core.Messages;
 import org.weasis.core.api.util.LocalUtil;
 
 public class JLocaleLanguage extends JComboBox<JLocale> {
 
-  private final String bundleName;
+  private final List<String> bundleNames;
 
   public JLocaleLanguage() {
-    this(Messages.BUNDLE_NAME, JLocalePercentage.thresholdRatioFromSystem());
+    this(LocalUtil.documentedBundles(), JLocalePercentage.thresholdRatioFromSystem());
   }
 
   public JLocaleLanguage(String bundleName, double minCoverage) {
+    this(singleBundle(bundleName), minCoverage);
+  }
+
+  public JLocaleLanguage(List<String> bundleNames, double minCoverage) {
     super();
-    this.bundleName =
-        bundleName == null || bundleName.isBlank() ? Messages.BUNDLE_NAME : bundleName;
+    this.bundleNames = copyBundles(bundleNames);
     rebuild(minCoverage);
   }
 
   public void rebuild(double minCoverage) {
     Locale previous = getSelectedLocale();
     removeAllItems();
-    List<Locale> locales = LocalUtil.listedLanguages(bundleName, minCoverage);
-    List<JLocale> items = new ArrayList<>();
-    for (Locale locale : locales) {
-      JLocale item = new JLocale(locale);
-      items.add(item);
-      addItem(item);
-    }
-    JLocale select = new JLocale(previous);
-    if (items.contains(select)) {
-      setSelectedItem(select);
-    } else if (!items.isEmpty()) {
-      setSelectedItem(items.getFirst());
-    }
+    selectPrevious(addLocales(minCoverage), previous);
   }
 
   public Locale getSelectedLocale() {
@@ -55,5 +45,40 @@ public class JLocaleLanguage extends JComboBox<JLocale> {
       return loc.getLocale();
     }
     return LocalUtil.textLocale();
+  }
+
+  List<JLocale> addLocales(double minCoverage) {
+    List<JLocale> items = new ArrayList<>();
+    for (Locale locale : LocalUtil.listedLanguages(bundleNames, minCoverage)) {
+      JLocale item = new JLocale(locale);
+      items.add(item);
+      addItem(item);
+    }
+    return items;
+  }
+
+  void selectPrevious(List<JLocale> items, Locale previous) {
+    JLocale select = new JLocale(previous);
+    if (items.contains(select)) {
+      setSelectedItem(select);
+      return;
+    }
+    if (!items.isEmpty()) {
+      setSelectedItem(items.getFirst());
+    }
+  }
+
+  static List<String> singleBundle(String bundleName) {
+    if (bundleName == null || bundleName.isBlank()) {
+      return LocalUtil.documentedBundles();
+    }
+    return List.of(bundleName);
+  }
+
+  static List<String> copyBundles(List<String> bundleNames) {
+    if (bundleNames == null || bundleNames.isEmpty()) {
+      return LocalUtil.documentedBundles();
+    }
+    return List.copyOf(bundleNames);
   }
 }
