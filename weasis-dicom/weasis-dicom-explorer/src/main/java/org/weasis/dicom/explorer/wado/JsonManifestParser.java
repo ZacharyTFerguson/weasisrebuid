@@ -45,8 +45,6 @@ public class JsonManifestParser {
         }
       }
       return new Manifest(arcs);
-    } catch (DownloadException e) {
-      throw e;
     } catch (Exception e) {
       throw new DownloadException("json manifest", e);
     }
@@ -57,7 +55,8 @@ public class JsonManifestParser {
     QueryMode mode = ManifestModelBuilder.queryMode(text(arc, "queryMode"));
     Boolean bulk = ManifestModelBuilder.seriesRetrieveFlag(text(arc, "seriesRetrieve"));
     boolean onlySop =
-        ManifestModelBuilder.truthy(text(arc, "requireOnlySOPInstanceUID", "requireOnlySopInstanceUID"));
+        ManifestModelBuilder.truthy(
+            text(arc, "requireOnlySOPInstanceUID", "requireOnlySopInstanceUID"));
     String extra = text(arc, "additionnalParameters", "additionalParameters");
     List<Patient> patients = new ArrayList<>();
     for (JsonNode patient : asArray(arc.get("Patient"))) {

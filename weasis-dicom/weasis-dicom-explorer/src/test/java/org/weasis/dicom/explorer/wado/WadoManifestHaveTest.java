@@ -148,9 +148,7 @@ class WadoManifestHaveTest {
     Manifest manifest = new LoadRemoteDicomManifest().parseFile(file);
     LoadSeries job = new DownloadManager().plan(manifest).getFirst();
     assertEquals("https://cdn.example/Lumbar/img.dcm", job.instanceUrls().getFirst());
-    String thumb =
-        new ThumbnailManager()
-            .thumbnailUrl(job.arc(), job.study(), job.series());
+    String thumb = new ThumbnailManager().thumbnailUrl(job.arc(), job.study(), job.series());
     assertEquals("https://cdn.example/Lumbar/thumb.jpg", thumb);
     String gogo = new DicomCommands().get("-w", file.toString());
     assertTrue(gogo.contains("series=1"));
@@ -174,10 +172,8 @@ class WadoManifestHaveTest {
         """;
     LoadSeries bulk = new DownloadManager().plan(new XmlManifestParser().parse(xml)).getFirst();
     assertTrue(bulk.bulk());
-    assertEquals(
-        "https://pacs.example/dicom-web/studies/2.25.11/series/2.25.10", bulk.bulkUrl());
-    String enumerated =
-        xml.replace("seriesRetrieve=\"true\"", "seriesRetrieve=\"false\"");
+    assertEquals("https://pacs.example/dicom-web/studies/2.25.11/series/2.25.10", bulk.bulkUrl());
+    String enumerated = xml.replace("seriesRetrieve=\"true\"", "seriesRetrieve=\"false\"");
     LoadSeries qido =
         new DownloadManager().plan(new XmlManifestParser().parse(enumerated)).getFirst();
     assertFalse(qido.bulk());
@@ -263,13 +259,7 @@ class WadoManifestHaveTest {
     Study study = new Study("2.25.11", "", "", "", "", "", List.of(series));
     ArcQuery arc =
         ManifestModelBuilder.arcQuery(
-            "1",
-            "https://pacs.example/dicom-web",
-            "",
-            false,
-            QueryMode.DICOM_WEB,
-            true,
-            List.of());
+            "1", "https://pacs.example/dicom-web", "", false, QueryMode.DICOM_WEB, true, List.of());
     String thumb = new ThumbnailManager().thumbnailUrl(arc, study, series);
     assertTrue(thumb.endsWith("/series/2.25.10/thumbnail"));
   }

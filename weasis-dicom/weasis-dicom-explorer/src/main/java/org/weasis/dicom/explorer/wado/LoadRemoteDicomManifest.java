@@ -44,7 +44,10 @@ public class LoadRemoteDicomManifest {
   }
 
   public static boolean isGzip(byte[] bytes) {
-    return bytes != null && bytes.length >= 2 && (bytes[0] & 0xff) == 0x1f && (bytes[1] & 0xff) == 0x8b;
+    return bytes != null
+        && bytes.length >= 2
+        && (bytes[0] & 0xff) == 0x1f
+        && (bytes[1] & 0xff) == 0x8b;
   }
 
   static byte[] gunzip(byte[] bytes) throws DownloadException {

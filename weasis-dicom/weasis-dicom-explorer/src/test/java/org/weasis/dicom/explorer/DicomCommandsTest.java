@@ -70,6 +70,8 @@ class DicomCommandsTest {
             "seriesUID=2.25.10",
             "-r",
             "objectUID=2.25.100");
-    assertTrue(out.contains("wado-rs https://pacs.example/dicom-web/studies/2.25.11/series/2.25.10/instances/2.25.100"));
+    assertTrue(
+        out.contains(
+            "wado-rs https://pacs.example/dicom-web/studies/2.25.11/series/2.25.10/instances/2.25.100"));
   }
 }

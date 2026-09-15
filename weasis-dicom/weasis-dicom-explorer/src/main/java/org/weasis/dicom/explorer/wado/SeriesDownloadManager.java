@@ -28,12 +28,12 @@ public class SeriesDownloadManager {
   }
 
   public SeriesDownloadManager(org.weasis.dicom.explorer.SeriesDownloadManager inner) {
-    this.inner =
-        inner == null ? new org.weasis.dicom.explorer.SeriesDownloadManager() : inner;
+    this.inner = inner == null ? new org.weasis.dicom.explorer.SeriesDownloadManager() : inner;
   }
 
   public static SeriesDownloadManager fromPrefs(WProperties prefs) {
-    return new SeriesDownloadManager(org.weasis.dicom.explorer.SeriesDownloadManager.fromPrefs(prefs));
+    return new SeriesDownloadManager(
+        org.weasis.dicom.explorer.SeriesDownloadManager.fromPrefs(prefs));
   }
 
   public org.weasis.dicom.explorer.SeriesDownloadManager inner() {

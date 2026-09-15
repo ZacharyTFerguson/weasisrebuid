@@ -17,7 +17,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
 import org.weasis.dicom.explorer.wado.ManifestModelBuilder.ArcQuery;
 import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Instance;
 import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Manifest;
@@ -25,8 +24,11 @@ import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Patient;
 import org.weasis.dicom.explorer.wado.ManifestModelBuilder.QueryMode;
 import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Series;
 import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Study;
+import org.xml.sax.InputSource;
 
-/** DOM parser for the documented {@code <manifest><arcQuery>} XML (and older {@code wado_query}). */
+/**
+ * DOM parser for the documented {@code <manifest><arcQuery>} XML (and older {@code wado_query}).
+ */
 public class XmlManifestParser {
 
   public Manifest parse(String xml) throws DownloadException {
@@ -80,7 +82,8 @@ public class XmlManifestParser {
 
   private static ArcQuery readArc(Element arc) {
     String base =
-        ManifestModelBuilder.firstNonBlank(attr(arc, "baseUrl"), attr(arc, "wadoURL"), attr(arc, "wadoUrl"));
+        ManifestModelBuilder.firstNonBlank(
+            attr(arc, "baseUrl"), attr(arc, "wadoURL"), attr(arc, "wadoUrl"));
     QueryMode mode = ManifestModelBuilder.queryMode(attr(arc, "queryMode"));
     Boolean bulk = ManifestModelBuilder.seriesRetrieveFlag(attr(arc, "seriesRetrieve"));
     boolean onlySop =

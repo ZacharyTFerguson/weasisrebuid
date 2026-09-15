@@ -171,7 +171,10 @@ public class ManifestModelBuilder {
       return QueryMode.WADO_URI;
     }
     String n = raw.trim().toUpperCase(Locale.ROOT).replace('-', '_');
-    if (n.contains("DICOM_WEB") || n.equals("DICOMWEB") || n.equals("QIDO") || n.equals("WADO_RS")) {
+    if (n.contains("DICOM_WEB")
+        || n.equals("DICOMWEB")
+        || n.equals("QIDO")
+        || n.equals("WADO_RS")) {
       return QueryMode.DICOM_WEB;
     }
     return QueryMode.WADO_URI;

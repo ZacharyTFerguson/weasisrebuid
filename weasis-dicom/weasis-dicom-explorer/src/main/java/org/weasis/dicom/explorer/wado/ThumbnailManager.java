@@ -20,8 +20,11 @@ import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Study;
 public class ThumbnailManager {
 
   public String thumbnailUrl(ArcQuery arc, Study study, Series series) {
-    if (series != null && series.directDownloadThumbnail() != null && !series.directDownloadThumbnail().isBlank()) {
-      return new LoadRemoteDicomURL().join(arc == null ? "" : arc.baseUrl(), series.directDownloadThumbnail());
+    if (series != null
+        && series.directDownloadThumbnail() != null
+        && !series.directDownloadThumbnail().isBlank()) {
+      return new LoadRemoteDicomURL()
+          .join(arc == null ? "" : arc.baseUrl(), series.directDownloadThumbnail());
     }
     if (arc != null && arc.queryMode() == QueryMode.DICOM_WEB) {
       String seriesUrl = new LoadRemoteDicomURL().wadoRsSeries(arc, study, series);
