@@ -9,4 +9,28 @@
  */
 package org.weasis.core.ui.model.utils.bean;
 
-public class MeasureItem {}
+/** One measured value with its unit, keyed by a {@link Measurement}. */
+public class MeasureItem {
+
+  private final Measurement measurement;
+  private final Number value;
+  private final String unit;
+
+  public MeasureItem(Measurement measurement, Number value, String unit) {
+    this.measurement = measurement;
+    this.value = value;
+    this.unit = unit == null ? "" : unit;
+  }
+
+  public Measurement getMeasurement() {
+    return measurement;
+  }
+
+  public Number getValue() {
+    return value;
+  }
+
+  public String getUnit() {
+    return unit;
+  }
+}

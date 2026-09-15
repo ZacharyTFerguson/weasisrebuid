@@ -9,4 +9,8 @@
  */
 package org.weasis.core.ui.model.utils;
 
-public interface ImageLayerChangeListener {}
+/** Notified when the IMAGE raster layer changes. */
+public interface ImageLayerChangeListener {
+
+  void handleLayerChanged();
+}

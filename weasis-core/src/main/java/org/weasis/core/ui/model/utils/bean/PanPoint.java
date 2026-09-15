@@ -9,4 +9,43 @@
  */
 package org.weasis.core.ui.model.utils.bean;
 
-public class PanPoint {}
+/** Image-space point recorded by pan / navigator actions. */
+public class PanPoint {
+
+  public enum State {
+    CENTER,
+    MOVE,
+    DRAG
+  }
+
+  private final State state;
+  private double x;
+  private double y;
+
+  public PanPoint(State state) {
+    this(state, 0, 0);
+  }
+
+  public PanPoint(State state, double x, double y) {
+    this.state = state == null ? State.MOVE : state;
+    this.x = x;
+    this.y = y;
+  }
+
+  public State getState() {
+    return state;
+  }
+
+  public double getX() {
+    return x;
+  }
+
+  public double getY() {
+    return y;
+  }
+
+  public void setLocation(double x, double y) {
+    this.x = x;
+    this.y = y;
+  }
+}

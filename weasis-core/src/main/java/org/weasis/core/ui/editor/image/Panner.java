@@ -19,6 +19,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import org.weasis.core.ui.model.utils.bean.PanPoint;
 
 /**
  * Overview navigator for the selected 2D view. Click/drag places that image point at the view
@@ -28,6 +29,7 @@ public class Panner extends JPanel {
 
   private DefaultView2d<?> view;
   private PannerListener listener;
+  private PanPoint lastPan;
 
   public Panner() {
     setOpaque(true);
@@ -71,6 +73,14 @@ public class Panner extends JPanel {
     this.listener = listener;
   }
 
+  public PannerListener getPannerListener() {
+    return listener;
+  }
+
+  public PanPoint lastPan() {
+    return lastPan;
+  }
+
   public void panAt(int x, int y) {
     if (view == null || view.getSourceImage() == null) {
       return;
@@ -80,6 +90,7 @@ public class Panner extends JPanel {
     int h = Math.max(1, getHeight());
     double imgX = x * src.getWidth() / (double) w;
     double imgY = y * src.getHeight() / (double) h;
+    lastPan = new PanPoint(PanPoint.State.CENTER, imgX, imgY);
     view.centerOnImage(imgX, imgY);
     if (listener != null) {
       listener.panChanged(view, view.getPanX(), view.getPanY());

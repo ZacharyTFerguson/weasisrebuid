@@ -9,4 +9,35 @@
  */
 package org.weasis.core.ui.model.utils.imp;
 
-public class DefaultUUID {}
+import java.util.UUID;
+import org.weasis.core.ui.model.utils.UUIDable;
+
+/** Stable identity for graphics and layers. */
+public class DefaultUUID implements UUIDable {
+
+  private String uuid;
+
+  public DefaultUUID() {
+    this(null);
+  }
+
+  public DefaultUUID(String uuid) {
+    this.uuid = blank(uuid) ? UUID.randomUUID().toString() : uuid;
+  }
+
+  static boolean blank(String uuid) {
+    return uuid == null || uuid.isBlank();
+  }
+
+  @Override
+  public String getUuid() {
+    return uuid;
+  }
+
+  @Override
+  public void setUuid(String uuid) {
+    if (!blank(uuid)) {
+      this.uuid = uuid;
+    }
+  }
+}

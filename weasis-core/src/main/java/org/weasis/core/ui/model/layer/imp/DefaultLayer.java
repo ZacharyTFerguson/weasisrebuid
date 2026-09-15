@@ -9,4 +9,38 @@
  */
 package org.weasis.core.ui.model.layer.imp;
 
-public class DefaultLayer {}
+import org.weasis.core.ui.model.layer.Layer;
+import org.weasis.core.ui.model.layer.LayerType;
+import org.weasis.core.ui.model.utils.UUIDable;
+import org.weasis.core.ui.model.utils.imp.DefaultUUID;
+
+/** Named canvas layer with a UUID and a locked flag. */
+public class DefaultLayer extends Layer implements UUIDable {
+
+  private final DefaultUUID id = new DefaultUUID();
+  private boolean locked;
+
+  public DefaultLayer() {}
+
+  public DefaultLayer(LayerType type) {
+    super(type);
+  }
+
+  @Override
+  public String getUuid() {
+    return id.getUuid();
+  }
+
+  @Override
+  public void setUuid(String uuid) {
+    id.setUuid(uuid);
+  }
+
+  public boolean isLocked() {
+    return locked;
+  }
+
+  public void setLocked(boolean locked) {
+    this.locked = locked;
+  }
+}

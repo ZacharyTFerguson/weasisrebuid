@@ -9,4 +9,32 @@
  */
 package org.weasis.core.ui.model.utils.bean;
 
-public class Measurement {}
+/** Named quantity a graphic can report (length, area, angle, …). */
+public class Measurement {
+
+  private final String name;
+  private final Integer id;
+  private boolean computed;
+
+  public Measurement(String name, Integer id, boolean computed) {
+    this.name = name == null ? "" : name;
+    this.id = id;
+    this.computed = computed;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public Integer getId() {
+    return id;
+  }
+
+  public boolean isComputed() {
+    return computed;
+  }
+
+  public void setComputed(boolean computed) {
+    this.computed = computed;
+  }
+}

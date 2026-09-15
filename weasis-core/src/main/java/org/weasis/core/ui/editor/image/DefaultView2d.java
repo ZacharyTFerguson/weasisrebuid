@@ -47,6 +47,8 @@ import org.weasis.core.ui.model.layer.GraphicModelChangeListener;
 import org.weasis.core.ui.model.layer.Layer;
 import org.weasis.core.ui.model.layer.LayerItem;
 import org.weasis.core.ui.model.layer.LayerType;
+import org.weasis.core.ui.model.layer.imp.DefaultLayer;
+import org.weasis.core.ui.model.layer.imp.RenderedImageLayer;
 import org.weasis.core.ui.util.ImagePrint;
 import org.weasis.core.ui.util.PrintOptions;
 
@@ -156,12 +158,18 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   private void initLayers() {
     for (LayerType type : LayerType.values()) {
-      layers.put(
-          type,
-          type == LayerType.MEASURE || type == LayerType.DRAW
-              ? new GraphicLayer(type)
-              : new Layer(type));
+      layers.put(type, layerFor(type));
     }
+  }
+
+  static Layer layerFor(LayerType type) {
+    if (type == LayerType.MEASURE || type == LayerType.DRAW) {
+      return new GraphicLayer(type);
+    }
+    if (type == LayerType.IMAGE) {
+      return new RenderedImageLayer();
+    }
+    return new DefaultLayer(type);
   }
 
   public OpManager getDisplayOpManager() {
@@ -184,7 +192,20 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     this.source = source;
     displayOp.setFirstNode(source);
     displayOp.setParamValue("op.affine", AffineTransformOp.P_ZOOM, zoom);
+    bindImageLayer(source);
     repaint();
+  }
+
+  public RenderedImageLayer getImageLayer() {
+    Layer layer = getLayer(LayerType.IMAGE);
+    return layer instanceof RenderedImageLayer rendered ? rendered : null;
+  }
+
+  void bindImageLayer(BufferedImage source) {
+    RenderedImageLayer layer = getImageLayer();
+    if (layer != null) {
+      layer.setImage(source);
+    }
   }
 
   public BufferedImage getSourceImage() {

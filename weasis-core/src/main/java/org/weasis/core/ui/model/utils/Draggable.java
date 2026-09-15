@@ -9,4 +9,24 @@
  */
 package org.weasis.core.ui.model.utils;
 
-public class Draggable {}
+import java.awt.geom.Point2D;
+
+/** Start / drag / complete sequence for a graphic handle, selection, or label. */
+public class Draggable {
+
+  public boolean start(Point2D.Double point) {
+    return false;
+  }
+
+  public boolean drag(Point2D.Double point) {
+    return false;
+  }
+
+  public boolean complete() {
+    return true;
+  }
+
+  protected static Point2D.Double copy(Point2D.Double point) {
+    return point == null ? null : new Point2D.Double(point.getX(), point.getY());
+  }
+}

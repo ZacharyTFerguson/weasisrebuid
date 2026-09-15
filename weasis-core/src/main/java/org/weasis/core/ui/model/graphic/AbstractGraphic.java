@@ -22,11 +22,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.weasis.core.ui.model.utils.imp.DefaultUUID;
 
 @XmlAccessorType(XmlAccessType.NONE)
-public abstract class AbstractGraphic implements Graphic {
+public abstract class AbstractGraphic extends DefaultUUID implements Graphic {
 
-  private String uuid = UUID.randomUUID().toString();
   private final List<Point2D.Double> pts = new ArrayList<>();
   private final List<XmlPt> xmlPts = new ArrayList<>();
   private Boolean filled = Boolean.FALSE;
@@ -46,12 +46,12 @@ public abstract class AbstractGraphic implements Graphic {
   @XmlAttribute
   @Override
   public String getUuid() {
-    return uuid;
+    return super.getUuid();
   }
 
   @Override
   public void setUuid(String uuid) {
-    this.uuid = uuid == null ? this.uuid : uuid;
+    super.setUuid(uuid);
   }
 
   @Override

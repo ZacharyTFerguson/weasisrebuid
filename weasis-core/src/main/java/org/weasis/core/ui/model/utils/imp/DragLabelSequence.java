@@ -9,4 +9,39 @@
  */
 package org.weasis.core.ui.model.utils.imp;
 
-public class DragLabelSequence {}
+import java.awt.geom.Point2D;
+import org.weasis.core.ui.model.graphic.AbstractGraphicLabel;
+import org.weasis.core.ui.model.utils.Draggable;
+
+/** Moves a graphic label offset in image space. */
+public class DragLabelSequence extends Draggable {
+
+  private final AbstractGraphicLabel label;
+  private Point2D.Double origin;
+  private double startX;
+  private double startY;
+
+  public DragLabelSequence(AbstractGraphicLabel label) {
+    this.label = label;
+  }
+
+  @Override
+  public boolean start(Point2D.Double point) {
+    if (label == null || point == null) {
+      return false;
+    }
+    origin = copy(point);
+    startX = label.getOffsetX();
+    startY = label.getOffsetY();
+    return true;
+  }
+
+  @Override
+  public boolean drag(Point2D.Double point) {
+    if (origin == null || point == null || label == null) {
+      return false;
+    }
+    label.setOffset(startX + point.getX() - origin.getX(), startY + point.getY() - origin.getY());
+    return true;
+  }
+}

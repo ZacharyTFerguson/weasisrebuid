@@ -9,4 +9,48 @@
  */
 package org.weasis.core.ui.model.utils.imp;
 
-public class DefaultDragSequence {}
+import java.awt.geom.Point2D;
+import org.weasis.core.ui.model.graphic.DragGraphic;
+import org.weasis.core.ui.model.utils.Draggable;
+
+/** Drags one handle of a {@link DragGraphic}. */
+public class DefaultDragSequence extends Draggable {
+
+  private final DragGraphic graphic;
+  private final int handle;
+  private boolean active;
+
+  public DefaultDragSequence(DragGraphic graphic, int handle) {
+    this.graphic = graphic;
+    this.handle = handle;
+  }
+
+  public DragGraphic graphic() {
+    return graphic;
+  }
+
+  @Override
+  public boolean start(Point2D.Double point) {
+    if (graphic == null || point == null) {
+      return false;
+    }
+    graphic.setHandlePoint(handle, copy(point));
+    active = true;
+    return true;
+  }
+
+  @Override
+  public boolean drag(Point2D.Double point) {
+    if (!active || graphic == null || point == null) {
+      return false;
+    }
+    graphic.setHandlePoint(handle, copy(point));
+    return true;
+  }
+
+  @Override
+  public boolean complete() {
+    active = false;
+    return true;
+  }
+}
