@@ -160,9 +160,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (dataset == null || roi == null) {
       return "";
     }
-    return RoiStatistics.ellipse(dataset, roi)
-        .map(MeasurementLabel::formatEllipse)
-        .orElse("");
+    return RoiStatistics.ellipse(dataset, roi).map(MeasurementLabel::formatEllipse).orElse("");
   }
 
   public double getWindow() {

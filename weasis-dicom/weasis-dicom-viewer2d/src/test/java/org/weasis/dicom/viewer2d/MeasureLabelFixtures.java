@@ -32,6 +32,11 @@ final class MeasureLabelFixtures {
     return writeCt(dest, 0, 0, false);
   }
 
+  /** Ellipse bound to the r=2 air disk in {@link #writeCtRoiAir} (centre 8,8 on 16×16). */
+  static Ellipse2D ctRoiAirEllipse() {
+    return new Ellipse2D.Double(6, 6, 4, 4);
+  }
+
   static File writeCtRoiAir(File dest) throws Exception {
     File base = writeCt(dest, 0.50, 0.50, true);
     Attributes dcm;
@@ -43,10 +48,14 @@ final class MeasureLabelFixtures {
     int rows = dcm.getInt(Tag.Rows, 0);
     int cols = dcm.getInt(Tag.Columns, 0);
     int[] px = dcm.getInts(Tag.PixelData);
-    Ellipse2D roi = new Ellipse2D.Double(2, 2, 12, 12);
+    double cx = cols / 2.0;
+    double cy = rows / 2.0;
+    double radius = 2.0;
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
-        if (roi.contains(col + 0.5, row + 0.5)) {
+        double dx = col + 0.5 - cx;
+        double dy = row + 0.5 - cy;
+        if (dx * dx + dy * dy <= radius * radius) {
           px[row * cols + col] = 24;
         } else {
           px[row * cols + col] = 1064;

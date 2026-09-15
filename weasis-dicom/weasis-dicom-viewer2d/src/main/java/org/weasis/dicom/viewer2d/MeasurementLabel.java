@@ -52,15 +52,13 @@ public final class MeasurementLabel {
     return String.format(Locale.US, "%.1f px", px);
   }
 
-  /** One decimal when the value is a half-millimetre step; two when spacing math needs it (e.g. ÷ M). */
+  /** Enough fraction digits for spacing math (e.g. 10 px × 0.15 ÷ 1.2 → 1.25 mm, not 1.3). */
   static String formatMm(double mm) {
-    double rounded = Math.round(mm * 100.0) / 100.0;
-    if (Math.abs(rounded - Math.rint(rounded)) < 1e-9) {
-      return String.format(Locale.US, "%.1f mm", rounded);
+    long cents = Math.round(mm * 100.0);
+    double value = cents / 100.0;
+    if (cents % 10 != 0) {
+      return String.format(Locale.US, "%.2f mm", value);
     }
-    if (Math.abs(rounded * 10.0 - Math.rint(rounded * 10.0)) < 1e-9) {
-      return String.format(Locale.US, "%.1f mm", rounded);
-    }
-    return String.format(Locale.US, "%.2f mm", rounded);
+    return String.format(Locale.US, "%.1f mm", value);
   }
 }

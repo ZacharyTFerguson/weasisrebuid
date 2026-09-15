@@ -43,22 +43,22 @@ import org.weasis.dicom.codec.utils.RoiStatistics;
  * {@link InstanceSpacing.Resolved#spacing()} plus {@link LineGraphic#getLengthMm}; HU and unit come
  * from {@link RoiStatistics.RoiStats} via {@link RoiStatistics#formatMeanLabel}. The formatter has
  * no {@code BufferedImage}, no {@link View2d}, and no dataset parameter on the ellipse path — it
- * cannot read window/level paint (0–255 grey) or re-resolve tags, so a W/L tweak cannot change
- * the ROI string.
+ * cannot read window/level paint (0–255 grey) or re-resolve tags, so a W/L tweak cannot change the
+ * ROI string.
  *
- * <p><b>Why {@code px} never coexists with {@code mm}:</b> when {@code InstanceSpacing.resolve}
- * is empty or spacing is unusable, the line label is pixel Euclidean length only; there is no
- * silent fallback to imager pitch on CT and no dual unit string.
+ * <p><b>Why {@code px} never coexists with {@code mm}:</b> when {@code InstanceSpacing.resolve} is
+ * empty or spacing is unusable, the line label is pixel Euclidean length only; there is no silent
+ * fallback to imager pitch on CT and no dual unit string.
  *
- * <p><b>Why the DX warning travels with the number:</b> detector-plane and estimate caveats live
- * on {@link InstanceSpacing.Resolved#warning()} and {@link InstanceSpacing.Source}; the line suffix
+ * <p><b>Why the DX warning travels with the number:</b> detector-plane and estimate caveats live on
+ * {@link InstanceSpacing.Resolved#warning()} and {@link InstanceSpacing.Source}; the line suffix
  * {@code (detector plane)} / {@code (estimate)} and the geometry banner both come from that
  * resolved value, not from a separate presence check that clears when (0018,1164) exists.
  *
- * <p><b>Why manual/monitor doubles stay inert:</b> {@link org.weasis.core.ui.editor.image.DefaultView2d}
- * keeps {@code monitorCalibrationMmPerPixel} and {@code sessionManualCalibrationMmPerPixel} unused
- * this run; labels use DICOM spacing only until a future slice defines precedence with its own red
- * test.
+ * <p><b>Why manual/monitor doubles stay inert:</b> {@link
+ * org.weasis.core.ui.editor.image.DefaultView2d} keeps {@code monitorCalibrationMmPerPixel} and
+ * {@code sessionManualCalibrationMmPerPixel} unused this run; labels use DICOM spacing only until a
+ * future slice defines precedence with its own red test.
  *
  * <p><b>Why not copy Weasis:</b> upstream measure adapters mix calibration prefs, painted buffers,
  * and file-extracted spacing; this slice adds a thin formatter beside the existing oracle paint
@@ -169,7 +169,7 @@ class View2dMeasureLabelTest {
     File ct = MeasureLabelFixtures.writeCtRoiAir(dir.resolve("ct_roi_air.dcm").toFile());
     View2d view = new View2d();
     view.load(ct);
-    Ellipse2D roi = new Ellipse2D.Double(2, 2, 12, 12);
+    Ellipse2D roi = MeasureLabelFixtures.ctRoiAirEllipse();
     String expected =
         RoiStatistics.formatMeanLabel(RoiStatistics.ellipse(view.getDataset(), roi).orElseThrow());
     assertEquals(expected, view.formatEllipseMeasureLabel(roi));
@@ -192,8 +192,7 @@ class View2dMeasureLabelTest {
             param.getName().contains("BufferedImage"),
             () -> "MeasurementLabel must not take BufferedImage: " + method);
         assertFalse(
-            param.equals(View2d.class),
-            () -> "MeasurementLabel must not take View2d: " + method);
+            param.equals(View2d.class), () -> "MeasurementLabel must not take View2d: " + method);
       }
     }
     assertFalse(
