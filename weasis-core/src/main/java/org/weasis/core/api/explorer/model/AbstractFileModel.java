@@ -13,7 +13,10 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.weasis.core.api.explorer.ObservableEvent;
 import org.weasis.core.api.media.data.Codec;
 import org.weasis.core.api.media.data.MediaSeriesGroup;
@@ -24,6 +27,7 @@ public abstract class AbstractFileModel implements DataExplorerModel, TreeModel 
   private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
   private final MediaSeriesGroupNode root = new MediaSeriesGroupNode(TagW.PatientID, "root");
   private final List<Codec> codecs = new ArrayList<>();
+  private final Map<MediaSeriesGroup, List<MediaSeriesGroup>> children = new LinkedHashMap<>();
 
   public MediaSeriesGroup getRoot() {
     return root;
@@ -65,13 +69,53 @@ public abstract class AbstractFileModel implements DataExplorerModel, TreeModel 
         };
   }
 
+  public boolean addHierarchyNode(MediaSeriesGroup parent, MediaSeriesGroup child) {
+    if (child == null) {
+      return false;
+    }
+    return storeChild(parent == null ? root : parent, child);
+  }
+
+  public boolean removeHierarchyNode(MediaSeriesGroup parent, MediaSeriesGroup child) {
+    List<MediaSeriesGroup> kids = children.get(parent == null ? root : parent);
+    if (kids == null || !kids.remove(child)) {
+      return false;
+    }
+    firePropertyChange(new ObservableEvent(ObservableEvent.BasicAction.REMOVE, this, child));
+    return true;
+  }
+
+  boolean storeChild(MediaSeriesGroup parent, MediaSeriesGroup child) {
+    List<MediaSeriesGroup> kids = children.computeIfAbsent(parent, k -> new ArrayList<>());
+    if (kids.contains(child)) {
+      return false;
+    }
+    kids.add(child);
+    firePropertyChange(new ObservableEvent(ObservableEvent.BasicAction.ADD, this, child));
+    return true;
+  }
+
   @Override
   public Collection<MediaSeriesGroup> getChildren(MediaSeriesGroup node) {
-    return List.of();
+    List<MediaSeriesGroup> kids = children.get(node == null ? root : node);
+    return kids == null ? List.of() : List.copyOf(kids);
   }
 
   @Override
   public MediaSeriesGroup getHierarchyNode(MediaSeriesGroup parent, Object value) {
-    return parent;
+    for (MediaSeriesGroup child : getChildren(parent == null ? root : parent)) {
+      if (sameId(child, value)) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  static boolean sameId(MediaSeriesGroup child, Object value) {
+    if (child == null) {
+      return false;
+    }
+    TagW id = child.getTagID();
+    return id != null && Objects.equals(child.getTagValue(id), value);
   }
 }

@@ -13,4 +13,8 @@ public class KOSpecialElement extends AbstractKOSpecialElement {
   public KOSpecialElement(DcmMediaReader mediaIO) {
     super(mediaIO);
   }
+
+  public boolean isKeyObjectSelection() {
+    return !isRejectionNote();
+  }
 }

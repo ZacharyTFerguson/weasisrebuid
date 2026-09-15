@@ -11,4 +11,17 @@ package org.weasis.core.ui.model.utils.imp;
 
 import org.weasis.core.ui.model.graphic.AbstractGraphicLabel;
 
-public class DefaultGraphicLabel extends AbstractGraphicLabel {}
+/** Measurement text drawn next to a graphic in image space. */
+public class DefaultGraphicLabel extends AbstractGraphicLabel {
+
+  public DefaultGraphicLabel copy() {
+    DefaultGraphicLabel copy = new DefaultGraphicLabel();
+    copy.setLabels(getLabels());
+    copy.setOffset(getOffsetX(), getOffsetY());
+    return copy;
+  }
+
+  public void move(double dx, double dy) {
+    setOffset(getOffsetX() + dx, getOffsetY() + dy);
+  }
+}

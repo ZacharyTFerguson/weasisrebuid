@@ -9,10 +9,29 @@
  */
 package org.weasis.dicom.codec;
 
+import java.util.Set;
+import org.dcm4che3.data.Attributes;
+
 /** Rejection note KO (hidden). */
 public class RejectedKOSpecialElement extends AbstractKOSpecialElement {
+
+  static final Set<String> REJECTION_CODES = Set.of("113001", "113037", "113038", "113039");
+
   public RejectedKOSpecialElement(DcmMediaReader mediaIO) {
     super(mediaIO);
     setMimeType(DicomMime.KO_DICOM);
+  }
+
+  @Override
+  public boolean isRejectionNote() {
+    return true;
+  }
+
+  public boolean hides(String sopInstanceUid) {
+    return isSopInstanceReferenced(sopInstanceUid);
+  }
+
+  public static boolean isRejection(Attributes dcm) {
+    return REJECTION_CODES.contains(conceptCode(dcm));
   }
 }

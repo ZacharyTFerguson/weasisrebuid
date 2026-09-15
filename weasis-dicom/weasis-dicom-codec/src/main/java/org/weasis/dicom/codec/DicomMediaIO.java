@@ -106,7 +106,7 @@ public class DicomMediaIO implements DcmMediaReader {
   public MediaElement getPreview() {
     String mime = mimeType();
     if (DicomMime.KO_DICOM.equals(mime)) {
-      return new KOSpecialElement(this);
+      return koElement();
     }
     if (DicomMime.PR_DICOM.equals(mime)) {
       return new PRSpecialElement(this);
@@ -127,6 +127,13 @@ public class DicomMediaIO implements DcmMediaReader {
       return new DicomSpecialElement(this);
     }
     return new DicomImageElement(this);
+  }
+
+  MediaElement koElement() {
+    if (RejectedKOSpecialElement.isRejection(dataset)) {
+      return new RejectedKOSpecialElement(this);
+    }
+    return new KOSpecialElement(this);
   }
 
   @Override

@@ -10,5 +10,16 @@
 package org.weasis.core.ui.editor;
 
 import org.weasis.core.api.explorer.model.AbstractFileModel;
+import org.weasis.core.api.media.data.MediaSeriesGroup;
+import org.weasis.core.api.media.data.MediaSeriesGroupNode;
+import org.weasis.core.api.media.data.TagW;
 
-public class FileModel extends AbstractFileModel {}
+/** Non-DICOM explorer tree: patient / study / series / image groups. */
+public class FileModel extends AbstractFileModel {
+
+  public MediaSeriesGroupNode addGroup(MediaSeriesGroup parent, TagW tag, Object id) {
+    MediaSeriesGroupNode node = new MediaSeriesGroupNode(tag, id);
+    addHierarchyNode(parent, node);
+    return node;
+  }
+}

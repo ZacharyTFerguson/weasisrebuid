@@ -12,6 +12,7 @@ package org.weasis.dicom.codec;
 import java.util.ArrayList;
 import java.util.List;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.api.service.UICore;
 
@@ -45,6 +46,31 @@ public abstract class AbstractKOSpecialElement extends DicomSpecialElement {
       return "KO";
     }
     String title = dcm.getString(Tag.ContentDescription);
-    return title == null || title.isBlank() ? "Key Object Selection" : title;
+    return title == null || title.isBlank() ? defaultTitle(dcm) : title;
+  }
+
+  String defaultTitle(Attributes dcm) {
+    String meaning = conceptMeaning(dcm);
+    return meaning.isBlank() ? "Key Object Selection" : meaning;
+  }
+
+  public boolean isRejectionNote() {
+    return false;
+  }
+
+  static String conceptMeaning(Attributes dcm) {
+    Sequence seq = dcm == null ? null : dcm.getSequence(Tag.ConceptNameCodeSequence);
+    if (seq == null || seq.isEmpty()) {
+      return "";
+    }
+    return seq.get(0).getString(Tag.CodeMeaning, "");
+  }
+
+  static String conceptCode(Attributes dcm) {
+    Sequence seq = dcm == null ? null : dcm.getSequence(Tag.ConceptNameCodeSequence);
+    if (seq == null || seq.isEmpty()) {
+      return "";
+    }
+    return seq.get(0).getString(Tag.CodeValue, "");
   }
 }
