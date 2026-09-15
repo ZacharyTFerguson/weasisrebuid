@@ -76,9 +76,9 @@ class GraphicSelectionHaveTest {
     assertEquals(MouseActions.NONE, view.getMouseActions().getLeft());
     view.addGraphic(line(0, 0, 8, 0));
     view.addGraphic(line(0, 8, 8, 8));
-    view.getEventManager().mousePressed(mouse(view, -1, -1, 1, false));
-    view.getEventManager().mouseDragged(mouse(view, 9, 9, 1, false));
-    view.getEventManager().mouseReleased(mouse(view, 9, 9, 1, false));
+    view.getEventManager().mousePressed(mouse(view, 20, 20, 1, false));
+    view.getEventManager().mouseDragged(mouse(view, -1, -1, 1, false));
+    view.getEventManager().mouseReleased(mouse(view, -1, -1, 1, false));
     assertEquals(2, view.getSelectedGraphics().size());
     assertEquals(2, view.getGraphicList().size());
   }
