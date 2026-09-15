@@ -189,6 +189,16 @@
         <version>${logback.version}</version>
       </dependency>
       <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf</artifactId>
+        <version>${flatlaf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.formdev</groupId>
+        <artifactId>flatlaf-extras</artifactId>
+        <version>${flatlaf.version}</version>
+      </dependency>
+      <dependency>
         <groupId>com.miglayout</groupId>
         <artifactId>miglayout-swing</artifactId>
         <version>${miglayout.version}</version>

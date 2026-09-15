@@ -34,6 +34,14 @@
       <artifactId>logback-classic</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf-extras</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.weasis.core</groupId>
       <artifactId>weasis-core</artifactId>
       <version>${project.version}</version>
@@ -185,6 +193,7 @@
                   <include>com.fasterxml.jackson.core:*</include>
                   <include>org.slf4j:*</include>
                   <include>ch.qos.logback:*</include>
+                  <include>com.formdev:*</include>
                 </includes>
               </artifactSet>
             </configuration>

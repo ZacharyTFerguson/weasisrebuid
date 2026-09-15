@@ -37,6 +37,8 @@ public class WeasisLauncher {
 
   public void launch(String[] args) throws Exception {
     suppressAssistiveTech();
+    Utils.LaunchRequest request = Utils.parseLaunch(args);
+    request.applyProperties();
     Path weasisHome = Path.of(System.getProperty("user.home"), ".weasis");
     Files.createDirectories(weasisHome.resolve("log"));
     BootLog.install(weasisHome.resolve("log"));
@@ -48,6 +50,7 @@ public class WeasisLauncher {
     ConfigData config = ConfigData.load(baseJson, overlay, buildInfo.asMap());
 
     applyWeasisSystemProperties(config);
+    LookAndFeels.install();
     ensureGogoPort();
     buildInfo
         .asMap()
@@ -164,8 +167,14 @@ public class WeasisLauncher {
         .values()
         .forEach(
             (key, value) -> {
-              if (key.startsWith("weasis.") && System.getProperty(key) == null) {
-                System.setProperty(key, value);
+              if (System.getProperty(key) != null) {
+                return;
+              }
+              if (key.startsWith("weasis.")
+                  || key.startsWith("org.weasis.")
+                  || key.startsWith("download.")
+                  || key.startsWith("locale.")) {
+                System.setProperty(key, value == null ? "" : value);
               }
             });
   }

@@ -16,6 +16,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.InsertableUtil;
 import org.weasis.core.api.service.UICore;
 
 @Component(service = DataExplorerViewFactory.class, immediate = true)
@@ -23,6 +24,9 @@ public class DefaultExplorerFactory implements DataExplorerViewFactory {
 
   @Activate
   public void activate() {
+    if (!InsertableUtil.isFactoryEnabled(DefaultExplorerFactory.class)) {
+      return;
+    }
     UICore.getInstance().registerExplorerFactory(this);
   }
 

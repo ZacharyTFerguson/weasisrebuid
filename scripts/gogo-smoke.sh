@@ -72,6 +72,7 @@ imageio_ok = bundle_state(lb, "Weasis ImageIO Codec") == "Active"
 codec_ok = bundle_state(lb, "Weasis DICOM Codec") == "Active"
 explorer_ok = bundle_state(lb, "Weasis DICOM Explorer") == "Active"
 viewer2d_ok = bundle_state(lb, "Weasis DICOM 2D Viewer") == "Active"
+docking_ok = bundle_state(lb, "Docking Frames") == "Active"
 opencv_state = bundle_state(lb, "OpenCV native")
 if not opencv_state:
     opencv_state = bundle_state(lb, "linux-x86-64")
@@ -86,6 +87,8 @@ if not explorer_ok:
     sys.exit("lb did not list weasis-dicom-explorer ACTIVE: %r" % lb)
 if not viewer2d_ok:
     sys.exit("lb did not list weasis-dicom-viewer2d ACTIVE: %r" % lb)
+if not docking_ok:
+    sys.exit("lb did not list docking-frames ACTIVE: %r" % lb)
 if not opencv_ok:
     sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
 send("weasis:ui -q")

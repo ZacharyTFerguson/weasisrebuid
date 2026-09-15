@@ -2,7 +2,7 @@
   "weasisPreferences": [
     {
       "code": "framework.system.packages.extra.basic",
-      "value": "ch.qos.logback.classic,ch.qos.logback.classic.encoder,ch.qos.logback.classic.spi,ch.qos.logback.core,ch.qos.logback.core.encoder,ch.qos.logback.core.rolling,ch.qos.logback.core.util,com.formdev.flatlaf,javax.accessibility,javax.imageio,javax.imageio.stream,javax.imageio.spi,javax.swing,javax.swing.border,javax.swing.event,javax.swing.plaf,javax.swing.table,javax.swing.text,javax.swing.tree,javax.xml.stream,net.miginfocom.layout,net.miginfocom.swing,org.slf4j,org.weasis.pref",
+      "value": "ch.qos.logback.classic,ch.qos.logback.classic.encoder,ch.qos.logback.classic.spi,ch.qos.logback.core,ch.qos.logback.core.encoder,ch.qos.logback.core.rolling,ch.qos.logback.core.util,com.formdev.flatlaf,com.formdev.flatlaf.extras,com.formdev.flatlaf.ui,com.formdev.flatlaf.util,javax.accessibility,javax.imageio,javax.imageio.stream,javax.imageio.spi,javax.swing,javax.swing.border,javax.swing.event,javax.swing.plaf,javax.swing.table,javax.swing.text,javax.swing.tree,javax.xml.stream,net.miginfocom.layout,net.miginfocom.swing,org.slf4j,org.weasis.pref",
       "description": "Additional packages visible from the Felix system bundle",
       "type": "A",
       "category": "FELIX_CONFIG"
@@ -239,6 +239,13 @@
       "value": "default",
       "description": "Preferences profile",
       "type": "AP",
+      "category": "LAUNCH"
+    },
+    {
+      "code": "weasis.theme",
+      "value": "org.weasis.launcher.FlatWeasisTheme",
+      "description": "Look and feel (Core Dark)",
+      "type": "F",
       "category": "LAUNCH"
     },
     {
