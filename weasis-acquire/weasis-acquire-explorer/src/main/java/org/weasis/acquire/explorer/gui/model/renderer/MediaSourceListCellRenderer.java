@@ -9,4 +9,22 @@
  */
 package org.weasis.acquire.explorer.gui.model.renderer;
 
-public class MediaSourceListCellRenderer {}
+import java.awt.Component;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JList;
+import org.weasis.acquire.explorer.media.MediaSource;
+
+/** Combo/list cell text is the {@link MediaSource} display name. */
+public class MediaSourceListCellRenderer extends DefaultListCellRenderer {
+
+  @Override
+  public Component getListCellRendererComponent(
+      JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+    if (value instanceof MediaSource source) {
+      setText(source.getDisplayName());
+      setName("media-source-" + source.getID());
+    }
+    return this;
+  }
+}

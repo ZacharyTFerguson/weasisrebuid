@@ -9,4 +9,20 @@
  */
 package org.weasis.acquire.explorer.gui.central;
 
-public class SeriesButton {}
+import javax.swing.JToggleButton;
+
+/** Exclusive series-group toggle in the central album. */
+public class SeriesButton extends JToggleButton {
+
+  private final String series;
+
+  public SeriesButton(String series) {
+    super(series == null || series.isBlank() ? "Series" : series);
+    this.series = series == null || series.isBlank() ? "Series" : series;
+    setName(this.series);
+  }
+
+  public String series() {
+    return series;
+  }
+}

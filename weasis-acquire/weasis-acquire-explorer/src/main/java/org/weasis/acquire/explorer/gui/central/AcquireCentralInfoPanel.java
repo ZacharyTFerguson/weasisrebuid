@@ -9,4 +9,38 @@
  */
 package org.weasis.acquire.explorer.gui.central;
 
-public class AcquireCentralInfoPanel {}
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import org.weasis.acquire.explorer.gui.central.tumbnail.AcquireCentralThumbnailModel;
+
+/** Series name and still count for the selected album group. */
+public class AcquireCentralInfoPanel extends JPanel {
+
+  private final JLabel label = new JLabel();
+  private String series;
+
+  public AcquireCentralInfoPanel() {
+    super(new BorderLayout());
+    label.setName("series-info");
+    add(label, BorderLayout.CENTER);
+  }
+
+  public void showSeries(String series, AcquireCentralThumbnailModel model) {
+    this.series = series;
+    int n = series == null || model == null ? 0 : model.itemsInSeries(series).size();
+    label.setText(series == null ? "" : series + " (" + n + ")");
+  }
+
+  public String series() {
+    return series;
+  }
+
+  public String text() {
+    return label.getText();
+  }
+
+  public JLabel label() {
+    return label;
+  }
+}

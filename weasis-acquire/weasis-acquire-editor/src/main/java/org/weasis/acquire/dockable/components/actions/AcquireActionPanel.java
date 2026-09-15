@@ -9,4 +9,11 @@
  */
 package org.weasis.acquire.dockable.components.actions;
 
-public class AcquireActionPanel {}
+import org.weasis.acquire.explorer.AcquireImageInfo;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+/** Photo-editor action chrome bound to one image session. */
+public interface AcquireActionPanel {
+
+  void initValues(AcquireImageInfo info, AcquireImageValues values);
+}

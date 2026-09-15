@@ -9,4 +9,38 @@
  */
 package org.weasis.acquire.dockable.components.actions;
 
-public class AbstractAcquireActionPanel {}
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
+import org.weasis.acquire.explorer.AcquireImageInfo;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+/** Base {@link AcquireActionPanel} that holds the pending image session. */
+public class AbstractAcquireActionPanel extends JPanel implements AcquireActionPanel {
+
+  private AcquireImageInfo imageInfo;
+  private AcquireImageValues values = new AcquireImageValues();
+
+  public AbstractAcquireActionPanel() {
+    super(new BorderLayout());
+  }
+
+  @Override
+  public void initValues(AcquireImageInfo info, AcquireImageValues values) {
+    this.imageInfo = info;
+    this.values = values == null ? new AcquireImageValues() : values;
+  }
+
+  public AcquireImageInfo getImageInfo() {
+    return imageInfo;
+  }
+
+  public AcquireImageValues getValues() {
+    return values;
+  }
+
+  public boolean needValidationPanel() {
+    return false;
+  }
+
+  public void stopEditing() {}
+}

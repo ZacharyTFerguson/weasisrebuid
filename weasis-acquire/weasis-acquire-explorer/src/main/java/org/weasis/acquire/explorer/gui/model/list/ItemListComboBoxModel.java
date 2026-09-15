@@ -9,4 +9,29 @@
  */
 package org.weasis.acquire.explorer.gui.model.list;
 
-public class ItemListComboBoxModel {}
+import javax.swing.ComboBoxModel;
+import org.weasis.acquire.explorer.core.ItemList;
+
+/** Combo model whose selected item is {@link ItemList#getCurrentItem()}. */
+public class ItemListComboBoxModel<T> extends ItemListModel<T> implements ComboBoxModel<T> {
+
+  public ItemListComboBoxModel() {
+    super();
+  }
+
+  public ItemListComboBoxModel(ItemList<T> itemList) {
+    super(itemList);
+  }
+
+  @Override
+  public void setSelectedItem(Object anItem) {
+    @SuppressWarnings("unchecked")
+    T item = (T) anItem;
+    itemList.setCurrentItem(item);
+  }
+
+  @Override
+  public Object getSelectedItem() {
+    return itemList.getCurrentItem();
+  }
+}

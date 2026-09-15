@@ -9,4 +9,47 @@
  */
 package org.weasis.acquire.dockable;
 
-public class EditionToolFactory {}
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Activate;
+import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Deactivate;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.InsertableFactory;
+import org.weasis.core.api.service.UICore;
+
+/** OSGi factory for the dicomizer {@link EditionTool} named Edition. */
+@Component(service = InsertableFactory.class, immediate = true)
+public class EditionToolFactory implements InsertableFactory {
+
+  @Activate
+  public void activate() {
+    UICore.getInstance().registerInsertableFactory(this);
+  }
+
+  @Deactivate
+  public void deactivate() {
+    UICore.getInstance().unregisterInsertableFactory(this);
+  }
+
+  @Override
+  public Insertable createInstance(Hashtable<String, Object> properties) {
+    return new EditionTool();
+  }
+
+  @Override
+  public void dispose(Insertable component) {
+    if (component instanceof EditionTool tool) {
+      tool.closeDockable();
+    }
+  }
+
+  @Override
+  public boolean isComponentCreatedByThisFactory(Insertable component) {
+    return component instanceof EditionTool;
+  }
+
+  @Override
+  public Insertable.Type getType() {
+    return Insertable.Type.TOOL;
+  }
+}

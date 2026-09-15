@@ -9,4 +9,23 @@
  */
 package org.weasis.acquire.explorer.gui.central;
 
-public class ImageGroupPane {}
+import java.awt.BorderLayout;
+import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.ui.editor.image.ViewerPlugin;
+
+/** Central dicomizer album pane hosting {@link AcquireTabPanel}. */
+public class ImageGroupPane extends ViewerPlugin<MediaElement> {
+
+  public static final String NAME = "Album";
+
+  private final AcquireTabPanel tabPanel = new AcquireTabPanel();
+
+  public ImageGroupPane() {
+    super(NAME);
+    add(tabPanel, BorderLayout.CENTER);
+  }
+
+  public AcquireTabPanel tabPanel() {
+    return tabPanel;
+  }
+}

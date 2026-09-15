@@ -9,4 +9,55 @@
  */
 package org.weasis.acquire.explorer;
 
-public class ImportTask {}
+import java.nio.file.Path;
+import java.util.List;
+import org.weasis.acquire.explorer.gui.central.AcquireTabPanel;
+import org.weasis.acquire.explorer.gui.dialog.AcquireImportDialog;
+
+/**
+ * Imports browse stills into the central album using {@link AcquireImportDialog} grouping already
+ * Have.
+ */
+public class ImportTask implements Runnable {
+
+  private final AcquireImportDialog dialog;
+  private final AcquireManager manager;
+  private final AcquireTabPanel album;
+  private final List<Path> files;
+
+  public ImportTask(
+      AcquireImportDialog dialog,
+      AcquireManager manager,
+      AcquireTabPanel album,
+      List<Path> files) {
+    this.dialog = dialog == null ? new AcquireImportDialog() : dialog;
+    this.manager = manager == null ? new AcquireManager() : manager;
+    this.album = album;
+    this.files = files == null ? List.of() : List.copyOf(files);
+  }
+
+  public AcquireImportDialog dialog() {
+    return dialog;
+  }
+
+  public AcquireManager manager() {
+    return manager;
+  }
+
+  public AcquireTabPanel album() {
+    return album;
+  }
+
+  public List<Path> files() {
+    return files;
+  }
+
+  @Override
+  public void run() {
+    if (album == null) {
+      return;
+    }
+    dialog.importInto(manager, album.imagePanel().model(), files);
+    album.refreshSeries();
+  }
+}

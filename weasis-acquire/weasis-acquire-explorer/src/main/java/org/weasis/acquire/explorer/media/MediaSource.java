@@ -9,4 +9,53 @@
  */
 package org.weasis.acquire.explorer.media;
 
-public class MediaSource {}
+import java.util.Objects;
+
+/** Named stills source shown in the dicomizer browse combo. */
+public class MediaSource {
+
+  private String id;
+  private String displayName;
+
+  public MediaSource(String id, String displayName) {
+    this.id = id == null ? "" : id;
+    this.displayName = displayName == null || displayName.isBlank() ? this.id : displayName;
+  }
+
+  public String getID() {
+    return id;
+  }
+
+  public String getDisplayName() {
+    return displayName;
+  }
+
+  protected void setID(String id) {
+    this.id = id == null ? "" : id;
+  }
+
+  protected void setDisplayName(String displayName) {
+    this.displayName = displayName == null || displayName.isBlank() ? this.id : displayName;
+  }
+
+  @Override
+  public String toString() {
+    return displayName;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (!(obj instanceof MediaSource other)) {
+      return false;
+    }
+    return Objects.equals(id, other.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
+}

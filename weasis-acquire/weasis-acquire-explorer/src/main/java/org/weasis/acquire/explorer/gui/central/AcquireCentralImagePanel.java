@@ -9,4 +9,45 @@
  */
 package org.weasis.acquire.explorer.gui.central;
 
-public class AcquireCentralImagePanel {}
+import java.awt.BorderLayout;
+import java.util.List;
+import javax.swing.JPanel;
+import org.weasis.acquire.explorer.gui.central.tumbnail.AcquireCentralThumbnailModel;
+import org.weasis.acquire.explorer.gui.central.tumbnail.AcquireCentralThumbnailModel.Item;
+import org.weasis.acquire.explorer.gui.central.tumbnail.AcquireCentralThumbnailPane;
+
+/** Central album thumbnails for the selected series group. */
+public class AcquireCentralImagePanel extends JPanel {
+
+  private final AcquireCentralThumbnailPane pane;
+
+  public AcquireCentralImagePanel() {
+    this(new AcquireCentralThumbnailPane());
+  }
+
+  public AcquireCentralImagePanel(AcquireCentralThumbnailPane pane) {
+    super(new BorderLayout());
+    this.pane = pane == null ? new AcquireCentralThumbnailPane() : pane;
+    add(this.pane, BorderLayout.CENTER);
+  }
+
+  public AcquireCentralThumbnailPane pane() {
+    return pane;
+  }
+
+  public AcquireCentralThumbnailModel model() {
+    return pane.model();
+  }
+
+  public void showSeries(String series) {
+    pane.showSeries(series);
+  }
+
+  public List<Item> displayed() {
+    return pane.displayed();
+  }
+
+  public List<Item> selected() {
+    return pane.selected();
+  }
+}
