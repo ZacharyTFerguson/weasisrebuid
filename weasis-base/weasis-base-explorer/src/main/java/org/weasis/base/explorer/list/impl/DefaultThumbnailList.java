@@ -9,4 +9,32 @@
  */
 package org.weasis.base.explorer.list.impl;
 
-public class DefaultThumbnailList {}
+import java.awt.image.BufferedImage;
+import org.weasis.base.explorer.JIThumbnailCache;
+import org.weasis.base.explorer.list.AbstractThumbnailList;
+
+/** Default non-DICOM thumbnail list backed by {@link JIThumbnailCache}. */
+public class DefaultThumbnailList extends AbstractThumbnailList {
+
+  private final JIThumbnailCache cache;
+
+  public DefaultThumbnailList() {
+    this(new JIThumbnailCache());
+  }
+
+  public DefaultThumbnailList(JIThumbnailCache cache) {
+    this.cache = cache == null ? new JIThumbnailCache() : cache;
+  }
+
+  public JIThumbnailCache getCache() {
+    return cache;
+  }
+
+  public BufferedImage thumbnailAt(int index) {
+    var path = get(index);
+    if (path == null) {
+      return null;
+    }
+    return cache.getOrLoad(path);
+  }
+}

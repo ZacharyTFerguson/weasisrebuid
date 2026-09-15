@@ -10,6 +10,7 @@
 package org.weasis.base.explorer;
 
 import java.beans.PropertyChangeListener;
+import org.weasis.base.explorer.list.impl.DefaultThumbnailList;
 import org.weasis.base.explorer.list.impl.JIThumbnailListPane;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.ObservableEvent;
@@ -23,7 +24,8 @@ public class DefaultExplorer extends PluginTool implements DataExplorerView {
 
   public static final String NAME = "Media Explorer";
 
-  private final JIThumbnailListPane thumbnails = new JIThumbnailListPane();
+  private final JIThumbnailListPane thumbnails =
+      new JIThumbnailListPane(new DefaultThumbnailList());
 
   private final DataExplorerModel model =
       new DataExplorerModel() {
