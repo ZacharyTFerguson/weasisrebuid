@@ -172,7 +172,8 @@ class HangingProtocolOpenHaveTest {
       assertEquals(4, container.getLayoutCount());
       View2d bottomLeft = container.getLayoutViews().get(2);
       Point screen = bottomLeft.getLocationOnScreen();
-      screen.translate(Math.max(1, bottomLeft.getWidth() / 2), Math.max(1, bottomLeft.getHeight() / 2));
+      screen.translate(
+          Math.max(1, bottomLeft.getWidth() / 2), Math.max(1, bottomLeft.getHeight() / 2));
       ViewTransferHandler.beginDrag(container.getLayoutViews().get(0).getSeries());
       assertTrue(new ViewTransferHandler().hangAtScreen(screen));
       assertEquals("2.25.chest", seriesUid(bottomLeft.getSeries()));
