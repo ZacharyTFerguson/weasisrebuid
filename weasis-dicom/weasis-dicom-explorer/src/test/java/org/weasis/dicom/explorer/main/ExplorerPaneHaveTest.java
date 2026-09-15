@@ -12,7 +12,10 @@ package org.weasis.dicom.explorer.main;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.weasis.core.api.media.data.SeriesThumbnail;
+import org.weasis.dicom.codec.DicomMime;
 import org.weasis.dicom.explorer.DicomExplorer;
 import org.weasis.dicom.explorer.DicomModel;
 import org.weasis.dicom.explorer.ImportedInstance;
@@ -56,6 +59,42 @@ class ExplorerPaneHaveTest {
     explorer.refresh();
     assertEquals(1, explorer.seriesSelection().getItems().size());
     assertTrue(explorer.seriesSelection().getItems().get(0).startsWith("SYNTHETIC^B"));
+  }
+
+  @Test
+  void overlaySopFamiliesPaintKoPrSegRtCornerIcons() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(
+        List.of(
+            instMime("2.25.ko", DicomMime.KO_DICOM, 1),
+            instMime("2.25.pr", DicomMime.PR_DICOM, 2),
+            instMime("2.25.seg", DicomMime.SEG_DICOM, 3),
+            instMime("2.25.rt", DicomMime.RT_DICOM, 4),
+            instMime("2.25.ct", DicomMime.IMAGE_DICOM, 5)));
+    List<SeriesThumbnail> thumbs = pane.thumbnails();
+    assertEquals(5, thumbs.size());
+    assertEquals("KO", thumbs.get(0).getOverlayIcon());
+    assertEquals("PR", thumbs.get(1).getOverlayIcon());
+    assertEquals("SEG", thumbs.get(2).getOverlayIcon());
+    assertEquals("RT", thumbs.get(3).getOverlayIcon());
+    assertEquals("", thumbs.get(4).getOverlayIcon());
+  }
+
+  static ImportedInstance instMime(String seriesUid, String mime, int series) {
+    return new ImportedInstance(
+        "SYNTHETIC^OVL",
+        "SYN-OVL",
+        "2.25.study",
+        seriesUid,
+        seriesUid + ".1",
+        "1.2.840.10008.10.0.2.2.1.2",
+        "OT",
+        seriesUid,
+        "20260101",
+        series,
+        1,
+        null,
+        mime);
   }
 
   static ImportedInstance inst(String name, String id, String study, int series) {

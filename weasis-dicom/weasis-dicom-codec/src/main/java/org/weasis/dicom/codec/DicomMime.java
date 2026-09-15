@@ -31,6 +31,39 @@ public final class DicomMime {
 
   private DicomMime() {}
 
+  /** Explorer thumbnail corner token for overlay SOP families. */
+  public static String overlayIcon(String mime) {
+    if (mime == null || mime.isBlank()) {
+      return "";
+    }
+    return overlayToken(mime);
+  }
+
+  static String overlayToken(String mime) {
+    String koPr = koPrIcon(mime);
+    return koPr.isEmpty() ? segRtIcon(mime) : koPr;
+  }
+
+  static String koPrIcon(String mime) {
+    if (KO_DICOM.equals(mime)) {
+      return "KO";
+    }
+    if (PR_DICOM.equals(mime)) {
+      return "PR";
+    }
+    return "";
+  }
+
+  static String segRtIcon(String mime) {
+    if (SEG_DICOM.equals(mime)) {
+      return "SEG";
+    }
+    if (RT_DICOM.equals(mime)) {
+      return "RT";
+    }
+    return "";
+  }
+
   public static String fromSopClass(String sopClassUid) {
     if (sopClassUid == null || sopClassUid.isBlank()) {
       return UNREADABLE_DICOM;

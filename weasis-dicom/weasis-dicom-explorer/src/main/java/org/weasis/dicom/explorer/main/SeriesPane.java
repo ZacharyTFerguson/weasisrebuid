@@ -23,6 +23,7 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.Series;
 import org.weasis.core.api.media.data.SeriesThumbnail;
 import org.weasis.core.api.media.data.Thumbnail;
+import org.weasis.dicom.codec.DicomMime;
 import org.weasis.dicom.explorer.DicomSorter;
 import org.weasis.dicom.explorer.ImportedInstance;
 
@@ -74,6 +75,7 @@ public class SeriesPane extends JPanel {
       String label = inst.modality() + " #" + inst.seriesNumber() + " " + inst.seriesDescription();
       thumb.setToolTipText(label);
       thumb.setName(inst.seriesUid());
+      thumb.setOverlayIcon(DicomMime.overlayIcon(inst.mime()));
       int idx = index;
       thumb.addMouseListener(
           new MouseAdapter() {
