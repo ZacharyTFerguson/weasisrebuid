@@ -9,16 +9,54 @@
  */
 package org.weasis.core.ui.pref;
 
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.weasis.core.api.gui.util.AbstractItemDialogPage;
+import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 
+/**
+ * Prefs &gt; Draw. Documented 2D measure tools (SHORTCUTS.md D/A/Y/G/B). No invented persist keys.
+ */
 public class GraphicPrefView extends AbstractItemDialogPage {
+
+  public static final String TITLE = "Draw";
+
+  private final JComboBox<String> tools;
+
   public GraphicPrefView() {
-    super("Draw", 400);
+    super(TITLE, 400);
+    tools = new JComboBox<>(MeasureTool.NAMES.toArray(String[]::new));
+    tools.setSelectedItem(MeasureTool.DISTANCE);
+    JPanel form = new JPanel();
+    form.add(new JLabel("Measure tool"));
+    form.add(tools);
+    add(form);
+  }
+
+  public String selectedTool() {
+    Object value = tools.getSelectedItem();
+    return value == null ? MeasureTool.DISTANCE : value.toString();
+  }
+
+  public void setSelectedTool(String tool) {
+    tools.setSelectedItem(namedTool(tool));
+  }
+
+  static String namedTool(String tool) {
+    if (tool == null || !MeasureTool.NAMES.contains(tool)) {
+      return MeasureTool.DISTANCE;
+    }
+    return tool;
   }
 
   @Override
-  public void closeAdditionalWindow() {}
+  public void closeAdditionalWindow() {
+    // SHORTCUTS.md lists tools; PREFERENCES.md has no draw persist key.
+  }
 
   @Override
-  public void resetToDefaultValues() {}
+  public void resetToDefaultValues() {
+    tools.setSelectedItem(MeasureTool.DISTANCE);
+  }
 }
