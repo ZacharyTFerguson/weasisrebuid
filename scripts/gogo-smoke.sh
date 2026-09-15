@@ -100,9 +100,16 @@ if not qr_ok:
     sys.exit("lb did not list weasis-dicom-qr ACTIVE @110: %r" % lb)
 if not iso_ok:
     sys.exit("lb did not list weasis-dicom-isowriter ACTIVE @110: %r" % lb)
+jogamp_ok = bundle_state(lb, "JOGL") == "Active" or bundle_state(lb, "jogamp") == "Active"
 viewer3d_ok = bundle_state(lb, "Weasis DICOM 3D Viewer") == "Active"
+jogamp_native = bundle_state(lb, "jogamp-linux-x86-64") or bundle_state(lb, "JOGL - Linux")
+jogamp_native_ok = jogamp_native in ("Resolved", "Installed")
+if not jogamp_ok:
+    sys.exit("lb did not list jogamp ACTIVE @120: %r" % lb)
 if not viewer3d_ok:
     sys.exit("lb did not list weasis-dicom-viewer3d ACTIVE @120: %r" % lb)
+if not jogamp_native_ok:
+    sys.exit("lb did not install JOGL native fragment @121 (Resolved): %r" % lb)
 send("weasis:ui -q")
 print("SMOKE_OK")
 PY
