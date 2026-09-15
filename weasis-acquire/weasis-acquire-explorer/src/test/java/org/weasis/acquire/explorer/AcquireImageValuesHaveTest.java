@@ -44,4 +44,14 @@ class AcquireImageValuesHaveTest {
     values.setContrast(0);
     assertEquals(0.01f, values.getContrast(), 1e-6f);
   }
+
+  @Test
+  void calibrationMmPerPixelRejectsNegatives() {
+    AcquireImageValues values = new AcquireImageValues();
+    assertEquals(0.0, values.getCalibrationMmPerPixel(), 1e-9);
+    values.setCalibrationMmPerPixel(-1.0);
+    assertEquals(0.0, values.getCalibrationMmPerPixel(), 1e-9);
+    values.setCalibrationMmPerPixel(0.25);
+    assertEquals(0.25, values.getCalibrationMmPerPixel(), 1e-9);
+  }
 }

@@ -9,4 +9,37 @@
  */
 package org.weasis.acquire.dockable.components.actions.calibrate;
 
-public class CalibrationAction {}
+import org.weasis.acquire.explorer.AcquireImageValues;
+import org.weasis.acquire.graphics.CalibrationGraphic;
+import org.weasis.core.api.image.util.Unit;
+
+/** Applies a known millimetre length on a calibration line onto pending photo-editor values. */
+public class CalibrationAction {
+
+  private final CalibrationPanel panel = new CalibrationPanel();
+
+  public CalibrationPanel panel() {
+    return panel;
+  }
+
+  public void setGraphic(CalibrationGraphic graphic) {
+    panel.setGraphic(graphic);
+  }
+
+  public CalibrationGraphic graphic() {
+    return panel.getGraphic();
+  }
+
+  public void setKnownLength(double knownLength, Unit unit) {
+    panel.setKnownLength(knownLength, unit);
+  }
+
+  public double apply(AcquireImageValues values) {
+    return panel.apply(values);
+  }
+
+  public double apply(AcquireImageValues values, CalibrationGraphic graphic) {
+    setGraphic(graphic);
+    return panel.apply(values, graphic);
+  }
+}

@@ -18,6 +18,7 @@ public class AcquireImageValues {
   private float brightness;
   private float contrast = 1.0f;
   private Rectangle crop;
+  private double calibrationMmPerPixel;
 
   public int getRotation() {
     return rotation;
@@ -53,5 +54,18 @@ public class AcquireImageValues {
 
   public void setCrop(Rectangle crop) {
     this.crop = crop == null ? null : new Rectangle(crop);
+  }
+
+  /** Spatial scale from a known length on a calibration line. Zero means uncalibrated. */
+  public double getCalibrationMmPerPixel() {
+    return calibrationMmPerPixel;
+  }
+
+  public void setCalibrationMmPerPixel(double calibrationMmPerPixel) {
+    this.calibrationMmPerPixel = calibrationMmPerPixel < 0 ? 0.0 : calibrationMmPerPixel;
+  }
+
+  public boolean isCalibrated() {
+    return calibrationMmPerPixel > 0.0;
   }
 }

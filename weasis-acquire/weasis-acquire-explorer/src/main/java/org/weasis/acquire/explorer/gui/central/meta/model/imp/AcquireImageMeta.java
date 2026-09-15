@@ -9,4 +9,14 @@
  */
 package org.weasis.acquire.explorer.gui.central.meta.model.imp;
 
-public class AcquireImageMeta {}
+import java.util.Map;
+import java.util.Properties;
+import org.weasis.acquire.explorer.AcquireMeta;
+import org.weasis.acquire.explorer.gui.central.meta.model.AcquireMetadataTableModel;
+
+public class AcquireImageMeta extends AcquireMetadataTableModel {
+
+  public AcquireImageMeta(Properties prefs, Map<String, String> values) {
+    super(AcquireMeta.Scope.IMAGE, prefs, values);
+  }
+}

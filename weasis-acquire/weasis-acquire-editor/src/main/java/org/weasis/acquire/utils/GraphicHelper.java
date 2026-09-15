@@ -9,4 +9,33 @@
  */
 package org.weasis.acquire.utils;
 
-public class GraphicHelper {}
+import java.awt.geom.Point2D;
+import org.weasis.core.api.image.util.Unit;
+
+/** Pixel length and mm/pixel helpers for dicomizer photo calibration. */
+public class GraphicHelper {
+
+  private GraphicHelper() {}
+
+  public static double pixelLength(Point2D a, Point2D b) {
+    if (a == null || b == null) {
+      return 0.0;
+    }
+    return a.distance(b);
+  }
+
+  public static double pixelLength(double x1, double y1, double x2, double y2) {
+    return pixelLength(new Point2D.Double(x1, y1), new Point2D.Double(x2, y2));
+  }
+
+  /**
+   * Converts a known real-world length along a pixel-measured line into millimetres per pixel.
+   * Pixel units and non-positive lengths leave the image uncalibrated (0).
+   */
+  public static double mmPerPixel(double knownLength, Unit unit, double pixelLength) {
+    if (pixelLength <= 0.0 || unit == null || unit == Unit.PIXEL || knownLength <= 0.0) {
+      return 0.0;
+    }
+    return (knownLength * unit.getConvMm()) / pixelLength;
+  }
+}

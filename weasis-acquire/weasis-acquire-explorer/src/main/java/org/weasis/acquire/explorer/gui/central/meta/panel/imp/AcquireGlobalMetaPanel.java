@@ -9,4 +9,14 @@
  */
 package org.weasis.acquire.explorer.gui.central.meta.panel.imp;
 
-public class AcquireGlobalMetaPanel {}
+import java.util.Map;
+import java.util.Properties;
+import org.weasis.acquire.explorer.gui.central.meta.model.imp.AcquireGlobalMeta;
+import org.weasis.acquire.explorer.gui.central.meta.panel.AcquireMetadataPanel;
+
+public class AcquireGlobalMetaPanel extends AcquireMetadataPanel {
+
+  public AcquireGlobalMetaPanel(Properties prefs, Map<String, String> values) {
+    super(new AcquireGlobalMeta(prefs, values));
+  }
+}

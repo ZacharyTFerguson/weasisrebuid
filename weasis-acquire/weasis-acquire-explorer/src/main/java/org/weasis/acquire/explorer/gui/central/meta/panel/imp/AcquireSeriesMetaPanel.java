@@ -9,4 +9,14 @@
  */
 package org.weasis.acquire.explorer.gui.central.meta.panel.imp;
 
-public class AcquireSeriesMetaPanel {}
+import java.util.Map;
+import java.util.Properties;
+import org.weasis.acquire.explorer.gui.central.meta.model.imp.AcquireSeriesMeta;
+import org.weasis.acquire.explorer.gui.central.meta.panel.AcquireMetadataPanel;
+
+public class AcquireSeriesMetaPanel extends AcquireMetadataPanel {
+
+  public AcquireSeriesMetaPanel(Properties prefs, Map<String, String> values) {
+    super(new AcquireSeriesMeta(prefs, values));
+  }
+}

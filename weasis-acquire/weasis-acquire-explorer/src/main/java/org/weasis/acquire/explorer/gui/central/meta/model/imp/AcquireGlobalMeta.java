@@ -9,4 +9,14 @@
  */
 package org.weasis.acquire.explorer.gui.central.meta.model.imp;
 
-public class AcquireGlobalMeta {}
+import java.util.Map;
+import java.util.Properties;
+import org.weasis.acquire.explorer.AcquireMeta;
+import org.weasis.acquire.explorer.gui.central.meta.model.AcquireMetadataTableModel;
+
+public class AcquireGlobalMeta extends AcquireMetadataTableModel {
+
+  public AcquireGlobalMeta(Properties prefs, Map<String, String> values) {
+    super(AcquireMeta.Scope.GLOBAL, prefs, values);
+  }
+}
