@@ -322,7 +322,23 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (screen == null) {
       return null;
     }
-    return firstView(viewOnScreen(screen), gridView(screen), localView(screen));
+    View2d hit = firstView(viewOnScreen(screen), gridView(screen), localView(screen));
+    if (hit == null) {
+      dumpCells(screen);
+    }
+    return hit;
+  }
+
+  void dumpCells(Point screen) {
+    System.err.println(
+        "view-grid miss pointer="
+            + screen
+            + " gridBox="
+            + showingBox(viewGrid)
+            + " pluginBox="
+            + showingBox(this)
+            + " n="
+            + layout.size());
   }
 
   View2d gridView(Point screen) {

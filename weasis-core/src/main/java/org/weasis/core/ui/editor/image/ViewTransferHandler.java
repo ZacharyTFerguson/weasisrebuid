@@ -52,6 +52,7 @@ public class ViewTransferHandler extends TransferHandler {
   private static MediaSeries<?> dragging;
   private static MediaSeries<?> lastDragged;
   private static Point lastOver;
+  private static String lastMiss = "";
 
   static {
     DragFill.arm();
@@ -170,23 +171,60 @@ public class ViewTransferHandler extends TransferHandler {
     return lastOver;
   }
 
+  public static String lastMiss() {
+    return lastMiss;
+  }
+
   /**
-   * Headed X11: native {@code exportAsDrag} swallows drop, {@code dragDropEnd}, and thumbnail
-   * {@code mouseReleased}. Hang on toolkit {@code MOUSE_RELEASED} while {@code dragging()} is set.
+   * Headed X11: hang the layout cell under the pointer. Native {@code exportAsDrag} is not used.
    */
   public boolean hangAtScreen(Point screen) {
     MediaSeries<?> series = dragged();
     JComponent cell = screenView(screen);
-    return series != null && cell != null && dropSeries(cell, series);
+    if (series != null && cell != null && dropSeries(cell, series)) {
+      lastMiss = "";
+      return true;
+    }
+    if (series != null) {
+      dumpMiss(screen, cell, series);
+    }
+    return false;
+  }
+
+  static void dumpMiss(Point screen, JComponent cell, MediaSeries<?> series) {
+    lastMiss = missText(screen, cell, series);
+    System.err.println(lastMiss);
+  }
+
+  static String missText(Point screen, JComponent cell, MediaSeries<?> series) {
+    ImageViewerPlugin<?> plugin = UICore.getInstance().getFocusedImagePlugin();
+    return "hangAtScreen miss pointer="
+        + screen
+        + " series="
+        + series
+        + " cell="
+        + cell
+        + " focused="
+        + plugin
+        + " focusedBox="
+        + screenBox(plugin)
+        + " dragging="
+        + dragging();
   }
 
   static JComponent screenView(Point screen) {
-    ImageViewerPlugin<?> plugin = pluginAt(screen);
-    if (plugin == null) {
+    if (screen == null) {
       return null;
     }
-    JComponent cell = plugin.dropCellAtScreen(screen);
-    return cell != null ? cell : plugin;
+    JComponent hit = cellFrom(pluginAt(screen), screen);
+    if (hit != null) {
+      return hit;
+    }
+    return cellFrom(UICore.getInstance().getFocusedImagePlugin(), screen);
+  }
+
+  static JComponent cellFrom(ImageViewerPlugin<?> plugin, Point screen) {
+    return plugin == null ? null : plugin.dropCellAtScreen(screen);
   }
 
   static ImageViewerPlugin<?> pluginAt(Point screen) {
@@ -481,7 +519,8 @@ public class ViewTransferHandler extends TransferHandler {
       DragSource src = DragSource.getDefaultDragSource();
       src.addDragSourceListener(this);
       src.addDragSourceMotionListener(this);
-      Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK);
+      Toolkit.getDefaultToolkit()
+          .addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
     }
 
     @Override
@@ -505,9 +544,31 @@ public class ViewTransferHandler extends TransferHandler {
 
     @Override
     public void eventDispatched(AWTEvent event) {
-      MouseEvent me = releaseWhileDrag(event);
-      if (me != null) {
+      if (event instanceof MouseEvent me) {
+        onMouse(me);
+      }
+    }
+
+    static void onMouse(MouseEvent me) {
+      armPress(me);
+      trackMove(me);
+      if (releaseWhileDrag(me) != null) {
         hangRelease(me);
+      }
+    }
+
+    static void armPress(MouseEvent me) {
+      if (me.getID() != MouseEvent.MOUSE_PRESSED || !SwingUtilities.isLeftMouseButton(me)) {
+        return;
+      }
+      if (me.getComponent() instanceof SeriesThumbnail thumb) {
+        beginDrag(thumb.getSeries());
+      }
+    }
+
+    static void trackMove(MouseEvent me) {
+      if (dragging() != null && me.getID() == MouseEvent.MOUSE_DRAGGED) {
+        lastOver = me.getLocationOnScreen();
       }
     }
 

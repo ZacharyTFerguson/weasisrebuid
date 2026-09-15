@@ -363,6 +363,20 @@ class ExplorerSeriesDnDHaveTest {
   }
 
   @Test
+  void leftPressBeginsSeriesDragWithoutExportAsDrag() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+    SeriesThumbnail thumb = pane.thumbnails().getFirst();
+    thumb.dispatchEvent(
+        new MouseEvent(
+            thumb, MouseEvent.MOUSE_PRESSED, 0L, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false,
+            MouseEvent.BUTTON1));
+    assertNotNull(ViewTransferHandler.dragging());
+    assertSame(thumb.getSeries(), ViewTransferHandler.lastDragged());
+    ViewTransferHandler.clearDragged();
+  }
+
+  @Test
   void leftDragBelowThresholdDoesNotExport() {
     SeriesPane pane = new SeriesPane();
     pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
@@ -372,7 +386,8 @@ class ExplorerSeriesDnDHaveTest {
       CountExport below =
           dragAt(thumb, InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1, shy, 0, shy, 0);
       assertEquals(0, below.exports);
-      assertNull(ViewTransferHandler.dragging());
+      assertNotNull(ViewTransferHandler.dragging());
+      ViewTransferHandler.endDrag();
     }
   }
 
