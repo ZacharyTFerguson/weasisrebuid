@@ -174,8 +174,7 @@ class HangingProtocolOpenHaveTest {
       View2d bottomLeft = container.getLayoutViews().get(2);
       JComponent grid = (JComponent) bottomLeft.getParent();
       Point screen = grid.getLocationOnScreen();
-      screen.translate(
-          Math.max(1, grid.getWidth() / 4), Math.max(1, (grid.getHeight() * 3) / 4));
+      screen.translate(Math.max(1, grid.getWidth() / 4), Math.max(1, (grid.getHeight() * 3) / 4));
       ViewTransferHandler.beginDrag(container.getLayoutViews().get(0).getSeries());
       ViewTransferHandler.overAt(screen);
       assertTrue(ViewTransferHandler.hangAtPointer());
