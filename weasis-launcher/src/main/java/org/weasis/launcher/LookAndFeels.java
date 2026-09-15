@@ -43,6 +43,7 @@ public final class LookAndFeels {
       } else {
         UIManager.setLookAndFeel(theme);
       }
+      UIManager.put("FileChooser.useShellFolder", Boolean.FALSE);
     } catch (Exception e) {
       LOGGER.warn("Cannot install look and feel {}", theme, e);
     }

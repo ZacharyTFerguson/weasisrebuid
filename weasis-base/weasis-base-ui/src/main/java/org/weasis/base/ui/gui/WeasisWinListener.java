@@ -9,6 +9,7 @@
  */
 package org.weasis.base.ui.gui;
 
+import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import org.weasis.core.api.command.WeasisUiCommand;
@@ -26,6 +27,30 @@ public class WeasisWinListener extends WindowAdapter {
 
   @Override
   public void windowClosing(WindowEvent e) {
+    if (!isMainWindowClose(e)) {
+      return;
+    }
+    window.dispose();
+    quitQuietly();
+  }
+
+  boolean isMainWindowClose(WindowEvent e) {
+    return e != null && e.getWindow() == window && !hasVisibleOwnedWindow(window);
+  }
+
+  static boolean hasVisibleOwnedWindow(Window window) {
+    if (window == null) {
+      return false;
+    }
+    for (Window owned : window.getOwnedWindows()) {
+      if (owned.isVisible()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static void quitQuietly() {
     try {
       new WeasisUiCommand().ui("-q");
     } catch (Exception ignored) {

@@ -10,12 +10,14 @@
 package org.weasis.dicom.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.File;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
+import javax.swing.WindowConstants;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.service.UICore;
 
@@ -26,9 +28,10 @@ public class ImportDicomDialog extends JDialog {
   private final boolean cd;
 
   public ImportDicomDialog(Frame owner, DicomModel model, boolean cd) {
-    super(owner, cd ? "Import DICOM CD" : "Import DICOM", true);
+    super(owner, cd ? "Import DICOM CD" : "Import DICOM", Dialog.ModalityType.DOCUMENT_MODAL);
     this.model = model == null ? new DicomModel() : model;
     this.cd = cd;
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     JTabbedPane tabs = new JTabbedPane();
     Hashtable<String, Object> props = new Hashtable<>();
     props.put("model", this.model);

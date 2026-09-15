@@ -14,6 +14,7 @@ import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
@@ -65,7 +66,7 @@ public class WeasisWin extends JFrame {
 
   public WeasisWin() {
     super(windowTitle());
-    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     setSize(960, 640);
     setLayout(new BorderLayout());
     toolbars = createDefaultToolBars();
@@ -486,23 +487,69 @@ public class WeasisWin extends JFrame {
   }
 
   void openImportDialog(boolean cd) {
+    JDialog dialog = importDialog(cd);
+    dialog.setVisible(true);
+    disposeImportDialog(dialog);
+  }
+
+  JDialog importDialog(boolean cd) {
+    JDialog dialog =
+        new JDialog(
+            this, cd ? "Import DICOM CD" : "Import DICOM", Dialog.ModalityType.DOCUMENT_MODAL);
+    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    dialog.setContentPane(importPagePanel(cd));
+    dialog.setSize(480, 320);
+    dialog.setLocationRelativeTo(this);
+    return dialog;
+  }
+
+  JPanel importPagePanel(boolean cd) {
+    JPanel panel = new JPanel(new BorderLayout());
+    addFirstImportPage(panel, importProps(cd));
+    return panel;
+  }
+
+  Hashtable<String, Object> importProps(boolean cd) {
     Hashtable<String, Object> props = new Hashtable<>();
     props.put("title", cd ? "DICOM CD" : "DICOM");
     if (explorerView != null && explorerView.getDataExplorerModel() != null) {
       props.put("model", explorerView.getDataExplorerModel());
     }
-    JDialog dialog = new JDialog(this, cd ? "Import DICOM CD" : "Import DICOM", true);
-    JPanel panel = new JPanel(new BorderLayout());
+    return props;
+  }
+
+  static void addFirstImportPage(JPanel panel, Hashtable<String, Object> props) {
     for (DicomImportFactory factory : UICore.getInstance().getDicomImportFactories()) {
       ImportDicom page = factory.createDicomImportPage(props);
       if (page instanceof Component component) {
         panel.add(component, BorderLayout.CENTER);
-        break;
+        return;
       }
     }
-    dialog.setContentPane(panel);
-    dialog.setSize(480, 320);
-    dialog.setLocationRelativeTo(this);
-    dialog.setVisible(true);
+  }
+
+  static void disposeImportDialog(JDialog dialog) {
+    if (dialog != null && dialog.isDisplayable()) {
+      dialog.dispose();
+    }
+  }
+
+  @Override
+  public void dispose() {
+    destroyDocking();
+    super.dispose();
+  }
+
+  void destroyDocking() {
+    CControl control = dockingControl;
+    dockingControl = null;
+    if (control == null) {
+      return;
+    }
+    try {
+      control.destroy();
+    } catch (RuntimeException ignored) {
+      // already destroyed in tests
+    }
   }
 }

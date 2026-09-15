@@ -17,14 +17,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.util.Hashtable;
 import java.util.List;
+import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.explorer.DataExplorerView;
@@ -199,6 +203,28 @@ class WeasisWinChromeHaveTest {
     } finally {
       closeOpen(core);
       core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void importDialogCloseDoesNotDisposeWeasisWin() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      win.setVisible(true);
+      JDialog dialog = win.importDialog(false);
+      assertEquals(WindowConstants.DISPOSE_ON_CLOSE, dialog.getDefaultCloseOperation());
+      assertEquals(Dialog.ModalityType.DOCUMENT_MODAL, dialog.getModalityType());
+      dialog.setModal(false);
+      dialog.setVisible(true);
+      win.dispatchEvent(new WindowEvent(win, WindowEvent.WINDOW_CLOSING));
+      assertTrue(win.isDisplayable());
+      dialog.dispatchEvent(new WindowEvent(dialog, WindowEvent.WINDOW_CLOSING));
+      WeasisWin.disposeImportDialog(dialog);
+      assertTrue(win.isDisplayable());
+      assertEquals(WindowConstants.DO_NOTHING_ON_CLOSE, win.getDefaultCloseOperation());
+    } finally {
       win.dispose();
     }
   }

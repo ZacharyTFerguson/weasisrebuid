@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.gui.util.AbstractItemDialogPage;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
@@ -91,15 +92,21 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
   }
 
   void browse() {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    chooser.setDialogTitle(title);
+    JFileChooser chooser = newFileChooser();
     if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
       File selected = chooser.getSelectedFile();
       if (selected != null) {
         pathField.setText(selected.getAbsolutePath());
       }
     }
+  }
+
+  JFileChooser newFileChooser() {
+    UIManager.put("FileChooser.useShellFolder", Boolean.FALSE);
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    chooser.setDialogTitle(title);
+    return chooser;
   }
 
   void runImport() {

@@ -9,7 +9,10 @@
  */
 package org.weasis.dicom.explorer.imp;
 
+import java.awt.Frame;
 import javax.swing.JButton;
+import javax.swing.JFrame;
+import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.util.WtoolBar;
 import org.weasis.dicom.explorer.ImportDicomDialog;
 
@@ -20,11 +23,20 @@ public class ImportToolBar extends WtoolBar {
     super("Import DICOM", 5);
     JButton button = new JButton("Import DICOM");
     button.setName("import-dicom");
-    button.addActionListener(
-        e -> {
-          ImportDicomDialog dialog = ImportDicomDialog.openFromFactories(null, false);
-          dialog.setVisible(true);
-        });
+    button.addActionListener(e -> openImport());
     add(button);
+  }
+
+  void openImport() {
+    ImportDicomDialog dialog = ImportDicomDialog.openFromFactories(ownerFrame(), false);
+    dialog.setVisible(true);
+    if (dialog.isDisplayable()) {
+      dialog.dispose();
+    }
+  }
+
+  static Frame ownerFrame() {
+    JFrame win = UICore.getInstance().getApplicationWindow();
+    return win;
   }
 }

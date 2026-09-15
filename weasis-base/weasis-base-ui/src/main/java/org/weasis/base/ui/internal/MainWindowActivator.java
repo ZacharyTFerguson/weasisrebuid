@@ -40,7 +40,7 @@ public class MainWindowActivator implements BundleActivator {
         () -> {
           WeasisWin win = new WeasisWin();
           window = win;
-          win.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+          win.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
           UICore.getInstance().setApplicationWindow(win);
           win.attachExplorer();
           win.setLocationRelativeTo(null);
