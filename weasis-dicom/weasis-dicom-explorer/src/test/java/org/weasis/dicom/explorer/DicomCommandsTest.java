@@ -38,8 +38,48 @@ class DicomCommandsTest {
 
   @Test
   void closeAll() {
+    DicomModel model = LocalPersistence.getDicomModel();
+    model.addInstance(inst("P1", "2.25.st1", "2.25.se1"));
+    assertEquals(1, model.getInstances().size());
     assertEquals("close-all", commands.close("--all"));
+    assertEquals(0, model.getInstances().size());
+    model.addInstance(inst("P1", "2.25.st1", "2.25.se1"));
     assertEquals("close-all", commands.close("-a"));
+    assertEquals(0, model.getInstances().size());
+  }
+
+  @Test
+  void closePatientStudySeriesRemovesOnlyMatching() {
+    DicomModel model = LocalPersistence.getDicomModel();
+    model.addInstance(inst("P1", "2.25.st1", "2.25.se1"));
+    model.addInstance(inst("P2", "2.25.st2", "2.25.se2"));
+    assertEquals("close-patient P1", commands.close("-p", "P1"));
+    assertEquals(1, model.getInstances().size());
+    assertEquals("P2", model.getInstances().get(0).patientId());
+    assertEquals("close-study 2.25.st2", commands.close("-y", "2.25.st2"));
+    assertEquals(0, model.getInstances().size());
+    model.addInstance(inst("P3", "2.25.st3", "2.25.se3"));
+    model.addInstance(inst("P3", "2.25.st3", "2.25.se4"));
+    assertEquals("close-series 2.25.se3", commands.close("-s", "2.25.se3"));
+    assertEquals(1, model.getInstances().size());
+    assertEquals("2.25.se4", model.getInstances().get(0).seriesUid());
+  }
+
+  static ImportedInstance inst(String patientId, String studyUid, String seriesUid) {
+    return new ImportedInstance(
+        "SYNTHETIC^" + patientId,
+        patientId,
+        studyUid,
+        seriesUid,
+        seriesUid + ".1",
+        "1.2.840.10008.10.0.2.2.1.2",
+        "CT",
+        "chest",
+        "20260101",
+        1,
+        1,
+        null,
+        "image/dicom");
   }
 
   @Test

@@ -123,19 +123,47 @@ public class DicomCommands {
 
   public String close(String... args) {
     Option opt = Options.compile("a(all)p(patient)y(study)s(series)").parse(args);
+    return closeOpt(LocalPersistence.getDicomModel(), opt);
+  }
+
+  String closeOpt(DicomModel model, Option opt) {
     if (opt.isSet("a") || opt.isSet("all")) {
-      return "close-all";
+      return closeAll(model);
     }
+    return closeScoped(model, opt);
+  }
+
+  String closeScoped(DicomModel model, Option opt) {
     if (opt.isSet("p")) {
-      return "close-patient " + opt.get("p");
+      return closePatient(model, opt.get("p"));
     }
     if (opt.isSet("y")) {
-      return "close-study " + opt.get("y");
+      return closeStudy(model, opt.get("y"));
     }
     if (opt.isSet("s")) {
-      return "close-series " + opt.get("s");
+      return closeSeries(model, opt.get("s"));
     }
     return "dicom:close -a | -p ID | -y UID | -s UID";
+  }
+
+  static String closeAll(DicomModel model) {
+    model.clearAll();
+    return "close-all";
+  }
+
+  static String closePatient(DicomModel model, String id) {
+    model.removePatient(id);
+    return "close-patient " + id;
+  }
+
+  static String closeStudy(DicomModel model, String uid) {
+    model.removeStudy(uid);
+    return "close-study " + uid;
+  }
+
+  static String closeSeries(DicomModel model, String uid) {
+    model.removeSeries(uid);
+    return "close-series " + uid;
   }
 
   static String describeManifest(String spec) {
