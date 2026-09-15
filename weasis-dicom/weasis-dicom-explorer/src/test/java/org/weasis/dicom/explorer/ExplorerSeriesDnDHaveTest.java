@@ -369,7 +369,14 @@ class ExplorerSeriesDnDHaveTest {
     SeriesThumbnail thumb = pane.thumbnails().getFirst();
     thumb.dispatchEvent(
         new MouseEvent(
-            thumb, MouseEvent.MOUSE_PRESSED, 0L, InputEvent.BUTTON1_DOWN_MASK, 0, 0, 1, false,
+            thumb,
+            MouseEvent.MOUSE_PRESSED,
+            0L,
+            InputEvent.BUTTON1_DOWN_MASK,
+            0,
+            0,
+            1,
+            false,
             MouseEvent.BUTTON1));
     assertNotNull(ViewTransferHandler.dragging());
     assertSame(thumb.getSeries(), ViewTransferHandler.lastDragged());

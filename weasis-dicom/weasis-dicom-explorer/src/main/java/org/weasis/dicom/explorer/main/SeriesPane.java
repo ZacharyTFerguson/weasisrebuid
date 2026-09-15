@@ -120,9 +120,9 @@ public class SeriesPane extends JPanel {
   }
 
   /**
-   * Arm {@code dragging}/{@code lastDragged} on left press. Do not {@code exportAsDrag}: X11
-   * native drag swallows drop and {@code dragDropEnd}. Toolkit {@code MOUSE_RELEASED} while
-   * {@code dragging()} hangs the empty View2d under the pointer.
+   * Arm {@code dragging}/{@code lastDragged} on left press. Do not {@code exportAsDrag}: X11 native
+   * drag swallows drop and {@code dragDropEnd}. Toolkit {@code MOUSE_RELEASED} while {@code
+   * dragging()} hangs the empty View2d under the pointer.
    */
   final class ThumbDrag extends MouseAdapter {
     private final SeriesThumbnail thumb;
