@@ -403,17 +403,7 @@ class ExplorerSeriesDnDHaveTest {
     ViewTransferHandler.beginDrag(thumb.getSeries());
     MouseEvent release =
         new MouseEvent(
-            thumb,
-            MouseEvent.MOUSE_RELEASED,
-            0L,
-            0,
-            1,
-            1,
-            80,
-            120,
-            1,
-            false,
-            MouseEvent.BUTTON1);
+            thumb, MouseEvent.MOUSE_RELEASED, 0L, 0, 1, 1, 80, 120, 1, false, MouseEvent.BUTTON1);
     ViewTransferHandler.hangFromAwt(release);
     assertEquals(80, ViewTransferHandler.lastOver().x);
     assertEquals(120, ViewTransferHandler.lastOver().y);
