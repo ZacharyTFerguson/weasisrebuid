@@ -17,10 +17,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import org.weasis.core.api.gui.util.GuiExecutor;
+import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
 import org.weasis.core.ui.editor.ViewerPluginBuilder;
+import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMime;
 
@@ -208,19 +210,53 @@ public class PluginOpeningStrategy {
 
   private ViewerPlugin<?> createPlugin(
       DicomSeriesHandler.SeriesBucket bucket, String mime, String patient) {
+    ViewerPlugin<?> plugin = openNewPlugin(bucket, mime, patient);
+    hangOpened(plugin, bucket);
+    return plugin;
+  }
+
+  private ViewerPlugin<?> openNewPlugin(
+      DicomSeriesHandler.SeriesBucket bucket, String mime, String patient) {
     SeriesViewerFactory factory = factoryFor(mime);
-    var series = handler.toMediaSeries(bucket);
+    MediaSeries<MediaElement> series = handler.toMediaSeries(bucket);
     if (factory != null) {
-      Hashtable<String, Object> props = new Hashtable<>();
-      if (!patient.isBlank()) {
-        props.put("patientKey", patient);
-      }
-      return ViewerPluginBuilder.openSequenceInPlugin(core, factory, series, props, true, true);
+      return openWithFactory(factory, series, patient);
     }
+    return openFallback(series, patient);
+  }
+
+  private ViewerPlugin<?> openWithFactory(
+      SeriesViewerFactory factory, MediaSeries<MediaElement> series, String patient) {
+    Hashtable<String, Object> props = new Hashtable<>();
+    if (!patient.isBlank()) {
+      props.put("patientKey", patient);
+    }
+    return ViewerPluginBuilder.openSequenceInPlugin(core, factory, series, props, true, true);
+  }
+
+  private ViewerPlugin<?> openFallback(MediaSeries<MediaElement> series, String patient) {
     DicomViewerPlugin plugin = new DicomViewerPlugin(DicomViewerPlugin.NAME, patient);
     plugin.addSeries(series);
     core.openViewerPlugin(plugin);
     return plugin;
+  }
+
+  void hangOpened(ViewerPlugin<?> plugin, DicomSeriesHandler.SeriesBucket bucket) {
+    if (plugin instanceof ImageViewerPlugin<?> image) {
+      hangImage(image, bucket);
+    }
+  }
+
+  void hangImage(ImageViewerPlugin<?> image, DicomSeriesHandler.SeriesBucket bucket) {
+    HangingProtocols.Layout layout = new HangingProtocols().layoutFor(modalityOf(bucket));
+    image.applyHanging(layout.rows(), layout.columns());
+  }
+
+  static String modalityOf(DicomSeriesHandler.SeriesBucket bucket) {
+    if (bucket == null || bucket.instances().isEmpty()) {
+      return "";
+    }
+    return bucket.instances().getFirst().modality();
   }
 
   @SuppressWarnings("unchecked")

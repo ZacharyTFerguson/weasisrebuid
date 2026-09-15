@@ -225,27 +225,124 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (sequence == null || sequence.getMedias().isEmpty()) {
       return;
     }
+    placeSeries(sequence);
+  }
+
+  @Override
+  public void hangSeries(List<MediaSeries<MediaElement>> series) {
+    if (series == null || series.isEmpty()) {
+      return;
+    }
+    growToHung(series.size());
+    hangPrimary(series.getFirst());
+    hangRest(series);
+  }
+
+  void growToHung(int n) {
+    if (layout.size() < n) {
+      setLayoutCount(n);
+    }
+  }
+
+  void hangPrimary(MediaSeries<MediaElement> primary) {
+    super.addSeries(primary);
+    view2d.setSeries(primary);
+    loadFirstMedia(primary);
+  }
+
+  void hangRest(List<MediaSeries<MediaElement>> series) {
+    MediaSeries<MediaElement> primary = series.getFirst();
+    for (int i = 1; i < layout.size(); i++) {
+      MediaSeries<MediaElement> cell = seriesAt(series, i, primary);
+      hangCell(layout.get(i), cell);
+      rememberHung(cell, primary);
+    }
+  }
+
+  static MediaSeries<MediaElement> seriesAt(
+      List<MediaSeries<MediaElement>> series, int i, MediaSeries<MediaElement> primary) {
+    return i < series.size() ? series.get(i) : primary;
+  }
+
+  void rememberHung(MediaSeries<MediaElement> cell, MediaSeries<MediaElement> primary) {
+    if (cell != null && cell != primary) {
+      super.addSeries(cell);
+    }
+  }
+
+  void placeSeries(MediaSeries<MediaElement> sequence) {
+    int slot = nextHangSlot();
+    if (slot == 0) {
+      putPrimary(sequence);
+      return;
+    }
+    hangCell(layout.get(slot), sequence);
+  }
+
+  void putPrimary(MediaSeries<MediaElement> sequence) {
     view2d.setSeries(sequence);
     loadFirstMedia(sequence);
     fillOtherLayoutViews(sequence);
   }
 
+  int nextHangSlot() {
+    if (view2d.getSeries() == null) {
+      return 0;
+    }
+    return firstCloneSlot();
+  }
+
+  int firstCloneSlot() {
+    MediaSeries<?> primary = view2d.getSeries();
+    for (int i = 1; i < layout.size(); i++) {
+      if (isCloneSlot(layout.get(i), primary)) {
+        return i;
+      }
+    }
+    return 0;
+  }
+
+  static boolean isCloneSlot(View2d cell, MediaSeries<?> primary) {
+    MediaSeries<?> hung = cell.getSeries();
+    return hung == null || hung == primary;
+  }
+
+  void hangCell(View2d cell, MediaSeries<MediaElement> sequence) {
+    if (sequence == null) {
+      return;
+    }
+    cell.setSeries(sequence);
+    loadInto(cell, sequence);
+  }
+
   void loadFirstMedia(MediaSeries<MediaElement> sequence) {
+    loadInto(view2d, sequence);
+    view2d.setSynch(SynchView.STACK);
+  }
+
+  void loadInto(View2d cell, MediaSeries<? extends MediaElement> sequence) {
+    if (sequence == null || sequence.getMedias().isEmpty()) {
+      return;
+    }
     URI uri = sequence.getMedias().getFirst().getMediaURI();
     if (uri == null) {
       return;
     }
+    tryLoad(cell, uri);
+  }
+
+  void tryLoad(View2d cell, URI uri) {
     try {
-      view2d.load(new File(uri));
-      view2d.setSynch(SynchView.STACK);
+      cell.load(new File(uri));
     } catch (Exception e) {
-      view2d.setGeometryWarning("Unable to open DICOM");
+      cell.setGeometryWarning("Unable to open DICOM");
     }
   }
 
   void fillOtherLayoutViews(MediaSeries<MediaElement> sequence) {
+    MediaSeries<?> primary = view2d.getSeries();
     for (View2d v : layout) {
-      if (v != view2d) {
+      if (v != view2d && isCloneSlot(v, primary)) {
         copyPrimaryInto(v, sequence);
       }
     }

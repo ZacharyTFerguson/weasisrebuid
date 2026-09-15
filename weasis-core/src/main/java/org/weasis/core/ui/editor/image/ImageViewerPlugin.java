@@ -9,9 +9,11 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.util.List;
 import org.weasis.core.api.image.OpManager;
 import org.weasis.core.api.image.SimpleOpManager;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
 
 /** Image viewer with a display op chain. */
 public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPlugin<E> {
@@ -31,6 +33,20 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
 
   public int getLayoutCount() {
     return 1;
+  }
+
+  /** Hanging protocol grid: MG 2×2, CR/DX 1×2, CT/MR/PT 1×1. */
+  public void applyHanging(int rows, int columns) {
+    setLayoutCount(Math.max(1, rows) * Math.max(1, columns));
+  }
+
+  public void hangSeries(List<MediaSeries<E>> series) {
+    if (series == null || series.isEmpty()) {
+      return;
+    }
+    for (MediaSeries<E> sequence : series) {
+      addSeries(sequence);
+    }
   }
 
   public void resetDisplay() {}
