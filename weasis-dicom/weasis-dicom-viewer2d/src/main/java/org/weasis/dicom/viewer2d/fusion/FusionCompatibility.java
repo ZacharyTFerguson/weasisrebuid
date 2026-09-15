@@ -9,4 +9,42 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionCompatibility {}
+/** Same Frame of Reference UID and overlapping IPP Z range. */
+public class FusionCompatibility {
+
+  public boolean sameFrameOfReference(String a, String b) {
+    return a != null && !a.isBlank() && a.equals(b);
+  }
+
+  public boolean overlappingZ(double[] a, double[] b) {
+    if (a == null || b == null || a.length == 0 || b.length == 0) {
+      return false;
+    }
+    double a0 = min(a);
+    double a1 = max(a);
+    double b0 = min(b);
+    double b1 = max(b);
+    return a0 <= b1 + 1e-9 && b0 <= a1 + 1e-9;
+  }
+
+  public boolean compatible(
+      String frameOfReferenceA, String frameOfReferenceB, double[] zA, double[] zB) {
+    return sameFrameOfReference(frameOfReferenceA, frameOfReferenceB) && overlappingZ(zA, zB);
+  }
+
+  private static double min(double[] v) {
+    double m = v[0];
+    for (double x : v) {
+      m = Math.min(m, x);
+    }
+    return m;
+  }
+
+  private static double max(double[] v) {
+    double m = v[0];
+    for (double x : v) {
+      m = Math.max(m, x);
+    }
+    return m;
+  }
+}

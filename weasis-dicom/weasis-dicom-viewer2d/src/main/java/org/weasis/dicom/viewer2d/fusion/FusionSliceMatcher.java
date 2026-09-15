@@ -9,4 +9,40 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionSliceMatcher {}
+/** Nearest ImagePositionPatient Z (mm) pairing between reference and overlay stacks. */
+public class FusionSliceMatcher {
+
+  public int nearestIndex(double[] zs, double z) {
+    return nearestIndex(zs, z, Double.POSITIVE_INFINITY);
+  }
+
+  public int nearestIndex(double[] zs, double z, double maxDeltaMm) {
+    if (zs == null || zs.length == 0 || Double.isNaN(z)) {
+      return -1;
+    }
+    int best = -1;
+    double bestD = Double.POSITIVE_INFINITY;
+    for (int i = 0; i < zs.length; i++) {
+      double d = Math.abs(zs[i] - z);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    if (best >= 0 && bestD > maxDeltaMm + 1e-9) {
+      return -1;
+    }
+    return best;
+  }
+
+  public int[] matchAll(double[] referenceZ, double[] overlayZ, double maxDeltaMm) {
+    if (referenceZ == null) {
+      return new int[0];
+    }
+    int[] out = new int[referenceZ.length];
+    for (int i = 0; i < referenceZ.length; i++) {
+      out[i] = nearestIndex(overlayZ, referenceZ[i], maxDeltaMm);
+    }
+    return out;
+  }
+}

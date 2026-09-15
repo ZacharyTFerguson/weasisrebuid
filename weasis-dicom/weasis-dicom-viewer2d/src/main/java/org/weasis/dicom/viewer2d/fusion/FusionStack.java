@@ -9,4 +9,38 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionStack {}
+import org.weasis.dicom.viewer2d.mpr.Volume;
+
+/** Overlay volume plus ImagePositionPatient Z (mm) for each stacked slice. */
+public class FusionStack {
+
+  private final Volume volume;
+  private final double[] zMm;
+  private final String frameOfReferenceUID;
+
+  public FusionStack(Volume volume, double[] zMm, String frameOfReferenceUID) {
+    this.volume = volume;
+    this.zMm = zMm == null ? new double[0] : zMm.clone();
+    this.frameOfReferenceUID = frameOfReferenceUID == null ? "" : frameOfReferenceUID;
+  }
+
+  public static FusionStack empty() {
+    return new FusionStack(null, new double[0], "");
+  }
+
+  public Volume volume() {
+    return volume;
+  }
+
+  public double[] zMm() {
+    return zMm.clone();
+  }
+
+  public String frameOfReferenceUID() {
+    return frameOfReferenceUID;
+  }
+
+  public boolean isEmpty() {
+    return volume == null || zMm.length == 0;
+  }
+}

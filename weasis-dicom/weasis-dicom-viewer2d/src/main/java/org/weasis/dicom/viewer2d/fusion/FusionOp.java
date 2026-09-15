@@ -9,4 +9,11 @@
  */
 package org.weasis.dicom.viewer2d.fusion;
 
-public class FusionOp {}
+/** Linear blend of base (CT) and overlay (PET) samples. */
+public class FusionOp {
+
+  public double blend(double base, double overlay, double opacity) {
+    double a = Math.max(0, Math.min(1, opacity));
+    return base * (1.0 - a) + overlay * a;
+  }
+}
