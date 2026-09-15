@@ -11,6 +11,8 @@ package org.weasis.core.ui.model.graphic.imp.line;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.Optional;
+import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
@@ -27,6 +29,28 @@ public class LineGraphic extends AbstractDragGraphic {
       return 0;
     }
     return a.distance(b);
+  }
+
+  /**
+   * Physical length in mm using row spacing for vertical delta and column spacing for horizontal.
+   */
+  public Optional<Double> getLengthMm(ImageSpacing spacing) {
+    if (spacing == null) {
+      return Optional.empty();
+    }
+    double row = spacing.rowMm();
+    double col = spacing.colMm();
+    if (row <= 0 || col <= 0 || !Double.isFinite(row) || !Double.isFinite(col)) {
+      return Optional.empty();
+    }
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double b = getHandlePoint(1);
+    if (a == null || b == null) {
+      return Optional.empty();
+    }
+    double dx = Math.abs(b.x - a.x);
+    double dy = Math.abs(b.y - a.y);
+    return Optional.of(Math.hypot(dx * col, dy * row));
   }
 
   @Override

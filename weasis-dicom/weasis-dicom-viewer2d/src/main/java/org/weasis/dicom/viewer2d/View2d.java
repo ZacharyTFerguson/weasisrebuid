@@ -9,11 +9,17 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.api.image.FilterOp;
@@ -25,9 +31,13 @@ import org.weasis.core.api.image.util.WindLevelParameters;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
+import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.codec.WindowLevelPainter;
 import org.weasis.dicom.codec.utils.DicomMediaUtils;
+import org.weasis.dicom.codec.utils.InstanceSpacing;
+import org.weasis.dicom.codec.utils.RoiStatistics;
 
 /**
  * DICOM 2D view. Op chain: WindowAndPresets → Filter → PseudoColor → Shutter → Overlay → Affine.
@@ -39,25 +49,121 @@ public class View2d extends DefaultView2d<MediaElement> {
   private double window = 400;
   private double level = 40;
   private File file;
+  private List<Attributes> stackDatasets = List.of();
+  private List<File> stackFiles = List.of();
+  private int pixelFrameIndex;
+  private Optional<InstanceSpacing.Resolved> resolvedInstanceSpacing = Optional.empty();
+
+  static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
   public View2d() {
     super();
   }
 
   public void load(File dicom) throws Exception {
-    this.file = dicom;
-    DicomMediaIO io = DicomMediaIO.open(dicom);
-    load(io.getDataset());
+    loadStack(List.of(dicom));
+  }
+
+  public void loadStack(List<File> files) throws IOException {
+    if (files == null || files.isEmpty()) {
+      throw new IllegalArgumentException("empty stack");
+    }
+    List<StackEntry> entries = new ArrayList<>();
+    for (File f : files) {
+      DicomMediaIO io = DicomMediaIO.open(f);
+      Attributes dcm = io.getDataset();
+      if (files.size() > 1 && dcm.getInt(Tag.NumberOfFrames, 1) > 1) {
+        throw new IllegalArgumentException(
+            "multi-frame instance cannot be combined with other stack files");
+      }
+      entries.add(new StackEntry(f, dcm));
+    }
+    String seriesUid = entries.getFirst().dataset.getString(Tag.SeriesInstanceUID, "");
+    for (StackEntry entry : entries) {
+      if (!seriesUid.equals(entry.dataset.getString(Tag.SeriesInstanceUID, ""))) {
+        throw new IllegalArgumentException("mixed SeriesInstanceUID in stack");
+      }
+    }
+    entries.sort(
+        Comparator.comparingInt((StackEntry e) -> e.dataset.getInt(Tag.InstanceNumber, 0))
+            .thenComparing(e -> e.file.getName()));
+    List<Attributes> datasets = new ArrayList<>();
+    List<File> stack = new ArrayList<>();
+    for (StackEntry entry : entries) {
+      datasets.add(entry.dataset);
+      stack.add(entry.file);
+    }
+    this.stackDatasets = List.copyOf(datasets);
+    this.stackFiles = List.copyOf(stack);
+    showStackFrame(0);
   }
 
   public void load(Attributes dataset) {
     this.dataset = Objects.requireNonNull(dataset, "dataset");
-    fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
+    this.stackDatasets = List.of(this.dataset);
+    this.stackFiles = file != null ? List.of(file) : List.of();
+    bindDataset(this.dataset);
+  }
+
+  private void bindDataset(Attributes active) {
+    fileWl = DicomMediaUtils.windowLevel(active, 400, 40);
     this.window = fileWl.getWindow();
     this.level = fileWl.getLevel();
     applyDatasetFlags();
     render();
   }
+
+  private void showStackFrame(int requestedIndex) {
+    if (stackDatasets.isEmpty()) {
+      return;
+    }
+    if (isMultiframePixelStack()) {
+      Attributes active = stackDatasets.getFirst();
+      this.dataset = active;
+      if (!stackFiles.isEmpty()) {
+        this.file = stackFiles.getFirst();
+      }
+      int frames = active.getInt(Tag.NumberOfFrames, 1);
+      pixelFrameIndex = Math.max(0, Math.min(requestedIndex, frames - 1));
+      super.setFrameIndex(pixelFrameIndex);
+      bindDataset(active);
+      return;
+    }
+    int clamped = Math.max(0, Math.min(requestedIndex, stackDatasets.size() - 1));
+    super.setFrameIndex(clamped);
+    pixelFrameIndex = 0;
+    this.dataset = stackDatasets.get(clamped);
+    if (!stackFiles.isEmpty()) {
+      this.file = stackFiles.get(clamped);
+    }
+    bindDataset(this.dataset);
+  }
+
+  private boolean isMultiframePixelStack() {
+    return stackDatasets.size() == 1 && stackDatasets.getFirst().getInt(Tag.NumberOfFrames, 1) > 1;
+  }
+
+  public int getStackSize() {
+    if (isMultiframePixelStack()) {
+      return stackDatasets.getFirst().getInt(Tag.NumberOfFrames, 1);
+    }
+    return stackDatasets.size();
+  }
+
+  int getPixelFrameIndex() {
+    return pixelFrameIndex;
+  }
+
+  @Override
+  public void setFrameIndex(int frameIndex) {
+    if (stackDatasets.isEmpty()) {
+      super.setFrameIndex(frameIndex);
+      return;
+    }
+    showStackFrame(frameIndex);
+  }
+
+  private record StackEntry(File file, Attributes dataset) {}
 
   public Attributes getDataset() {
     return dataset;
@@ -65,6 +171,25 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public File getFile() {
     return file;
+  }
+
+  public Optional<InstanceSpacing.Resolved> getResolvedInstanceSpacing() {
+    return resolvedInstanceSpacing;
+  }
+
+  public String formatLineMeasureLabel(LineGraphic line) {
+    return MeasurementLabel.formatLine(line, resolvedInstanceSpacing);
+  }
+
+  public String formatPolylineMeasureLabel(PolylineGraphic polyline) {
+    return MeasurementLabel.formatPolyline(polyline, resolvedInstanceSpacing);
+  }
+
+  public String formatEllipseMeasureLabel(Ellipse2D roi) {
+    if (dataset == null || roi == null) {
+      return "";
+    }
+    return RoiStatistics.ellipse(dataset, roi).map(MeasurementLabel::formatEllipse).orElse("");
   }
 
   public double getWindow() {
@@ -98,7 +223,8 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (dataset == null) {
       return;
     }
-    BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, window, level);
+    BufferedImage painted =
+        WindowLevelPainter.paintMonochrome2(dataset, pixelFrameIndex, window, level);
     painted = applyFilterAndColor(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);
@@ -197,8 +323,12 @@ public class View2d extends DefaultView2d<MediaElement> {
               ShutterOp.P_LOWER,
               dataset.getInt(Tag.ShutterLowerHorizontalEdge, dataset.getInt(Tag.Rows, 0) - 1));
     }
-    if (dataset.containsValue(Tag.PixelSpacing) || dataset.containsValue(Tag.ImagerPixelSpacing)) {
-      setGeometryWarning("");
+    resolvedInstanceSpacing = InstanceSpacing.resolve(dataset);
+    if (resolvedInstanceSpacing.isPresent()) {
+      String warn = resolvedInstanceSpacing.get().warning();
+      setGeometryWarning(warn == null ? "" : warn);
+    } else {
+      setGeometryWarning(MeasurementLabel.NO_USABLE_SPACING_WARNING);
     }
   }
 

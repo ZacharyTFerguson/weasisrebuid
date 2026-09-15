@@ -20,8 +20,8 @@ import org.weasis.dicom.codec.utils.DicomMediaUtils;
 import org.weasis.dicom.codec.utils.LutPipeline;
 
 /**
- * Applies the View2d W/L node to Explicit VR LE MONOCHROME2 pixels and paints 8-bit grey.
- * Uncompressed path is pure Java (OpenCV not required).
+ * Applies the View2d W/L node to pixels that pass {@link DicomUnderstandingLimits} and paints 8-bit
+ * grey. Uncompressed path is pure Java (OpenCV not required).
  */
 public final class WindowLevelPainter {
 
@@ -33,13 +33,24 @@ public final class WindowLevelPainter {
   }
 
   public static BufferedImage paintMonochrome2(Attributes dcm, double window, double level) {
+    return paintMonochrome2(dcm, 0, window, level);
+  }
+
+  public static BufferedImage paintMonochrome2(
+      Attributes dcm, int frameIndex, double window, double level) {
     if (dcm == null || !DicomMediaUtils.isMonochrome2(dcm)) {
       throw new IllegalArgumentException("MONOCHROME2 dataset required");
     }
     int rows = dcm.getInt(Tag.Rows, 0);
     int cols = dcm.getInt(Tag.Columns, 0);
+    int frameSize = rows * cols;
+    int numberOfFrames = Math.max(1, dcm.getInt(Tag.NumberOfFrames, 1));
+    if (frameIndex < 0 || frameIndex >= numberOfFrames) {
+      throw new IllegalArgumentException("frame index");
+    }
     int[] pixels = dcm.getInts(Tag.PixelData);
-    if (rows <= 0 || cols <= 0 || pixels == null || pixels.length < rows * cols) {
+    int offset = frameIndex * frameSize;
+    if (rows <= 0 || cols <= 0 || pixels == null || pixels.length < offset + frameSize) {
       throw new IllegalArgumentException("pixel data");
     }
     SimpleOpManager chain = SimpleOpManager.view2dChain();
@@ -50,8 +61,8 @@ public final class WindowLevelPainter {
     int pad = DicomMediaUtils.pixelPaddingValue(dcm);
     BufferedImage image = new BufferedImage(cols, rows, BufferedImage.TYPE_BYTE_GRAY);
     byte[] out = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-    for (int i = 0; i < rows * cols; i++) {
-      int raw = pixels[i];
+    for (int i = 0; i < frameSize; i++) {
+      int raw = pixels[offset + i];
       if (raw == pad) {
         out[i] = 0;
         continue;
