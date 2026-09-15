@@ -70,6 +70,7 @@ import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.pref.PreferenceDialog;
+import org.weasis.core.ui.pref.ShortcutPrefView;
 import org.weasis.core.ui.util.TitleMenuItem;
 import org.weasis.core.ui.util.ToolBarContainer;
 
@@ -835,13 +836,41 @@ public class WeasisWin extends JFrame {
 
   JMenu createHelpMenu() {
     JMenu help = new JMenu("Help");
-    JMenuItem about = new JMenuItem("About");
-    about.addActionListener(e -> new WeasisAboutBox(this).setVisible(true));
-    help.add(about);
-    JMenuItem licenses = new JMenuItem("Licenses");
-    licenses.addActionListener(e -> new LicencesDialog(this).setVisible(true));
-    help.add(licenses);
+    help.add(namedItem("Keyboard Shortcuts", this::showKeyboardShortcuts));
+    help.add(namedItem("About", this::showAbout));
+    help.add(namedItem("Licenses", this::showLicenses));
     return help;
+  }
+
+  void showKeyboardShortcuts() {
+    keyboardShortcutsDialog().setVisible(true);
+  }
+
+  void showAbout() {
+    new WeasisAboutBox(this).setVisible(true);
+  }
+
+  void showLicenses() {
+    new LicencesDialog(this).setVisible(true);
+  }
+
+  JDialog keyboardShortcutsDialog() {
+    JDialog dialog = new JDialog(this, "Keyboard Shortcuts", Dialog.ModalityType.APPLICATION_MODAL);
+    dialog.setName("keyboard-shortcuts");
+    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    dialog.add(liveShortcutMap(), BorderLayout.CENTER);
+    JButton close = new JButton("Close");
+    close.addActionListener(e -> dialog.dispose());
+    dialog.add(close, BorderLayout.SOUTH);
+    dialog.pack();
+    dialog.setLocationRelativeTo(this);
+    return dialog;
+  }
+
+  static ShortcutPrefView liveShortcutMap() {
+    ShortcutPrefView map = new ShortcutPrefView();
+    map.setName("keyboard-shortcuts-map");
+    return map;
   }
 
   public void attachViewer(ViewerPlugin<?> plugin) {

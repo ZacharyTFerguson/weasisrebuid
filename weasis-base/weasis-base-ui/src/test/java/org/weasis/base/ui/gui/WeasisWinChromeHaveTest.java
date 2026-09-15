@@ -41,6 +41,7 @@ import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.gui.util.AppProperties;
 import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.media.data.MediaElement;
@@ -50,6 +51,7 @@ import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.core.ui.pref.ShortcutPrefView;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.core.ui.util.WtoolBar;
 
@@ -96,11 +98,47 @@ class WeasisWinChromeHaveTest {
       assertEquals("Select All", edit.getItem(0).getText());
       assertEquals("Deselect All", edit.getItem(1).getText());
       assertEquals("Resource Monitor", win.menuNamed("Tools").getItem(0).getText());
-      assertEquals("About", win.menuNamed("Help").getItem(0).getText());
-      assertEquals("Licenses", win.menuNamed("Help").getItem(1).getText());
+      assertEquals("Keyboard Shortcuts", win.menuNamed("Help").getItem(0).getText());
+      assertEquals("About", win.menuNamed("Help").getItem(1).getText());
+      assertEquals("Licenses", win.menuNamed("Help").getItem(2).getText());
     } finally {
       win.dispose();
     }
+  }
+
+  @Test
+  void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    JDialog dialog = null;
+    try {
+      dialog = win.keyboardShortcutsDialog();
+      assertEquals("Keyboard Shortcuts", dialog.getTitle());
+      assertEquals("keyboard-shortcuts", dialog.getName());
+      ShortcutPrefView map = shortcutMapIn(dialog);
+      assertNotNull(map);
+      assertEquals("keyboard-shortcuts-map", map.getName());
+      assertSame(ActionW.PAN, map.actionFor(KeyEvent.VK_T));
+      assertSame(ActionW.WINLEVEL, map.actionFor(KeyEvent.VK_W));
+      assertSame(ActionW.CINE, map.actionFor(KeyEvent.VK_C));
+      assertSame(ActionW.MEASURE, map.actionFor(KeyEvent.VK_M));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.contains(ActionW.PAN.cmd())));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.contains(ActionW.CINE.cmd())));
+    } finally {
+      if (dialog != null) {
+        dialog.dispose();
+      }
+      win.dispose();
+    }
+  }
+
+  static ShortcutPrefView shortcutMapIn(JDialog dialog) {
+    for (Component child : dialog.getContentPane().getComponents()) {
+      if (child instanceof ShortcutPrefView map) {
+        return map;
+      }
+    }
+    return null;
   }
 
   @Test
