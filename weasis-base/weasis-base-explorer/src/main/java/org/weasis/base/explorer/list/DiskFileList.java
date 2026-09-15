@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import org.weasis.base.explorer.JIUtility;
 
 /** Lists a directory for the non-DICOM explorer (files for thumbnails, folders for the tree). */
 public class DiskFileList {
@@ -36,19 +37,34 @@ public class DiskFileList {
     if (directory == null || !Files.isDirectory(directory)) {
       return List.of();
     }
+    return sorted(collect(directory, directories));
+  }
+
+  List<Path> collect(Path directory, boolean directories) throws IOException {
     List<Path> out = new ArrayList<>();
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
       for (Path path : stream) {
-        String name = path.getFileName() == null ? "" : path.getFileName().toString();
-        if (name.startsWith(".")) {
-          continue;
-        }
-        if (directories ? Files.isDirectory(path) : Files.isRegularFile(path)) {
-          out.add(path);
-        }
+        addVisible(out, path, directories);
       }
     }
-    out.sort(Comparator.comparing(path -> path.getFileName().toString()));
+    return out;
+  }
+
+  static void addVisible(List<Path> out, Path path, boolean directories) {
+    if (JIUtility.fileName(path).startsWith(".")) {
+      return;
+    }
+    if (matchesKind(path, directories)) {
+      out.add(path);
+    }
+  }
+
+  static boolean matchesKind(Path path, boolean directories) {
+    return directories ? Files.isDirectory(path) : Files.isRegularFile(path);
+  }
+
+  static List<Path> sorted(List<Path> out) {
+    out.sort(Comparator.comparing(JIUtility::fileName));
     return List.copyOf(out);
   }
 }

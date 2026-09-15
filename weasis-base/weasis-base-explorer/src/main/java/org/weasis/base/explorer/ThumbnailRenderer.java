@@ -62,7 +62,7 @@ public class ThumbnailRenderer extends DefaultListCellRenderer {
     Path path = value instanceof Path p ? p : null;
     ThumbnailIcon icon = iconFor(path);
     setIcon(icon);
-    setText(path == null ? "" : path.getFileName().toString());
+    setText(JIUtility.fileName(path));
     return this;
   }
 }

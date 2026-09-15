@@ -26,7 +26,7 @@ public class DefaultExplorer extends PluginTool implements DataExplorerView {
 
   private final JIThumbnailListPane thumbnails =
       new JIThumbnailListPane(new DefaultThumbnailList());
-  private final JIExplorerContext explorerContext = new JIExplorerContext();
+  private final JIExplorerContext explorerContext = JIUtility.newContext();
 
   private final DataExplorerModel model =
       new DataExplorerModel() {

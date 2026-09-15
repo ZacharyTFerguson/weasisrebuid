@@ -26,6 +26,7 @@ import org.weasis.core.ui.editor.SeriesViewerFactory;
 import org.weasis.core.ui.editor.ViewerPluginBuilder;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.explorer.main.SplitSeriesManager;
 
 /**
  * Groups imported SOP instances by Series Instance UID and opens each series with the MIME factory
@@ -63,22 +64,31 @@ public class DicomSeriesHandler extends TransferHandler {
   }
 
   public List<SeriesBucket> group(List<ImportedInstance> instances) {
+    List<ImportedInstance> source = instances == null ? List.of() : instances;
+    return bucketsOf(new SplitSeriesManager().rewrite(source));
+  }
+
+  static List<SeriesBucket> bucketsOf(List<ImportedInstance> instances) {
     Map<String, List<ImportedInstance>> map = new LinkedHashMap<>();
-    if (instances != null) {
-      for (ImportedInstance inst : instances) {
-        if (inst == null) {
-          continue;
-        }
+    for (ImportedInstance inst : instances) {
+      if (inst != null) {
         map.computeIfAbsent(inst.seriesUid(), k -> new ArrayList<>()).add(inst);
       }
     }
+    return toBuckets(map);
+  }
+
+  static List<SeriesBucket> toBuckets(Map<String, List<ImportedInstance>> map) {
     List<SeriesBucket> buckets = new ArrayList<>();
     for (Map.Entry<String, List<ImportedInstance>> e : map.entrySet()) {
       List<ImportedInstance> sorted = DicomSorter.sortInstances(e.getValue());
-      String mime = sorted.isEmpty() ? DicomMime.IMAGE_DICOM : sorted.getFirst().mime();
-      buckets.add(new SeriesBucket(e.getKey(), mime, sorted));
+      buckets.add(new SeriesBucket(e.getKey(), mimeOf(sorted), sorted));
     }
     return buckets;
+  }
+
+  static String mimeOf(List<ImportedInstance> sorted) {
+    return sorted.isEmpty() ? DicomMime.IMAGE_DICOM : sorted.getFirst().mime();
   }
 
   public List<SeriesBucket> group(DicomModel source) {
