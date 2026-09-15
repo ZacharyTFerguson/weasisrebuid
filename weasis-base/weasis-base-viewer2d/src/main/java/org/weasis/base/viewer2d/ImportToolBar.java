@@ -16,8 +16,8 @@ import javax.swing.JButton;
 import org.weasis.core.ui.util.WtoolBar;
 
 /**
- * Non-DICOM stills import chrome. Local files go through {@link ImageCommands} {@code image:get
- * -f} (ImageIO); tests call {@link #importFiles} instead of a file chooser.
+ * Non-DICOM stills import chrome. Local files go through {@link ImageCommands} {@code image:get -f}
+ * (ImageIO); tests call {@link #importFiles} instead of a file chooser.
  */
 public class ImportToolBar extends WtoolBar {
 
