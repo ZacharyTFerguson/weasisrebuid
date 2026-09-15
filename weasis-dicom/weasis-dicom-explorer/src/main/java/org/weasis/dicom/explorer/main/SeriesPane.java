@@ -172,6 +172,9 @@ public class SeriesPane extends JPanel {
       origin = SwingUtilities.isLeftMouseButton(e) ? e.getPoint() : null;
       started = false;
       adapter.pressed(idx, e);
+      if (origin != null) {
+        e.consume();
+      }
     }
 
     @Override
@@ -189,6 +192,7 @@ public class SeriesPane extends JPanel {
       }
       exportThumb(thumb, e);
       started = ViewTransferHandler.dragging() != null;
+      e.consume();
     }
 
     boolean armed(MouseEvent e) {

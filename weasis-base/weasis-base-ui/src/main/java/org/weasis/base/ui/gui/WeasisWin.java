@@ -187,6 +187,15 @@ public class WeasisWin extends JFrame {
     c.setDropTarget(null);
     c.setTransferHandler(keep instanceof ViewTransferHandler ? keep : new ViewTransferHandler());
     ViewTransferHandler.armDrop(c);
+    stampPlugin(c);
+  }
+
+  static void stampPlugin(JComponent c) {
+    ImageViewerPlugin<?> plugin = ImageViewerPlugin.pluginAbove(c);
+    if (plugin != null) {
+      c.putClientProperty(ImageViewerPlugin.class, plugin);
+      c.putClientProperty(plugin.getClass(), plugin);
+    }
   }
 
   static DefaultSingleCDockable uncloseableDock(String id, String title, Component content) {
@@ -641,9 +650,12 @@ public class WeasisWin extends JFrame {
 
   void applyLayout(int count) {
     ImageViewerPlugin<?> image = focusedImagePlugin();
-    if (image != null) {
-      image.setLayoutCount(count);
+    if (image == null) {
+      return;
     }
+    image.setLayoutCount(count);
+    image.revalidate();
+    image.repaint();
   }
 
   void resetSelectedView() {
@@ -662,8 +674,8 @@ public class WeasisWin extends JFrame {
   }
 
   ImageViewerPlugin<?> imagePluginFromTabs() {
-    Component selected = viewerTabs.getSelectedComponent();
-    if (!(selected instanceof ImageViewerPlugin<?> image)) {
+    ImageViewerPlugin<?> image = ImageViewerPlugin.pluginIn(viewerTabs.getSelectedComponent());
+    if (image == null) {
       return null;
     }
     UICore.getInstance().setSelectedViewerPlugin(image);

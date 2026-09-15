@@ -9,6 +9,8 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Point;
 import java.util.List;
 import javax.swing.JComponent;
@@ -88,6 +90,37 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
   public void resetDisplay() {}
 
   public void applyPreset(int index) {}
+
+  /** Nested or self {@link ImageViewerPlugin} under a tab / docking wrapper. */
+  public static ImageViewerPlugin<?> pluginIn(Component c) {
+    if (c instanceof ImageViewerPlugin<?> image) {
+      return image;
+    }
+    return nestedPlugin(c);
+  }
+
+  static ImageViewerPlugin<?> nestedPlugin(Component c) {
+    if (!(c instanceof Container box)) {
+      return null;
+    }
+    for (Component child : box.getComponents()) {
+      ImageViewerPlugin<?> found = pluginIn(child);
+      if (found != null) {
+        return found;
+      }
+    }
+    return null;
+  }
+
+  public static ImageViewerPlugin<?> pluginAbove(Component c) {
+    while (c != null) {
+      if (c instanceof ImageViewerPlugin<?> image) {
+        return image;
+      }
+      c = c.getParent();
+    }
+    return null;
+  }
 
   /** Edit > Select All (graphics). */
   public void selectAllGraphics() {}

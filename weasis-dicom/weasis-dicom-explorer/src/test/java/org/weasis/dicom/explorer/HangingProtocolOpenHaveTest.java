@@ -27,6 +27,7 @@ import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.viewer2d.DicomView2dCommands;
 import org.weasis.dicom.viewer2d.View2dContainer;
 import org.weasis.dicom.viewer2d.View2dFactory;
 
@@ -102,6 +103,40 @@ class HangingProtocolOpenHaveTest {
       assertEquals("2.25.chest", seriesUid(container.getLayoutViews().get(0).getSeries()));
       assertEquals("2.25.knee", seriesUid(container.getLayoutViews().get(1).getSeries()));
       assertSame(container, win.getViewerTabs().getComponentAt(0));
+    } finally {
+      close(core, factory);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void viewMenuTwoByTwoAndLayoutNGrowEmptyExtrasAfterHang1x2() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    close(core, null);
+    core.setApplicationWindow(win);
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    DicomModel model = new DicomModel();
+    try {
+      model.addInstance(dx("CHEST", "P-CHEST", "2.25.chest"));
+      new PluginOpeningStrategy(core).openIfWindow(model);
+      model.addInstance(dx("KNEE", "P-KNEE", "2.25.knee"));
+      new PluginOpeningStrategy(core).openIfWindow(model);
+      View2dContainer container = (View2dContainer) core.getSelectedViewerPlugin();
+      assertEquals(2, container.getLayoutCount());
+      win.menuNamed("View").getItem(2).doClick();
+      assertEquals(4, container.getLayoutCount());
+      assertEquals("2.25.chest", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertEquals("2.25.knee", seriesUid(container.getLayoutViews().get(1).getSeries()));
+      assertNull(container.getLayoutViews().get(2).getSeries());
+      assertNull(container.getLayoutViews().get(3).getSeries());
+      container.getView2d().putClientProperty(View2dContainer.class, null);
+      assertEquals("layout -n 4", new DicomView2dCommands(container.getView2d()).layout("-n", "4"));
+      assertEquals(4, container.getLayoutCount());
+      assertNull(container.getLayoutViews().get(2).getSeries());
     } finally {
       close(core, factory);
       core.setApplicationWindow(null);

@@ -69,6 +69,9 @@ public class ImageViewerEventManager {
   }
 
   public void mouseDragged(MouseEvent e) {
+    if (ViewTransferHandler.dragging() != null) {
+      return;
+    }
     int dx = e.getX() - lastX;
     int dy = e.getY() - lastY;
     lastX = e.getX();

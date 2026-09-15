@@ -148,12 +148,15 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   @Override
+  @Override
   public void setLayoutCount(int n) {
     int count = Math.max(1, n);
     growLayout(count);
     shrinkLayout(count);
     layoutIndex = Math.min(layoutIndex, layout.size() - 1);
     relayoutViews();
+    revalidate();
+    repaint();
   }
 
   void growLayout(int count) {

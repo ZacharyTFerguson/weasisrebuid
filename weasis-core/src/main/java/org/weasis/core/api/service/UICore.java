@@ -299,7 +299,8 @@ public class UICore {
       return null;
     }
     Component selected = tabs.getSelectedComponent();
-    if (!(selected instanceof ImageViewerPlugin<?> image)) {
+    ImageViewerPlugin<?> image = ImageViewerPlugin.pluginIn(selected);
+    if (image == null) {
       return null;
     }
     setSelectedViewerPlugin(image);
