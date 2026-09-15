@@ -9,4 +9,30 @@
  */
 package org.weasis.dicom.wave;
 
-public class InfoPanel {}
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+/** Sampling frequency and duration for the loaded waveform. */
+public class InfoPanel extends JPanel {
+
+  private final JLabel label = new JLabel(" ");
+
+  public InfoPanel() {
+    add(label);
+  }
+
+  public void setWaveform(WaveDataReadable data) {
+    if (data == null || data.sampleCount() == 0) {
+      label.setText(" ");
+      return;
+    }
+    label.setText(
+        String.format(
+            "%.1f Hz, %.3f s, %d channel(s)",
+            data.samplingFrequency(), data.durationSeconds(), data.channelCount()));
+  }
+
+  public String text() {
+    return label.getText();
+  }
+}

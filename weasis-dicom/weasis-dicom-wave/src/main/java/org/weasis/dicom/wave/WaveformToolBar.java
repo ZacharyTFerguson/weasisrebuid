@@ -9,4 +9,21 @@
  */
 package org.weasis.dicom.wave;
 
-public class WaveformToolBar {}
+import javax.swing.JButton;
+import javax.swing.JToolBar;
+
+/** ECG format shortcuts. */
+public class WaveformToolBar extends JToolBar {
+
+  public WaveformToolBar(WaveView view) {
+    JButton two = new JButton("2");
+    two.addActionListener(e -> view.setFormat(Format.TWO));
+    add(two);
+    JButton four = new JButton("4");
+    four.addActionListener(e -> view.setFormat(Format.FOUR));
+    add(four);
+    JButton twelve = new JButton("12");
+    twelve.addActionListener(e -> view.setFormat(Format.DEFAULT));
+    add(twelve);
+  }
+}

@@ -9,4 +9,51 @@
  */
 package org.weasis.dicom.wave;
 
-public class WaveLayout {}
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+/** Ordered leads for one ECG page. */
+public class WaveLayout {
+
+  private final Format format;
+  private final List<Lead> leads;
+
+  public WaveLayout(Format format, List<Lead> leads) {
+    this.format = format == null ? Format.DEFAULT : format;
+    this.leads = leads == null ? List.of() : List.copyOf(leads);
+  }
+
+  public Format format() {
+    return format;
+  }
+
+  public List<Lead> leads() {
+    return Collections.unmodifiableList(leads);
+  }
+
+  public int rows() {
+    return format.rows();
+  }
+
+  public int columns() {
+    return format.columns();
+  }
+
+  public static List<Lead> twelveLeadOrder() {
+    List<Lead> list = new ArrayList<>();
+    list.add(Lead.I);
+    list.add(Lead.AVR);
+    list.add(Lead.V1);
+    list.add(Lead.V4);
+    list.add(Lead.II);
+    list.add(Lead.AVL);
+    list.add(Lead.V2);
+    list.add(Lead.V5);
+    list.add(Lead.III);
+    list.add(Lead.AVF);
+    list.add(Lead.V3);
+    list.add(Lead.V6);
+    return list;
+  }
+}

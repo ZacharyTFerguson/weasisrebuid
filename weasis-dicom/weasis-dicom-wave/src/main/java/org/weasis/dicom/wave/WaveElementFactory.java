@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.wave;
 
-public class WaveElementFactory {}
+import org.weasis.dicom.codec.DcmMediaReader;
+import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.codec.DicomSpecialElement;
+import org.weasis.dicom.codec.DicomSpecialElementFactory;
+
+public class WaveElementFactory implements DicomSpecialElementFactory {
+
+  @Override
+  public String getSeriesMimeType() {
+    return DicomMime.WAVE_DICOM;
+  }
+
+  @Override
+  public String getModality() {
+    return "ECG";
+  }
+
+  @Override
+  public DicomSpecialElement buildInstance(DcmMediaReader mediaIO) {
+    return new DicomSpecialElement(mediaIO);
+  }
+}

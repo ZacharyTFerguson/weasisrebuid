@@ -9,12 +9,33 @@
  */
 package org.weasis.dicom.wave;
 
+import java.awt.BorderLayout;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 
 public class WaveContainer extends ViewerPlugin<MediaElement> {
 
+  private final WaveView waveView = new WaveView();
+
   public WaveContainer() {
     super("DICOM ECG Viewer");
+    add(waveView, BorderLayout.CENTER);
+  }
+
+  public WaveView getWaveView() {
+    return waveView;
+  }
+
+  @Override
+  public synchronized void addSeries(MediaSeries<MediaElement> sequence) {
+    super.addSeries(sequence);
+    if (sequence == null) {
+      return;
+    }
+    for (MediaElement media : sequence.getMedias()) {
+      waveView.display(media);
+      break;
+    }
   }
 }

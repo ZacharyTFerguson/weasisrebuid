@@ -9,4 +9,49 @@
  */
 package org.weasis.dicom.wave;
 
-public class Lead {}
+/** Standard ECG lead labels (CID 3001 / common Channel Label values). */
+public enum Lead {
+  I("I"),
+  II("II"),
+  III("III"),
+  AVR("aVR"),
+  AVL("aVL"),
+  AVF("aVF"),
+  V1("V1"),
+  V2("V2"),
+  V3("V3"),
+  V4("V4"),
+  V5("V5"),
+  V6("V6"),
+  UNKNOWN("?");
+
+  private final String label;
+
+  Lead(String label) {
+    this.label = label;
+  }
+
+  public String label() {
+    return label;
+  }
+
+  public static Lead fromLabel(String raw) {
+    if (raw == null || raw.isBlank()) {
+      return UNKNOWN;
+    }
+    String t = raw.trim();
+    String compact = t.replace("Lead ", "").replace("LEAD ", "").replace("_", "").replace(" ", "");
+    for (Lead lead : values()) {
+      if (lead == UNKNOWN) {
+        continue;
+      }
+      if (lead.label.equalsIgnoreCase(t)
+          || lead.label.equalsIgnoreCase(compact)
+          || lead.name().equalsIgnoreCase(compact)
+          || lead.name().equalsIgnoreCase(t)) {
+        return lead;
+      }
+    }
+    return UNKNOWN;
+  }
+}

@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.wave;
 
-public class WaveShortData {}
+import org.dcm4che3.data.Attributes;
+
+/** 16-bit signed little-endian (SS) multiplexed waveform samples. */
+public class WaveShortData extends AbstractWaveData {
+
+  public WaveShortData(Attributes multiplex) {
+    super(multiplex);
+  }
+
+  @Override
+  public int rawSample(int channel, int sample) {
+    if (channel < 0 || sample < 0 || channel >= channelCount() || sample >= sampleCount()) {
+      return 0;
+    }
+    int index = interleavedIndex(channel, sample) * 2;
+    byte[] data = waveformData();
+    if (index + 1 >= data.length) {
+      return 0;
+    }
+    return (short) ((data[index] & 0xff) | (data[index + 1] << 8));
+  }
+}

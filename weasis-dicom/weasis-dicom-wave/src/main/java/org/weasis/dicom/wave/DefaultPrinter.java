@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.wave;
 
-public class DefaultPrinter {}
+/** Headless millivolt dump used by File &gt; Print ECG Have. */
+public class DefaultPrinter {
+
+  public String print(WaveDataReadable data) {
+    if (data == null || data.channelCount() == 0) {
+      return "";
+    }
+    StringBuilder builder = new StringBuilder();
+    for (ChannelDefinition def : data.channelDefinitions()) {
+      builder.append(def.label()).append(':');
+      for (int i = 0; i < data.sampleCount(); i++) {
+        if (i > 0) {
+          builder.append(',');
+        }
+        builder.append(data.millivolt(def.index(), i));
+      }
+      builder.append('\n');
+    }
+    return builder.toString();
+  }
+}

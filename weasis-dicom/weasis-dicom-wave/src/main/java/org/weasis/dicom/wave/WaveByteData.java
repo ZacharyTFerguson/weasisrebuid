@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.wave;
 
-public class WaveByteData {}
+import org.dcm4che3.data.Attributes;
+
+/** 8-bit unsigned (UB) multiplexed waveform samples. */
+public class WaveByteData extends AbstractWaveData {
+
+  public WaveByteData(Attributes multiplex) {
+    super(multiplex);
+  }
+
+  @Override
+  public int rawSample(int channel, int sample) {
+    if (channel < 0 || sample < 0 || channel >= channelCount() || sample >= sampleCount()) {
+      return 0;
+    }
+    int index = interleavedIndex(channel, sample);
+    byte[] data = waveformData();
+    if (index >= data.length) {
+      return 0;
+    }
+    return data[index] & 0xff;
+  }
+}

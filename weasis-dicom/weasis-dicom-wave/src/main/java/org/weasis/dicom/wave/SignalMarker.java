@@ -9,4 +9,22 @@
  */
 package org.weasis.dicom.wave;
 
-public class SignalMarker {}
+/** Sample index and millivolt for a caliper on one lead. */
+public class SignalMarker {
+
+  private final int sampleIndex;
+  private final double millivolt;
+
+  public SignalMarker(int sampleIndex, double millivolt) {
+    this.sampleIndex = sampleIndex;
+    this.millivolt = millivolt;
+  }
+
+  public int sampleIndex() {
+    return sampleIndex;
+  }
+
+  public double millivolt() {
+    return millivolt;
+  }
+}

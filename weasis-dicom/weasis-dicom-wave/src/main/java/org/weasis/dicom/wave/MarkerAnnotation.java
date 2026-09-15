@@ -9,4 +9,22 @@
  */
 package org.weasis.dicom.wave;
 
-public class MarkerAnnotation {}
+/** Annotated caliper on a lead. */
+public class MarkerAnnotation {
+
+  private final Lead lead;
+  private final SignalMarker marker;
+
+  public MarkerAnnotation(Lead lead, SignalMarker marker) {
+    this.lead = lead == null ? Lead.UNKNOWN : lead;
+    this.marker = marker;
+  }
+
+  public Lead lead() {
+    return lead;
+  }
+
+  public SignalMarker marker() {
+    return marker;
+  }
+}

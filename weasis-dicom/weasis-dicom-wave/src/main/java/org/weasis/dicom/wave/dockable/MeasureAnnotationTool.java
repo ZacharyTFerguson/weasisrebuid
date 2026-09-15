@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.wave.dockable;
 
-public class MeasureAnnotationTool {}
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.swing.JPanel;
+import org.weasis.dicom.wave.MarkerAnnotation;
+
+/** Dockable list of ECG caliper annotations. */
+public class MeasureAnnotationTool extends JPanel {
+
+  private final List<MarkerAnnotation> annotations = new ArrayList<>();
+
+  public void addAnnotation(MarkerAnnotation annotation) {
+    if (annotation != null) {
+      annotations.add(annotation);
+    }
+  }
+
+  public List<MarkerAnnotation> annotations() {
+    return Collections.unmodifiableList(annotations);
+  }
+}

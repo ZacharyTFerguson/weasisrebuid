@@ -9,4 +9,20 @@
  */
 package org.weasis.dicom.wave;
 
-public class WaveLayoutManager {}
+import java.util.List;
+
+/** Chooses a {@link StandardWaveLayout} for the current format and channels. */
+public class WaveLayoutManager {
+
+  public WaveLayout layout(Format format, List<ChannelDefinition> channels) {
+    return StandardWaveLayout.of(format, channels);
+  }
+
+  public WaveLayout layout(WaveDataReadable data) {
+    if (data == null) {
+      return StandardWaveLayout.of(Format.TWO, List.of());
+    }
+    Format format = Format.forChannelCount(data.channelCount());
+    return StandardWaveLayout.of(format, data.channelDefinitions());
+  }
+}

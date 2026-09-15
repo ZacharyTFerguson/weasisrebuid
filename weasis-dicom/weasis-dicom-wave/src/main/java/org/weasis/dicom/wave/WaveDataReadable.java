@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.wave;
 
-public class WaveDataReadable {}
+import java.util.List;
+
+/** Decoded multiplexed waveform samples (DICOM Waveform Module). */
+public interface WaveDataReadable {
+
+  int channelCount();
+
+  int sampleCount();
+
+  double samplingFrequency();
+
+  int rawSample(int channel, int sample);
+
+  double millivolt(int channel, int sample);
+
+  List<ChannelDefinition> channelDefinitions();
+
+  default double durationSeconds() {
+    double freq = samplingFrequency();
+    return freq <= 0 ? 0 : sampleCount() / freq;
+  }
+}

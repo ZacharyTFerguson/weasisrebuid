@@ -9,4 +9,32 @@
  */
 package org.weasis.dicom.wave;
 
-public class ToolPanel {}
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+/** Format selector for the ECG page. */
+public class ToolPanel extends JPanel {
+
+  private final JComboBox<Format> formatBox = new JComboBox<>(Format.values());
+
+  public ToolPanel(WaveView view) {
+    add(new JLabel("Format"));
+    add(formatBox);
+    formatBox.addActionListener(
+        e -> {
+          if (view != null) {
+            view.setFormat((Format) formatBox.getSelectedItem());
+          }
+        });
+  }
+
+  public void setFormat(Format format) {
+    formatBox.setSelectedItem(format == null ? Format.DEFAULT : format);
+  }
+
+  public Format format() {
+    Format selected = (Format) formatBox.getSelectedItem();
+    return selected == null ? Format.DEFAULT : selected;
+  }
+}

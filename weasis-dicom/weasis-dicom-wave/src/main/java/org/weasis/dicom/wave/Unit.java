@@ -9,4 +9,28 @@
  */
 package org.weasis.dicom.wave;
 
-public class Unit {}
+/** Channel sensitivity unit; ECG samples convert to millivolts. */
+public class Unit {
+
+  public static final String MILLIVOLT = "mV";
+  public static final String MICROVOLT = "uV";
+
+  private final String code;
+
+  public Unit(String code) {
+    this.code = code == null || code.isBlank() ? MILLIVOLT : code;
+  }
+
+  public String code() {
+    return code;
+  }
+
+  public boolean isMicrovolt() {
+    String c = code.toLowerCase();
+    return "uv".equals(c) || "µv".equals(c) || "microvolt".equals(c) || "microvolts".equals(c);
+  }
+
+  public double toMillivolt(double value) {
+    return isMicrovolt() ? value / 1000.0 : value;
+  }
+}
