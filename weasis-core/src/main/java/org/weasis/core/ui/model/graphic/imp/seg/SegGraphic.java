@@ -10,11 +10,17 @@
 package org.weasis.core.ui.model.graphic.imp.seg;
 
 import org.weasis.core.ui.model.graphic.imp.NonEditableGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Segmentation overlay graphic wrapping a {@link SegContour}. */
+@XmlRootElement(name = "SegGraphic")
 public class SegGraphic extends NonEditableGraphic {
 
   private final SegContour contour;
+
+  public SegGraphic() {
+    this(new SegContour());
+  }
 
   public SegGraphic(SegContour contour) {
     super(contour == null ? null : contour.getPath());

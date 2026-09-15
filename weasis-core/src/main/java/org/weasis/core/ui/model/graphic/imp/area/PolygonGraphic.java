@@ -13,7 +13,9 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "PolygonGraphic")
 public class PolygonGraphic extends AbstractDragGraphicArea {
 
   public PolygonGraphic() {

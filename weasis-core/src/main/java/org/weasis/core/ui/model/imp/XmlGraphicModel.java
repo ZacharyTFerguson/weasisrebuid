@@ -16,24 +16,73 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlElements;
+import jakarta.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.weasis.core.ui.model.AbstractGraphicModel;
 import org.weasis.core.ui.model.graphic.Graphic;
+import org.weasis.core.ui.model.graphic.imp.AnnotationGraphic;
+import org.weasis.core.ui.model.graphic.imp.NonEditableGraphic;
+import org.weasis.core.ui.model.graphic.imp.PixelInfoGraphic;
+import org.weasis.core.ui.model.graphic.imp.PointGraphic;
+import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.angle.CobbAngleToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.angle.FourPointsAngleToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.angle.OpenAngleToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.EllipseGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.ObliqueRectangleGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.SelectGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.ThreePointsCircleGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.LineWithGapGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.ParallelLineGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.PerpendicularLineGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
+import org.weasis.core.ui.model.graphic.imp.seg.SegGraphic;
 import org.xml.sax.InputSource;
 
 /**
- * XML persistence for a {@link AbstractGraphicModel}. Runtime JAXB-OSGi is on start level 7; this
- * writer uses JDK XML so Have tests do not depend on OSGi service-loader wiring.
+ * JAXB persistence for a {@link AbstractGraphicModel}. Runtime JAXB-OSGi is start level 7. Legacy
+ * {@code <graphic type=…>} DOM documents still unmarshal.
  */
+@XmlRootElement(name = "graphicModel")
+@XmlAccessorType(XmlAccessType.NONE)
+@XmlSeeAlso({
+  LineGraphic.class,
+  LineWithGapGraphic.class,
+  ParallelLineGraphic.class,
+  PerpendicularLineGraphic.class,
+  PolylineGraphic.class,
+  EllipseGraphic.class,
+  ObliqueRectangleGraphic.class,
+  PolygonGraphic.class,
+  RectangleGraphic.class,
+  SelectGraphic.class,
+  ThreePointsCircleGraphic.class,
+  AngleToolGraphic.class,
+  CobbAngleToolGraphic.class,
+  FourPointsAngleToolGraphic.class,
+  OpenAngleToolGraphic.class,
+  AnnotationGraphic.class,
+  PointGraphic.class,
+  PixelInfoGraphic.class,
+  NonEditableGraphic.class,
+  SegGraphic.class
+})
 public class XmlGraphicModel extends AbstractGraphicModel {
 
   private static final String[] PACKAGES = {
@@ -44,40 +93,91 @@ public class XmlGraphicModel extends AbstractGraphicModel {
     "org.weasis.core.ui.model.graphic.imp.seg"
   };
 
+  private static JAXBContext jaxbContext;
+
+  @XmlElements({
+    @XmlElement(name = "LineGraphic", type = LineGraphic.class),
+    @XmlElement(name = "LineWithGapGraphic", type = LineWithGapGraphic.class),
+    @XmlElement(name = "ParallelLineGraphic", type = ParallelLineGraphic.class),
+    @XmlElement(name = "PerpendicularLineGraphic", type = PerpendicularLineGraphic.class),
+    @XmlElement(name = "PolylineGraphic", type = PolylineGraphic.class),
+    @XmlElement(name = "EllipseGraphic", type = EllipseGraphic.class),
+    @XmlElement(name = "ObliqueRectangleGraphic", type = ObliqueRectangleGraphic.class),
+    @XmlElement(name = "PolygonGraphic", type = PolygonGraphic.class),
+    @XmlElement(name = "RectangleGraphic", type = RectangleGraphic.class),
+    @XmlElement(name = "SelectGraphic", type = SelectGraphic.class),
+    @XmlElement(name = "ThreePointsCircleGraphic", type = ThreePointsCircleGraphic.class),
+    @XmlElement(name = "AngleToolGraphic", type = AngleToolGraphic.class),
+    @XmlElement(name = "CobbAngleToolGraphic", type = CobbAngleToolGraphic.class),
+    @XmlElement(name = "FourPointsAngleToolGraphic", type = FourPointsAngleToolGraphic.class),
+    @XmlElement(name = "OpenAngleToolGraphic", type = OpenAngleToolGraphic.class),
+    @XmlElement(name = "AnnotationGraphic", type = AnnotationGraphic.class),
+    @XmlElement(name = "PointGraphic", type = PointGraphic.class),
+    @XmlElement(name = "PixelInfoGraphic", type = PixelInfoGraphic.class),
+    @XmlElement(name = "NonEditableGraphic", type = NonEditableGraphic.class),
+    @XmlElement(name = "SegGraphic", type = SegGraphic.class)
+  })
+  public List<Graphic> getGraphics() {
+    return new ArrayList<>(getModels());
+  }
+
+  public void setGraphics(List<Graphic> graphics) {
+    clear();
+    if (graphics == null) {
+      return;
+    }
+    for (Graphic graphic : graphics) {
+      graphic.buildShape();
+      addGraphic(graphic);
+    }
+  }
+
   public String toXml() {
     try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-      Document doc = factory.newDocumentBuilder().newDocument();
-      Element root = doc.createElement("graphicModel");
-      doc.appendChild(root);
-      for (Graphic graphic : getModels()) {
-        Element el = doc.createElement("graphic");
-        el.setAttribute("type", graphic.getClass().getSimpleName());
-        el.setAttribute("uuid", graphic.getUuid() == null ? "" : graphic.getUuid());
-        for (Point2D.Double pt : graphic.getPts()) {
-          Element p = doc.createElement("pt");
-          p.setAttribute("x", Double.toString(pt.getX()));
-          p.setAttribute("y", Double.toString(pt.getY()));
-          el.appendChild(p);
-        }
-        root.appendChild(el);
-      }
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
-      transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
+      Marshaller marshaller = context().createMarshaller();
+      marshaller.setProperty(Marshaller.JAXB_FRAGMENT, Boolean.TRUE);
       StringWriter writer = new StringWriter();
-      transformer.transform(new DOMSource(doc), new StreamResult(writer));
+      marshaller.marshal(this, writer);
       return writer.toString();
-    } catch (Exception e) {
+    } catch (JAXBException e) {
       throw new IllegalStateException("graphic xml", e);
     }
   }
 
   public static XmlGraphicModel fromXml(String xml) {
-    XmlGraphicModel model = new XmlGraphicModel();
+    XmlGraphicModel empty = new XmlGraphicModel();
     if (xml == null || xml.isBlank()) {
-      return model;
+      return empty;
     }
+    String trimmed = xml.trim();
+    if (trimmed.contains("<graphic") && trimmed.contains("type=")) {
+      return fromDom(trimmed);
+    }
+    try {
+      Unmarshaller unmarshaller = context().createUnmarshaller();
+      Object value = unmarshaller.unmarshal(new StringReader(trimmed));
+      if (value instanceof XmlGraphicModel model) {
+        for (Graphic graphic : model.getModels()) {
+          graphic.buildShape();
+        }
+        return model;
+      }
+      throw new IllegalArgumentException("graphic xml");
+    } catch (JAXBException e) {
+      throw new IllegalArgumentException("graphic xml", e);
+    }
+  }
+
+  public void write(Path file) throws java.io.IOException {
+    Files.writeString(file, toXml());
+  }
+
+  public static XmlGraphicModel read(Path file) throws java.io.IOException {
+    return fromXml(Files.readString(file));
+  }
+
+  static XmlGraphicModel fromDom(String xml) {
+    XmlGraphicModel model = new XmlGraphicModel();
     try {
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
@@ -111,14 +211,6 @@ public class XmlGraphicModel extends AbstractGraphicModel {
     }
   }
 
-  public void write(Path file) throws java.io.IOException {
-    Files.writeString(file, toXml());
-  }
-
-  public static XmlGraphicModel read(Path file) throws java.io.IOException {
-    return fromXml(Files.readString(file));
-  }
-
   static Graphic newGraphic(String type) {
     if (type == null || type.isBlank()) {
       throw new IllegalArgumentException("graphic type");
@@ -135,5 +227,16 @@ public class XmlGraphicModel extends AbstractGraphicModel {
       }
     }
     throw new IllegalArgumentException("graphic " + type);
+  }
+
+  static synchronized JAXBContext context() {
+    if (jaxbContext == null) {
+      try {
+        jaxbContext = JAXBContext.newInstance(XmlGraphicModel.class);
+      } catch (JAXBException e) {
+        throw new IllegalStateException("graphic jaxb", e);
+      }
+    }
+    return jaxbContext;
   }
 }

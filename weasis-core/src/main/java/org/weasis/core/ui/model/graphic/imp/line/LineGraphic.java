@@ -13,7 +13,9 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "LineGraphic")
 public class LineGraphic extends AbstractDragGraphic {
 
   public LineGraphic() {

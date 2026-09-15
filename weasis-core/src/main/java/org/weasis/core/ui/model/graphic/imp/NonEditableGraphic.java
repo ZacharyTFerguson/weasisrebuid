@@ -11,8 +11,14 @@ package org.weasis.core.ui.model.graphic.imp;
 
 import java.awt.Shape;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "NonEditableGraphic")
 public class NonEditableGraphic extends AbstractGraphic {
+
+  public NonEditableGraphic() {
+    this(null);
+  }
 
   public NonEditableGraphic(Shape shape) {
     super(0);

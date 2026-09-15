@@ -10,8 +10,10 @@
 package org.weasis.core.ui.model.graphic.imp.area;
 
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Rubber-band selection rectangle (not a measurement). */
+@XmlRootElement(name = "SelectGraphic")
 public class SelectGraphic extends RectangleGraphic {
 
   @Override

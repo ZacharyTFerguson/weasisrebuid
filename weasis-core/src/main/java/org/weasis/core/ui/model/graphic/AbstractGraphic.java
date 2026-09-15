@@ -17,7 +17,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 
+@XmlAccessorType(XmlAccessType.NONE)
 public abstract class AbstractGraphic implements Graphic {
 
   private String uuid = UUID.randomUUID().toString();
@@ -36,6 +42,7 @@ public abstract class AbstractGraphic implements Graphic {
     }
   }
 
+  @XmlAttribute
   @Override
   public String getUuid() {
     return uuid;
@@ -51,6 +58,26 @@ public abstract class AbstractGraphic implements Graphic {
     return pts.size();
   }
 
+  @XmlElement(name = "pt")
+  public List<XmlPt> getXmlPts() {
+    List<XmlPt> out = new ArrayList<>();
+    for (Point2D.Double p : pts) {
+      out.add(new XmlPt(p.getX(), p.getY()));
+    }
+    return out;
+  }
+
+  public void setXmlPts(List<XmlPt> xmlPts) {
+    List<Point2D.Double> points = new ArrayList<>();
+    if (xmlPts != null) {
+      for (XmlPt pt : xmlPts) {
+        points.add(new Point2D.Double(pt.x, pt.y));
+      }
+    }
+    setPts(points);
+  }
+
+  @XmlTransient
   @Override
   public List<Point2D.Double> getPts() {
     return Collections.unmodifiableList(pts);
@@ -71,6 +98,7 @@ public abstract class AbstractGraphic implements Graphic {
     return pts;
   }
 
+  @XmlAttribute
   @Override
   public Boolean getFilled() {
     return filled;
@@ -91,6 +119,7 @@ public abstract class AbstractGraphic implements Graphic {
     this.colorPaint = paint == null ? Color.YELLOW : paint;
   }
 
+  @XmlAttribute
   @Override
   public Float getLineThickness() {
     return lineThickness;
@@ -111,6 +140,7 @@ public abstract class AbstractGraphic implements Graphic {
     this.selected = selected != null && selected;
   }
 
+  @XmlAttribute
   @Override
   public Boolean getLabelVisible() {
     return labelVisible;
@@ -157,4 +187,17 @@ public abstract class AbstractGraphic implements Graphic {
   }
 
   protected abstract AbstractGraphic newInstance();
+
+  @XmlAccessorType(XmlAccessType.FIELD)
+  public static final class XmlPt {
+    @XmlAttribute public double x;
+    @XmlAttribute public double y;
+
+    public XmlPt() {}
+
+    public XmlPt(double x, double y) {
+      this.x = x;
+      this.y = y;
+    }
+  }
 }

@@ -13,7 +13,9 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement(name = "RectangleGraphic")
 public class RectangleGraphic extends AbstractDragGraphicArea {
 
   public RectangleGraphic() {

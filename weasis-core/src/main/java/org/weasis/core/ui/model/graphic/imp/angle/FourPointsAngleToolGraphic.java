@@ -10,8 +10,10 @@
 package org.weasis.core.ui.model.graphic.imp.angle;
 
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Four-point angle: two segments. */
+@XmlRootElement(name = "FourPointsAngleToolGraphic")
 public class FourPointsAngleToolGraphic extends CobbAngleToolGraphic {
 
   @Override

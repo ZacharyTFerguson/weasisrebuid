@@ -13,8 +13,10 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Base segment 0-1; handle 2 is the free end of a perpendicular from the nearest point on 0-1. */
+@XmlRootElement(name = "PerpendicularLineGraphic")
 public class PerpendicularLineGraphic extends AbstractDragGraphic {
 
   public PerpendicularLineGraphic() {

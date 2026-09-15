@@ -13,8 +13,10 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 /** Four-point Cobb angle: two line segments, angle between their directions. */
+@XmlRootElement(name = "CobbAngleToolGraphic")
 public class CobbAngleToolGraphic extends AbstractDragGraphic {
 
   public CobbAngleToolGraphic() {
