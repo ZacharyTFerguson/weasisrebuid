@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.VR;
@@ -64,5 +65,20 @@ class DicomMediaUtilsTest {
     Attributes dcm = new Attributes();
     dcm.setDouble(Tag.ImageOrientationPatient, VR.DS, 1, 0, 0, 0, 1, 0);
     assertEquals("TRANSVERSE", DicomMediaUtils.planLabel(dcm));
+  }
+
+  @Test
+  void voiPresetsFromMultiValueWindowCenter() {
+    Attributes dcm = new Attributes();
+    dcm.setDouble(Tag.WindowWidth, VR.DS, 400, 1500, 80);
+    dcm.setDouble(Tag.WindowCenter, VR.DS, 40, 300, 40);
+    List<WindLevelParameters> presets = DicomMediaUtils.voiPresets(dcm);
+    assertEquals(3, presets.size());
+    assertEquals(400, presets.get(0).getWindow(), 1e-9);
+    assertEquals(1500, presets.get(1).getWindow(), 1e-9);
+    assertEquals(80, presets.get(2).getWindow(), 1e-9);
+    assertEquals(40, presets.get(0).getLevel(), 1e-9);
+    assertTrue(DicomMediaUtils.voiPresets(null).isEmpty());
+    assertTrue(DicomMediaUtils.voiPresets(new Attributes()).isEmpty());
   }
 }

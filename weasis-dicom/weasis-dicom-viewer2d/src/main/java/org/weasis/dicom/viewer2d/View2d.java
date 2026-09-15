@@ -66,14 +66,19 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public void load(Attributes dataset) {
     this.dataset = Objects.requireNonNull(dataset, "dataset");
-    fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
-    this.window = fileWl.getWindow();
-    this.level = fileWl.getLevel();
+    bindWindowLevel(dataset);
     setModalityLut(
         dataset.getDouble(Tag.RescaleSlope, 1.0), dataset.getDouble(Tag.RescaleIntercept, 0.0));
     setFrameOfReferenceUID(dataset.getString(Tag.FrameOfReferenceUID, ""));
     applyDatasetFlags();
     render();
+  }
+
+  void bindWindowLevel(Attributes dataset) {
+    fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
+    this.window = fileWl.getWindow();
+    this.level = fileWl.getLevel();
+    setPresets(DicomMediaUtils.voiPresets(dataset));
   }
 
   public Attributes getDataset() {
@@ -140,7 +145,12 @@ public class View2d extends DefaultView2d<MediaElement> {
       resetWinLevelDefaults();
       return;
     }
-    WindLevelParameters preset = presets.get(Math.min(presets.size(), index) - 1);
+    applyIndexedPreset(index);
+  }
+
+  void applyIndexedPreset(int index) {
+    int i = Math.min(presets.size(), index) - 1;
+    WindLevelParameters preset = presets.get(i);
     setWindowLevel(preset.getWindow(), preset.getLevel());
   }
 

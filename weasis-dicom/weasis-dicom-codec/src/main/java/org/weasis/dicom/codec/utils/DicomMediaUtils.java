@@ -9,6 +9,8 @@
  */
 package org.weasis.dicom.codec.utils;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.api.image.util.WindLevelParameters;
@@ -73,6 +75,39 @@ public final class DicomMediaUtils {
       return fromData;
     }
     return new WindLevelParameters(defaultWindow, defaultLevel);
+  }
+
+  /**
+   * Linear VOI presets from multi-value Window Center/Width (keys 1–9). Empty when the dataset
+   * has no VOI; callers then keep {@link #windowLevel} (data-range or first WindowCenter).
+   */
+  public static List<WindLevelParameters> voiPresets(Attributes dcm) {
+    if (dcm == null) {
+      return List.of();
+    }
+    return pairPresets(dcm.getDoubles(Tag.WindowWidth), dcm.getDoubles(Tag.WindowCenter));
+  }
+
+  static List<WindLevelParameters> pairPresets(double[] widths, double[] centers) {
+    if (widths == null || centers == null) {
+      return List.of();
+    }
+    return copyValidPairs(widths, centers);
+  }
+
+  static List<WindLevelParameters> copyValidPairs(double[] widths, double[] centers) {
+    int n = Math.min(widths.length, centers.length);
+    List<WindLevelParameters> out = new ArrayList<>();
+    for (int i = 0; i < n; i++) {
+      addIfValid(out, widths[i], centers[i]);
+    }
+    return List.copyOf(out);
+  }
+
+  static void addIfValid(List<WindLevelParameters> out, double window, double level) {
+    if (window > 0) {
+      out.add(new WindLevelParameters(window, level));
+    }
   }
 
   static WindLevelParameters dataRangeWindowLevel(Attributes dcm) {
