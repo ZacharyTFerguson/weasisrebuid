@@ -9,4 +9,45 @@
  */
 package org.weasis.acquire.explorer.gui.model.publish;
 
-public class PublishTree {}
+import java.nio.file.Path;
+import java.util.List;
+import org.weasis.acquire.explorer.gui.central.tumbnail.AcquireCentralThumbnailModel.Item;
+import org.weasis.acquire.explorer.gui.model.publish.PublishTreeModel.Node;
+
+/** Publish checkbox tree chrome over {@link PublishTreeModel}. */
+public class PublishTree {
+
+  private final PublishTreeModel model;
+
+  public PublishTree() {
+    this(new PublishTreeModel());
+  }
+
+  public PublishTree(PublishTreeModel model) {
+    this.model = model == null ? new PublishTreeModel() : model;
+  }
+
+  public PublishTreeModel model() {
+    return model;
+  }
+
+  public void load(List<Item> items) {
+    model.replace(items);
+  }
+
+  public void toggle(Node node) {
+    model.setChecked(node, !model.isChecked(node));
+  }
+
+  public void setSeriesChecked(String series, boolean value) {
+    model.setSeriesChecked(series, value);
+  }
+
+  public List<Node> checkedImages() {
+    return model.checkedImages();
+  }
+
+  public List<Path> checkedFiles() {
+    return model.checkedFiles();
+  }
+}

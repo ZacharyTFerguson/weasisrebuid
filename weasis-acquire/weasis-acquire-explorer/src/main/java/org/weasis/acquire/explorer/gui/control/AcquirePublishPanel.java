@@ -9,4 +9,53 @@
  */
 package org.weasis.acquire.explorer.gui.control;
 
-public class AcquirePublishPanel {}
+import java.awt.BorderLayout;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Properties;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import org.weasis.acquire.explorer.AcquireDest;
+import org.weasis.acquire.explorer.gui.central.tumbnail.AcquireCentralThumbnailModel.Item;
+import org.weasis.acquire.explorer.gui.dialog.AcquirePublishDialog;
+import org.weasis.acquire.explorer.gui.model.publish.PublishTree;
+
+/**
+ * Publish chrome: dialog scope/resolution plus checkbox tree of stills, then {@code
+ * PublishDicomTask} plan.
+ */
+public class AcquirePublishPanel extends JPanel {
+
+  private final AcquirePublishDialog dialog;
+  private final PublishTree tree;
+
+  public AcquirePublishPanel() {
+    this(new AcquirePublishDialog(), new PublishTree());
+  }
+
+  public AcquirePublishPanel(AcquirePublishDialog dialog, PublishTree tree) {
+    super(new BorderLayout());
+    this.dialog = dialog == null ? new AcquirePublishDialog() : dialog;
+    this.tree = tree == null ? new PublishTree() : tree;
+    add(new JLabel("Publish"), BorderLayout.NORTH);
+  }
+
+  public AcquirePublishDialog dialog() {
+    return dialog;
+  }
+
+  public PublishTree tree() {
+    return tree;
+  }
+
+  public AcquireDest.Publication prepare(
+      Properties prefs, List<Item> all, List<Item> selected, String callingAe) {
+    dialog.setPreferences(prefs);
+    tree.load(dialog.imagesForPublish(all, selected));
+    return dialog.plan(callingAe);
+  }
+
+  public List<Path> checkedFiles() {
+    return tree.checkedFiles();
+  }
+}

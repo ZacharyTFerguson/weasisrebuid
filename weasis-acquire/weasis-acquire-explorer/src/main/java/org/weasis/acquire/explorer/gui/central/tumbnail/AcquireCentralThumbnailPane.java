@@ -9,4 +9,48 @@
  */
 package org.weasis.acquire.explorer.gui.central.tumbnail;
 
-public class AcquireCentralThumbnailPane {}
+import java.awt.BorderLayout;
+import java.util.List;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import org.weasis.acquire.explorer.gui.central.tumbnail.AcquireCentralThumbnailModel.Item;
+
+/** Central album pane: series-filtered imported thumbnails. */
+public class AcquireCentralThumbnailPane extends JPanel {
+
+  private final AcquireCentralThumbnailList list;
+
+  public AcquireCentralThumbnailPane() {
+    this(new AcquireCentralThumbnailList());
+  }
+
+  public AcquireCentralThumbnailPane(AcquireCentralThumbnailList list) {
+    super(new BorderLayout());
+    this.list = list == null ? new AcquireCentralThumbnailList() : list;
+    add(new JLabel("Album"), BorderLayout.NORTH);
+  }
+
+  public AcquireCentralThumbnailList thumbnailList() {
+    return list;
+  }
+
+  public AcquireCentralThumbnailModel model() {
+    return list.model();
+  }
+
+  public void showSeries(String series) {
+    list.showSeries(series);
+  }
+
+  public void click(int index, boolean ctrl, boolean shift) {
+    list.click(index, ctrl, shift);
+  }
+
+  public List<Item> displayed() {
+    return list.displayed();
+  }
+
+  public List<Item> selected() {
+    return list.selectedItems();
+  }
+}
