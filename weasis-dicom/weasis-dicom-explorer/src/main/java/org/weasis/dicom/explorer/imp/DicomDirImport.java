@@ -13,11 +13,12 @@ import java.io.File;
 import java.io.IOException;
 import org.weasis.dicom.explorer.DicomModel;
 import org.weasis.dicom.explorer.ImportDicomPage;
+import org.weasis.dicom.explorer.LoadDicomDir;
 import org.weasis.dicom.explorer.LoadLocalDicom;
 import org.weasis.dicom.explorer.LocalImportFactory;
 import org.weasis.dicom.explorer.SkipUnsupportedSopNotifier;
 
-/** File &gt; Import DICOMDIR page. Load is {@link LoadLocalDicom#importDicomDir}. */
+/** File &gt; Import DICOMDIR page. Load is {@link LoadDicomDir}. */
 public class DicomDirImport extends ImportDicomPage {
 
   public DicomDirImport(DicomModel model, SkipUnsupportedSopNotifier skip) {
@@ -26,6 +27,6 @@ public class DicomDirImport extends ImportDicomPage {
 
   public static LoadLocalDicom.ImportResult read(
       File dicomdir, DicomModel model, SkipUnsupportedSopNotifier skip) throws IOException {
-    return LoadLocalDicom.importDicomDir(dicomdir, model, skip);
+    return new LoadDicomDir(model, dicomdir, skip).load();
   }
 }

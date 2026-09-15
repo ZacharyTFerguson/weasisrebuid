@@ -155,7 +155,7 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     for (File file : files) {
       try {
         File src = copyToTemp ? copyLocal(file) : file;
-        LoadLocalDicom.importPath(src, zipPassword, model, skip);
+        new LoadDicom(model, List.of(src), zipPassword, skip).load();
       } catch (Exception e) {
         status.setText("Error (corrupt) " + file.getName());
       }

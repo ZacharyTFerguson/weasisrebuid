@@ -11,6 +11,7 @@ package org.weasis.core.ui.editor.image;
 
 import java.awt.Frame;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,8 +23,11 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-/** Capture the focused 2D view (PNG/JPEG, optional overlays). */
-public class ScreenshotDialog extends JDialog {
+/**
+ * Capture the focused 2D view (PNG/JPEG, optional overlays). Capture state lives on fields so
+ * {@link #write} works without a display; the Swing dialog is created only when headed.
+ */
+public class ScreenshotDialog {
 
   public enum Format {
     PNG,
@@ -35,54 +39,75 @@ public class ScreenshotDialog extends JDialog {
     NATIVE_PIXELS
   }
 
-  private final JComboBox<Format> formatBox = new JComboBox<>(Format.values());
-  private final JComboBox<Scope> scopeBox = new JComboBox<>(Scope.values());
-  private final JCheckBox overlaysBox = new JCheckBox("Include overlays", true);
+  private Format format = Format.PNG;
+  private Scope scope = Scope.CURRENT_VIEW;
+  private boolean includeOverlays = true;
+  private final Frame owner;
+  private JDialog window;
+  private JComboBox<Format> formatBox;
+  private JComboBox<Scope> scopeBox;
+  private JCheckBox overlaysBox;
 
   public ScreenshotDialog() {
     this(null);
   }
 
   public ScreenshotDialog(Frame owner) {
-    super(owner, "Screenshot", true);
-    JPanel form = new JPanel();
-    form.add(new JLabel("Format"));
-    form.add(formatBox);
-    form.add(new JLabel("Scope"));
-    form.add(scopeBox);
-    form.add(overlaysBox);
-    getContentPane().add(form);
-    setSize(420, 120);
+    this.owner = owner;
   }
 
   public Format format() {
-    Format f = (Format) formatBox.getSelectedItem();
-    return f == null ? Format.PNG : f;
+    return format == null ? Format.PNG : format;
   }
 
   public void setFormat(Format format) {
-    formatBox.setSelectedItem(format == null ? Format.PNG : format);
+    this.format = format == null ? Format.PNG : format;
+    if (formatBox != null) {
+      formatBox.setSelectedItem(this.format);
+    }
   }
 
   public Scope scope() {
-    Scope s = (Scope) scopeBox.getSelectedItem();
-    return s == null ? Scope.CURRENT_VIEW : s;
+    return scope == null ? Scope.CURRENT_VIEW : scope;
   }
 
   public void setScope(Scope scope) {
-    scopeBox.setSelectedItem(scope == null ? Scope.CURRENT_VIEW : scope);
+    this.scope = scope == null ? Scope.CURRENT_VIEW : scope;
+    if (scopeBox != null) {
+      scopeBox.setSelectedItem(this.scope);
+    }
   }
 
   public boolean includeOverlays() {
-    return overlaysBox.isSelected();
+    return includeOverlays;
   }
 
   public void setIncludeOverlays(boolean includeOverlays) {
-    overlaysBox.setSelected(includeOverlays);
+    this.includeOverlays = includeOverlays;
+    if (overlaysBox != null) {
+      overlaysBox.setSelected(includeOverlays);
+    }
   }
 
   public String imageIoFormat() {
     return format() == Format.JPEG ? "jpeg" : "png";
+  }
+
+  public void setVisible(boolean visible) {
+    if (!visible) {
+      if (window != null) {
+        window.setVisible(false);
+      }
+      return;
+    }
+    if (GraphicsEnvironment.isHeadless()) {
+      return;
+    }
+    ensureWindow().setVisible(true);
+  }
+
+  public boolean isHeadless() {
+    return GraphicsEnvironment.isHeadless();
   }
 
   public BufferedImage render(DefaultView2d<?> view) {
@@ -127,5 +152,36 @@ public class ScreenshotDialog extends JDialog {
       throw new IOException("write " + format().name().toLowerCase(Locale.ROOT));
     }
     return file;
+  }
+
+  JDialog ensureWindow() {
+    if (window == null) {
+      window = new JDialog(owner, "Screenshot", false);
+      formatBox = new JComboBox<>(Format.values());
+      formatBox.setSelectedItem(format());
+      formatBox.addActionListener(
+          e -> {
+            Format selected = (Format) formatBox.getSelectedItem();
+            format = selected == null ? Format.PNG : selected;
+          });
+      scopeBox = new JComboBox<>(Scope.values());
+      scopeBox.setSelectedItem(scope());
+      scopeBox.addActionListener(
+          e -> {
+            Scope selected = (Scope) scopeBox.getSelectedItem();
+            scope = selected == null ? Scope.CURRENT_VIEW : selected;
+          });
+      overlaysBox = new JCheckBox("Include overlays", includeOverlays);
+      overlaysBox.addActionListener(e -> includeOverlays = overlaysBox.isSelected());
+      JPanel form = new JPanel();
+      form.add(new JLabel("Format"));
+      form.add(formatBox);
+      form.add(new JLabel("Scope"));
+      form.add(scopeBox);
+      form.add(overlaysBox);
+      window.getContentPane().add(form);
+      window.setSize(420, 120);
+    }
+    return window;
   }
 }

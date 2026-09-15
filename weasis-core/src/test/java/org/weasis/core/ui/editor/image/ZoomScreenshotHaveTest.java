@@ -67,6 +67,7 @@ class ZoomScreenshotHaveTest {
     assertEquals(16, read.getWidth());
     assertEquals(8, read.getHeight());
     assertEquals("png", dialog.imageIoFormat());
+    dialog.setVisible(true);
     ScreenshotToolBar bar = new ScreenshotToolBar();
     assertEquals("Screenshot", bar.getComponentName());
   }

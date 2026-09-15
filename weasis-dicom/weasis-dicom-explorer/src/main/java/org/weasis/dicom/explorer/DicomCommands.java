@@ -27,7 +27,7 @@ import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Manifest;
 
 /**
  * Gogo {@code dicom:get}, {@code dicom:rs}, {@code dicom:close}. Local {@code -l} uses {@link
- * LoadLocalDicom}; {@code -w}/{@code -i} parse XML/JSON manifests without a live PACS.
+ * LoadDicom}; {@code -w}/{@code -i} parse XML/JSON manifests without a live PACS.
  */
 @Component(
     immediate = true,
@@ -49,7 +49,7 @@ public class DicomCommands {
       }
       try {
         LoadLocalDicom.ImportResult result =
-            LoadLocalDicom.importPath(new File(local), null, null, null);
+            new LoadDicom(new DicomModel(), List.of(new File(local)), null, null).load();
         lines.add("local " + local + " imported=" + result.imported().size());
       } catch (IOException e) {
         lines.add("local " + local + " error=" + e.getMessage());
