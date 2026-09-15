@@ -64,22 +64,34 @@ public final class Utils {
       return List.of();
     }
     String s = decoded.trim();
-    if (!s.contains("$")) {
-      return List.of(s.startsWith("$") ? s : "$" + s);
-    }
-    String[] parts = s.split("(?=\\$)");
     List<String> cmds = new ArrayList<>();
-    for (String p : parts) {
-      String t = p.trim();
-      if (t.isEmpty()) {
+    StringBuilder cur = new StringBuilder();
+    boolean inQuote = false;
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (c == '"') {
+        inQuote = !inQuote;
+        cur.append(c);
         continue;
       }
-      if (!t.startsWith("$")) {
-        t = "$" + t;
+      if (!inQuote && c == '$' && !cur.isEmpty()) {
+        addCommand(cmds, cur.toString());
+        cur.setLength(0);
       }
-      cmds.add(t);
+      cur.append(c);
+    }
+    if (!cur.isEmpty()) {
+      addCommand(cmds, cur.toString());
     }
     return cmds;
+  }
+
+  private static void addCommand(List<String> cmds, String raw) {
+    String t = raw.trim();
+    if (t.isEmpty()) {
+      return;
+    }
+    cmds.add(t.startsWith("$") ? t : "$" + t);
   }
 
   public static boolean isConfigCommand(String command) {
