@@ -42,8 +42,7 @@ public class Basic3DToolBar extends WtoolBar {
   }
 
   public MprContainer openMpr(UICore core) {
-    MprContainer container =
-        (MprContainer) new MprFactory().createSeriesViewer(new Hashtable<>());
+    MprContainer container = (MprContainer) new MprFactory().createSeriesViewer(new Hashtable<>());
     if (core != null) {
       core.openViewerPlugin(container);
     }

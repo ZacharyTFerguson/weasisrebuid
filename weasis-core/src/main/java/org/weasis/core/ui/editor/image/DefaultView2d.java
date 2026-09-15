@@ -305,7 +305,9 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
 
   public void setLut(String lut) {
     displayOp.setParamValue(
-        "op.pseudocolor", PseudoColorOp.P_LUT, lut == null || lut.isBlank() ? PseudoColorOp.GRAY : lut);
+        "op.pseudocolor",
+        PseudoColorOp.P_LUT,
+        lut == null || lut.isBlank() ? PseudoColorOp.GRAY : lut);
   }
 
   public String getLut() {
