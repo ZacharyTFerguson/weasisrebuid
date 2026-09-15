@@ -46,13 +46,11 @@ public class LoggingPrefView extends ShellPrefPage {
     super(TITLE, 750);
     this.prefs = prefs == null ? new WProperties() : prefs;
     felixSpinner =
-        new JSpinner(
-            new SpinnerNumberModel(intPref(PREF_FELIX, DEFAULT_FELIX), 0, 4, 1));
+        new JSpinner(new SpinnerNumberModel(intPref(PREF_FELIX, DEFAULT_FELIX), 0, 4, 1));
     slingCombo = new JComboBox<>(LEVELS);
     slingCombo.setSelectedItem(slingPref());
     stackSpinner =
-        new JSpinner(
-            new SpinnerNumberModel(intPref(PREF_STACK, DEFAULT_STACK), -1, 99, 1));
+        new JSpinner(new SpinnerNumberModel(intPref(PREF_STACK, DEFAULT_STACK), -1, 99, 1));
     JPanel form = new JPanel();
     form.add(new JLabel("Felix log level"));
     form.add(felixSpinner);
@@ -109,7 +107,8 @@ public class LoggingPrefView extends ShellPrefPage {
   }
 
   String slingPref() {
-    return normalizeSling(prefs.getProperty(PREF_SLING, System.getProperty(PREF_SLING, DEFAULT_SLING)));
+    return normalizeSling(
+        prefs.getProperty(PREF_SLING, System.getProperty(PREF_SLING, DEFAULT_SLING)));
   }
 
   String selectedSling() {
