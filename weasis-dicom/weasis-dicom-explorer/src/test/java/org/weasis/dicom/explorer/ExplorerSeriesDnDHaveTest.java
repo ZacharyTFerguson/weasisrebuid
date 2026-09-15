@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DragSource;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -63,6 +64,7 @@ class ExplorerSeriesDnDHaveTest {
       assertEquals(TransferHandler.COPY, drag.getSourceActions(thumb));
       Transferable transferable = drag.seriesTransferable(thumb.getSeries());
       assertTrue(transferable.isDataFlavorSupported(ViewTransferHandler.SERIES_FLAVOR));
+      assertTrue(transferable.isDataFlavorSupported(DataFlavor.stringFlavor));
 
       View2d empty = container.getLayoutViews().get(1);
       ViewTransferHandler drop = (ViewTransferHandler) empty.getTransferHandler();
@@ -140,22 +142,89 @@ class ExplorerSeriesDnDHaveTest {
     return SwingUtilities.convertPoint(cell.getParent(), mid, container);
   }
 
+  @Test
+  void leftDragBelowThresholdDoesNotExport() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+    SeriesThumbnail thumb = pane.thumbnails().getFirst();
+    int shy = Math.max(0, DragSource.getDragThreshold() - 1);
+    if (DragSource.getDragThreshold() > 0) {
+      CountExport below =
+          dragAt(thumb, InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1, shy, 0, shy, 0);
+      assertEquals(0, below.exports);
+    }
+  }
+
+  @Test
+  void leftDragAboveThresholdExportsOnceWithButton1() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+    SeriesThumbnail thumb = pane.thumbnails().getFirst();
+    CountExport once =
+        dragAt(
+            thumb,
+            InputEvent.BUTTON1_DOWN_MASK,
+            MouseEvent.BUTTON1,
+            far(),
+            far(),
+            far() + 8,
+            far());
+    assertEquals(1, once.exports);
+    MouseEvent sent = (MouseEvent) once.last;
+    assertEquals(MouseEvent.MOUSE_PRESSED, sent.getID());
+    assertEquals(MouseEvent.BUTTON1, sent.getButton());
+    assertTrue(SwingUtilities.isLeftMouseButton(sent));
+  }
+
+  @Test
+  void nonLeftPressDoesNotExport() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+    SeriesThumbnail thumb = pane.thumbnails().getFirst();
+    CountExport right =
+        dragAt(
+            thumb,
+            InputEvent.BUTTON3_DOWN_MASK,
+            MouseEvent.BUTTON3,
+            far(),
+            far(),
+            far() + 8,
+            far());
+    assertEquals(0, right.exports);
+  }
+
   static int dragExports(SeriesThumbnail thumb) {
+    return dragAt(
+            thumb, InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1, far(), far(), far() + 8, far())
+        .exports;
+  }
+
+  static CountExport dragAt(
+      SeriesThumbnail thumb, int mods, int button, int x1, int y1, int x2, int y2) {
     CountExport handler = new CountExport();
     thumb.setTransferHandler(handler);
-    int mods = InputEvent.BUTTON1_DOWN_MASK;
-    thumb.dispatchEvent(new MouseEvent(thumb, MouseEvent.MOUSE_PRESSED, 0L, mods, 2, 2, 1, false));
-    thumb.dispatchEvent(new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, 8, 8, 1, false));
-    thumb.dispatchEvent(new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, 16, 8, 1, false));
-    return handler.exports;
+    thumb.dispatchEvent(
+        new MouseEvent(thumb, MouseEvent.MOUSE_PRESSED, 0L, mods, 0, 0, 1, false, button));
+    thumb.dispatchEvent(
+        new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, x1, y1, 1, false));
+    thumb.dispatchEvent(
+        new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, x2, y2, 1, false));
+    ViewTransferHandler.endDrag();
+    return handler;
+  }
+
+  static int far() {
+    return DragSource.getDragThreshold() + 4;
   }
 
   static final class CountExport extends ViewTransferHandler {
     int exports;
+    InputEvent last;
 
     @Override
     public void exportAsDrag(javax.swing.JComponent c, InputEvent e, int action) {
       exports++;
+      last = e;
     }
   }
 

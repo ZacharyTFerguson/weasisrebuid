@@ -11,15 +11,18 @@ package org.weasis.dicom.explorer.main;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.Point;
+import java.awt.dnd.DragSource;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.Series;
@@ -113,30 +116,9 @@ public class SeriesPane extends JPanel {
   }
 
   void bindThumb(SeriesThumbnail thumb, int idx) {
-    ThumbDrag drag = new ThumbDrag();
-    thumb.addMouseListener(
-        new MouseAdapter() {
-          @Override
-          public void mousePressed(MouseEvent e) {
-            drag.press();
-            adapter.pressed(idx, e);
-          }
-
-          @Override
-          public void mouseClicked(MouseEvent e) {
-            if (e.getClickCount() == 2) {
-              adapter.getModel().enter();
-              onOpen.run();
-            }
-          }
-        });
-    thumb.addMouseMotionListener(
-        new MouseMotionAdapter() {
-          @Override
-          public void mouseDragged(MouseEvent e) {
-            drag.drag(thumb, e);
-          }
-        });
+    ThumbDrag drag = new ThumbDrag(thumb, idx);
+    thumb.addMouseListener(drag);
+    thumb.addMouseMotionListener(drag);
   }
 
   static void exportThumb(SeriesThumbnail thumb, MouseEvent e) {
@@ -145,23 +127,74 @@ public class SeriesPane extends JPanel {
       return;
     }
     ViewTransferHandler.beginDrag(thumb.getSeries());
-    handler.exportAsDrag(thumb, e, TransferHandler.COPY);
+    try {
+      handler.exportAsDrag(thumb, withLeft(e), TransferHandler.COPY);
+    } catch (RuntimeException ex) {
+      ViewTransferHandler.endDrag();
+    }
   }
 
-  /** One {@link TransferHandler#exportAsDrag} per press; repeating drag events abort Swing DnD. */
-  static final class ThumbDrag {
+  /** X11 {@code startDrag} needs BUTTON1 down; {@code MOUSE_DRAGGED} often reports NOBUTTON. */
+  static MouseEvent withLeft(MouseEvent e) {
+    int mods = e.getModifiersEx() | InputEvent.BUTTON1_DOWN_MASK;
+    return new MouseEvent(
+        e.getComponent(),
+        MouseEvent.MOUSE_PRESSED,
+        e.getWhen(),
+        mods,
+        e.getX(),
+        e.getY(),
+        e.getXOnScreen(),
+        e.getYOnScreen(),
+        Math.max(1, e.getClickCount()),
+        false,
+        MouseEvent.BUTTON1);
+  }
+
+  /**
+   * Arm on left press, start after {@link DragSource#getDragThreshold()}, retry if {@code
+   * startDrag} failed ({@code dragging} cleared). Repeating a live {@code exportAsDrag} aborts
+   * Swing DnD.
+   */
+  final class ThumbDrag extends MouseAdapter {
+    private final SeriesThumbnail thumb;
+    private final int idx;
+    private Point origin;
     private boolean started;
 
-    void press() {
-      started = false;
+    ThumbDrag(SeriesThumbnail thumb, int idx) {
+      this.thumb = thumb;
+      this.idx = idx;
     }
 
-    void drag(SeriesThumbnail thumb, MouseEvent e) {
-      if (started) {
+    @Override
+    public void mousePressed(MouseEvent e) {
+      origin = SwingUtilities.isLeftMouseButton(e) ? e.getPoint() : null;
+      started = false;
+      adapter.pressed(idx, e);
+    }
+
+    @Override
+    public void mouseClicked(MouseEvent e) {
+      if (e.getClickCount() == 2) {
+        adapter.getModel().enter();
+        onOpen.run();
+      }
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+      if (!armed(e)) {
         return;
       }
-      started = true;
       exportThumb(thumb, e);
+      started = ViewTransferHandler.dragging() != null;
+    }
+
+    boolean armed(MouseEvent e) {
+      return !started
+          && origin != null
+          && origin.distance(e.getPoint()) >= DragSource.getDragThreshold();
     }
   }
 }

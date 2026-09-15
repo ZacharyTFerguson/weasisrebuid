@@ -262,20 +262,23 @@ public class ViewTransferHandler extends TransferHandler {
 
     @Override
     public DataFlavor[] getTransferDataFlavors() {
-      return new DataFlavor[] {SERIES_FLAVOR};
+      return new DataFlavor[] {SERIES_FLAVOR, DataFlavor.stringFlavor};
     }
 
     @Override
     public boolean isDataFlavorSupported(DataFlavor flavor) {
-      return SERIES_FLAVOR.equals(flavor);
+      return SERIES_FLAVOR.equals(flavor) || DataFlavor.stringFlavor.equals(flavor);
     }
 
     @Override
     public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
-      if (!isDataFlavorSupported(flavor)) {
-        throw new UnsupportedFlavorException(flavor);
+      if (SERIES_FLAVOR.equals(flavor)) {
+        return series;
       }
-      return series;
+      if (DataFlavor.stringFlavor.equals(flavor)) {
+        return String.valueOf(series);
+      }
+      throw new UnsupportedFlavorException(flavor);
     }
   }
 }
