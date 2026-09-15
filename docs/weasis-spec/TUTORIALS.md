@@ -2,7 +2,7 @@
 
 Source: weasis.org **Tutorials** index (4.7) and GUI overview.
 
-Default DICOM workspace: **Explorer left**, **viewers as tabs right**. Menus/toolbars follow the focused tab. One patient per multi-view tab; the same patient may occupy several tabs. Tabs dock/split (WP-6).
+Default DICOM workspace: **Explorer left**, **viewers as tabs right**. Menus/toolbars follow the focused tab. One patient per multi-view tab; the same patient may occupy several tabs. Tabs dock/split (WP-6): remaining viewer-tab drag onto a `viewer-work` edge is a Docking Frames `CLocation.working()` split; hang 1×2 stays on `viewer-tabs`.
 
 SOP routing (docs): MPR, MIP, 3D VR, ECG, SR, audio, PDF (system app), video (system player). Overlay: SEG, RT, PR/GSPS.
 
@@ -15,7 +15,7 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | DICOM 2D / LUT / Zoom | 4 | W/L paints; zoom −200/−100; screenshot PNG/JPEG (headless-safe `ScreenshotDialog`); T/W/S/Z/R/C/Q/P keys; series/image nav; Ctrl-drag accelerate; Alt+R/L/F; Ctrl+Space; Ctrl+/-; Tab layout; Lut/Reset chrome; `ViewCanvas`/`Canvas`; `ViewerPrefView` documented W/L + PR overlay tokens; `DcmHeaderToolBar` dataset tag dump; `DicomFieldsView` limited vs all + tag search table/document; `View2dContainer` Viewer/LUT/Zoom/Reset/Cine/header toolbars; `VOILUTSequence` table + SIGMOID VOI | tutorial |
 | Draw & Measure | 5 | graphic geometry + shortcuts D/A/Y; select/delete map; ROI stats | tutorial |
 | Build KO and PR | 5 | KO/PR objects with root UID 2.25; star/filter + K; `PrGraphicUtil` GSPS Graphic Object → Weasis Graphic; `InterpolatedPath2D` INTERPOLATED spline | tutorial |
-| Docking / sync / 3D cursor / histogram / lens | 6 | docking start + FoR vs manual; histogram bind/RGB/ROI; 3D cursor H/PixelInfo; Mini Tool + panner; central-panel docking keys | tutorial |
+| Docking / sync / 3D cursor / histogram / lens | 6 | docking start + FoR vs manual; histogram bind/RGB/ROI; 3D cursor H/PixelInfo; Mini Tool + panner; central-panel docking keys; remaining viewer-tab drag-split via `CLocation.working()` | tutorial |
 | MPR / CPR / MIP | 7 | isotropic axes, MIP types; MPR Alt+X/C/V and Ctrl+Alt+B / Alt+wheel; Basic3DToolBar opens MPR; CPR arc-length + straightened image; oblique plane; curve cross-section; ArcBall `u`/`v`; `VolImageIO`/`RawImageIO` derived slices; `BuildContext`/`SliceCanvas`; `SegVolumeBuilder`; `MprGeometryModule`; `SplatContext`; `CrossLineGraphic`; MIP `SeriesBuilder` frames | tutorial |
 | Fusion / SUV | 8 | FusionController + SUVbw; IPP-Z stack; nearest-Z PET→CT resample; Hot Iron/PET window LUT; `FusionMeasurableLayer` | tutorial |
 | 3D VR | 9 | GL 3.3; refuse llvmpipe | tutorial |

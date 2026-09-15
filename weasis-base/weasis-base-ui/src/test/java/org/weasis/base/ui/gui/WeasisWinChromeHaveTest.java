@@ -20,7 +20,11 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
 import java.awt.GraphicsEnvironment;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.util.Hashtable;
 import java.util.List;
@@ -40,6 +44,7 @@ import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.gui.util.AppProperties;
 import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.Series;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.TabPlacement;
@@ -292,6 +297,7 @@ class WeasisWinChromeHaveTest {
       assertSame(first, win.getViewerTabs().getComponentAt(0));
       assertTrue(win.seriesDockOf(second).isVisible());
       assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
+      assertEquals("east", WeasisWin.dockSide(win.seriesDockOf(second)));
       assertEquals(ViewerPlugin.DockingState.NORMAL, first.getDockingState());
       assertEquals(ViewerPlugin.DockingState.NORMAL, second.getDockingState());
       assertEquals(2, core.getOpenViewerPlugins().size());
@@ -300,6 +306,148 @@ class WeasisWinChromeHaveTest {
       core.setApplicationWindow(null);
       win.dispose();
     }
+  }
+
+  @Test
+  void splitSideMapsWorkAreaEdgesAndLeavesCenterUnsplit() {
+    Rectangle work = new Rectangle(10, 20, 400, 200);
+    assertEquals("east", WeasisWin.splitSide(work, new Point(390, 120)));
+    assertEquals("west", WeasisWin.splitSide(work, new Point(20, 120)));
+    assertEquals("south", WeasisWin.splitSide(work, new Point(210, 210)));
+    assertEquals("north", WeasisWin.splitSide(work, new Point(210, 30)));
+    assertEquals(null, WeasisWin.splitSide(work, new Point(210, 120)));
+    assertEquals(null, WeasisWin.splitSide(work, new Point(0, 0)));
+    assertTrue(WeasisWin.farEnough(new Point(0, 0), new Point(20, 0)));
+    assertFalse(WeasisWin.farEnough(new Point(0, 0), new Point(8, 0)));
+  }
+
+  @Test
+  void remainingSeriesTabSouthSplitUsesWorkingAreaCLocation() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    ViewerPlugin<?> second = plugin("B");
+    try {
+      core.openViewerPlugin(first);
+      core.openViewerPlugin(second);
+      win.splitAt(second, "south");
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertSame(first, win.getViewerTabs().getComponentAt(0));
+      assertTrue(win.seriesDockOf(second).isVisible());
+      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
+      assertEquals("south", WeasisWin.dockSide(win.seriesDockOf(second)));
+      assertEquals(ViewerPlugin.DockingState.NORMAL, first.getDockingState());
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void viewerTabDragToEastEdgeSplitsWorkingArea() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    ViewerPlugin<?> second = plugin("B");
+    try {
+      core.openViewerPlugin(first);
+      core.openViewerPlugin(second);
+      win.setSize(960, 640);
+      win.setVisible(true);
+      win.validate();
+      dragTabToWorkEdge(win, 1, "east");
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertSame(first, win.getViewerTabs().getComponentAt(0));
+      assertTrue(win.seriesDockOf(second).isVisible());
+      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
+      assertEquals("east", WeasisWin.dockSide(win.seriesDockOf(second)));
+    } finally {
+      win.setVisible(false);
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void tabClickStaysOnStripAndSeriesDragDoNotSplit() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    ViewerPlugin<?> second = plugin("B");
+    try {
+      core.openViewerPlugin(first);
+      core.openViewerPlugin(second);
+      win.setSize(960, 640);
+      win.setVisible(true);
+      win.validate();
+      clickTab(win, 1);
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertEquals(0, win.seriesDockCount());
+      ViewTransferHandler.beginDrag(new Series<>());
+      dragTabToWorkEdge(win, 1, "east");
+      assertEquals(2, win.getViewerTabs().getTabCount());
+      assertEquals(0, win.seriesDockCount());
+    } finally {
+      ViewTransferHandler.clearDragged();
+      win.setVisible(false);
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  static void dragTabToWorkEdge(WeasisWin win, int tab, String side) {
+    Point press = tabPoint(win, tab);
+    Point release = workEdge(win, side);
+    win.getViewerTabs().dispatchEvent(mouse(win.getViewerTabs(), MouseEvent.MOUSE_PRESSED, press));
+    win.getViewerTabs()
+        .dispatchEvent(mouse(win.getViewerTabs(), MouseEvent.MOUSE_RELEASED, release));
+  }
+
+  static void clickTab(WeasisWin win, int tab) {
+    Point p = tabPoint(win, tab);
+    win.getViewerTabs().dispatchEvent(mouse(win.getViewerTabs(), MouseEvent.MOUSE_PRESSED, p));
+    win.getViewerTabs().dispatchEvent(mouse(win.getViewerTabs(), MouseEvent.MOUSE_RELEASED, p));
+  }
+
+  static Point tabPoint(WeasisWin win, int tab) {
+    Rectangle r = win.getViewerTabs().getBoundsAt(tab);
+    if (r == null) {
+      return new Point(40 + tab * 80, 8);
+    }
+    return new Point(r.x + r.width / 2, r.y + r.height / 2);
+  }
+
+  static Point workEdge(WeasisWin win, String side) {
+    Component tabs = win.getViewerTabs();
+    int w = Math.max(2, tabs.getWidth());
+    int h = Math.max(2, tabs.getHeight());
+    if ("south".equals(side)) {
+      return new Point(w / 2, h - 2);
+    }
+    if ("west".equals(side)) {
+      return new Point(2, h / 2);
+    }
+    if ("north".equals(side)) {
+      return new Point(w / 2, Math.min(h - 2, 2));
+    }
+    return new Point(w - 2, h / 2);
+  }
+
+  static MouseEvent mouse(Component c, int id, Point p) {
+    return new MouseEvent(
+        c, id, 0L, InputEvent.BUTTON1_DOWN_MASK, p.x, p.y, 1, false, MouseEvent.BUTTON1);
   }
 
   @Test

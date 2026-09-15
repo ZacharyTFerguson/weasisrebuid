@@ -16,20 +16,27 @@ import bibliothek.gui.dock.common.CWorkingArea;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import bibliothek.gui.dock.common.event.CFocusListener;
 import bibliothek.gui.dock.common.intern.CDockable;
+import bibliothek.gui.dock.common.location.AbstractTreeLocation;
+import bibliothek.gui.dock.common.location.CWorkingAreaLocation;
 import bibliothek.gui.dock.security.GlassedPane;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ContainerAdapter;
 import java.awt.event.ContainerEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
@@ -44,6 +51,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import javax.swing.WindowConstants;
 import org.weasis.core.api.explorer.DataExplorerView;
@@ -117,6 +125,12 @@ public class WeasisWin extends JFrame {
     add(dockingControl.getContentArea(), BorderLayout.CENTER);
     bindSeriesDrop();
     bindWorkingFocus();
+    bindTabSplit();
+  }
+
+  void bindTabSplit() {
+    TabSplit split = new TabSplit();
+    viewerTabs.addMouseListener(split);
   }
 
   void bindSeriesDrop() {
@@ -330,14 +344,151 @@ public class WeasisWin extends JFrame {
   }
 
   void splitSeries(ViewerPlugin<?> plugin) {
-    if (plugin == null || viewerWork == null) {
+    splitAt(plugin, "east");
+  }
+
+  void splitAt(ViewerPlugin<?> plugin, String side) {
+    splitSeries(plugin, workingLocation(side));
+  }
+
+  void splitAtScreen(ViewerPlugin<?> plugin, Point screen) {
+    splitSeries(plugin, locationAtScreen(screen));
+  }
+
+  void splitSeries(ViewerPlugin<?> plugin, CLocation loc) {
+    if (!canSplit(plugin, loc)) {
       return;
     }
     viewerTabs.remove(plugin);
     DefaultSingleCDockable dock = ensureSeriesDock(plugin);
     dock.setWorkingArea(viewerWork);
-    dock.setLocation(CLocation.working(viewerWork).east(0.5));
+    dock.setLocation(loc);
     dock.setVisible(true);
+  }
+
+  boolean canSplit(ViewerPlugin<?> plugin, CLocation loc) {
+    return plugin != null && loc != null && viewerWork != null && otherTabsRemain(plugin);
+  }
+
+  boolean otherTabsRemain(ViewerPlugin<?> plugin) {
+    int n = viewerTabs.getTabCount();
+    return viewerTabs.indexOfComponent(plugin) >= 0 ? n > 1 : n >= 1;
+  }
+
+  CLocation workingLocation(String side) {
+    if (side == null || viewerWork == null) {
+      return null;
+    }
+    return sideLocation(CLocation.working(viewerWork), side);
+  }
+
+  static CLocation sideLocation(CWorkingAreaLocation base, String side) {
+    if (base == null || side == null) {
+      return null;
+    }
+    return namedSide(base, side);
+  }
+
+  static CLocation namedSide(CWorkingAreaLocation base, String side) {
+    return switch (side) {
+      case "east" -> base.east(0.5);
+      case "west" -> base.west(0.5);
+      case "south" -> base.south(0.5);
+      case "north" -> base.north(0.5);
+      default -> null;
+    };
+  }
+
+  CLocation locationAtScreen(Point screen) {
+    Component work = workComponent();
+    if (work == null || screen == null || !work.isShowing()) {
+      return null;
+    }
+    return locationAt(screenBox(work), screen);
+  }
+
+  Component workComponent() {
+    return viewerWork == null ? null : viewerWork.getComponent();
+  }
+
+  static Rectangle screenBox(Component work) {
+    Point origin = work.getLocationOnScreen();
+    return new Rectangle(origin.x, origin.y, work.getWidth(), work.getHeight());
+  }
+
+  CLocation locationAt(Rectangle work, Point local) {
+    return workingLocation(splitSide(work, local));
+  }
+
+  static String splitSide(Rectangle work, Point local) {
+    if (work == null || local == null || !work.contains(local)) {
+      return null;
+    }
+    return nearestEdge(work.width, work.height, local.x - work.x, local.y - work.y);
+  }
+
+  static String nearestEdge(int width, int height, int x, int y) {
+    if (width <= 0 || height <= 0) {
+      return null;
+    }
+    return edgeName(x / (double) width, y / (double) height);
+  }
+
+  static String edgeName(double fx, double fy) {
+    double west = fx;
+    double east = 1.0 - fx;
+    double north = fy;
+    double south = 1.0 - fy;
+    double min = Math.min(Math.min(west, east), Math.min(north, south));
+    if (min > 0.25) {
+      return null;
+    }
+    return namedEdge(west, east, north, south, min);
+  }
+
+  static String namedEdge(double west, double east, double north, double south, double min) {
+    if (min == west) {
+      return "west";
+    }
+    if (min == east) {
+      return "east";
+    }
+    if (min == north) {
+      return "north";
+    }
+    return "south";
+  }
+
+  static String dockSide(DefaultSingleCDockable dock) {
+    CLocation loc = dock == null ? null : dock.getBaseLocation();
+    if (loc instanceof AbstractTreeLocation tree) {
+      return tree.getSide().name().toLowerCase(Locale.ROOT);
+    }
+    return sideToken(loc == null ? null : loc.toString());
+  }
+
+  static String sideToken(String text) {
+    if (text == null) {
+      return null;
+    }
+    String u = text.toUpperCase(Locale.ROOT);
+    return namedToken(u);
+  }
+
+  static String namedToken(String u) {
+    if (u.contains(" EAST ")) {
+      return "east";
+    }
+    if (u.contains(" WEST ")) {
+      return "west";
+    }
+    if (u.contains(" SOUTH ")) {
+      return "south";
+    }
+    if (u.contains(" NORTH ")) {
+      return "north";
+    }
+    return u;
   }
 
   void reinsertTab(ViewerPlugin<?> plugin) {
@@ -814,5 +965,90 @@ public class WeasisWin extends JFrame {
     } catch (RuntimeException ignored) {
       // already destroyed in tests
     }
+  }
+
+  /**
+   * Viewer-tab press/release maps onto {@link CLocation} working-area edges. Series hang-fill
+   * ({@code dragging()!=null}) is skipped. A click that stays on the tab strip does not split.
+   */
+  final class TabSplit extends MouseAdapter {
+    ViewerPlugin<?> plugin;
+    Point press;
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      armTab(e);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+      dropTab(e);
+    }
+
+    void armTab(MouseEvent e) {
+      plugin = null;
+      press = null;
+      if (!canArmTab(e)) {
+        return;
+      }
+      plugin = pluginAtTab(e);
+      press = e.getPoint();
+    }
+
+    void dropTab(MouseEvent e) {
+      ViewerPlugin<?> tab = plugin;
+      Point start = press;
+      plugin = null;
+      press = null;
+      if (tab == null || !canDropTab(e, start)) {
+        return;
+      }
+      splitAtScreen(tab, screenOf(e));
+    }
+  }
+
+  boolean canArmTab(MouseEvent e) {
+    return e != null
+        && SwingUtilities.isLeftMouseButton(e)
+        && ViewTransferHandler.dragging() == null;
+  }
+
+  boolean canDropTab(MouseEvent e, Point start) {
+    return e != null
+        && ViewTransferHandler.dragging() == null
+        && farEnough(start, e.getPoint())
+        && viewerTabs.indexAtLocation(e.getX(), e.getY()) < 0;
+  }
+
+  ViewerPlugin<?> pluginAtTab(MouseEvent e) {
+    return e == null ? null : pluginAt(viewerTabs.indexAtLocation(e.getX(), e.getY()));
+  }
+
+  ViewerPlugin<?> pluginAt(int index) {
+    if (index < 0) {
+      return null;
+    }
+    Component c = viewerTabs.getComponentAt(index);
+    return c instanceof ViewerPlugin<?> p ? p : null;
+  }
+
+  static boolean farEnough(Point a, Point b) {
+    if (a == null || b == null) {
+      return false;
+    }
+    int dx = a.x - b.x;
+    int dy = a.y - b.y;
+    return dx * dx + dy * dy >= 256;
+  }
+
+  static Point screenOf(MouseEvent e) {
+    if (e == null) {
+      return null;
+    }
+    Component c = e.getComponent();
+    if (c == null || !c.isShowing()) {
+      return e.getPoint();
+    }
+    return e.getLocationOnScreen();
   }
 }
