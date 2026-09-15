@@ -536,6 +536,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   public void setDrawing(Graphic drawing) {
     this.drawing = drawing;
+    repaint();
   }
 
   public AbstractInfoLayer getInfoLayer() {
@@ -882,7 +883,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   public Graphic graphicAt(double x, double y) {
     for (int i = graphics.size() - 1; i >= 0; i--) {
       Graphic graphic = graphics.get(i);
-      Shape shape = graphic.getShape();
+      Shape shape = viewShape(graphic);
       if (shape == null) {
         continue;
       }
@@ -891,6 +892,25 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
       }
     }
     return null;
+  }
+
+  /** Graphics live in image space; paint/hit-test use the same affine as the pixels. */
+  public Shape viewShape(Graphic graphic) {
+    if (graphic == null || graphic.getShape() == null) {
+      return null;
+    }
+    AffineTransform tx = graphicTransform();
+    if (tx.isIdentity()) {
+      return graphic.getShape();
+    }
+    return tx.createTransformedShape(graphic.getShape());
+  }
+
+  AffineTransform graphicTransform() {
+    if (source == null || getWidth() <= 0 || getHeight() <= 0) {
+      return new AffineTransform();
+    }
+    return imageTransform(getWidth(), getHeight());
   }
 
   public List<Graphic> getSelectedGraphics() {
@@ -1088,20 +1108,35 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
       g.drawLine(0, py, w, py);
       g.drawLine(px, 0, px, h);
     }
+    paintMeasureGraphics(g);
+  }
+
+  void paintMeasureGraphics(Graphics2D g) {
     if (!isLayerVisible(LayerType.MEASURE) && !isLayerVisible(LayerType.DRAW)) {
       return;
     }
     for (Graphic graphic : graphics) {
-      if (graphic.getShape() == null) {
-        continue;
-      }
-      g.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
-      Stroke previous = g.getStroke();
-      if (Boolean.TRUE.equals(graphic.getSelected())) {
-        g.setStroke(new BasicStroke(2.5f));
-      }
-      g.draw(graphic.getShape());
-      g.setStroke(previous);
+      paintOneGraphic(g, graphic);
     }
+  }
+
+  void paintOneGraphic(Graphics2D g, Graphic graphic) {
+    Shape shape = viewShape(graphic);
+    if (shape == null) {
+      return;
+    }
+    g.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
+    Stroke previous = g.getStroke();
+    g.setStroke(strokeFor(graphic));
+    g.draw(shape);
+    g.setStroke(previous);
+  }
+
+  static Stroke strokeFor(Graphic graphic) {
+    float width = graphic.getLineThickness() == null ? 1.0f : graphic.getLineThickness();
+    if (Boolean.TRUE.equals(graphic.getSelected())) {
+      return new BasicStroke(Math.max(2.5f, width));
+    }
+    return new BasicStroke(Math.max(1.0f, width));
   }
 }

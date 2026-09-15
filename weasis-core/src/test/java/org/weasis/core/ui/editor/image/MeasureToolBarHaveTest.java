@@ -14,8 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Graphics2D;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
@@ -73,6 +75,71 @@ class MeasureToolBarHaveTest {
     AngleToolGraphic angle = (AngleToolGraphic) view.getGraphicList().getFirst();
     assertEquals(90.0, angle.getAngleDegrees(), 1e-6);
     assertNotNull(angle.getShape());
+  }
+
+  @Test
+  void distanceStaysOnImagePixelsAfterZoomAndStillPaints() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 80, 20, 1));
+
+    LineGraphic line = (LineGraphic) view.getGraphicList().getFirst();
+    assertEquals(10.0, line.getHandlePoint(0).x, 0.01);
+    assertEquals(10.0, line.getHandlePoint(0).y, 0.01);
+    assertEquals(40.0, line.getHandlePoint(1).x, 0.01);
+    assertEquals(10.0, line.getHandlePoint(1).y, 0.01);
+    assertEquals(30.0, line.getLength(), 0.01);
+    assertNull(view.getDrawing());
+
+    view.setZoom(1.0);
+    assertEquals(10.0, line.getHandlePoint(0).x, 0.01);
+    assertEquals(40.0, line.getHandlePoint(1).x, 0.01);
+    assertNotNull(view.graphicAt(75, 60));
+    assertTrue(paintsYellowOnSegment(view));
+  }
+
+  static DefaultView2d<?> sizedGrayView() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    view.setSize(200, 200);
+    view.setSourceImage(new BufferedImage(100, 100, BufferedImage.TYPE_BYTE_GRAY));
+    view.setZoom(2.0);
+    return view;
+  }
+
+  static boolean paintsYellowOnSegment(DefaultView2d<?> view) {
+    BufferedImage page = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = page.createGraphics();
+    try {
+      view.paintView(g, true);
+    } finally {
+      g.dispose();
+    }
+    return yellowAt(page, 60, 60) && yellowAt(page, 75, 60) && yellowAt(page, 90, 60);
+  }
+
+  static boolean yellowAt(BufferedImage page, int x, int y) {
+    for (int dy = -1; dy <= 1; dy++) {
+      for (int dx = -1; dx <= 1; dx++) {
+        if (isYellow(page, x + dx, y + dy)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static boolean isYellow(BufferedImage page, int x, int y) {
+    if (x < 0 || y < 0 || x >= page.getWidth() || y >= page.getHeight()) {
+      return false;
+    }
+    int rgb = page.getRGB(x, y);
+    int r = (rgb >> 16) & 255;
+    int green = (rgb >> 8) & 255;
+    int b = rgb & 255;
+    return r > 200 && green > 200 && b < 80;
   }
 
   static MouseEvent mouse(DefaultView2d<?> view, int id, int x, int y, int clicks) {

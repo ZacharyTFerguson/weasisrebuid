@@ -65,7 +65,11 @@ public final class MeasureTool {
     if (s == null) {
       s = TOOLS.get(tool.toLowerCase());
     }
-    return s == null ? null : s.get();
+    Graphic graphic = s == null ? null : s.get();
+    if (graphic != null) {
+      graphic.setLineThickness(2.0f);
+    }
+    return graphic;
   }
 
   public static Graphic distance(Point2D.Double a, Point2D.Double b) {

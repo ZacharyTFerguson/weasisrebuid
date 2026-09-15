@@ -44,7 +44,7 @@ public class GraphicMouseHandler {
       view.deselectAllGraphics();
     }
     rubber = new SelectGraphic();
-    Point2D.Double p = new Point2D.Double(e.getX(), e.getY());
+    Point2D.Double p = imagePoint(e, view);
     rubber.setHandlePoint(0, p);
     rubber.setHandlePoint(1, p);
     view.addGraphic(rubber);
@@ -56,7 +56,7 @@ public class GraphicMouseHandler {
     if (!selecting || rubber == null || e == null) {
       return false;
     }
-    rubber.setHandlePoint(1, new Point2D.Double(e.getX(), e.getY()));
+    rubber.setHandlePoint(1, imagePoint(e, view));
     if (view != null) {
       view.repaint();
     }
@@ -70,12 +70,19 @@ public class GraphicMouseHandler {
       return false;
     }
     if (e != null) {
-      rubber.setHandlePoint(1, new Point2D.Double(e.getX(), e.getY()));
+      rubber.setHandlePoint(1, imagePoint(e, view));
     }
     view.selectIntersecting(rubber);
     view.removeGraphic(rubber);
     selecting = false;
     rubber = null;
     return true;
+  }
+
+  static Point2D.Double imagePoint(MouseEvent e, DefaultView2d<?> view) {
+    if (e == null || view == null) {
+      return new Point2D.Double();
+    }
+    return view.viewToImage(e.getX(), e.getY());
   }
 }

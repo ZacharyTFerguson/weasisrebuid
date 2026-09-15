@@ -355,8 +355,12 @@ public class ImageViewerEventManager {
     return MouseActions.MEASURE.equals(a) || MouseActions.DRAW.equals(a);
   }
 
+  Point2D.Double imagePoint(MouseEvent e) {
+    return view.viewToImage(e.getX(), e.getY());
+  }
+
   void onDrawPressed(MouseEvent e) {
-    Point2D.Double p = new Point2D.Double(e.getX(), e.getY());
+    Point2D.Double p = imagePoint(e);
     Graphic current = view.getDrawing();
     if (e.getClickCount() > 1 && current != null) {
       view.setDrawing(null);
@@ -391,8 +395,9 @@ public class ImageViewerEventManager {
   void onDrawDragged(MouseEvent e) {
     Graphic current = view.getDrawing();
     if (current instanceof DragGraphic drag) {
-      drag.setHandlePoint(drawHandle, new Point2D.Double(e.getX(), e.getY()));
+      drag.setHandlePoint(drawHandle, imagePoint(e));
     }
+    view.repaint();
   }
 
   void onDrawReleased(MouseEvent e) {
@@ -401,9 +406,10 @@ public class ImageViewerEventManager {
       return;
     }
     if (current instanceof DragGraphic drag) {
-      drag.setHandlePoint(drawHandle, new Point2D.Double(e.getX(), e.getY()));
+      drag.setHandlePoint(drawHandle, imagePoint(e));
     }
     if (isOpenPath(current) || current instanceof AngleToolGraphic) {
+      view.repaint();
       return;
     }
     view.setDrawing(null);

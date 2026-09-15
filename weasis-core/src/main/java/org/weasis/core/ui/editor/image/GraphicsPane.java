@@ -12,6 +12,7 @@ package org.weasis.core.ui.editor.image;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.util.List;
 import javax.swing.JPanel;
 import org.weasis.core.ui.model.graphic.Graphic;
@@ -47,11 +48,12 @@ public class GraphicsPane extends JPanel {
     Graphics2D g2 = (Graphics2D) g.create();
     try {
       for (Graphic graphic : view.getGraphicList()) {
-        if (graphic.getShape() == null) {
+        Shape shape = view.viewShape(graphic);
+        if (shape == null) {
           continue;
         }
         g2.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
-        g2.draw(graphic.getShape());
+        g2.draw(shape);
       }
     } finally {
       g2.dispose();
