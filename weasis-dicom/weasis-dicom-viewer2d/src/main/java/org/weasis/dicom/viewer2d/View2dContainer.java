@@ -62,6 +62,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     add(toolbars, BorderLayout.NORTH);
     add(viewGrid, BorderLayout.CENTER);
     bindDrop(this);
+    bindDrop(viewGrid);
     bindDrop(view2d);
     view2d.setSynchManager(synchManager);
     synchManager.add(view2d);
@@ -250,6 +251,31 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
       return;
     }
     placeSeries(sequence);
+  }
+
+  @Override
+  public void dropSeries(MediaSeries<MediaElement> sequence, JComponent onto) {
+    if (sequence == null || sequence.getMedias().isEmpty()) {
+      return;
+    }
+    rememberOpen(sequence);
+    dropOnto(onto, sequence);
+  }
+
+  void rememberOpen(MediaSeries<MediaElement> sequence) {
+    super.addSeries(sequence);
+  }
+
+  void dropOnto(JComponent onto, MediaSeries<MediaElement> sequence) {
+    if (onto instanceof View2d cell && isEmptyHang(cell)) {
+      hangCell(cell, sequence);
+      return;
+    }
+    placeSeries(sequence);
+  }
+
+  boolean isEmptyHang(View2d cell) {
+    return cell != view2d && layout.contains(cell) && isCloneSlot(cell, view2d.getSeries());
   }
 
   @Override

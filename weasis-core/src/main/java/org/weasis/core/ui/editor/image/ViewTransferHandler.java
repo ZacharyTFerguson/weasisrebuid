@@ -76,8 +76,13 @@ public class ViewTransferHandler extends TransferHandler {
   }
 
   @Override
+  public boolean importData(JComponent comp, Transferable t) {
+    return importTransferable(comp, t);
+  }
+
+  @Override
   public boolean importData(TransferSupport support) {
-    if (!canImport(support)) {
+    if (support == null || !canImport(support)) {
       return false;
     }
     return importTransferable(support.getComponent(), support.getTransferable());
@@ -96,8 +101,15 @@ public class ViewTransferHandler extends TransferHandler {
       return false;
     }
     lastSeries = series;
-    addToPlugin(pluginOf(target), series);
+    dropInto(pluginOf(target), target, series);
     return true;
+  }
+
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  static void dropInto(ImageViewerPlugin<?> plugin, JComponent target, MediaSeries<?> series) {
+    if (plugin != null) {
+      plugin.dropSeries((MediaSeries) series, target);
+    }
   }
 
   static ImageViewerPlugin<?> pluginOf(JComponent comp) {
@@ -117,9 +129,7 @@ public class ViewTransferHandler extends TransferHandler {
 
   @SuppressWarnings({"unchecked", "rawtypes"})
   static void addToPlugin(ImageViewerPlugin<?> plugin, MediaSeries<?> series) {
-    if (plugin != null) {
-      ((ImageViewerPlugin) plugin).addSeries(series);
-    }
+    dropInto(plugin, plugin, series);
   }
 
   MediaSeries<?> seriesFrom(Transferable t) {

@@ -10,6 +10,7 @@
 package org.weasis.core.ui.editor.image;
 
 import java.util.List;
+import javax.swing.JComponent;
 import org.weasis.core.api.image.OpManager;
 import org.weasis.core.api.image.SimpleOpManager;
 import org.weasis.core.api.media.data.MediaElement;
@@ -47,6 +48,14 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
     for (MediaSeries<E> sequence : series) {
       addSeries(sequence);
     }
+  }
+
+  /**
+   * Explorer series drop onto a view. Default fills the next hang slot via {@link #addSeries};
+   * viewers override to fill the dropped cell without opening a tab.
+   */
+  public void dropSeries(MediaSeries<E> sequence, JComponent onto) {
+    addSeries(sequence);
   }
 
   /** True when hanging layout still has a clone or empty cell for another series. */

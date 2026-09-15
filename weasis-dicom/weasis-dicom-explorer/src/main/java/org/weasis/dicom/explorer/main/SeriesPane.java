@@ -113,10 +113,12 @@ public class SeriesPane extends JPanel {
   }
 
   void bindThumb(SeriesThumbnail thumb, int idx) {
+    ThumbDrag drag = new ThumbDrag();
     thumb.addMouseListener(
         new MouseAdapter() {
           @Override
           public void mousePressed(MouseEvent e) {
+            drag.press();
             adapter.pressed(idx, e);
           }
 
@@ -132,7 +134,7 @@ public class SeriesPane extends JPanel {
         new MouseMotionAdapter() {
           @Override
           public void mouseDragged(MouseEvent e) {
-            exportThumb(thumb, e);
+            drag.drag(thumb, e);
           }
         });
   }
@@ -141,6 +143,23 @@ public class SeriesPane extends JPanel {
     TransferHandler handler = thumb.getTransferHandler();
     if (handler != null) {
       handler.exportAsDrag(thumb, e, TransferHandler.COPY);
+    }
+  }
+
+  /** One {@link TransferHandler#exportAsDrag} per press; repeating drag events abort Swing DnD. */
+  static final class ThumbDrag {
+    private boolean started;
+
+    void press() {
+      started = false;
+    }
+
+    void drag(SeriesThumbnail thumb, MouseEvent e) {
+      if (started) {
+        return;
+      }
+      started = true;
+      exportThumb(thumb, e);
     }
   }
 }

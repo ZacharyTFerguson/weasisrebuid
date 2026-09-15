@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.TransferHandler;
 import org.dcm4che3.data.UID;
@@ -30,6 +32,7 @@ import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMime;
 import org.weasis.dicom.explorer.main.SeriesPane;
+import org.weasis.dicom.viewer2d.View2d;
 import org.weasis.dicom.viewer2d.View2dContainer;
 import org.weasis.dicom.viewer2d.View2dFactory;
 
@@ -58,21 +61,40 @@ class ExplorerSeriesDnDHaveTest {
       Transferable transferable = drag.seriesTransferable(thumb.getSeries());
       assertTrue(transferable.isDataFlavorSupported(ViewTransferHandler.SERIES_FLAVOR));
 
-      ViewTransferHandler drop = (ViewTransferHandler) container.getTransferHandler();
-      assertTrue(
-          drop.canImport(
-              container.getView2d(), new DataFlavor[] {ViewTransferHandler.SERIES_FLAVOR}));
-      assertTrue(drop.dropSeries(container.getView2d(), thumb.getSeries()));
+      View2d empty = container.getLayoutViews().get(1);
+      ViewTransferHandler drop = (ViewTransferHandler) empty.getTransferHandler();
+      assertTrue(drop.canImport(empty, new DataFlavor[] {ViewTransferHandler.SERIES_FLAVOR}));
+      assertTrue(drop.importData(new TransferHandler.TransferSupport(empty, transferable)));
+      assertTrue(drop.importData(empty, transferable));
       assertEquals(1, core.getOpenViewerPlugins().size());
       assertSame(plugin, core.getOpenViewerPlugins().getFirst());
       assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(0).getSeries()));
-      assertEquals("2.25.dx.lat", seriesUid(container.getLayoutViews().get(1).getSeries()));
+      assertEquals("2.25.dx.lat", seriesUid(empty.getSeries()));
       assertNotEquals(
-          seriesUid(container.getLayoutViews().get(0).getSeries()),
-          seriesUid(container.getLayoutViews().get(1).getSeries()));
+          seriesUid(container.getLayoutViews().get(0).getSeries()), seriesUid(empty.getSeries()));
       assertSame(thumb.getSeries(), drop.lastSeries());
+      assertEquals(1, dragExports(thumb));
     } finally {
       HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  static int dragExports(SeriesThumbnail thumb) {
+    CountExport handler = new CountExport();
+    thumb.setTransferHandler(handler);
+    int mods = InputEvent.BUTTON1_DOWN_MASK;
+    thumb.dispatchEvent(new MouseEvent(thumb, MouseEvent.MOUSE_PRESSED, 0L, mods, 2, 2, 1, false));
+    thumb.dispatchEvent(new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, 8, 8, 1, false));
+    thumb.dispatchEvent(new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, 16, 8, 1, false));
+    return handler.exports;
+  }
+
+  static final class CountExport extends ViewTransferHandler {
+    int exports;
+
+    @Override
+    public void exportAsDrag(javax.swing.JComponent c, InputEvent e, int action) {
+      exports++;
     }
   }
 
