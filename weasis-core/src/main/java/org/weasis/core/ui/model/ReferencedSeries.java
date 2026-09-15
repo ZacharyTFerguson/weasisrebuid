@@ -9,4 +9,37 @@
  */
 package org.weasis.core.ui.model;
 
-public class ReferencedSeries {}
+import java.util.List;
+
+/** KO/PR referenced series: Series Instance UID plus referenced SOP images. */
+public class ReferencedSeries {
+
+  private final String seriesUid;
+  private final List<ReferencedImage> images;
+
+  public ReferencedSeries(String seriesUid, List<ReferencedImage> images) {
+    this.seriesUid = seriesUid == null ? "" : seriesUid;
+    this.images = images == null ? List.of() : List.copyOf(images);
+  }
+
+  public String seriesUid() {
+    return seriesUid;
+  }
+
+  public List<ReferencedImage> images() {
+    return images;
+  }
+
+  public boolean containsSop(String sop) {
+    return findSop(sop == null ? "" : sop);
+  }
+
+  boolean findSop(String sop) {
+    for (ReferencedImage image : images) {
+      if (image.sopInstanceUid().equals(sop)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}

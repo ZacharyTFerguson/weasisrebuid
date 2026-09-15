@@ -9,4 +9,39 @@
  */
 package org.weasis.core.ui.model;
 
-public class ReferencedImage {}
+import java.util.List;
+
+/** One SOP in a KO/PR referenced series; empty frames means the whole instance. */
+public class ReferencedImage {
+
+  private final String sopInstanceUid;
+  private final List<Integer> frames;
+
+  public ReferencedImage(String sopInstanceUid) {
+    this(sopInstanceUid, List.of());
+  }
+
+  public ReferencedImage(String sopInstanceUid, List<Integer> frames) {
+    this.sopInstanceUid = sopInstanceUid == null ? "" : sopInstanceUid;
+    this.frames = frames == null ? List.of() : List.copyOf(frames);
+  }
+
+  public String sopInstanceUid() {
+    return sopInstanceUid;
+  }
+
+  public List<Integer> frames() {
+    return frames;
+  }
+
+  public boolean matches(String sop, int frame) {
+    if (!sameSop(sop)) {
+      return false;
+    }
+    return frames.isEmpty() || frames.contains(frame);
+  }
+
+  boolean sameSop(String sop) {
+    return sopInstanceUid.equals(sop == null ? "" : sop);
+  }
+}

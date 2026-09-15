@@ -9,4 +9,33 @@
  */
 package org.weasis.core.ui.model.utils.bean;
 
-public class AdvancedShape {}
+import java.awt.Shape;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.List;
+import org.weasis.core.ui.model.utils.algo.ConvexHull;
+import org.weasis.core.ui.model.utils.algo.MinimumEnclosingRectangle;
+
+/** Drawn shape plus its convex hull / enclosing rectangle. */
+public class AdvancedShape {
+
+  private final Shape shape;
+  private final List<Point2D.Double> hull;
+
+  public AdvancedShape(Shape shape, List<Point2D.Double> pts) {
+    this.shape = shape;
+    this.hull = ConvexHull.hull(pts);
+  }
+
+  public Shape getShape() {
+    return shape;
+  }
+
+  public List<Point2D.Double> getHull() {
+    return hull;
+  }
+
+  public Rectangle2D getBounds() {
+    return MinimumEnclosingRectangle.of(hull);
+  }
+}

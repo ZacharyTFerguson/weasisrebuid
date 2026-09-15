@@ -49,6 +49,7 @@ import org.weasis.core.ui.model.layer.LayerItem;
 import org.weasis.core.ui.model.layer.LayerType;
 import org.weasis.core.ui.model.layer.imp.DefaultLayer;
 import org.weasis.core.ui.model.layer.imp.RenderedImageLayer;
+import org.weasis.core.ui.model.utils.ImageStatistics;
 import org.weasis.core.ui.util.ImagePrint;
 import org.weasis.core.ui.util.PrintOptions;
 
@@ -213,6 +214,12 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   public BufferedImage getSourceImage() {
     return source;
+  }
+
+  public ImageStatistics imageStatistics() {
+    ImageRegionStatistics.Stats stats = ImageRegionStatistics.compute(this);
+    return new ImageStatistics(
+        stats.getSamples(), stats.getMin(), stats.getMax(), stats.getMean(), stats.getStdev());
   }
 
   public double getZoom() {

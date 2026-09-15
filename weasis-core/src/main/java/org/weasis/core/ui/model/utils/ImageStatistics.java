@@ -9,4 +9,40 @@
  */
 package org.weasis.core.ui.model.utils;
 
-public class ImageStatistics {}
+/** Pixel statistics for a raster or selected closed graphic. */
+public class ImageStatistics {
+
+  private final int samples;
+  private final double min;
+  private final double max;
+  private final double mean;
+  private final double stdev;
+
+  public ImageStatistics(int samples, double min, double max, double mean, double stdev) {
+    this.samples = samples;
+    this.min = min;
+    this.max = max;
+    this.mean = mean;
+    this.stdev = stdev;
+  }
+
+  public int getSamples() {
+    return samples;
+  }
+
+  public double getMin() {
+    return min;
+  }
+
+  public double getMax() {
+    return max;
+  }
+
+  public double getMean() {
+    return mean;
+  }
+
+  public double getStdev() {
+    return stdev;
+  }
+}

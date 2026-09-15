@@ -19,6 +19,7 @@ import org.weasis.core.ui.model.utils.bean.GraphicClipboard;
 public class AbstractGraphicModel implements GraphicModel {
 
   private final List<Graphic> models = new CopyOnWriteArrayList<>();
+  private final List<ReferencedSeries> referencedSeries = new CopyOnWriteArrayList<>();
   private final GraphicClipboard clipboard;
 
   public AbstractGraphicModel() {
@@ -100,5 +101,24 @@ public class AbstractGraphicModel implements GraphicModel {
 
   public void deleteSelected() {
     models.removeIf(g -> Boolean.TRUE.equals(g.getSelected()));
+  }
+
+  public void addReferencedSeries(ReferencedSeries series) {
+    if (series != null) {
+      referencedSeries.add(series);
+    }
+  }
+
+  public List<ReferencedSeries> getReferencedSeries() {
+    return Collections.unmodifiableList(referencedSeries);
+  }
+
+  public boolean referencesSop(String sop) {
+    for (ReferencedSeries series : referencedSeries) {
+      if (series.containsSop(sop)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

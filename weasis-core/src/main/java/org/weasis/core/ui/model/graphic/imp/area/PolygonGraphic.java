@@ -14,6 +14,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
+import org.weasis.core.ui.model.utils.bean.AdvancedShape;
 
 @XmlRootElement(name = "PolygonGraphic")
 public class PolygonGraphic extends AbstractDragGraphicArea {
@@ -38,6 +39,10 @@ public class PolygonGraphic extends AbstractDragGraphicArea {
     }
     path.closePath();
     setShape(path);
+  }
+
+  public AdvancedShape advancedShape() {
+    return new AdvancedShape(getShape(), getPts());
   }
 
   @Override
