@@ -11,6 +11,7 @@ package org.weasis.base.ui.gui;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -138,6 +139,10 @@ class WeasisWinChromeHaveTest {
       assertTrue(win.handleViewerKey(digit));
       assertEquals(7, image.lastPreset);
       assertSame(image, core.getSelectedViewerPlugin());
+      javax.swing.Action key1 = win.getRootPane().getActionMap().get("voi-preset-1");
+      assertNotNull(key1);
+      key1.actionPerformed(null);
+      assertEquals(1, image.lastPreset);
     } finally {
       closeOpen(core);
       core.setApplicationWindow(null);

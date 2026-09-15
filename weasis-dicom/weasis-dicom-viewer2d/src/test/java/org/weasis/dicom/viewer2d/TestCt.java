@@ -62,4 +62,35 @@ final class TestCt {
       out.writeDataset(fmi, dcm);
     }
   }
+
+  static void writeDualVoi(File dest) throws IOException {
+    String sop = UIDUtils.createUID("2.25");
+    Attributes fmi = new Attributes();
+    fmi.setBytes(Tag.FileMetaInformationVersion, VR.OB, new byte[] {0, 1});
+    fmi.setString(Tag.MediaStorageSOPClassUID, VR.UI, UID.CTImageStorage);
+    fmi.setString(Tag.MediaStorageSOPInstanceUID, VR.UI, sop);
+    fmi.setString(Tag.TransferSyntaxUID, VR.UI, UID.ExplicitVRLittleEndian);
+    fmi.setString(Tag.ImplementationClassUID, VR.UI, "2.25.1918");
+    Attributes dcm = new Attributes();
+    dcm.setString(Tag.SOPClassUID, VR.UI, UID.CTImageStorage);
+    dcm.setString(Tag.SOPInstanceUID, VR.UI, sop);
+    dcm.setString(Tag.StudyInstanceUID, VR.UI, UIDUtils.createUID("2.25"));
+    dcm.setString(Tag.SeriesInstanceUID, VR.UI, UIDUtils.createUID("2.25"));
+    dcm.setString(Tag.Modality, VR.CS, "DX");
+    dcm.setString(Tag.PhotometricInterpretation, VR.CS, "MONOCHROME2");
+    dcm.setInt(Tag.SamplesPerPixel, VR.US, 1);
+    dcm.setInt(Tag.Rows, VR.US, 2);
+    dcm.setInt(Tag.Columns, VR.US, 2);
+    dcm.setInt(Tag.BitsAllocated, VR.US, 16);
+    dcm.setInt(Tag.BitsStored, VR.US, 16);
+    dcm.setInt(Tag.HighBit, VR.US, 15);
+    dcm.setInt(Tag.PixelRepresentation, VR.US, 0);
+    dcm.setDouble(Tag.WindowCenter, VR.DS, 40, 200);
+    dcm.setDouble(Tag.WindowWidth, VR.DS, 80, 400);
+    dcm.setString(Tag.PatientName, VR.PN, "SYNTHETIC^DX");
+    dcm.setInt(Tag.PixelData, VR.OW, 0, 50, 100, 200);
+    try (DicomOutputStream out = new DicomOutputStream(dest)) {
+      out.writeDataset(fmi, dcm);
+    }
+  }
 }

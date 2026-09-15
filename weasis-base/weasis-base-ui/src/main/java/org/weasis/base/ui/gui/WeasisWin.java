@@ -15,10 +15,15 @@ import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.Hashtable;
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -63,6 +68,7 @@ public class WeasisWin extends JFrame {
     installChrome();
     addWindowListener(new WeasisWinListener(this));
     UICore.getInstance().installDockingKeyDispatcher();
+    bindDigitKeys(getRootPane());
   }
 
   void installChrome() {
@@ -158,6 +164,44 @@ public class WeasisWin extends JFrame {
 
   public boolean handleViewerKey(KeyEvent e) {
     return UICore.getInstance().handleViewerKey(e);
+  }
+
+  void bindDigitKeys(JComponent root) {
+    if (root == null) {
+      return;
+    }
+    InputMap inputs = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+    ActionMap actions = root.getActionMap();
+    bindDigitRange(inputs, actions, KeyEvent.VK_0);
+    bindDigitRange(inputs, actions, KeyEvent.VK_NUMPAD0);
+  }
+
+  void bindDigitRange(InputMap inputs, ActionMap actions, int base) {
+    for (int d = 0; d <= 9; d++) {
+      bindDigit(inputs, actions, base + d, d);
+    }
+  }
+
+  void bindDigit(InputMap inputs, ActionMap actions, int keyCode, int index) {
+    String name = "voi-preset-" + index;
+    inputs.put(KeyStroke.getKeyStroke(keyCode, 0), name);
+    actions.put(name, presetAction(index));
+  }
+
+  AbstractAction presetAction(int index) {
+    return new AbstractAction() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        applyPresetFromWindow(index);
+      }
+    };
+  }
+
+  void applyPresetFromWindow(int index) {
+    ImageViewerPlugin<?> image = focusedImagePlugin();
+    if (image != null) {
+      image.applyPreset(index);
+    }
   }
 
   public JMenuBar createMenuBar() {

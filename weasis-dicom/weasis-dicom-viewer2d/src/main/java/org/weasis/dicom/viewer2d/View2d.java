@@ -41,6 +41,7 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private Attributes dataset;
   private WindLevelParameters fileWl = new WindLevelParameters(400, 40);
+  private WindLevelParameters dataRangeWl;
   private double window = 400;
   private double level = 40;
   private File file;
@@ -76,6 +77,7 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   void bindWindowLevel(Attributes dataset) {
     fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
+    dataRangeWl = DicomMediaUtils.dataRangeWindowLevel(dataset);
     this.window = fileWl.getWindow();
     this.level = fileWl.getLevel();
     setPresets(DicomMediaUtils.voiPresets(dataset));
@@ -141,11 +143,47 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   @Override
   public void applyPreset(int index) {
-    if (index <= 0 || presets.isEmpty()) {
-      resetWinLevelDefaults();
+    if (index <= 0) {
+      applyDataRange();
+      return;
+    }
+    applyPositivePreset(index);
+  }
+
+  void applyPositivePreset(int index) {
+    if (presets.isEmpty()) {
+      applyDataRange();
       return;
     }
     applyIndexedPreset(index);
+  }
+
+  void applyDataRange() {
+    WindLevelParameters range = visibleDataRange();
+    if (range != null) {
+      setWindowLevel(range.getWindow(), range.getLevel());
+    }
+  }
+
+  WindLevelParameters visibleDataRange() {
+    if (dataRangeWl == null) {
+      return fileWl;
+    }
+    if (presets.isEmpty() || !sameOverlay(dataRangeWl, fileWl)) {
+      return dataRangeWl;
+    }
+    return halfWindow(dataRangeWl);
+  }
+
+  static boolean sameOverlay(WindLevelParameters a, WindLevelParameters b) {
+    if (a == null || b == null) {
+      return false;
+    }
+    return (int) a.getWindow() == (int) b.getWindow() && (int) a.getLevel() == (int) b.getLevel();
+  }
+
+  static WindLevelParameters halfWindow(WindLevelParameters range) {
+    return new WindLevelParameters(Math.max(1.0, range.getWindow() / 2.0), range.getLevel());
   }
 
   void applyIndexedPreset(int index) {

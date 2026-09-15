@@ -11,6 +11,7 @@ package org.weasis.dicom.codec.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
@@ -80,5 +81,22 @@ class DicomMediaUtilsTest {
     assertEquals(40, presets.get(0).getLevel(), 1e-9);
     assertTrue(DicomMediaUtils.voiPresets(null).isEmpty());
     assertTrue(DicomMediaUtils.voiPresets(new Attributes()).isEmpty());
+  }
+
+  @Test
+  void dataRangeWindowLevelUsesPixelMinMax() {
+    Attributes dcm = new Attributes();
+    dcm.setInt(Tag.BitsAllocated, VR.US, 16);
+    dcm.setInt(Tag.BitsStored, VR.US, 16);
+    dcm.setInt(Tag.PixelRepresentation, VR.US, 0);
+    dcm.setInt(Tag.PixelData, VR.OW, 0, 50, 100, 200);
+    WindLevelParameters range = DicomMediaUtils.dataRangeWindowLevel(dcm);
+    assertEquals(200, range.getWindow(), 1e-9);
+    assertEquals(100, range.getLevel(), 1e-9);
+    dcm.setDouble(Tag.WindowWidth, VR.DS, 80);
+    dcm.setDouble(Tag.WindowCenter, VR.DS, 40);
+    WindLevelParameters file = DicomMediaUtils.windowLevel(dcm, 1, 0);
+    assertEquals(80, file.getWindow(), 1e-9);
+    assertNotNull(range);
   }
 }

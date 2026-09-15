@@ -11,6 +11,7 @@ package org.weasis.dicom.viewer2d;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.event.InputEvent;
@@ -39,7 +40,7 @@ class View2dPresetSegHaveTest {
   }
 
   @Test
-  void loadedSeriesDigitKeysUseDatasetVoiAndZeroKeepsDefaultWl() {
+  void loadedSeriesDigitKeysUseDatasetVoiAndZeroUsesDataRange() {
     View2d view = new View2d();
     view.load(ctWithVoiPresets());
     assertEquals(400.0, view.getWindow(), 1e-9);
@@ -48,11 +49,58 @@ class View2dPresetSegHaveTest {
     view.getEventManager().keyPressed(key(view, KeyEvent.VK_2, 0));
     assertEquals(1500.0, view.getWindow(), 1e-9);
     assertEquals(300.0, view.getLevel(), 1e-9);
-    view.getEventManager().keyPressed(key(view, KeyEvent.VK_0, 0));
-    assertEquals(400.0, view.getWindow(), 1e-9);
-    assertEquals(40.0, view.getLevel(), 1e-9);
     view.getEventManager().keyPressed(key(view, KeyEvent.VK_1, 0));
     assertEquals(400.0, view.getWindow(), 1e-9);
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_0, 0));
+    assertEquals(1.0, view.getWindow(), 1e-9);
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_1, 0));
+    assertEquals(400.0, view.getWindow(), 1e-9);
+  }
+
+  @Test
+  void twoWindowCenterValuesChangeOverlayOnKeyOneVersusTwo() {
+    View2d view = new View2d();
+    view.load(dxWithTwoVoi());
+    view.applyPreset(1);
+    String key1 = view.getInfoLayer().overlayText(view);
+    assertTrue(key1.contains("W:80"));
+    view.applyPreset(2);
+    String key2 = view.getInfoLayer().overlayText(view);
+    assertTrue(key2.contains("W:400"));
+    assertNotEquals(key1, key2);
+    view.applyPreset(0);
+    String key0 = view.getInfoLayer().overlayText(view);
+    assertTrue(key0.contains("W:200"));
+    assertNotEquals(key0, key1);
+  }
+
+  @Test
+  void singleWindowKeyZeroUsesDataRangeAndOneRestoresDataset() {
+    View2d view = new View2d();
+    view.load(dxWithSingleVoi());
+    assertEquals(80.0, view.getWindow(), 1e-9);
+    view.applyPreset(0);
+    assertEquals(200.0, view.getWindow(), 1e-9);
+    view.applyPreset(1);
+    assertEquals(80.0, view.getWindow(), 1e-9);
+    view.applyPreset(5);
+    assertEquals(80.0, view.getWindow(), 1e-9);
+  }
+
+  @Test
+  void part10DualVoiFileKeyOneAndTwoDiffer() throws Exception {
+    java.io.File part10 = java.io.File.createTempFile("dual-voi", ".dcm");
+    part10.deleteOnExit();
+    TestCt.writeDualVoi(part10);
+    View2d view = new View2d();
+    view.load(part10);
+    view.applyPreset(1);
+    double first = view.getWindow();
+    view.applyPreset(2);
+    double second = view.getWindow();
+    assertNotEquals(first, second);
+    view.applyPreset(0);
+    assertNotEquals(first, view.getWindow());
   }
 
   @Test
@@ -148,6 +196,37 @@ class View2dPresetSegHaveTest {
       }
     }
     dcm.setBytes(Tag.PixelData, VR.OB, px);
+    return dcm;
+  }
+
+  static Attributes dxWithTwoVoi() {
+    Attributes dcm = dxDxBase();
+    dcm.setDouble(Tag.WindowCenter, VR.DS, 40, 200);
+    dcm.setDouble(Tag.WindowWidth, VR.DS, 80, 400);
+    dcm.setInt(Tag.PixelData, VR.OW, 0, 50, 100, 200);
+    return dcm;
+  }
+
+  static Attributes dxWithSingleVoi() {
+    Attributes dcm = dxDxBase();
+    dcm.setDouble(Tag.WindowCenter, VR.DS, 40);
+    dcm.setDouble(Tag.WindowWidth, VR.DS, 80);
+    dcm.setInt(Tag.PixelData, VR.OW, 0, 50, 100, 200);
+    return dcm;
+  }
+
+  static Attributes dxDxBase() {
+    Attributes dcm = new Attributes();
+    dcm.setString(Tag.PhotometricInterpretation, VR.CS, "MONOCHROME2");
+    dcm.setString(Tag.Modality, VR.CS, "DX");
+    dcm.setString(Tag.PatientName, VR.PN, "SYNTHETIC^DX");
+    dcm.setInt(Tag.SamplesPerPixel, VR.US, 1);
+    dcm.setInt(Tag.Rows, VR.US, 2);
+    dcm.setInt(Tag.Columns, VR.US, 2);
+    dcm.setInt(Tag.BitsAllocated, VR.US, 16);
+    dcm.setInt(Tag.BitsStored, VR.US, 16);
+    dcm.setInt(Tag.HighBit, VR.US, 15);
+    dcm.setInt(Tag.PixelRepresentation, VR.US, 0);
     return dcm;
   }
 }

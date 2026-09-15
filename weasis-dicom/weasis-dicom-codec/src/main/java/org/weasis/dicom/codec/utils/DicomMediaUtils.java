@@ -110,7 +110,7 @@ public final class DicomMediaUtils {
     }
   }
 
-  static WindLevelParameters dataRangeWindowLevel(Attributes dcm) {
+  public static WindLevelParameters dataRangeWindowLevel(Attributes dcm) {
     int[] pixels = dcm.getInts(Tag.PixelData);
     if (pixels == null || pixels.length == 0) {
       return null;
