@@ -1,0 +1,59 @@
+{
+  "generator": "dicomlight cmd/synthdicom",
+  "kinds": ["dx", "clinical"],
+  "phi": "synthetic-only",
+  "subset": [
+    "dx_chest_pa_256.dcm",
+    "dx_hand_pa_256.dcm",
+    "dx_knee_ap_256.dcm",
+    "ct_brain_ax_s01_256.dcm",
+    "ct_brain_ax_s02_256.dcm"
+  ],
+  "studies": [
+    {
+      "path": "dx_chest_pa_256.dcm",
+      "kind": "dx",
+      "modality": "DX",
+      "bodyPartExamined": "CHEST",
+      "studyInstanceUid": "2.25.777000000000000000000000000000301",
+      "sopInstanceUid": "2.25.777000000000000000000000000000411",
+      "sha256": "1d5b1dc76cb9a9502347dd0431d8f7e5df0c4b9152e985cb7fc1ce429b1601dd"
+    },
+    {
+      "path": "dx_hand_pa_256.dcm",
+      "kind": "dx",
+      "modality": "DX",
+      "bodyPartExamined": "HAND",
+      "studyInstanceUid": "2.25.777000000000000000000000000000301",
+      "sopInstanceUid": "2.25.777000000000000000000000000000414",
+      "sha256": "3f2e9f35631b7451b839dd623c7b995c507c78965b75e598dda6e577f142f308"
+    },
+    {
+      "path": "dx_knee_ap_256.dcm",
+      "kind": "dx",
+      "modality": "DX",
+      "bodyPartExamined": "KNEE",
+      "studyInstanceUid": "2.25.777000000000000000000000000000301",
+      "sopInstanceUid": "2.25.777000000000000000000000000000417",
+      "sha256": "a05fc6e293a873534de3864688e2d6267b8ec5e4f719e62bcea5cdfb1c888e35"
+    },
+    {
+      "path": "ct_brain_ax_s01_256.dcm",
+      "kind": "clinical",
+      "modality": "CT",
+      "bodyPartExamined": "HEAD",
+      "studyInstanceUid": "2.25.777000000000000000000000000000501",
+      "sopInstanceUid": "2.25.777000000000000000000000000000521",
+      "sha256": "c1e1828cad619e521c23ae8a16461543f26da818ba48e9dab7886424626dac7c"
+    },
+    {
+      "path": "ct_brain_ax_s02_256.dcm",
+      "kind": "clinical",
+      "modality": "CT",
+      "bodyPartExamined": "HEAD",
+      "studyInstanceUid": "2.25.777000000000000000000000000000501",
+      "sopInstanceUid": "2.25.777000000000000000000000000000522",
+      "sha256": "b8457603c3765cd220d98421a7f480f3ab375a22f05bd41ac1dbedebfdb9d9fb"
+    }
+  ]
+}

@@ -23,7 +23,6 @@ import org.weasis.core.api.media.data.MediaReader;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.Series;
 import org.weasis.core.api.media.data.TagW;
-import org.weasis.dicom.codec.utils.DicomMediaUtils;
 
 /** Part-10 reader via weasis-dicom-tools / dcm4che. */
 public class DicomMediaIO implements MediaReader {
@@ -80,12 +79,18 @@ public class DicomMediaIO implements MediaReader {
     return DicomMime.fromSopClass(dataset.getString(Tag.SOPClassUID, ""));
   }
 
+  /**
+   * @see DicomUnderstandingLimits#canPaintWindowLevel(String, Attributes)
+   */
   public boolean isExplicitVrLeMonochrome2() {
-    return TransferSyntax.EXPLICIT_VR_LE.uid().equals(transferSyntax)
-        && DicomMediaUtils.isMonochrome2(dataset);
+    return DicomUnderstandingLimits.canPaintWindowLevel(transferSyntax, dataset);
   }
 
+  /** Same paint path as View2d W/L; throws when {@link #isExplicitVrLeMonochrome2()} is false. */
   public BufferedImage paintWindowLevel() {
+    if (!isExplicitVrLeMonochrome2()) {
+      throw new IllegalStateException("outside DicomUnderstandingLimits");
+    }
     return WindowLevelPainter.paintMonochrome2(dataset);
   }
 
