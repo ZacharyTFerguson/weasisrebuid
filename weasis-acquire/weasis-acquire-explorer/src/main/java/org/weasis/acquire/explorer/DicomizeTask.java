@@ -9,4 +9,24 @@
  */
 package org.weasis.acquire.explorer;
 
-public class DicomizeTask {}
+import java.nio.file.Path;
+import java.util.Properties;
+import org.weasis.acquire.explorer.dicom.Transform2Dicom;
+
+/** Background-friendly wrapper around {@link Transform2Dicom}. */
+public class DicomizeTask {
+
+  private final AcquireManager manager;
+  private final Path destination;
+  private final Properties preferences;
+
+  public DicomizeTask(AcquireManager manager, Path destination, Properties preferences) {
+    this.manager = manager;
+    this.destination = destination;
+    this.preferences = preferences == null ? new Properties() : preferences;
+  }
+
+  public int run() {
+    return new Transform2Dicom().dicomize(manager, destination, preferences);
+  }
+}

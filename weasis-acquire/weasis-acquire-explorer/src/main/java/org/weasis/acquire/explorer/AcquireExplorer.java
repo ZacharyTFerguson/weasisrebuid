@@ -20,6 +20,7 @@ public class AcquireExplorer extends PluginTool implements DataExplorerView {
   public static final String NAME = "Dicomizer";
 
   private final AcquireManager manager = new AcquireManager();
+  private final AcquireExplorerModel model = new AcquireExplorerModel();
 
   public AcquireExplorer() {
     super(NAME, 20);
@@ -36,7 +37,7 @@ public class AcquireExplorer extends PluginTool implements DataExplorerView {
 
   @Override
   public DataExplorerModel getDataExplorerModel() {
-    return null;
+    return model;
   }
 
   @Override

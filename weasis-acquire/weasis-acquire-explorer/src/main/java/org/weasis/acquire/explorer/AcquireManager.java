@@ -18,13 +18,31 @@ public class AcquireManager {
 
   private final List<AcquireImageInfo> images = new ArrayList<>();
   private String patientXml = "";
+  private PatientDemographics demographics = PatientDemographics.empty();
 
   public void loadPatientContext(String xml) {
     this.patientXml = xml == null ? "" : xml;
+    if (patientXml.isBlank()) {
+      demographics = PatientDemographics.empty();
+      return;
+    }
+    try {
+      demographics = AcquirePatientCommand.parseXml(patientXml);
+    } catch (Exception ignored) {
+      demographics = PatientDemographics.empty();
+    }
   }
 
   public String getPatientXml() {
     return patientXml;
+  }
+
+  public PatientDemographics getDemographics() {
+    return demographics;
+  }
+
+  public void setDemographics(PatientDemographics demographics) {
+    this.demographics = demographics == null ? PatientDemographics.empty() : demographics;
   }
 
   public void addImage(AcquireImageInfo info) {

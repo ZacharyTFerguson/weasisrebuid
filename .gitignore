@@ -37,3 +37,4 @@ boot-work/
 
 # Tooling
 .cursor/
+.tools/
