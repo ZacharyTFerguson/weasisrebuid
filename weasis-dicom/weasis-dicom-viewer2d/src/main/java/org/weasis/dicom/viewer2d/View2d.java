@@ -42,6 +42,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private double window = 400;
   private double level = 40;
   private File file;
+  private final KOManager koManager = new KOManager();
 
   public View2d() {
     super();
@@ -64,6 +65,8 @@ public class View2d extends DefaultView2d<MediaElement> {
     fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
     this.window = fileWl.getWindow();
     this.level = fileWl.getLevel();
+    setModalityLut(
+        dataset.getDouble(Tag.RescaleSlope, 1.0), dataset.getDouble(Tag.RescaleIntercept, 0.0));
     setFrameOfReferenceUID(dataset.getString(Tag.FrameOfReferenceUID, ""));
     applyDatasetFlags();
     render();
@@ -75,6 +78,18 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public File getFile() {
     return file;
+  }
+
+  public KOManager getKoManager() {
+    return koManager;
+  }
+
+  @Override
+  public boolean toggleKeyImage() {
+    if (dataset == null) {
+      return false;
+    }
+    return koManager.toggleKeyImage(dataset.getString(Tag.SOPInstanceUID));
   }
 
   public double getWindow() {

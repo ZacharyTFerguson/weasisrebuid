@@ -73,6 +73,11 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   /** Manual Calibration, session, image or series (MX-07). */
   private volatile double sessionManualCalibrationMmPerPixel;
 
+  /** Modality LUT (Rescale Slope/Intercept) for histogram X axis. */
+  private volatile double modalityLutSlope = 1.0;
+
+  private volatile double modalityLutIntercept;
+
   public DefaultView2d() {
     setBackground(Color.BLACK);
     setOpaque(true);
@@ -365,6 +370,24 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
 
   public void setSessionManualCalibrationMmPerPixel(double sessionManualCalibrationMmPerPixel) {
     this.sessionManualCalibrationMmPerPixel = sessionManualCalibrationMmPerPixel;
+  }
+
+  public double getModalityLutSlope() {
+    return modalityLutSlope;
+  }
+
+  public double getModalityLutIntercept() {
+    return modalityLutIntercept;
+  }
+
+  public void setModalityLut(double slope, double intercept) {
+    this.modalityLutSlope = slope == 0 ? 1.0 : slope;
+    this.modalityLutIntercept = intercept;
+  }
+
+  /** Key image (K). DICOM {@code View2d} toggles the SOP in {@code KOManager}. */
+  public boolean toggleKeyImage() {
+    return false;
   }
 
   public List<Graphic> getGraphicList() {

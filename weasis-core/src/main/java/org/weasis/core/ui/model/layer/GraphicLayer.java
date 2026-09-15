@@ -9,4 +9,14 @@
  */
 package org.weasis.core.ui.model.layer;
 
-public class GraphicLayer {}
+/** Layer that holds measure/draw graphics. Defaults to {@link LayerType#MEASURE}. */
+public class GraphicLayer extends Layer {
+
+  public GraphicLayer() {
+    this(LayerType.MEASURE);
+  }
+
+  public GraphicLayer(LayerType type) {
+    super(type == null ? LayerType.MEASURE : type);
+  }
+}

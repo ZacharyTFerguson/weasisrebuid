@@ -33,6 +33,7 @@ public class KOManager {
   public static final String ROOT_UID = "2.25";
 
   private final LinkedHashSet<String> keySopInstanceUids = new LinkedHashSet<>();
+  private boolean filterKeyImages;
 
   public boolean toggleKeyImage(String sopInstanceUid) {
     if (sopInstanceUid == null || sopInstanceUid.isBlank()) {
@@ -51,6 +52,27 @@ public class KOManager {
 
   public Set<String> keyImages() {
     return Collections.unmodifiableSet(keySopInstanceUids);
+  }
+
+  public boolean isFilterKeyImages() {
+    return filterKeyImages;
+  }
+
+  public void setFilterKeyImages(boolean filterKeyImages) {
+    this.filterKeyImages = filterKeyImages;
+  }
+
+  public List<String> visibleSops(Iterable<String> all) {
+    if (all == null) {
+      return List.of();
+    }
+    List<String> visible = new ArrayList<>();
+    for (String uid : all) {
+      if (!filterKeyImages || isKeyImage(uid)) {
+        visible.add(uid);
+      }
+    }
+    return List.copyOf(visible);
   }
 
   public Attributes buildKoDocument(Attributes sourceImage) {

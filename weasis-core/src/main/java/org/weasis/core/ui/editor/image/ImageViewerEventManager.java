@@ -85,6 +85,8 @@ public class ImageViewerEventManager {
     ActionW action = shortcuts.getAction(KeyStroke.getKeyStroke(e.getKeyCode(), 0));
     if (action == ActionW.ANNOTATIONS) {
       view.cycleAnnotations();
+    } else if (action == ActionW.KO) {
+      view.toggleKeyImage();
     }
   }
 

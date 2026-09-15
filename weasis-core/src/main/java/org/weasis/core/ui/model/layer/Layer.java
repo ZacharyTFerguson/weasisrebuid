@@ -9,4 +9,40 @@
  */
 package org.weasis.core.ui.model.layer;
 
-public class Layer {}
+/** Named canvas layer (image, measure, draw, annotations, …). */
+public class Layer {
+
+  private LayerType type = LayerType.IMAGE;
+  private boolean visible = true;
+  private int level;
+
+  public Layer() {}
+
+  public Layer(LayerType type) {
+    setType(type);
+  }
+
+  public LayerType getType() {
+    return type;
+  }
+
+  public void setType(LayerType type) {
+    this.type = type == null ? LayerType.IMAGE : type;
+  }
+
+  public boolean isVisible() {
+    return visible;
+  }
+
+  public void setVisible(boolean visible) {
+    this.visible = visible;
+  }
+
+  public int getLevel() {
+    return level;
+  }
+
+  public void setLevel(int level) {
+    this.level = level;
+  }
+}

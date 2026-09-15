@@ -9,4 +9,16 @@
  */
 package org.weasis.core.ui.model.layer;
 
-public class LayerType {}
+/** Graphic / overlay layer kinds used by the 2D canvas and measure/draw tools. */
+public enum LayerType {
+  IMAGE,
+  CROSSLINES,
+  ANNOTATION,
+  DRAW,
+  MEASURE,
+  TEMP_DRAW,
+  TEMP_LINE,
+  ACQ_IMAGE,
+  PROCESSING,
+  DICOM_PR
+}

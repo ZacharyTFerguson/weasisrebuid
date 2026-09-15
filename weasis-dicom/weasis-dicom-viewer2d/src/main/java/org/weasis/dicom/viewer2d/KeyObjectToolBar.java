@@ -9,19 +9,29 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.util.Toolbar;
 
+/**
+ * Key Object chrome. Star toggles the current SOP as a key image (shortcut K); filter shows only
+ * key images.
+ */
 public class KeyObjectToolBar implements Toolbar {
 
   public static final String NAME = "Key Object";
+  public static final String STAR = "star";
+  public static final String FILTER = "filter";
 
-  private final KOManager manager;
+  private KOManager manager;
   private final JToolBar bar = new JToolBar(NAME);
   private int position = 50;
   private boolean enabled = true;
+  private View2d view;
 
   public KeyObjectToolBar() {
     this(new KOManager());
@@ -29,14 +39,62 @@ public class KeyObjectToolBar implements Toolbar {
 
   public KeyObjectToolBar(KOManager manager) {
     this.manager = manager == null ? new KOManager() : manager;
+    bar.add(button(STAR));
+    bar.add(button(FILTER));
+  }
+
+  public void bind(View2d view) {
+    this.view = view;
+    if (view != null) {
+      this.manager = view.getKoManager();
+    }
+  }
+
+  public View2d boundView() {
+    return view;
   }
 
   public KOManager getManager() {
-    return manager;
+    return view != null ? view.getKoManager() : manager;
   }
 
   public boolean toggle(String sopInstanceUid) {
-    return manager.toggleKeyImage(sopInstanceUid);
+    return getManager().toggleKeyImage(sopInstanceUid);
+  }
+
+  public boolean star() {
+    if (view != null) {
+      return view.toggleKeyImage();
+    }
+    return false;
+  }
+
+  public boolean filter() {
+    KOManager ko = getManager();
+    ko.setFilterKeyImages(!ko.isFilterKeyImages());
+    return ko.isFilterKeyImages();
+  }
+
+  public boolean isFilterKeyImages() {
+    return getManager().isFilterKeyImages();
+  }
+
+  private JButton button(String name) {
+    JButton button =
+        new JButton(
+            new AbstractAction(name) {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                if (STAR.equals(name)) {
+                  star();
+                } else if (FILTER.equals(name)) {
+                  filter();
+                }
+              }
+            });
+    button.setName(name);
+    button.setToolTipText(name);
+    return button;
   }
 
   @Override
