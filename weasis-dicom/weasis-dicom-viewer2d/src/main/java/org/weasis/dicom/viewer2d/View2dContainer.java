@@ -503,10 +503,15 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   MediaSeries<MediaElement> hungSameUid(MediaSeries<MediaElement> sequence) {
     for (View2d v : layout) {
       if (sameSeries(v.getSeries(), sequence) && hasUri(v.getSeries())) {
-        return v.getSeries();
+        return asMedia(v.getSeries());
       }
     }
     return sequence;
+  }
+
+  @SuppressWarnings("unchecked")
+  static MediaSeries<MediaElement> asMedia(MediaSeries<? extends MediaElement> series) {
+    return (MediaSeries<MediaElement>) series;
   }
 
   void loadFirstMedia(MediaSeries<MediaElement> sequence) {
