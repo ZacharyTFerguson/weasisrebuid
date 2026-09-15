@@ -13,7 +13,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -40,8 +39,9 @@ import org.weasis.dicom.codec.utils.InstanceSpacing;
  * the tag repeats). (0020,0032) {@code ImagePositionPatient} — lets tests prove the view bound the
  * dataset for the chosen index, not a stale handle. (0028,0008) {@code NumberOfFrames} — read only
  * to refuse values &gt; 1: this slice pages <em>instances</em> (separate objects), not frame
- * offsets inside one object's {@code PixelData}; showing frame 0 under another index would lie
- * about which anatomy is on screen.
+ * offsets inside one object's {@code PixelData} until stretch S paints frame {@code N} from byte
+ * offset; a lone multi-frame file may then scroll inside {@code PixelData} (see {@code
+ * multiFramePixelScrollChangesPaint}).
  *
  * <p><b>Why re-resolve per instance:</b> {@code PixelSpacing}, default W/L, rescale, and geometry
  * warnings live on each instance's dataset. Paging must call {@code applyDatasetFlags} and repaint
@@ -156,14 +156,28 @@ class View2dStackPagingTest {
   }
 
   @Test
-  void multiFrameInstanceIsRefused(@TempDir Path dir) throws Exception {
+  void multiFramePixelScrollChangesPaint(@TempDir Path dir) throws Exception {
     File mf = StackPagingFixtures.writeMultiframeCt(dir.resolve("mf.dcm").toFile());
     View2d view = new View2d();
-    assertThrows(IllegalArgumentException.class, () -> view.loadStack(List.of(mf)));
-    String warn = view.getGeometryWarning().toLowerCase();
-    assertTrue(
-        warn.contains("multi-frame") || warn.contains("numberofframes"),
-        () -> "expected geometry warning to name multi-frame, was: " + view.getGeometryWarning());
+    view.loadStack(List.of(mf));
+    assertEquals(3, view.getStackSize());
+    byte[] frame0 = paintedBytes(view);
+    view.setFrameIndex(2);
+    assertEquals(2, view.getPixelFrameIndex());
+    byte[] frame2 = paintedBytes(view);
+    assertNotEquals(frame0, frame2);
+  }
+
+  @Test
+  void multiFrameCannotMixWithOtherInstances(@TempDir Path dir) throws Exception {
+    Path pack = roundtripDir();
+    Assumptions.assumeTrue(Files.isDirectory(pack));
+    File s01 = pack.resolve("ct_brain_ax_s01_256.dcm").toFile();
+    Assumptions.assumeTrue(s01.isFile());
+    File mf = StackPagingFixtures.writeMultiframeCt(dir.resolve("mf.dcm").toFile());
+    View2d view = new View2d();
+    view.loadStack(List.of(s01));
+    assertThrows(IllegalArgumentException.class, () -> view.loadStack(List.of(s01, mf)));
   }
 
   @Test
