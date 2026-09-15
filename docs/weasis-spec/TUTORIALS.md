@@ -21,7 +21,7 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | 3D VR | 9 | GL 3.3; refuse llvmpipe | tutorial |
 | SR / AU / ECG / RT / SEG | 10 | factories + MIME; SR Content Sequence display; ECG millivolt leads; AU PCM play/pause/stop; RT STRUCT contours by Z | tutorial |
 | Q/R, DICOMweb, send, ISO, print | 11 | DIMSE/QIDO/STOW Have tests; Q/R import chrome; send C-STORE/STOW chrome | tutorial |
-| Dicomizer | 12 | acquire explorer/editor, Gogo 17181 smoke; photo editor rotate/crop/contrast; calibration mm/pixel; metadata display/edit/required; PersonName/AnatomicRegion cell editors; editor annotate (WP-5 graphics); MetadataAction; AcquireActionButton chrome; import/central thumbnails; import grouping; publish tree/dialog | tutorial |
+| Dicomizer | 12 | acquire explorer/editor, Gogo 17181 smoke; photo editor rotate/crop/contrast; calibration mm/pixel; metadata display/edit/required; PersonName/AnatomicRegion cell editors; editor annotate (WP-5 graphics); MetadataAction; AcquireActionButton chrome; import/central thumbnails; import grouping; publish tree/dialog; browse/series chrome; EditionToolFactory | tutorial |
 | `weasis://` `$dicom:get` `$dicom:rs` | 13 | protocol parser | tutorial |
 | i18n ≥30 %, native zip | 14 | fragment @13 + compressXZ zip | tutorial |
 | ViewerHub / IID | 15 | `/display` 302 `weasis://` | tutorial |
