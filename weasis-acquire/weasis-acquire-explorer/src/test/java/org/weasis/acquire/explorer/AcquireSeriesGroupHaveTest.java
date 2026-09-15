@@ -2,7 +2,8 @@
  * Copyright (c) 2026 Weasis rebuild contributors.
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
- * Public License 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ * License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
@@ -76,8 +77,7 @@ class AcquireSeriesGroupHaveTest {
     dialog.setSeriesName("camera");
     SeriesGroup series = dialog.createSeries();
     MediaImporterFactory factory = new MediaImporterFactory();
-    List<AcquireImageInfo> imported =
-        factory.importStills(manager, series, List.of(png, txt, jpg));
+    List<AcquireImageInfo> imported = factory.importStills(manager, series, List.of(png, txt, jpg));
 
     assertEquals(2, imported.size());
     assertEquals(2, manager.getImages().size());
@@ -107,8 +107,7 @@ class AcquireSeriesGroupHaveTest {
     assertEquals("ID-9", tags.getTagValue(TagW.PatientID));
     assertEquals(List.of("ID-9"), seen);
 
-    PatientDemographics demo =
-        new PatientDemographics("DOE^JANE", "P-1", "19700101", "F", "ACC-7");
+    PatientDemographics demo = new PatientDemographics("DOE^JANE", "P-1", "19700101", "F", "ACC-7");
     AcquireManager manager = new AcquireManager();
     manager.setDemographics(demo);
     Global global = manager.getGlobal();
