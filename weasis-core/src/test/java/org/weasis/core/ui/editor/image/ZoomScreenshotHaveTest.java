@@ -70,4 +70,17 @@ class ZoomScreenshotHaveTest {
     ScreenshotToolBar bar = new ScreenshotToolBar();
     assertEquals("Screenshot", bar.getComponentName());
   }
+
+  @Test
+  void rotationToolbarAppliesQuarterTurns() {
+    RotationToolBar bar = new RotationToolBar();
+    assertEquals("Rotation", bar.getComponentName());
+    DefaultView2d<?> view = new DefaultView2d<>();
+    bar.setSelectedRotation(90);
+    bar.apply(view);
+    assertEquals(90.0, view.getRotation());
+    bar.setSelectedRotation(0);
+    bar.apply(view);
+    assertEquals(0.0, view.getRotation());
+  }
 }

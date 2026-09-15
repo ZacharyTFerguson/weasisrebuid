@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import org.weasis.dicom.viewer3d.OpenGLInfo;
 import org.weasis.dicom.viewer3d.geometry.ArcballMouseListener;
 import org.weasis.dicom.viewer3d.geometry.Camera;
+import org.weasis.dicom.viewer3d.vr.lut.VolumePreset;
 
 /**
  * Headless-safe VR canvas. GPU capability is decided by {@link OpenGLInfo}; JOGL is not required to
@@ -82,6 +83,16 @@ public class VolumeCanvas extends JPanel implements ArcballMouseListener {
   public void onZoom(double factor) {
     if (isVolumeRenderingAvailable()) {
       model.getViewData().setZoom(model.getViewData().getZoom() * factor);
+    }
+  }
+
+  public VolumePreset getVolumePreset() {
+    return model.getPreset();
+  }
+
+  public void setVolumePreset(VolumePreset preset) {
+    if (preset != null && isVolumeRenderingAvailable()) {
+      model.setPreset(preset);
     }
   }
 }

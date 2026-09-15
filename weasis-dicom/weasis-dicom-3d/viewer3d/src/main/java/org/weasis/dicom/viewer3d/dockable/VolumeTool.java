@@ -3,17 +3,20 @@
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
- * License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ * License, Version 2.0 which is available at https://www.eclipse.org/licenses/LICENSE-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
 package org.weasis.dicom.viewer3d.dockable;
 
 import java.awt.BorderLayout;
-import javax.swing.JLabel;
+import java.awt.FlowLayout;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import org.weasis.core.api.gui.Insertable;
+import org.weasis.dicom.viewer3d.EventManager;
 import org.weasis.dicom.viewer3d.vr.RenderingType;
+import org.weasis.dicom.viewer3d.vr.View3d;
 
 public class VolumeTool extends JPanel implements Insertable {
 
@@ -24,7 +27,13 @@ public class VolumeTool extends JPanel implements Insertable {
 
   public VolumeTool() {
     super(new BorderLayout());
-    add(new JLabel(NAME), BorderLayout.CENTER);
+    JPanel types = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    for (RenderingType type : RenderingType.values()) {
+      JButton button = new JButton(type.name());
+      button.addActionListener(e -> setRenderingType(type));
+      types.add(button);
+    }
+    add(types, BorderLayout.CENTER);
   }
 
   public RenderingType getRenderingType() {
@@ -32,7 +41,14 @@ public class VolumeTool extends JPanel implements Insertable {
   }
 
   public void setRenderingType(RenderingType renderingType) {
-    if (renderingType != null) {
+    if (renderingType == null) {
+      return;
+    }
+    View3d view = EventManager.getInstance().getSelectedView();
+    if (view != null) {
+      view.setRenderingType(renderingType);
+      this.renderingType = view.getRenderingType();
+    } else {
       this.renderingType = renderingType;
     }
   }

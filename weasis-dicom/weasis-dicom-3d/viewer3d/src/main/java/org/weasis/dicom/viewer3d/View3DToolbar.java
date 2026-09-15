@@ -9,17 +9,62 @@
  */
 package org.weasis.dicom.viewer3d;
 
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.util.Toolbar;
+import org.weasis.dicom.viewer3d.vr.RenderingType;
+import org.weasis.dicom.viewer3d.vr.View3d;
 
+/** 3D chrome: COMPOSITE/MIP/MINIP/ISO on {@link EventManager#getSelectedView()}. */
 public class View3DToolbar implements Toolbar {
 
   public static final String NAME = "3D";
   private final JToolBar bar = new JToolBar(NAME);
   private int position = 120;
   private boolean enabled = true;
+  private RenderingType selected = RenderingType.COMPOSITE;
+
+  public View3DToolbar() {
+    for (RenderingType type : RenderingType.values()) {
+      bar.add(button(type));
+    }
+  }
+
+  public RenderingType getSelected() {
+    return selected;
+  }
+
+  public void select(RenderingType type) {
+    if (type == null) {
+      return;
+    }
+    selected = type;
+    applySelected();
+  }
+
+  public void applySelected() {
+    View3d view = EventManager.getInstance().getSelectedView();
+    if (view != null) {
+      view.setRenderingType(selected);
+    }
+  }
+
+  private JButton button(RenderingType type) {
+    JButton button =
+        new JButton(
+            new AbstractAction(type.name()) {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                select(type);
+              }
+            });
+    button.setToolTipText(type.name());
+    return button;
+  }
 
   @Override
   public JComponent getComponent() {

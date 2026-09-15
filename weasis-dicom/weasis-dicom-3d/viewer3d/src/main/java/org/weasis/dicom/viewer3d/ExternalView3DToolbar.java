@@ -9,17 +9,43 @@
  */
 package org.weasis.dicom.viewer3d;
 
+import java.util.Hashtable;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.util.Toolbar;
 
+/** 2D-side chrome that opens the current series in the DICOM 3D viewer. */
 public class ExternalView3DToolbar implements Toolbar {
 
   public static final String NAME = "3D External";
   private final JToolBar bar = new JToolBar(NAME);
+  private final View3DFactory factory = new View3DFactory();
+  private final JButton open = new JButton("3D");
   private int position = 121;
   private boolean enabled = true;
+  private View3DContainer lastOpened;
+
+  public ExternalView3DToolbar() {
+    bar.add(open);
+    open.addActionListener(e -> open3d(new Hashtable<>()));
+  }
+
+  public View3DContainer open3d(Hashtable<String, Object> properties) {
+    SeriesViewer<?> viewer = factory.createSeriesViewer(properties);
+    if (viewer instanceof View3DContainer container) {
+      lastOpened = container;
+      EventManager.getInstance().setAction(ActionVol.RENDERING_TYPE);
+      return container;
+    }
+    return null;
+  }
+
+  public View3DContainer getLastOpened() {
+    return lastOpened;
+  }
 
   @Override
   public JComponent getComponent() {
