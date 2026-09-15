@@ -34,7 +34,7 @@ public class GraphicsPane extends JPanel {
     return view;
   }
 
-  public List<Graphic> getGraphics() {
+  public List<Graphic> getGraphicList() {
     return view == null ? List.of() : view.getGraphicList();
   }
 

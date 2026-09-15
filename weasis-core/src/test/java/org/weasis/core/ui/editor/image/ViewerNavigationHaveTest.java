@@ -96,7 +96,7 @@ class ViewerNavigationHaveTest {
     GraphicsPane pane = new GraphicsPane();
     pane.bind(view);
     assertSame(view, pane.boundView());
-    assertEquals(1, pane.getGraphics().size());
+    assertEquals(1, pane.getGraphicList().size());
   }
 
   static Series<ImageElement> frames(int n) {
