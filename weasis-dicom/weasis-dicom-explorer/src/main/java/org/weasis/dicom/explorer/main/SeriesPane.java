@@ -13,7 +13,6 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.dnd.DragSource;
-import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import java.util.Map;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
-import javax.swing.TransferHandler;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.Series;
 import org.weasis.core.api.media.data.SeriesThumbnail;
@@ -121,40 +119,10 @@ public class SeriesPane extends JPanel {
     thumb.addMouseMotionListener(drag);
   }
 
-  static void exportThumb(SeriesThumbnail thumb, MouseEvent e) {
-    TransferHandler handler = thumb.getTransferHandler();
-    if (handler == null) {
-      return;
-    }
-    ViewTransferHandler.beginDrag(thumb.getSeries());
-    try {
-      handler.exportAsDrag(thumb, withLeft(e), TransferHandler.COPY);
-    } catch (RuntimeException ex) {
-      ViewTransferHandler.endDrag();
-    }
-  }
-
-  /** X11 {@code startDrag} needs BUTTON1 down; {@code MOUSE_DRAGGED} often reports NOBUTTON. */
-  static MouseEvent withLeft(MouseEvent e) {
-    int mods = e.getModifiersEx() | InputEvent.BUTTON1_DOWN_MASK;
-    return new MouseEvent(
-        e.getComponent(),
-        MouseEvent.MOUSE_PRESSED,
-        e.getWhen(),
-        mods,
-        e.getX(),
-        e.getY(),
-        e.getXOnScreen(),
-        e.getYOnScreen(),
-        Math.max(1, e.getClickCount()),
-        false,
-        MouseEvent.BUTTON1);
-  }
-
   /**
-   * Arm on left press, start after {@link DragSource#getDragThreshold()}, retry if {@code
-   * startDrag} failed ({@code dragging} cleared). Repeating a live {@code exportAsDrag} aborts
-   * Swing DnD.
+   * Arm on left press, start after {@link DragSource#getDragThreshold()}. Do not {@code
+   * exportAsDrag}: X11 native drag swallows drop, {@code dragDropEnd}, and thumbnail release.
+   * Toolkit {@code MOUSE_RELEASED} while {@code dragging()} hangs the cell under the pointer.
    */
   final class ThumbDrag extends MouseAdapter {
     private final SeriesThumbnail thumb;
@@ -188,23 +156,32 @@ public class SeriesPane extends JPanel {
 
     @Override
     public void mouseDragged(MouseEvent e) {
-      if (!armed(e)) {
+      if (origin == null) {
         return;
       }
-      exportThumb(thumb, e);
-      started = ViewTransferHandler.dragging() != null;
+      startIfFar(e);
+      track(e);
       e.consume();
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
+      ViewTransferHandler.overAt(new Point(e.getXOnScreen(), e.getYOnScreen()));
       ViewTransferHandler.hangAtPointer();
+      ViewTransferHandler.endDrag();
     }
 
-    boolean armed(MouseEvent e) {
-      return !started
-          && origin != null
-          && origin.distance(e.getPoint()) >= DragSource.getDragThreshold();
+    void startIfFar(MouseEvent e) {
+      if (!started && origin.distance(e.getPoint()) >= DragSource.getDragThreshold()) {
+        ViewTransferHandler.beginDrag(thumb.getSeries());
+        started = true;
+      }
+    }
+
+    void track(MouseEvent e) {
+      if (started) {
+        ViewTransferHandler.overAt(new Point(e.getXOnScreen(), e.getYOnScreen()));
+      }
     }
   }
 }

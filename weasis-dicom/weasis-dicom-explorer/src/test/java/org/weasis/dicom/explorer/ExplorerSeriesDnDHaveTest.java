@@ -12,6 +12,7 @@ package org.weasis.dicom.explorer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,7 +83,7 @@ class ExplorerSeriesDnDHaveTest {
       assertNotEquals(
           seriesUid(container.getLayoutViews().get(0).getSeries()), seriesUid(empty.getSeries()));
       assertSame(thumb.getSeries(), drop.lastSeries());
-      assertEquals(1, dragExports(thumb));
+      assertEquals(1, core.getOpenViewerPlugins().size());
     } finally {
       HangingProtocolOpenHaveTest.close(core, factory);
     }
@@ -371,11 +372,12 @@ class ExplorerSeriesDnDHaveTest {
       CountExport below =
           dragAt(thumb, InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1, shy, 0, shy, 0);
       assertEquals(0, below.exports);
+      assertNull(ViewTransferHandler.dragging());
     }
   }
 
   @Test
-  void leftDragAboveThresholdExportsOnceWithButton1() {
+  void leftDragAboveThresholdBeginsSeriesDragWithoutExportAsDrag() {
     SeriesPane pane = new SeriesPane();
     pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
     SeriesThumbnail thumb = pane.thumbnails().getFirst();
@@ -388,11 +390,35 @@ class ExplorerSeriesDnDHaveTest {
             far(),
             far() + 8,
             far());
-    assertEquals(1, once.exports);
-    MouseEvent sent = (MouseEvent) once.last;
-    assertEquals(MouseEvent.MOUSE_PRESSED, sent.getID());
-    assertEquals(MouseEvent.BUTTON1, sent.getButton());
-    assertTrue(SwingUtilities.isLeftMouseButton(sent));
+    assertEquals(0, once.exports);
+    assertNotNull(ViewTransferHandler.dragging());
+    ViewTransferHandler.endDrag();
+  }
+
+  @Test
+  void awtReleaseWhileDraggingHangsAtEventScreenAndEndsDrag() {
+    SeriesPane pane = new SeriesPane();
+    pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+    SeriesThumbnail thumb = pane.thumbnails().getFirst();
+    ViewTransferHandler.beginDrag(thumb.getSeries());
+    MouseEvent release =
+        new MouseEvent(
+            thumb,
+            MouseEvent.MOUSE_RELEASED,
+            0L,
+            0,
+            1,
+            1,
+            80,
+            120,
+            1,
+            false,
+            MouseEvent.BUTTON1);
+    ViewTransferHandler.hangFromAwt(release);
+    assertEquals(80, ViewTransferHandler.lastOver().x);
+    assertEquals(120, ViewTransferHandler.lastOver().y);
+    assertNull(ViewTransferHandler.dragging());
+    ViewTransferHandler.clearDragged();
   }
 
   @Test
@@ -410,12 +436,7 @@ class ExplorerSeriesDnDHaveTest {
             far() + 8,
             far());
     assertEquals(0, right.exports);
-  }
-
-  static int dragExports(SeriesThumbnail thumb) {
-    return dragAt(
-            thumb, InputEvent.BUTTON1_DOWN_MASK, MouseEvent.BUTTON1, far(), far(), far() + 8, far())
-        .exports;
+    ViewTransferHandler.clearDragged();
   }
 
   static CountExport dragAt(
@@ -428,7 +449,6 @@ class ExplorerSeriesDnDHaveTest {
         new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, x1, y1, 1, false));
     thumb.dispatchEvent(
         new MouseEvent(thumb, MouseEvent.MOUSE_DRAGGED, 0L, mods, x2, y2, 1, false));
-    ViewTransferHandler.endDrag();
     return handler;
   }
 

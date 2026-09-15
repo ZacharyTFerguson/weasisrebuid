@@ -53,6 +53,10 @@ public class ViewTransferHandler extends TransferHandler {
   private static MediaSeries<?> lastDragged;
   private static Point lastOver;
 
+  static {
+    DragFill.arm();
+  }
+
   private List<File> lastFiles = List.of();
   private MediaSeries<?> lastSeries;
 
@@ -125,6 +129,11 @@ public class ViewTransferHandler extends TransferHandler {
     return dragging != null ? dragging : lastDragged;
   }
 
+  /** Headed fill: toolkit mouse-release while {@link #dragging()} (not native drop). */
+  public static void hangFromAwt(AWTEvent event) {
+    DragFill.INSTANCE.eventDispatched(event);
+  }
+
   @Override
   protected void exportDone(JComponent source, Transferable data, int action) {
     hangAtPointer();
@@ -162,8 +171,8 @@ public class ViewTransferHandler extends TransferHandler {
   }
 
   /**
-   * Headed X11: {@code mouseReleased} is swallowed after {@code exportAsDrag}; hang the layout cell
-   * under the pointer (view-grid bounds, not glass-local View2d boxes).
+   * Headed X11: native {@code exportAsDrag} swallows drop, {@code dragDropEnd}, and thumbnail
+   * {@code mouseReleased}. Hang on toolkit {@code MOUSE_RELEASED} while {@code dragging()} is set.
    */
   public boolean hangAtScreen(Point screen) {
     MediaSeries<?> series = dragged();
@@ -496,9 +505,17 @@ public class ViewTransferHandler extends TransferHandler {
 
     @Override
     public void eventDispatched(AWTEvent event) {
-      if (releaseWhileDrag(event) instanceof MouseEvent me) {
-        hangScreen(me.getLocationOnScreen());
+      MouseEvent me = releaseWhileDrag(event);
+      if (me != null) {
+        hangRelease(me);
       }
+    }
+
+    static void hangRelease(MouseEvent me) {
+      Point screen = me.getLocationOnScreen();
+      lastOver = screen;
+      hangScreen(screen);
+      endDrag();
     }
 
     static MouseEvent releaseWhileDrag(AWTEvent event) {
