@@ -9,11 +9,13 @@
  */
 package org.weasis.core.ui.model.graphic.imp.line;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
+@XmlRootElement(name = "PolylineGraphic")
 public class PolylineGraphic extends AbstractDragGraphic {
 
   public PolylineGraphic() {

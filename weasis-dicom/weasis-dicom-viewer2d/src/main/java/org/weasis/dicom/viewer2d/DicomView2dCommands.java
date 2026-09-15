@@ -15,6 +15,8 @@ import java.util.Locale;
 import java.util.function.Supplier;
 import org.osgi.service.component.annotations.Component;
 import org.weasis.core.api.image.AffineTransformOp;
+import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MouseActions;
 import org.weasis.core.ui.editor.image.SynchView;
 
@@ -53,22 +55,89 @@ public class DicomView2dCommands {
   }
 
   public String layout(String... args) {
-    View2d view = requireView();
-    List<String> a = tokens(args);
-    int n = indexOfFlag(a, "-n");
-    int i = indexOfFlag(a, "-i");
-    Object host = view.getClientProperty(View2dContainer.class);
-    if (n >= 0 && n + 1 < a.size() && host instanceof View2dContainer container) {
-      container.setLayoutCount(Integer.parseInt(a.get(n + 1)));
+    return applyLayout(requireView(), tokens(args));
+  }
+
+  String applyLayout(View2d view, List<String> a) {
+    Integer n = intFlag(a, "-n");
+    Integer i = intFlag(a, "-i");
+    return applyLayout(containerOf(view), n, i);
+  }
+
+  static String applyLayout(View2dContainer host, Integer n, Integer i) {
+    if (n != null && host != null) {
+      host.setLayoutCount(n);
     }
-    if (i >= 0 && i + 1 < a.size() && host instanceof View2dContainer container) {
-      container.setLayoutIndex(Integer.parseInt(a.get(i + 1)));
-      return "layout -i " + container.getLayoutIndex();
+    return layoutResult(host, n, i);
+  }
+
+  static String layoutResult(View2dContainer host, Integer n, Integer i) {
+    if (i != null && host != null) {
+      host.setLayoutIndex(i);
+      return "layout -i " + host.getLayoutIndex();
     }
-    if (n >= 0 && n + 1 < a.size()) {
-      return "layout -n " + a.get(n + 1);
+    return n != null ? "layout -n " + n : "layout";
+  }
+
+  static View2dContainer containerOf(View2d view) {
+    if (view == null) {
+      return null;
     }
-    return "layout";
+    Object tagged = view.getClientProperty(View2dContainer.class);
+    if (tagged instanceof View2dContainer taggedHost) {
+      return taggedHost;
+    }
+    return containerWalk(view);
+  }
+
+  static View2dContainer containerWalk(java.awt.Component c) {
+    while (c != null) {
+      if (c instanceof View2dContainer host) {
+        return host;
+      }
+      c = c.getParent();
+    }
+    return focusedContainer();
+  }
+
+  static View2dContainer focusedContainer() {
+    ImageViewerPlugin<?> plugin = UICore.getInstance().getFocusedImagePlugin();
+    return plugin instanceof View2dContainer host ? host : null;
+  }
+
+  static Integer intFlag(List<String> a, String flag) {
+    int i = indexOfFlag(a, flag);
+    if (i < 0) {
+      return null;
+    }
+    return parseFlag(a, i, flag);
+  }
+
+  static Integer parseFlag(List<String> a, int i, String flag) {
+    String t = a.get(i);
+    String glued = gluedValue(t, flag);
+    if (glued != null) {
+      return Integer.valueOf(glued);
+    }
+    return i + 1 < a.size() ? Integer.valueOf(a.get(i + 1)) : null;
+  }
+
+  static String gluedValue(String t, String flag) {
+    if (!hasGlued(t, flag)) {
+      return null;
+    }
+    return stripEquals(t.substring(flag.length()));
+  }
+
+  static boolean hasGlued(String t, String flag) {
+    return t.startsWith(flag) && t.length() > flag.length();
+  }
+
+  static String stripEquals(String rest) {
+    if (rest.startsWith("=")) {
+      rest = rest.substring(1);
+    }
+    return rest.isEmpty() ? null : rest;
   }
 
   public String mouseLeftAction(String... args) {
@@ -195,11 +264,21 @@ public class DicomView2dCommands {
 
   static int indexOfFlag(List<String> a, String flag) {
     for (int i = 0; i < a.size(); i++) {
-      if (flag.equals(a.get(i)) || a.get(i).startsWith(flag + "=")) {
+      if (flagMatch(a.get(i), flag)) {
         return i;
       }
     }
     return -1;
+  }
+
+  static boolean flagMatch(String t, String flag) {
+    return flag.equals(t) || t.startsWith(flag + "=") || gluedNumber(t, flag);
+  }
+
+  static boolean gluedNumber(String t, String flag) {
+    return t.startsWith(flag)
+        && t.length() > flag.length()
+        && Character.isDigit(t.charAt(flag.length()));
   }
 
   /**

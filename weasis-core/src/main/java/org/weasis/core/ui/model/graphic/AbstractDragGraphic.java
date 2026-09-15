@@ -11,6 +11,7 @@ package org.weasis.core.ui.model.graphic;
 
 import java.awt.geom.Point2D;
 import java.util.List;
+import org.weasis.core.ui.model.utils.imp.DefaultDragSequence;
 
 public abstract class AbstractDragGraphic extends AbstractGraphic implements DragGraphic {
 
@@ -43,5 +44,9 @@ public abstract class AbstractDragGraphic extends AbstractGraphic implements Dra
   @Override
   public int getHandlePointTotalNumber() {
     return getPtsNumber();
+  }
+
+  public DefaultDragSequence dragHandle(int handle) {
+    return new DefaultDragSequence(this, handle);
   }
 }

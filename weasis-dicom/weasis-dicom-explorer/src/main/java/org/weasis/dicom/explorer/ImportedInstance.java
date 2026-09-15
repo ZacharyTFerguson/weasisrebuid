@@ -28,6 +28,9 @@ public final class ImportedInstance {
   private final int instanceNumber;
   private final File file;
   private final String mime;
+  private final String echoNumber;
+  private final String temporalPosition;
+  private final String contrastAgent;
 
   public ImportedInstance(
       String patientName,
@@ -43,19 +46,82 @@ public final class ImportedInstance {
       int instanceNumber,
       File file,
       String mime) {
-    this.patientName = patientName == null ? "" : patientName;
-    this.patientId = patientId == null ? "" : patientId;
-    this.studyUid = studyUid == null ? "" : studyUid;
-    this.seriesUid = seriesUid == null ? "" : seriesUid;
-    this.sopUid = sopUid == null ? "" : sopUid;
-    this.sopClassUid = sopClassUid == null ? "" : sopClassUid;
-    this.modality = modality == null ? "" : modality;
-    this.seriesDescription = seriesDescription == null ? "" : seriesDescription;
-    this.studyDate = studyDate == null ? "" : studyDate;
+    this(
+        patientName,
+        patientId,
+        studyUid,
+        seriesUid,
+        sopUid,
+        sopClassUid,
+        modality,
+        seriesDescription,
+        studyDate,
+        seriesNumber,
+        instanceNumber,
+        file,
+        mime,
+        "",
+        "",
+        "");
+  }
+
+  public ImportedInstance(
+      String patientName,
+      String patientId,
+      String studyUid,
+      String seriesUid,
+      String sopUid,
+      String sopClassUid,
+      String modality,
+      String seriesDescription,
+      String studyDate,
+      int seriesNumber,
+      int instanceNumber,
+      File file,
+      String mime,
+      String echoNumber,
+      String temporalPosition,
+      String contrastAgent) {
+    this.patientName = blank(patientName);
+    this.patientId = blank(patientId);
+    this.studyUid = blank(studyUid);
+    this.seriesUid = blank(seriesUid);
+    this.sopUid = blank(sopUid);
+    this.sopClassUid = blank(sopClassUid);
+    this.modality = blank(modality);
+    this.seriesDescription = blank(seriesDescription);
+    this.studyDate = blank(studyDate);
     this.seriesNumber = seriesNumber;
     this.instanceNumber = instanceNumber;
     this.file = file;
     this.mime = mime == null ? "application/dicom" : mime;
+    this.echoNumber = blank(echoNumber);
+    this.temporalPosition = blank(temporalPosition);
+    this.contrastAgent = blank(contrastAgent);
+  }
+
+  static String blank(String value) {
+    return value == null ? "" : value;
+  }
+
+  public ImportedInstance withSeriesUid(String seriesUid) {
+    return new ImportedInstance(
+        patientName,
+        patientId,
+        studyUid,
+        seriesUid,
+        sopUid,
+        sopClassUid,
+        modality,
+        seriesDescription,
+        studyDate,
+        seriesNumber,
+        instanceNumber,
+        file,
+        mime,
+        echoNumber,
+        temporalPosition,
+        contrastAgent);
   }
 
   public String patientName() {
@@ -108,6 +174,18 @@ public final class ImportedInstance {
 
   public String mime() {
     return mime;
+  }
+
+  public String echoNumber() {
+    return echoNumber;
+  }
+
+  public String temporalPosition() {
+    return temporalPosition;
+  }
+
+  public String contrastAgent() {
+    return contrastAgent;
   }
 
   public String patientKey() {

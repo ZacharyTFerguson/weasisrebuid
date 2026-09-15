@@ -15,4 +15,8 @@ public interface DicomSpecialElementFactory {
   String getSeriesMimeType();
 
   String getModality();
+
+  default DicomSpecialElement buildInstance(DcmMediaReader mediaIO) {
+    return new DicomSpecialElement(mediaIO);
+  }
 }

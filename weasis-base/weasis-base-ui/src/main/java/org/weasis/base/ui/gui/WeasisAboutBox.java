@@ -1,0 +1,38 @@
+/*
+ * Copyright (c) 2026 Weasis rebuild contributors.
+ *
+ * This program and the accompanying materials are made available under the terms of the Eclipse
+ * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
+ * License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ */
+package org.weasis.base.ui.gui;
+
+import java.awt.BorderLayout;
+import java.awt.Window;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.WindowConstants;
+import org.weasis.core.api.gui.util.AppProperties;
+
+public class WeasisAboutBox extends JDialog {
+  public WeasisAboutBox(Window parent) {
+    super(parent, "About " + AppProperties.WEASIS_NAME, ModalityType.APPLICATION_MODAL);
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    add(
+        new JLabel(
+            "<html><h2>"
+                + AppProperties.WEASIS_NAME
+                + " "
+                + AppProperties.WEASIS_VERSION
+                + "</h2><p>Clean-room rebuild</p></html>"),
+        BorderLayout.CENTER);
+    JButton close = new JButton("Close");
+    close.addActionListener(e -> dispose());
+    add(close, BorderLayout.SOUTH);
+    pack();
+    setLocationRelativeTo(parent);
+  }
+}

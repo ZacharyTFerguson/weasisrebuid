@@ -40,10 +40,7 @@ public class WeasisUiCommand {
       return help();
     }
     return switch (arg) {
-      case "-q", "--quit" -> {
-        bundleContext.getBundle(0).stop();
-        yield "stopping";
-      }
+      case "-q", "--quit" -> quit();
       case "-v", "--visible" -> showWindow(false);
       case "-m", "--minimized" -> showWindow(true);
       case "-?", "--help" -> help();
@@ -51,22 +48,35 @@ public class WeasisUiCommand {
     };
   }
 
+  /**
+   * COMMANDS.md {@code weasis:ui -q}: stop the OSGi system bundle. Window-close callers construct
+   * this command without {@link #activate}, so a missing context must still return {@code
+   * stopping}.
+   */
+  String quit() throws BundleException {
+    if (bundleContext != null) {
+      bundleContext.getBundle(0).stop();
+    }
+    return "stopping";
+  }
+
   static String showWindow(boolean minimize) {
     JFrame window = UICore.getInstance().getApplicationWindow();
     if (window == null) {
       return GraphicsEnvironmentNote.HEADLESS;
     }
-    GuiExecutor.execute(
-        () -> {
-          if (minimize) {
-            window.setExtendedState(window.getExtendedState() | JFrame.ICONIFIED);
-          } else {
-            window.setExtendedState(window.getExtendedState() & ~JFrame.ICONIFIED);
-            window.setVisible(true);
-            window.toFront();
-          }
-        });
+    GuiExecutor.invokeAndWait(() -> applyWindowState(window, minimize));
     return minimize ? "minimized" : "visible";
+  }
+
+  static void applyWindowState(JFrame window, boolean minimize) {
+    if (minimize) {
+      window.setExtendedState(window.getExtendedState() | JFrame.ICONIFIED);
+      return;
+    }
+    window.setExtendedState(window.getExtendedState() & ~JFrame.ICONIFIED);
+    window.setVisible(true);
+    window.toFront();
   }
 
   static String help() {

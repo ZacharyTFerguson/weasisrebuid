@@ -14,10 +14,45 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import org.weasis.core.ui.model.graphic.Graphic;
+import org.weasis.core.ui.model.utils.bean.GraphicClipboard;
 
 public class AbstractGraphicModel implements GraphicModel {
 
   private final List<Graphic> models = new CopyOnWriteArrayList<>();
+  private final List<ReferencedSeries> referencedSeries = new CopyOnWriteArrayList<>();
+  private final GraphicClipboard clipboard;
+
+  public AbstractGraphicModel() {
+    this(new GraphicClipboard());
+  }
+
+  public AbstractGraphicModel(GraphicClipboard clipboard) {
+    this.clipboard = clipboard == null ? new GraphicClipboard() : clipboard;
+  }
+
+  public GraphicClipboard clipboard() {
+    return clipboard;
+  }
+
+  public void copySelected() {
+    clipboard.setGraphics(getSelectedGraphics());
+  }
+
+  public int paste() {
+    int added = 0;
+    for (Graphic graphic : clipboard.getGraphics()) {
+      added += addCopy(graphic);
+    }
+    return added;
+  }
+
+  int addCopy(Graphic graphic) {
+    if (graphic == null) {
+      return 0;
+    }
+    addGraphic(graphic.copy());
+    return 1;
+  }
 
   @Override
   public List<Graphic> getModels() {
@@ -50,5 +85,40 @@ public class AbstractGraphicModel implements GraphicModel {
       }
     }
     return selected;
+  }
+
+  public void selectAll() {
+    for (Graphic g : models) {
+      g.setSelected(true);
+    }
+  }
+
+  public void deselectAll() {
+    for (Graphic g : models) {
+      g.setSelected(false);
+    }
+  }
+
+  public void deleteSelected() {
+    models.removeIf(g -> Boolean.TRUE.equals(g.getSelected()));
+  }
+
+  public void addReferencedSeries(ReferencedSeries series) {
+    if (series != null) {
+      referencedSeries.add(series);
+    }
+  }
+
+  public List<ReferencedSeries> getReferencedSeries() {
+    return Collections.unmodifiableList(referencedSeries);
+  }
+
+  public boolean referencesSop(String sop) {
+    for (ReferencedSeries series : referencedSeries) {
+      if (series.containsSop(sop)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

@@ -9,9 +9,22 @@
  */
 package org.weasis.core.ui.pref;
 
+/** Prefs &gt; Draw &amp; Measure. Graphic and Labels are documented SHORTCUTS.md subpages. */
 public class DrawPrefView extends ShellPrefPage {
 
+  public static final String TITLE = "Draw & Measure";
+
   public DrawPrefView() {
-    super("Draw & Measure", 500);
+    super(TITLE, 500);
+    addSubPage(new GraphicPrefView());
+    addSubPage(new LabelsPrefView());
+  }
+
+  public GraphicPrefView graphicPage() {
+    return (GraphicPrefView) getSubPages().getFirst();
+  }
+
+  public LabelsPrefView labelsPage() {
+    return (LabelsPrefView) getSubPages().get(1);
   }
 }

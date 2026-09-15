@@ -11,6 +11,7 @@
     <relativePath>../weasis-parent/pom.xml</relativePath>
   </parent>
 
+  <groupId>org.weasis.dicom</groupId>
   <artifactId>weasis-dicom</artifactId>
   <packaging>pom</packaging>
   <name>Weasis DICOM</name>
@@ -20,5 +21,13 @@
     <module>weasis-dicom-codec</module>
     <module>weasis-dicom-explorer</module>
     <module>weasis-dicom-viewer2d</module>
+    <module>weasis-dicom-sr</module>
+    <module>weasis-dicom-wave</module>
+    <module>weasis-dicom-au</module>
+    <module>weasis-dicom-send</module>
+    <module>weasis-dicom-qr</module>
+    <module>weasis-dicom-rt</module>
+    <module>weasis-dicom-isowriter</module>
+    <module>weasis-dicom-3d</module>
   </modules>
 </project>

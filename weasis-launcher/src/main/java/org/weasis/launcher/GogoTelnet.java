@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.launch.Framework;
@@ -30,14 +31,7 @@ final class GogoTelnet {
   private GogoTelnet() {}
 
   static void start(Framework framework, String port) throws Exception {
-    BundleContext context = framework.getBundleContext();
-    Object processor = waitForProcessor(context);
-    Method createSession =
-        processor
-            .getClass()
-            .getMethod("createSession", InputStream.class, OutputStream.class, OutputStream.class);
-    Object session =
-        createSession.invoke(processor, InputStream.nullInputStream(), System.out, System.err);
+    Object session = newSession(framework);
     Method execute = session.getClass().getMethod("execute", CharSequence.class);
     String command = "telnetd --ip=127.0.0.1 --port=" + port + " start";
     LOGGER.info("Starting Gogo {}", command);
@@ -65,6 +59,38 @@ final class GogoTelnet {
       }
     }
     throw new IllegalStateException("Cannot start Gogo telnetd on " + port, last);
+  }
+
+  static void executeLines(Framework framework, List<String> gogoLines) throws Exception {
+    if (gogoLines == null || gogoLines.isEmpty()) {
+      return;
+    }
+    Object session = newSession(framework);
+    Method execute = session.getClass().getMethod("execute", CharSequence.class);
+    executeEach(execute, session, gogoLines);
+  }
+
+  private static void executeEach(Method execute, Object session, List<String> gogoLines)
+      throws Exception {
+    for (String line : gogoLines) {
+      executeOne(execute, session, line);
+    }
+  }
+
+  private static void executeOne(Method execute, Object session, String line) throws Exception {
+    if (line == null || line.isBlank()) {
+      return;
+    }
+    execute.invoke(session, line);
+  }
+
+  private static Object newSession(Framework framework) throws Exception {
+    Object processor = waitForProcessor(framework.getBundleContext());
+    Method createSession =
+        processor
+            .getClass()
+            .getMethod("createSession", InputStream.class, OutputStream.class, OutputStream.class);
+    return createSession.invoke(processor, InputStream.nullInputStream(), System.out, System.err);
   }
 
   private static Object waitForProcessor(BundleContext context) throws InterruptedException {

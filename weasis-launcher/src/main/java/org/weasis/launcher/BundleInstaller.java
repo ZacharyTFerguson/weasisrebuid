@@ -21,6 +21,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.launch.Framework;
 import org.osgi.framework.startlevel.BundleStartLevel;
 import org.osgi.framework.startlevel.FrameworkStartLevel;
+import org.osgi.framework.wiring.BundleRequirement;
+import org.osgi.framework.wiring.BundleRevision;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,5 +80,28 @@ public final class BundleInstaller {
       throw new IllegalStateException("Interrupted raising framework start level", e);
     }
     LOGGER.info("Framework start level {}", beginning);
+    logUnresolved(framework);
+  }
+
+  /** Installed (unresolved) bundles after the start-level raise — Gogo smoke root-cause. */
+  static void logUnresolved(Framework framework) {
+    BundleContext context = framework.getBundleContext();
+    for (Bundle bundle : context.getBundles()) {
+      if (bundle.getState() != Bundle.INSTALLED) {
+        continue;
+      }
+      LOGGER.warn("Bundle still INSTALLED: {}", bundle.getSymbolicName());
+      BundleRevision revision = bundle.adapt(BundleRevision.class);
+      if (revision == null) {
+        continue;
+      }
+      for (BundleRequirement req :
+          revision.getDeclaredRequirements(BundleRevision.PACKAGE_NAMESPACE)) {
+        if ("optional".equals(req.getDirectives().get("resolution"))) {
+          continue;
+        }
+        LOGGER.warn("  missing-capable package: {}", req.getDirectives().get("filter"));
+      }
+    }
   }
 }

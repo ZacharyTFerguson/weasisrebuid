@@ -16,6 +16,9 @@ public class TagW {
 
   public static final TagW PatientID = new TagW("PatientID", "Patient ID");
   public static final TagW PatientName = new TagW("PatientName", "Patient Name");
+  public static final TagW PatientBirthDate = new TagW("PatientBirthDate", "Patient Birth Date");
+  public static final TagW PatientSex = new TagW("PatientSex", "Patient Sex");
+  public static final TagW AccessionNumber = new TagW("AccessionNumber", "Accession Number");
   public static final TagW StudyInstanceUID = new TagW("StudyInstanceUID", "Study Instance UID");
   public static final TagW SeriesInstanceUID = new TagW("SeriesInstanceUID", "Series Instance UID");
   public static final TagW SOPInstanceUID = new TagW("SOPInstanceUID", "SOP Instance UID");
@@ -27,6 +30,10 @@ public class TagW {
   public static final TagW SeriesDescription = new TagW("SeriesDescription", "Series Description");
   public static final TagW StudyDate = new TagW("StudyDate", "Study Date");
   public static final TagW StudyDescription = new TagW("StudyDescription", "Study Description");
+  public static final TagW StudyID = new TagW("StudyID", "Study ID");
+  public static final TagW OperatorsName = new TagW("OperatorsName", "Operators Name");
+  public static final TagW LocalNamespaceEntityID =
+      new TagW("LocalNamespaceEntityID", "Local Namespace Entity ID");
 
   private final String keyword;
   private final String displayedName;

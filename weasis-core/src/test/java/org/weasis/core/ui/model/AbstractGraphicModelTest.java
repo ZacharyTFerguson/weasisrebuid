@@ -32,4 +32,20 @@ class AbstractGraphicModelTest {
     model.clear();
     assertTrue(model.getModels().isEmpty());
   }
+
+  @Test
+  void selectAllAndDeleteSelected() {
+    AbstractGraphicModel model = new AbstractGraphicModel();
+    PointGraphic a = new PointGraphic();
+    PointGraphic b = new PointGraphic();
+    model.addGraphic(a);
+    model.addGraphic(b);
+    model.selectAll();
+    assertEquals(2, model.getSelectedGraphics().size());
+    model.deselectAll();
+    a.setSelected(true);
+    model.deleteSelected();
+    assertEquals(1, model.getModels().size());
+    assertTrue(model.getModels().contains(b));
+  }
 }

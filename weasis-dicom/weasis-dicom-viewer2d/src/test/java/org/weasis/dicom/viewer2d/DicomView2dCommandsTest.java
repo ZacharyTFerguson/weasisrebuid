@@ -78,4 +78,11 @@ class DicomView2dCommandsTest {
     cmd.layout("-i", "1");
     assertEquals(1, container.getLayoutIndex());
   }
+
+  @Test
+  void layoutNGluedTokenGrowsHost() {
+    View2dContainer container = new View2dContainer();
+    assertEquals("layout -n 4", new DicomView2dCommands(container.getView2d()).layout("-n4"));
+    assertEquals(4, container.getLayoutCount());
+  }
 }

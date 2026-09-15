@@ -28,21 +28,29 @@ public class WeasisLauncher {
 
   public static final String GOGO_PORT_PROPERTY = "gosh.port";
   public static final String DEFAULT_GOGO_PORT = "17179";
+  public static final String DICOMIZER_GOGO_PORT = "17181";
   public static final String BASE_JSON_PROPERTY = "weasis.base.json";
+  public static final String EXTENDED_CONFIG_PROPERTY = "felix.extended.config.properties";
+  public static final String DICOMIZER_PROFILE = "dicomizer";
 
   private static final Logger LOGGER = LoggerFactory.getLogger(WeasisLauncher.class);
 
   public void launch(String[] args) throws Exception {
     suppressAssistiveTech();
+    Utils.LaunchRequest request = Utils.parseLaunch(args);
+    request.applyProperties();
     Path weasisHome = Path.of(System.getProperty("user.home"), ".weasis");
     Files.createDirectories(weasisHome.resolve("log"));
     BootLog.install(weasisHome.resolve("log"));
 
     BuildInfo buildInfo = BuildInfo.load();
     Path baseJson = resolveBaseJson();
-    LOGGER.info("Loading {}", baseJson);
-    ConfigData config = ConfigData.load(baseJson, buildInfo.asMap());
+    Path overlay = resolveExtendedJson(baseJson);
+    LOGGER.info("Loading {} overlay={}", baseJson, overlay);
+    ConfigData config = ConfigData.load(baseJson, overlay, buildInfo.asMap());
 
+    applyWeasisSystemProperties(config);
+    LookAndFeels.install();
     ensureGogoPort();
     buildInfo
         .asMap()
@@ -52,8 +60,6 @@ public class WeasisLauncher {
                 System.setProperty(key, value);
               }
             });
-    applyWeasisSystemProperties(config);
-
     Map<String, String> fwConfig = new HashMap<>(config.frameworkProperties());
     fwConfig.put(GOGO_PORT_PROPERTY, System.getProperty(GOGO_PORT_PROPERTY));
     // Keep the framework up when stdin is not a TTY (CI / background launch).
@@ -66,6 +72,7 @@ public class WeasisLauncher {
     BundleInstaller.raiseStartLevel(framework, config);
     LauncherGogo.register(framework);
     GogoTelnet.start(framework, System.getProperty(GOGO_PORT_PROPERTY));
+    dispatchLaunchCommands(framework, request);
     LOGGER.info(
         "Felix {} started; Gogo {} ; weasis {}",
         framework.getSymbolicName(),
@@ -82,14 +89,60 @@ public class WeasisLauncher {
   }
 
   static String resolveGogoPort(String existing) {
-    if (existing == null || existing.isBlank()) {
-      return DEFAULT_GOGO_PORT;
+    return resolveGogoPort(existing, System.getProperty("weasis.profile"));
+  }
+
+  /** MX-16: desktop 17179; Dicomizer profile 17181. Never a JSON pref. */
+  static String resolveGogoPort(String existing, String profile) {
+    if (existing != null && !existing.isBlank()) {
+      return existing;
     }
-    return existing;
+    if (DICOMIZER_PROFILE.equals(profile)) {
+      return DICOMIZER_GOGO_PORT;
+    }
+    return DEFAULT_GOGO_PORT;
   }
 
   static void ensureGogoPort() {
     System.setProperty(GOGO_PORT_PROPERTY, resolveGogoPort(System.getProperty(GOGO_PORT_PROPERTY)));
+  }
+
+  static void dispatchLaunchCommands(Framework framework, Utils.LaunchRequest request)
+      throws Exception {
+    GogoTelnet.executeLines(framework, Utils.gogoLines(request));
+  }
+
+  static Path resolveExtendedJson(Path baseJson) {
+    String raw = System.getProperty(EXTENDED_CONFIG_PROPERTY);
+    if (raw == null || raw.isBlank()) {
+      return null;
+    }
+    String path = raw.trim();
+    if (path.startsWith("file:")) {
+      path = path.substring("file:".length());
+      if (path.startsWith("//")) {
+        path = path.substring(1);
+      }
+    }
+    Path candidate = Path.of(path);
+    if (Files.isRegularFile(candidate)) {
+      return candidate.toAbsolutePath().normalize();
+    }
+    if (baseJson != null && baseJson.getParent() != null) {
+      Path nextToBase = baseJson.getParent().resolve(candidate.getFileName());
+      if (Files.isRegularFile(nextToBase)) {
+        return nextToBase.toAbsolutePath().normalize();
+      }
+      Path fromConfParent = baseJson.getParent().resolve(path);
+      if (Files.isRegularFile(fromConfParent)) {
+        return fromConfParent.toAbsolutePath().normalize();
+      }
+    }
+    Path fromCwd = Path.of(System.getProperty("user.dir", ".")).resolve(path);
+    if (Files.isRegularFile(fromCwd)) {
+      return fromCwd.toAbsolutePath().normalize();
+    }
+    throw new IllegalStateException("extended config not found: " + raw);
   }
 
   static Path resolveBaseJson() {
@@ -120,8 +173,14 @@ public class WeasisLauncher {
         .values()
         .forEach(
             (key, value) -> {
-              if (key.startsWith("weasis.") && System.getProperty(key) == null) {
-                System.setProperty(key, value);
+              if (System.getProperty(key) != null) {
+                return;
+              }
+              if (key.startsWith("weasis.")
+                  || key.startsWith("org.weasis.")
+                  || key.startsWith("download.")
+                  || key.startsWith("locale.")) {
+                System.setProperty(key, value == null ? "" : value);
               }
             });
   }

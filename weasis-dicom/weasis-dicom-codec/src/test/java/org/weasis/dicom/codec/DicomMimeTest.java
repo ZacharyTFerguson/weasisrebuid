@@ -25,6 +25,20 @@ class DicomMimeTest {
     assertEquals(DicomMime.SEG_DICOM, DicomMime.fromSopClass(UID.SegmentationStorage));
     assertEquals(DicomMime.ENCAP_DICOM, DicomMime.fromSopClass(UID.EncapsulatedPDFStorage));
     assertEquals(DicomMime.VIDEO_DICOM, DicomMime.fromSopClass(UID.VideoEndoscopicImageStorage));
+    assertEquals(DicomMime.SR_DICOM, DicomMime.fromSopClass(UID.BasicTextSRStorage));
+    assertEquals(DicomMime.AU_DICOM, DicomMime.fromSopClass(UID.BasicVoiceAudioWaveformStorage));
+    assertEquals(DicomMime.WAVE_DICOM, DicomMime.fromSopClass(UID.TwelveLeadECGWaveformStorage));
+    assertEquals(DicomMime.RT_DICOM, DicomMime.fromSopClass(UID.RTStructureSetStorage));
     assertEquals(DicomMime.UNREADABLE_DICOM, DicomMime.fromSopClass(null));
+  }
+
+  @Test
+  void overlayIconTokensForKoPrSegRtOnly() {
+    assertEquals("KO", DicomMime.overlayIcon(DicomMime.KO_DICOM));
+    assertEquals("PR", DicomMime.overlayIcon(DicomMime.PR_DICOM));
+    assertEquals("SEG", DicomMime.overlayIcon(DicomMime.SEG_DICOM));
+    assertEquals("RT", DicomMime.overlayIcon(DicomMime.RT_DICOM));
+    assertEquals("", DicomMime.overlayIcon(DicomMime.IMAGE_DICOM));
+    assertEquals("", DicomMime.overlayIcon(""));
   }
 }

@@ -16,6 +16,24 @@ public final class InsertableUtil {
 
   private InsertableUtil() {}
 
+  public static boolean isFactoryEnabled(Class<?> type) {
+    if (type == null) {
+      return true;
+    }
+    return isFactoryEnabled(type.getName());
+  }
+
+  public static boolean isFactoryEnabled(String className) {
+    if (className == null || className.isBlank()) {
+      return true;
+    }
+    String v = System.getProperty(className);
+    if (v == null || v.isBlank()) {
+      return true;
+    }
+    return !"false".equalsIgnoreCase(v.trim());
+  }
+
   public static String visibilityKey(String className) {
     return className + ".visible";
   }

@@ -47,6 +47,15 @@ public final class ConfigData {
   }
 
   public static ConfigData load(Path json, Map<String, String> buildInfo) throws IOException {
+    return load(json, null, buildInfo);
+  }
+
+  /**
+   * Loads {@code json} then overlays {@code overlay} by preference code. Empty overlay values win
+   * (Dicomizer clears start-levels 70/75). {@code overlay} may be {@code null}.
+   */
+  public static ConfigData load(Path json, Path overlay, Map<String, String> buildInfo)
+      throws IOException {
     Objects.requireNonNull(json, "json");
     Map<String, String> seeds = new LinkedHashMap<>();
     seeds.put("user.home", System.getProperty("user.home"));
@@ -62,24 +71,9 @@ public final class ConfigData {
     }
     seeds.put("native.library.spec", NativeLibrary.spec());
 
-    JsonNode root = MAPPER.readTree(Files.readString(json));
-    JsonNode array = root.get("weasisPreferences");
-    if (array == null || !array.isArray()) {
-      throw new IllegalArgumentException(json + " is missing weasisPreferences[]");
-    }
-
-    Map<String, Preference> prefs = new LinkedHashMap<>();
-    for (JsonNode node : array) {
-      String code = text(node, "code");
-      prefs.put(
-          code,
-          new Preference(
-              code,
-              text(node, "value"),
-              text(node, "description"),
-              text(node, "type"),
-              text(node, "javaType"),
-              text(node, "category")));
+    Map<String, Preference> prefs = parsePreferences(json);
+    if (overlay != null) {
+      prefs.putAll(parsePreferences(overlay));
     }
 
     Map<String, String> raw = new LinkedHashMap<>(seeds);
@@ -96,6 +90,28 @@ public final class ConfigData {
 
     Map<String, String> resolved = resolveAll(raw);
     return new ConfigData(json, Collections.unmodifiableMap(prefs), resolved);
+  }
+
+  static Map<String, Preference> parsePreferences(Path json) throws IOException {
+    JsonNode root = MAPPER.readTree(Files.readString(json));
+    JsonNode array = root.get("weasisPreferences");
+    if (array == null || !array.isArray()) {
+      throw new IllegalArgumentException(json + " is missing weasisPreferences[]");
+    }
+    Map<String, Preference> prefs = new LinkedHashMap<>();
+    for (JsonNode node : array) {
+      String code = text(node, "code");
+      prefs.put(
+          code,
+          new Preference(
+              code,
+              text(node, "value"),
+              text(node, "description"),
+              text(node, "type"),
+              text(node, "javaType"),
+              text(node, "category")));
+    }
+    return prefs;
   }
 
   public Path source() {

@@ -1,0 +1,54 @@
+{
+  "weasisPreferences": [
+    {
+      "code": "org.osgi.framework.startlevel.beginning",
+      "value": "100",
+      "description": "Non-DICOM explorer beginning start level",
+      "type": "A",
+      "category": "FELIX_CONFIG",
+      "javaType": "INT"
+    },
+    {
+      "code": "felix.auto.start.30",
+      "value": "",
+      "description": "No dicom-codec",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.40",
+      "value": "file:${maven.localRepository}/org/weasis/base/weasis-base-explorer/${app.version}/weasis-base-explorer-${app.version}.jar",
+      "description": "base-explorer replaces dicom-explorer",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.70",
+      "value": "",
+      "description": "empty 70",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "felix.auto.start.75",
+      "value": "",
+      "description": "empty 75",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
+      "code": "weasis.name",
+      "value": "Weasis Image Explorer",
+      "description": "Application name",
+      "type": "AP",
+      "category": "LAUNCH"
+    },
+    {
+      "code": "weasis.profile",
+      "value": "base-explorer",
+      "description": "Preferences profile",
+      "type": "AP",
+      "category": "LAUNCH"
+    }
+  ]
+}

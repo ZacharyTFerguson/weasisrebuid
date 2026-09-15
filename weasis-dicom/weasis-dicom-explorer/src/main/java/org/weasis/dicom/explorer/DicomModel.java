@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 import org.weasis.core.api.explorer.ObservableEvent;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.media.data.Codec;
@@ -53,10 +54,63 @@ public class DicomModel implements DataExplorerModel {
     return List.copyOf(instances);
   }
 
+  public int clearAll() {
+    return removeWhere(inst -> true);
+  }
+
+  public int removePatient(String patientId) {
+    return removeWhere(inst -> uidEquals(patientId, inst.patientId()));
+  }
+
+  public int removeStudy(String studyUid) {
+    return removeWhere(inst -> uidEquals(studyUid, inst.studyUid()));
+  }
+
+  public int removeSeries(String seriesUid) {
+    return removeWhere(inst -> uidEquals(seriesUid, inst.seriesUid()));
+  }
+
+  int removeWhere(Predicate<ImportedInstance> pred) {
+    List<ImportedInstance> gone = matching(pred);
+    if (gone.isEmpty()) {
+      return 0;
+    }
+    instances.removeAll(gone);
+    firePropertyChange(new ObservableEvent(ObservableEvent.BasicAction.REMOVE, this, gone));
+    return gone.size();
+  }
+
+  List<ImportedInstance> matching(Predicate<ImportedInstance> pred) {
+    List<ImportedInstance> gone = new ArrayList<>();
+    for (ImportedInstance inst : instances) {
+      addIfMatch(gone, inst, pred);
+    }
+    return gone;
+  }
+
+  static void addIfMatch(
+      List<ImportedInstance> gone, ImportedInstance inst, Predicate<ImportedInstance> pred) {
+    if (pred != null && pred.test(inst)) {
+      gone.add(inst);
+    }
+  }
+
+  static boolean uidEquals(String want, String have) {
+    return want != null && !want.isBlank() && want.equals(have);
+  }
+
   public Map<String, List<ImportedInstance>> patients() {
     Map<String, List<ImportedInstance>> map = new LinkedHashMap<>();
     for (ImportedInstance inst : instances) {
       map.computeIfAbsent(inst.patientKey(), k -> new ArrayList<>()).add(inst);
+    }
+    return map;
+  }
+
+  public Map<String, List<ImportedInstance>> studies(String patientKey) {
+    Map<String, List<ImportedInstance>> map = new LinkedHashMap<>();
+    for (ImportedInstance inst : patients().getOrDefault(patientKey, List.of())) {
+      map.computeIfAbsent(inst.studyUid(), k -> new ArrayList<>()).add(inst);
     }
     return map;
   }

@@ -13,13 +13,53 @@ import java.awt.BorderLayout;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 
-/** Blank central panel produced by {@link DummySeriesViewerFactory}. */
+/**
+ * Blank fallback viewer for {@code image/dummy}. The main window must not attach this at startup;
+ * File &gt; Import opens a real series viewer instead.
+ */
 public class DummyViewerPlugin extends ViewerPlugin<MediaElement> {
 
+  public static final String EMPTY_STATUS = "No series";
+
+  private final JLabel status;
+
   public DummyViewerPlugin() {
-    super("Dummy viewer");
-    add(new JLabel(" ", SwingConstants.CENTER), BorderLayout.CENTER);
+    super(DummySeriesViewerFactory.NAME);
+    status = new JLabel(EMPTY_STATUS, SwingConstants.CENTER);
+    status.setName("dummy-status");
+    add(status, BorderLayout.CENTER);
+  }
+
+  public String statusText() {
+    return status.getText();
+  }
+
+  @Override
+  public synchronized void addSeries(MediaSeries<MediaElement> sequence) {
+    super.addSeries(sequence);
+    refreshStatus();
+  }
+
+  @Override
+  public synchronized void removeSeries(MediaSeries<MediaElement> sequence) {
+    super.removeSeries(sequence);
+    refreshStatus();
+  }
+
+  @Override
+  public void close() {
+    super.close();
+    refreshStatus();
+  }
+
+  void refreshStatus() {
+    status.setText(labelFor(getOpenSeries().size()));
+  }
+
+  static String labelFor(int n) {
+    return n <= 0 ? EMPTY_STATUS : n + " series";
   }
 }

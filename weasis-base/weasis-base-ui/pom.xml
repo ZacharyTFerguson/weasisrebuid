@@ -15,6 +15,39 @@
   <name>Weasis base UI</name>
   <description>UI aggregator named by weasis.main.ui. WP-1 opens a dummy SeriesViewerFactory / ViewerPlugin.</description>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.weasis.thirdparty</groupId>
+      <artifactId>docking-frames</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf-extras</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.weisj</groupId>
+      <artifactId>jsvg</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -27,7 +60,7 @@ Bundle-Name: Weasis Base UI
 Bundle-Activator: org.weasis.base.ui.internal.MainWindowActivator
 -dsannotations: *
 Export-Package: !org.weasis.base.ui.internal.*, org.weasis.base.ui.*
-Import-Package: org.osgi.framework,org.osgi.service.component,javax.swing,javax.swing.border,javax.swing.event,*
+Import-Package: org.osgi.framework,org.osgi.service.component,javax.swing,javax.swing.border,javax.swing.event,bibliothek.gui.dock.common,bibliothek.gui.dock.common.intern,org.slf4j;version=!,*
 ]]></bnd>
         </configuration>
       </plugin>

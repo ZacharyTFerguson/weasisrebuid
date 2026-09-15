@@ -9,10 +9,13 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -23,11 +26,14 @@ import org.weasis.core.api.image.ShutterOp;
 import org.weasis.core.api.image.WindowAndPresetsOp;
 import org.weasis.core.api.image.util.WindLevelParameters;
 import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.codec.WindowLevelPainter;
+import org.weasis.dicom.codec.seg.SegVisibilityPolicy;
 import org.weasis.dicom.codec.utils.DicomMediaUtils;
+import org.weasis.dicom.codec.utils.LutPipeline;
 
 /**
  * DICOM 2D view. Op chain: WindowAndPresets → Filter → PseudoColor → Shutter → Overlay → Affine.
@@ -36,12 +42,23 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private Attributes dataset;
   private WindLevelParameters fileWl = new WindLevelParameters(400, 40);
+  private WindLevelParameters dataRangeWl;
+  private WindLevelParameters activeVoi = new WindLevelParameters(400, 40);
   private double window = 400;
   private double level = 40;
   private File file;
+  private final KOManager koManager = new KOManager();
+  private final List<WindLevelParameters> presets = new ArrayList<>();
+  private final SegVisibilityPolicy segVisibility = new SegVisibilityPolicy();
 
   public View2d() {
     super();
+    setInfoLayer(new InfoLayer());
+  }
+
+  @Override
+  public InfoLayer getInfoLayer() {
+    return infoLayer instanceof InfoLayer layer ? layer : new InfoLayer();
   }
 
   public void load(File dicom) throws Exception {
@@ -52,11 +69,22 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public void load(Attributes dataset) {
     this.dataset = Objects.requireNonNull(dataset, "dataset");
-    fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
-    this.window = fileWl.getWindow();
-    this.level = fileWl.getLevel();
+    bindWindowLevel(dataset);
+    setModalityLut(
+        dataset.getDouble(Tag.RescaleSlope, 1.0), dataset.getDouble(Tag.RescaleIntercept, 0.0));
+    setFrameOfReferenceUID(dataset.getString(Tag.FrameOfReferenceUID, ""));
     applyDatasetFlags();
     render();
+  }
+
+  void bindWindowLevel(Attributes dataset) {
+    fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
+    dataRangeWl = DicomMediaUtils.dataRangeWindowLevel(dataset);
+    setPresets(DicomMediaUtils.voiPresets(dataset));
+    this.activeVoi = fileWl;
+    this.window = fileWl.getWindow();
+    this.level = fileWl.getLevel();
+    bindOp(fileWl);
   }
 
   public Attributes getDataset() {
@@ -65,6 +93,60 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public File getFile() {
     return file;
+  }
+
+  public KOManager getKoManager() {
+    return koManager;
+  }
+
+  @Override
+  public boolean toggleKeyImage() {
+    if (dataset == null) {
+      return false;
+    }
+    return koManager.toggleKeyImage(dataset.getString(Tag.SOPInstanceUID));
+  }
+
+  public List<MediaElement> visibleMedias() {
+    MediaSeries<? extends MediaElement> s = getSeries();
+    return koManager.visibleMedias(s == null ? List.of() : s.getMedias());
+  }
+
+  public void applyKeyImageFilter() {
+    if (!koManager.isFilterKeyImages()) {
+      return;
+    }
+    jumpToVisible();
+  }
+
+  void jumpToVisible() {
+    List<MediaElement> visible = visibleMedias();
+    if (nothingToShow(visible)) {
+      return;
+    }
+    selectFirstIfHidden(getSeries().getMedias(), visible);
+  }
+
+  boolean nothingToShow(List<MediaElement> visible) {
+    return visible.isEmpty() || getSeries() == null;
+  }
+
+  void selectFirstIfHidden(List<? extends MediaElement> all, List<MediaElement> visible) {
+    if (currentIsVisible(all, visible)) {
+      return;
+    }
+    int idx = all.indexOf(visible.getFirst());
+    if (idx >= 0) {
+      setFrameIndex(idx);
+    }
+  }
+
+  boolean currentIsVisible(List<? extends MediaElement> all, List<MediaElement> visible) {
+    int idx = getFrameIndex();
+    if (idx < 0 || idx >= all.size()) {
+      return false;
+    }
+    return visible.contains(all.get(idx));
   }
 
   public double getWindow() {
@@ -76,11 +158,36 @@ public class View2d extends DefaultView2d<MediaElement> {
   }
 
   public void setWindowLevel(double window, double level) {
-    this.window = window;
-    this.level = level;
-    getDisplayOpManager().setParamValue("op.window.presets", WindowAndPresetsOp.P_WINDOW, window);
-    getDisplayOpManager().setParamValue("op.window.presets", WindowAndPresetsOp.P_LEVEL, level);
+    applyVoi(shapedVoi(window, level));
+  }
+
+  void applyVoi(WindLevelParameters voi) {
+    this.activeVoi = voi == null ? new WindLevelParameters(this.window, this.level) : voi;
+    this.window = activeVoi.getWindow();
+    this.level = activeVoi.getLevel();
+    bindOp(activeVoi);
     render();
+  }
+
+  void bindOp(WindLevelParameters voi) {
+    getDisplayOpManager()
+        .setParamValue("op.window.presets", WindowAndPresetsOp.P_WINDOW, voi.getWindow());
+    getDisplayOpManager()
+        .setParamValue("op.window.presets", WindowAndPresetsOp.P_LEVEL, voi.getLevel());
+    getDisplayOpManager()
+        .setParamValue("op.window.presets", WindowAndPresetsOp.P_VOI_LUT_SHAPE, voi.getLutShape());
+  }
+
+  WindLevelParameters shapedVoi(double window, double level) {
+    WindLevelParameters p = new WindLevelParameters(window, level);
+    if (dataset != null) {
+      p.setLutShape(LutPipeline.voiFunction(dataset));
+    }
+    return p;
+  }
+
+  public WindLevelParameters getActiveVoi() {
+    return activeVoi;
   }
 
   public WindLevelParameters getFileWindowLevel() {
@@ -90,15 +197,96 @@ public class View2d extends DefaultView2d<MediaElement> {
   @Override
   public void resetWinLevelDefaults() {
     if (fileWl != null) {
-      setWindowLevel(fileWl.getWindow(), fileWl.getLevel());
+      applyVoi(fileWl);
     }
+  }
+
+  public void setPresets(List<WindLevelParameters> presets) {
+    this.presets.clear();
+    if (presets != null) {
+      this.presets.addAll(presets);
+    }
+  }
+
+  public List<WindLevelParameters> getPresets() {
+    return List.copyOf(presets);
+  }
+
+  @Override
+  public void applyPreset(int index) {
+    if (index <= 0) {
+      applyDataRange();
+      return;
+    }
+    applyPositivePreset(index);
+  }
+
+  void applyPositivePreset(int index) {
+    if (presets.isEmpty()) {
+      applyDataRange();
+      return;
+    }
+    applyIndexedPreset(index);
+  }
+
+  void applyDataRange() {
+    WindLevelParameters range = visibleDataRange();
+    if (range != null) {
+      setWindowLevel(range.getWindow(), range.getLevel());
+    }
+  }
+
+  WindLevelParameters visibleDataRange() {
+    if (dataRangeWl == null) {
+      return fileWl;
+    }
+    if (presets.isEmpty() || !sameOverlayWindow(dataRangeWl, fileWl)) {
+      return dataRangeWl;
+    }
+    return halfWindow(dataRangeWl);
+  }
+
+  static boolean sameOverlayWindow(WindLevelParameters a, WindLevelParameters b) {
+    if (a == null || b == null) {
+      return false;
+    }
+    return overlayWindow(a) == overlayWindow(b);
+  }
+
+  static int overlayWindow(WindLevelParameters range) {
+    return (int) range.getWindow();
+  }
+
+  static WindLevelParameters halfWindow(WindLevelParameters range) {
+    return new WindLevelParameters(Math.max(1.0, range.getWindow() / 2.0), range.getLevel());
+  }
+
+  void applyIndexedPreset(int index) {
+    int i = Math.min(presets.size(), index) - 1;
+    applyVoi(presets.get(i));
+  }
+
+  public SegVisibilityPolicy getSegVisibility() {
+    return segVisibility;
+  }
+
+  @Override
+  public void setSegmentationsVisible(boolean visible) {
+    super.setSegmentationsVisible(visible);
+    segVisibility.setVisible(visible);
+  }
+
+  @Override
+  public void toggleSegmentations() {
+    super.toggleSegmentations();
+    segVisibility.setVisible(isSegmentationsVisible());
   }
 
   public void render() {
     if (dataset == null) {
       return;
     }
-    BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, window, level);
+    BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, activeVoi);
     painted = applyFilterAndColor(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);
@@ -211,21 +399,45 @@ public class View2d extends DefaultView2d<MediaElement> {
   }
 
   @Override
-  protected ImageViewerEventManager createEventManager() {
-    return new View2dEventManager(this);
+  public void setFrameIndex(int frameIndex, boolean propagate) {
+    super.setFrameIndex(frameIndex, propagate);
+    loadFrameMedia();
   }
 
-  static final class View2dEventManager extends ImageViewerEventManager {
-    private final View2d view2d;
-
-    View2dEventManager(View2d view) {
-      super(view);
-      this.view2d = view;
+  void loadFrameMedia() {
+    MediaSeries<? extends MediaElement> series = getSeries();
+    if (series == null) {
+      return;
     }
-
-    @Override
-    protected void applyWindowLevel(int dx, int dy) {
-      view2d.setWindowLevel(view2d.getWindow() + dx, view2d.getLevel() - dy);
+    List<? extends MediaElement> medias = series.getMedias();
+    int index = getFrameIndex();
+    if (index < 0 || index >= medias.size()) {
+      return;
     }
+    MediaElement media = medias.get(index);
+    if (media == null || media.getMediaURI() == null) {
+      return;
+    }
+    try {
+      File file = new File(media.getMediaURI());
+      if (file.isFile()) {
+        load(file);
+      }
+    } catch (Exception ignored) {
+      // stills with decoded pixels are applied in DefaultView2d.applyFramePixels
+    }
+  }
+
+  @Override
+  protected void paintDecorations(Graphics2D g) {
+    super.paintDecorations(g);
+    if (getInfoLayer() instanceof InfoLayer layer) {
+      layer.paint(g, this);
+    }
+  }
+
+  @Override
+  protected ImageViewerEventManager createEventManager() {
+    return new EventManager(this);
   }
 }
