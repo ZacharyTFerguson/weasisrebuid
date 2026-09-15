@@ -25,6 +25,9 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 import javax.swing.WindowConstants;
+import bibliothek.gui.dock.common.CControl;
+import bibliothek.gui.dock.common.CGrid;
+import bibliothek.gui.dock.common.DefaultSingleCDockable;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.explorer.DicomImportFactory;
@@ -45,6 +48,10 @@ public class WeasisWin extends JFrame {
 
   private final ToolBarContainer toolbars;
   private final JTabbedPane viewerTabs = new JTabbedPane();
+  private final JPanel explorerHost = new JPanel(new BorderLayout());
+  private CControl dockingControl;
+  private DefaultSingleCDockable explorerDock;
+  private DefaultSingleCDockable viewerDock;
   private DataExplorerView explorerView;
 
   public WeasisWin() {
@@ -62,8 +69,30 @@ public class WeasisWin extends JFrame {
     setJMenuBar(createMenuBar());
     addImportButton();
     add(toolbars, BorderLayout.NORTH);
-    add(viewerTabs, BorderLayout.CENTER);
+    installDockingHost();
+  }
+
+  void installDockingHost() {
+    viewerTabs.setName("viewer-tabs");
     viewerTabs.addChangeListener(e -> onViewerTabChanged());
+    dockingControl = new CControl(this);
+    explorerDock = uncloseableDock("explorer", "Explorer", explorerHost);
+    viewerDock = uncloseableDock("viewer", "Viewer", viewerTabs);
+    deployExplorerAndViewer();
+    add(dockingControl.getContentArea(), BorderLayout.CENTER);
+  }
+
+  static DefaultSingleCDockable uncloseableDock(String id, String title, Component content) {
+    DefaultSingleCDockable dock = new DefaultSingleCDockable(id, title, content);
+    dock.setCloseable(false);
+    return dock;
+  }
+
+  void deployExplorerAndViewer() {
+    CGrid grid = new CGrid(dockingControl);
+    grid.add(0, 0, 1, 1, explorerDock);
+    grid.add(1, 0, 3, 1, viewerDock);
+    dockingControl.getContentArea().deploy(grid);
   }
 
   void addImportButton() {
@@ -99,6 +128,22 @@ public class WeasisWin extends JFrame {
 
   public JTabbedPane getViewerTabs() {
     return viewerTabs;
+  }
+
+  public CControl getDockingControl() {
+    return dockingControl;
+  }
+
+  public JPanel getExplorerHost() {
+    return explorerHost;
+  }
+
+  public DefaultSingleCDockable getExplorerDock() {
+    return explorerDock;
+  }
+
+  public DefaultSingleCDockable getViewerDock() {
+    return viewerDock;
   }
 
   public DataExplorerView getExplorerView() {
@@ -187,27 +232,52 @@ public class WeasisWin extends JFrame {
   }
 
   public void attachExplorer() {
+    DataExplorerView chosen = pickExplorer();
+    if (chosen instanceof Component component) {
+      dockExplorer(chosen, component);
+    }
+  }
+
+  DataExplorerView pickExplorer() {
     DataExplorerView chosen = null;
     for (DataExplorerViewFactory explorerFactory : UICore.getInstance().getExplorerFactories()) {
       DataExplorerView explorer = explorerFactory.createInstance(new Hashtable<>());
-      if (!(explorer instanceof Component)) {
-        continue;
-      }
-      if (explorer.getClass().getName().contains("dicom.explorer.DicomExplorer")) {
-        chosen = explorer;
+      chosen = preferExplorer(chosen, explorer);
+      if (isDicomExplorer(explorer)) {
         break;
       }
-      if (chosen == null) {
-        chosen = explorer;
-      }
     }
-    if (chosen instanceof Component component) {
-      explorerView = chosen;
-      component.setPreferredSize(new Dimension(280, 640));
-      add(component, BorderLayout.WEST);
-      if (chosen.getDataExplorerModel() != null) {
-        chosen.getDataExplorerModel().addPropertyChangeListener(new MainWindowListener(this));
-      }
+    return chosen;
+  }
+
+  static boolean isDicomExplorer(DataExplorerView explorer) {
+    return explorer != null
+        && explorer.getClass().getName().contains("dicom.explorer.DicomExplorer");
+  }
+
+  static DataExplorerView preferExplorer(DataExplorerView chosen, DataExplorerView explorer) {
+    if (!(explorer instanceof Component)) {
+      return chosen;
+    }
+    if (isDicomExplorer(explorer)) {
+      return explorer;
+    }
+    return chosen == null ? explorer : chosen;
+  }
+
+  void dockExplorer(DataExplorerView chosen, Component component) {
+    explorerView = chosen;
+    component.setPreferredSize(new Dimension(280, 640));
+    explorerHost.removeAll();
+    explorerHost.add(component, BorderLayout.CENTER);
+    explorerHost.revalidate();
+    explorerHost.repaint();
+    listenToExplorerModel(chosen);
+  }
+
+  void listenToExplorerModel(DataExplorerView chosen) {
+    if (chosen.getDataExplorerModel() != null) {
+      chosen.getDataExplorerModel().addPropertyChangeListener(new MainWindowListener(this));
     }
   }
 

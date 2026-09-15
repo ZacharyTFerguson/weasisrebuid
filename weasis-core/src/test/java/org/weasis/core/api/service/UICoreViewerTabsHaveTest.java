@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.awt.BorderLayout;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.media.data.MediaElement;
@@ -38,6 +39,26 @@ class UICoreViewerTabsHaveTest {
     core.closeViewerPlugin(a);
     assertEquals(1, tabs.getTabCount());
     assertSame(b, tabs.getSelectedComponent());
+  }
+
+  @Test
+  void openPluginFindsNamedTabsNestedInCenter() {
+    JFrame win = new JFrame();
+    JPanel host = new JPanel(new BorderLayout());
+    JTabbedPane tabs = new JTabbedPane();
+    tabs.setName("viewer-tabs");
+    host.add(tabs, BorderLayout.CENTER);
+    win.setLayout(new BorderLayout());
+    win.add(host, BorderLayout.CENTER);
+    UICore core = new UICore();
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> a = plugin("A");
+    core.openViewerPlugin(a);
+    assertEquals(1, tabs.getTabCount());
+    assertSame(a, tabs.getSelectedComponent());
+    assertSame(
+        host,
+        ((BorderLayout) win.getContentPane().getLayout()).getLayoutComponent(BorderLayout.CENTER));
   }
 
   static ViewerPlugin<?> plugin(String name) {

@@ -11,6 +11,7 @@ package org.weasis.core.api.service;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.KeyboardFocusManager;
 import java.awt.LayoutManager;
 import java.awt.event.InputEvent;
@@ -405,12 +406,39 @@ public class UICore {
     if (win == null) {
       return null;
     }
+    Component center = centerComponent(win);
+    if (center instanceof JTabbedPane tabs) {
+      return tabs;
+    }
+    return namedTabs(win.getContentPane(), "viewer-tabs");
+  }
+
+  static Component centerComponent(JFrame win) {
     LayoutManager layout = win.getContentPane().getLayout();
     if (!(layout instanceof BorderLayout border)) {
       return null;
     }
-    Component center = border.getLayoutComponent(BorderLayout.CENTER);
-    return center instanceof JTabbedPane tabs ? tabs : null;
+    return border.getLayoutComponent(BorderLayout.CENTER);
+  }
+
+  static JTabbedPane namedTabs(Component root, String name) {
+    if (root instanceof JTabbedPane tabs && name.equals(tabs.getName())) {
+      return tabs;
+    }
+    return namedTabsInChildren(root, name);
+  }
+
+  static JTabbedPane namedTabsInChildren(Component root, String name) {
+    if (!(root instanceof Container container)) {
+      return null;
+    }
+    for (Component child : container.getComponents()) {
+      JTabbedPane found = namedTabs(child, name);
+      if (found != null) {
+        return found;
+      }
+    }
+    return null;
   }
 
   static void addViewerTab(JTabbedPane tabs, ViewerPlugin<?> plugin) {
