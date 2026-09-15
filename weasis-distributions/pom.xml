@@ -16,6 +16,14 @@
   <name>Weasis distributions</name>
   <description>Second Maven invocation. Shipping prefs live in etc/config/base.json (MX-03). Native zip is WP-14.</description>
 
+  <dependencies>
+    <dependency>
+      <groupId>org.weasis</groupId>
+      <artifactId>weasis-launcher</artifactId>
+      <version>${revision}${changelist}</version>
+    </dependency>
+  </dependencies>
+
   <profiles>
     <profile>
       <id>compressXZ</id>
@@ -26,7 +34,7 @@
             <artifactId>maven-enforcer-plugin</artifactId>
             <executions>
               <execution>
-                <id>wp-14-not-yet</id>
+                <id>wp-14-shipping-json</id>
                 <phase>package</phase>
                 <goals>
                   <goal>enforce</goal>
@@ -39,6 +47,32 @@
                       </files>
                     </requireFilesExist>
                   </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>weasis-native-zip</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>java</goal>
+                </goals>
+                <configuration>
+                  <mainClass>org.weasis.launcher.NativeDistribution</mainClass>
+                  <arguments>
+                    <argument>--out</argument>
+                    <argument>${project.build.directory}/weasis-native.zip</argument>
+                    <argument>--launcher</argument>
+                    <argument>${maven.localRepository}/org/weasis/weasis-launcher/${app.version}/weasis-launcher-${app.version}.jar</argument>
+                    <argument>--etc</argument>
+                    <argument>${project.basedir}/etc/config</argument>
+                    <argument>--bin</argument>
+                    <argument>${project.basedir}/bin</argument>
+                  </arguments>
                 </configuration>
               </execution>
             </executions>

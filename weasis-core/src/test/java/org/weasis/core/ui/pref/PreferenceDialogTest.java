@@ -34,6 +34,15 @@ class PreferenceDialogTest {
                 new ScreenPrefFactory(),
                 new LoggingPrefFactory()));
     assertEquals("General", pages.getFirst().getTitle());
+    assertTrue(
+        pages.getFirst().getSubPages().stream().anyMatch(p -> "Language".equals(p.getTitle())));
+    LanguageSetting language =
+        (LanguageSetting)
+            pages.getFirst().getSubPages().stream()
+                .filter(p -> "Language".equals(p.getTitle()))
+                .findFirst()
+                .orElseThrow();
+    assertTrue(language.getLanguageCombo().getItemCount() >= 2);
     assertTrue(pages.stream().anyMatch(p -> "Proxy Server".equals(p.getTitle())));
     assertTrue(pages.stream().anyMatch(p -> "Viewer".equals(p.getTitle())));
     AbstractItemDialogPage viewer =

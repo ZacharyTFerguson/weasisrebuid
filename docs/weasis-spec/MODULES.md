@@ -10,6 +10,8 @@ Same modules as upstream `pom.xml`:
 
 `weasis-distributions` is **not** in the root reactor. Package native zip from that aggregator with `-P compressXZ`.
 
+`weasis-i18n` **is** in the root reactor (WP-14). Upstream keeps translations in the sister repo `nroduit/weasis-i18n`; this clone vendors a `weasis-core-i18n` fragment so File &gt; Preferences can attach locales with ≥ 30 % coverage.
+
 ## Feature aggregators
 
 | Directory | groupId | artifactId | Children (4.7.3) |

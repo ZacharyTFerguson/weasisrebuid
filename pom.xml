@@ -21,6 +21,7 @@
     <module>weasis-launcher</module>
     <module>weasis-opencv</module>
     <module>weasis-core</module>
+    <module>weasis-i18n</module>
     <module>weasis-imageio</module>
     <module>weasis-base</module>
     <module>weasis-dicom</module>

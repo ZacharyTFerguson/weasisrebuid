@@ -74,3 +74,4 @@ weasis-acquire/weasis-acquire-explorer/src/main/java/org/weasis/acquire/explorer
 weasis-acquire/weasis-acquire-explorer/src/main/java/org/weasis/acquire/explorer/VideoSizeLimit.java
 weasis-acquire/weasis-acquire-explorer/src/main/java/org/weasis/acquire/explorer/VideoToDicom.java
 weasis-dicom/weasis-dicom-explorer/src/main/java/org/weasis/dicom/explorer/DicomCommands.java
+weasis-launcher/src/main/java/org/weasis/launcher/NativeDistribution.java

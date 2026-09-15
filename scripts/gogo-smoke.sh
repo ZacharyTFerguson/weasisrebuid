@@ -91,6 +91,10 @@ if not docking_ok:
     sys.exit("lb did not list docking-frames ACTIVE: %r" % lb)
 if not opencv_ok:
     sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
+i18n_state = bundle_state(lb, "Weasis Core i18n")
+i18n_ok = i18n_state in ("Resolved", "Installed")
+if not i18n_ok:
+    sys.exit("lb did not install weasis-core-i18n fragment @13 (Resolved): %r" % lb)
 send_ok = bundle_state(lb, "Weasis DICOM Send") == "Active"
 qr_ok = bundle_state(lb, "Weasis DICOM Q/R") == "Active"
 iso_ok = bundle_state(lb, "Weasis DICOM ISO writer") == "Active"

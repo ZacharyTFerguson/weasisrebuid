@@ -16,7 +16,7 @@
 | 11 | QR C-FIND/MOVE/GET, WADO, QIDO/STOW, send, ISO, print | network Have tests |
 | 12 | Dicomizer profile | `dicomizer.json` overlay; acquire convert Have; Gogo 17181 when `weasis.profile=dicomizer` |
 | 13 | `weasis://`, `$dicom:get`/`-rs`, non-DICOM profile | URI + `$weasis:config` parser; `dicom:get`/`rs`/`close`; `non-dicom-explorer.json` |
-| 14 | i18n fragments, ≥30 % lang pref, native zip | compressXZ without relying on Maven cache as the zip |
+| 14 | i18n fragments, ≥30 % lang pref, native zip | `weasis-core-i18n` fragment (name ends in i18n) Installed @13; language list ≥ 30 %; `weasis-native.zip` via `-P compressXZ` |
 | 15 | ViewerHub `/display`, dcm4chee IID | opens clone via `weasis://` |
 
-WP-0–4 Have is recorded in `docs/loops/TEAM-B-SCORE-wp0-4.md`. This branch adds Have tests for MX-14 (FoR vs manual), MPR/MIP, fusion `targetViews`, special-SOP factories Active on `lb`, WP-11 Q/R + DICOMweb + STOW + ISO + print, WP-12 Dicomizer overlay plus still/video/PDF/STL convert Have, WP-6 Docking Frames **Active**, WP-9 MX-15 OpenGL 3.3+ / refuse llvmpipe (jogamp **Active @120**, native **Resolved @121**), and WP-13 `weasis://` parsers. All **985** Weasis 4.7.3 main Java paths exist; matching a path is **not** feature-complete. Headed §6 Pass stays empty. SCORE may only change Have boxes.
+WP-0–4 Have is recorded in `docs/loops/TEAM-B-SCORE-wp0-4.md`. This branch adds Have tests for MX-14 (FoR vs manual), MPR/MIP, fusion `targetViews`, special-SOP factories Active on `lb`, WP-11 Q/R + DICOMweb + STOW + ISO + print, WP-12 Dicomizer overlay plus still/video/PDF/STL convert Have, WP-6 Docking Frames **Active**, WP-9 MX-15 OpenGL 3.3+ / refuse llvmpipe (jogamp **Active @120**, native **Resolved @121**), WP-13 `weasis://` parsers, and WP-14 i18n ≥30 % plus `weasis-native.zip`. All **985** Weasis 4.7.3 main Java paths exist; matching a path is **not** feature-complete. Headed §6 Pass stays empty. SCORE may only change Have boxes.

@@ -16,6 +16,7 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.weasis.core.api.explorer.DicomImportFactory;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.service.UICore;
+import org.weasis.dicom.explorer.imp.DicomDirImport;
 
 @Component(service = DicomImportFactory.class, immediate = true)
 public class LocalImportFactory implements DicomImportFactory {
@@ -45,6 +46,10 @@ public class LocalImportFactory implements DicomImportFactory {
     if (properties != null && properties.get("model") instanceof DicomModel m) {
       model = m;
     }
-    return new ImportDicomPage(title, 0, model, new SkipUnsupportedSopNotifier());
+    SkipUnsupportedSopNotifier skip = new SkipUnsupportedSopNotifier();
+    if (PAGE_DIR.equals(title)) {
+      return new DicomDirImport(model, skip);
+    }
+    return new ImportDicomPage(title, 0, model, skip);
   }
 }

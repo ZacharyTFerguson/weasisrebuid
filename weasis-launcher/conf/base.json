@@ -101,6 +101,13 @@
       "category": "FELIX_INSTALL"
     },
     {
+      "code": "felix.auto.install.13",
+      "value": "file:${maven.localRepository}/org/weasis/core/weasis-core-i18n/${app.version}/weasis-core-i18n-${app.version}.jar",
+      "description": "weasis-core i18n fragment",
+      "type": "A",
+      "category": "FELIX_INSTALL"
+    },
+    {
       "code": "felix.auto.start.15",
       "value": "file:${maven.localRepository}/org/weasis/imageio/weasis-imageio-codec/${app.version}/weasis-imageio-codec-${app.version}.jar",
       "description": "weasis-imageio-codec",

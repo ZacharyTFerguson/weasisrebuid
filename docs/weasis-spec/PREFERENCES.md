@@ -26,6 +26,7 @@ Type badges: **F** first launch only (then client UI), **A** every launch, **AP*
 | `org.apache.sling.commons.log.level` | `INFO` | shipping |
 | `org.apache.sling.commons.log.stack.limit` | `3` | shipping |
 | `locale.lang.code` | `en` | F; UI list ≥ 30 % i18n |
+| `weasis.i18n.min.percent` | `30` | F; language list threshold |
 | `weasis.theme` | `org.weasis.launcher.FlatWeasisTheme` | recommended Core Dark |
 | `weasis.level.inverse` | `true` | |
 | `weasis.color.wl.apply` | `true` | |

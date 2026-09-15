@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.explorer.imp;
 
-public class DicomDirImport {}
+import java.io.File;
+import java.io.IOException;
+import org.weasis.dicom.explorer.DicomModel;
+import org.weasis.dicom.explorer.ImportDicomPage;
+import org.weasis.dicom.explorer.LoadLocalDicom;
+import org.weasis.dicom.explorer.LocalImportFactory;
+import org.weasis.dicom.explorer.SkipUnsupportedSopNotifier;
+
+/** File &gt; Import DICOMDIR page. Load is {@link LoadLocalDicom#importDicomDir}. */
+public class DicomDirImport extends ImportDicomPage {
+
+  public DicomDirImport(DicomModel model, SkipUnsupportedSopNotifier skip) {
+    super(LocalImportFactory.PAGE_DIR, 0, model, skip);
+  }
+
+  public static LoadLocalDicom.ImportResult read(
+      File dicomdir, DicomModel model, SkipUnsupportedSopNotifier skip) throws IOException {
+    return LoadLocalDicom.importDicomDir(dicomdir, model, skip);
+  }
+}

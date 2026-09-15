@@ -31,6 +31,7 @@ public class AppPreferences extends WProperties {
     put("weasis.force.3d", "false");
     put("weasis.toolbar.mouse.left", "winLevel");
     put("locale.lang.code", "en");
+    put("weasis.i18n.min.percent", "30");
     put("felix.log.level", "1");
   }
 

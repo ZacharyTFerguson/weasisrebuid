@@ -9,25 +9,51 @@
  */
 package org.weasis.core.ui.pref;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import javax.swing.JComboBox;
+import org.weasis.core.Messages;
+import org.weasis.core.api.util.LocalUtil;
 
 public class JLocaleLanguage extends JComboBox<JLocale> {
+
+  private final String bundleName;
+
   public JLocaleLanguage() {
+    this(Messages.BUNDLE_NAME, JLocalePercentage.thresholdRatioFromSystem());
+  }
+
+  public JLocaleLanguage(String bundleName, double minCoverage) {
     super();
-    addItem(new JLocale(Locale.ENGLISH));
-    addItem(new JLocale(Locale.FRENCH));
-    addItem(new JLocale(Locale.GERMAN));
-    addItem(new JLocale(Locale.ITALIAN));
-    addItem(new JLocale(Locale.JAPANESE));
-    addItem(new JLocale(Locale.SIMPLIFIED_CHINESE));
-    addItem(new JLocale(Locale.getDefault()));
-    setSelectedItem(
-        new JLocale(Locale.forLanguageTag(System.getProperty("locale.lang.code", "en"))));
+    this.bundleName =
+        bundleName == null || bundleName.isBlank() ? Messages.BUNDLE_NAME : bundleName;
+    rebuild(minCoverage);
+  }
+
+  public void rebuild(double minCoverage) {
+    Locale previous = getSelectedLocale();
+    removeAllItems();
+    List<Locale> locales = LocalUtil.listedLanguages(bundleName, minCoverage);
+    List<JLocale> items = new ArrayList<>();
+    for (Locale locale : locales) {
+      JLocale item = new JLocale(locale);
+      items.add(item);
+      addItem(item);
+    }
+    JLocale select = new JLocale(previous);
+    if (items.contains(select)) {
+      setSelectedItem(select);
+    } else if (!items.isEmpty()) {
+      setSelectedItem(items.getFirst());
+    }
   }
 
   public Locale getSelectedLocale() {
     Object v = getSelectedItem();
-    return v instanceof JLocale loc ? loc.getLocale() : Locale.getDefault();
+    if (v instanceof JLocale loc) {
+      return loc.getLocale();
+    }
+    return LocalUtil.textLocale();
   }
 }

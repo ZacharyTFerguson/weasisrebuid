@@ -32,6 +32,7 @@ Plugin categories:
 | 7 | MigLayout (+ JAXB-OSGi when graphics XML needs it) |
 | 10 | `weasis-core-img`, zip4j, JOML, Docking Frames (WP-6) |
 | 12 | `weasis-core` |
+| 13 | i18n fragments (install; WP-14) |
 | 15 | `weasis-imageio-codec` (directory `weasis-imageio/`) |
 | 23 | OpenCV native fragment (install) |
 | 30 | `weasis-dicom-codec` |
