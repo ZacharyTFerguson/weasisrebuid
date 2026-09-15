@@ -69,7 +69,6 @@ class ImageioCodecTest {
   @Test
   void getMediaIoRejectsUnsupportedMime() {
     assertNull(
-        new ImageioCodec()
-            .getMediaIO(URI.create("file:///tmp/a.dcm"), "application/dicom", null));
+        new ImageioCodec().getMediaIO(URI.create("file:///tmp/a.dcm"), "application/dicom", null));
   }
 }

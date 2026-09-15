@@ -77,7 +77,7 @@ public class ImageioCodec implements Codec {
     return new ImageioMediaReader(this, media, mime == null ? "application/octet-stream" : mime);
   }
 
-  static String guessMime(URI media) {
+  public static String guessMime(URI media) {
     String path = media.getPath();
     if (path == null || path.isBlank()) {
       path = media.toString();
@@ -85,7 +85,7 @@ public class ImageioCodec implements Codec {
     return MimeInspector.getMimeType(new File(path));
   }
 
-  static File localFile(URI uri) {
+  public static File localFile(URI uri) {
     if (uri == null) {
       return null;
     }
