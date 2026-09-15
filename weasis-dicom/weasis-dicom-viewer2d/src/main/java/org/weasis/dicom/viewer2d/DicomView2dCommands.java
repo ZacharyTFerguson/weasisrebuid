@@ -9,7 +9,6 @@
  */
 package org.weasis.dicom.viewer2d;
 
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -91,7 +90,7 @@ public class DicomView2dCommands {
     return containerWalk(view);
   }
 
-  static View2dContainer containerWalk(Component c) {
+  static View2dContainer containerWalk(java.awt.Component c) {
     while (c != null) {
       if (c instanceof View2dContainer host) {
         return host;
