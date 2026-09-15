@@ -24,8 +24,7 @@ class FusionVolumeHaveTest {
 
   @Test
   void stacksSlicesByImagePositionPatientZ() {
-    Attributes[] ds =
-        new Attributes[] {axial("1.2.FOR", 10.0, 2, 2), axial("1.2.FOR", 0.0, 2, 2)};
+    Attributes[] ds = new Attributes[] {axial("1.2.FOR", 10.0, 2, 2), axial("1.2.FOR", 0.0, 2, 2)};
     double[][][] pixels = new double[][][] {plane(7), plane(3)};
     FusionStack stack = new FusionVolumeBuilder().build(ds, pixels);
     assertFalse(stack.isEmpty());
@@ -57,8 +56,7 @@ class FusionVolumeHaveTest {
                 new double[][][] {plane(1), plane(1), plane(1), plane(1)});
     assertTrue(
         new FusionCompatibility()
-            .compatible(
-                pet.frameOfReferenceUID(), ct.frameOfReferenceUID(), pet.zMm(), ct.zMm()));
+            .compatible(pet.frameOfReferenceUID(), ct.frameOfReferenceUID(), pet.zMm(), ct.zMm()));
     int[] idx = new FusionSliceMatcher().matchAll(ct.zMm(), pet.zMm(), 6.0);
     assertArrayEquals(new int[] {0, 0, 1, 1}, idx);
     Volume onto = new FusionVolumeResampler().onto(pet, ct, FusionRegistration.identity());
