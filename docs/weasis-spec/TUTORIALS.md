@@ -19,7 +19,7 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | MPR / CPR / MIP | 7 | isotropic axes, MIP types; MPR Alt+X/C/V and Ctrl+Alt+B / Alt+wheel; Basic3DToolBar opens MPR; CPR arc-length + straightened image; oblique plane; curve cross-section | tutorial |
 | Fusion / SUV | 8 | FusionController + SUVbw; IPP-Z stack; nearest-Z PET→CT resample | tutorial |
 | 3D VR | 9 | GL 3.3; refuse llvmpipe | tutorial |
-| SR / AU / ECG / RT / SEG | 10 | factories + MIME; SR Content Sequence display; ECG millivolt leads; RT STRUCT contours by Z | tutorial |
+| SR / AU / ECG / RT / SEG | 10 | factories + MIME; SR Content Sequence display; ECG millivolt leads; AU PCM play/pause/stop; RT STRUCT contours by Z | tutorial |
 | Q/R, DICOMweb, send, ISO, print | 11 | DIMSE/QIDO/STOW Have tests; Q/R import chrome; send C-STORE/STOW chrome | tutorial |
 | Dicomizer | 12 | acquire explorer/editor, Gogo 17181 smoke | tutorial |
 | `weasis://` `$dicom:get` `$dicom:rs` | 13 | protocol parser | tutorial |
