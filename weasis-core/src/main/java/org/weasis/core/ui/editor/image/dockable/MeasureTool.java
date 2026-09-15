@@ -11,6 +11,7 @@ package org.weasis.core.ui.editor.image.dockable;
 
 import java.awt.geom.Point2D;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.weasis.core.ui.model.graphic.Graphic;
@@ -32,6 +33,9 @@ public final class MeasureTool {
   public static final String RECTANGLE = "rectangle";
   public static final String ELLIPSE = "ellipse";
   public static final String POLYGON = "polygon";
+
+  public static final List<String> NAMES =
+      List.of(DISTANCE, ANGLE, POLYLINE, TEXTBOX, RECTANGLE, ELLIPSE, POLYGON);
 
   private static final Map<String, Supplier<Graphic>> TOOLS = new LinkedHashMap<>();
 

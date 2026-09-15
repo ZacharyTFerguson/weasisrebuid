@@ -9,6 +9,9 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JToolBar;
 import org.weasis.core.api.gui.Insertable;
@@ -16,7 +19,10 @@ import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.util.Toolbar;
 
-/** Toolbar that selects the current measure/draw graphic. */
+/**
+ * Measure/draw chrome. Buttons are SHORTCUTS.md tools (D distance, A angle, Y polyline, B textbox, G
+ * draw rectangle). Selecting a tool sets the left mouse action to {@code measure}.
+ */
 public class MeasureToolBar implements Toolbar {
 
   public static final String NAME = "Measure";
@@ -25,17 +31,58 @@ public class MeasureToolBar implements Toolbar {
   private String selected = MeasureTool.DISTANCE;
   private int position = 40;
   private boolean enabled = true;
+  private DefaultView2d<?> view;
+
+  public MeasureToolBar() {
+    for (String tool : MeasureTool.NAMES) {
+      bar.add(button(tool));
+    }
+  }
+
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+    if (view != null) {
+      apply(view);
+    }
+  }
+
+  public DefaultView2d<?> boundView() {
+    return view;
+  }
 
   public Graphic newGraphic() {
     return MeasureTool.create(selected);
   }
 
   public void setSelected(String selected) {
-    this.selected = selected;
+    this.selected = selected == null || selected.isBlank() ? MeasureTool.DISTANCE : selected;
   }
 
   public String getSelected() {
     return selected;
+  }
+
+  public void apply(DefaultView2d<?> view) {
+    if (view == null) {
+      return;
+    }
+    view.setMeasureTool(selected);
+    view.getMouseActions().setLeft(MouseActions.MEASURE);
+  }
+
+  private JButton button(String tool) {
+    JButton button =
+        new JButton(
+            new AbstractAction(tool) {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                setSelected(tool);
+                apply(view);
+              }
+            });
+    button.setName(tool);
+    button.setToolTipText(tool);
+    return button;
   }
 
   @Override

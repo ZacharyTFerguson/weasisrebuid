@@ -27,6 +27,7 @@ import org.weasis.core.api.image.SimpleOpManager;
 import org.weasis.core.api.media.data.ImageElement;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
+import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
 
 /**
@@ -51,6 +52,8 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private volatile int frameCount;
   private MediaSeries<? extends MediaElement> series;
   private volatile SynchCineEvent lastCineEvent;
+  private volatile String measureTool = MeasureTool.DISTANCE;
+  private Graphic drawing;
   private volatile SynchView synch = SynchView.STACK;
   private volatile SynchData synchData = new SynchData();
   private volatile SynchManager synchManager;
@@ -210,6 +213,23 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
 
   public SynchCineEvent lastCineEvent() {
     return lastCineEvent;
+  }
+
+  public String getMeasureTool() {
+    return measureTool;
+  }
+
+  public void setMeasureTool(String measureTool) {
+    this.measureTool =
+        measureTool == null || measureTool.isBlank() ? MeasureTool.DISTANCE : measureTool;
+  }
+
+  public Graphic getDrawing() {
+    return drawing;
+  }
+
+  public void setDrawing(Graphic drawing) {
+    this.drawing = drawing;
   }
 
   public void setFrameIndex(int frameIndex) {
@@ -420,6 +440,13 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     }
     if (!geometryWarning.isBlank()) {
       g.drawString(geometryWarning, 8, y);
+    }
+    for (Graphic graphic : graphics) {
+      if (graphic.getShape() == null) {
+        continue;
+      }
+      g.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
+      g.draw(graphic.getShape());
     }
   }
 }
