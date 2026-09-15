@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.explorer.exp;
 
-public class ExplorerTask {}
+import javax.swing.SwingWorker;
+
+/** Background import/export worker (Have: interruptible flag + message). */
+public abstract class ExplorerTask<T, V> extends SwingWorker<T, V> {
+
+  private final String message;
+  private final boolean interruptible;
+
+  protected ExplorerTask(String message, boolean interruptible) {
+    this.message = message == null ? "" : message;
+    this.interruptible = interruptible;
+  }
+
+  public String getMessage() {
+    return message;
+  }
+
+  public boolean isInterruptible() {
+    return interruptible;
+  }
+}

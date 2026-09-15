@@ -9,4 +9,14 @@
  */
 package org.weasis.dicom.explorer.imp;
 
-public class ImportDicom {}
+import org.weasis.dicom.explorer.DicomModel;
+import org.weasis.dicom.explorer.ImportDicomPage;
+import org.weasis.dicom.explorer.SkipUnsupportedSopNotifier;
+
+/** One Import DICOM dialog page (ZIP, CD, or named). */
+public class ImportDicom extends ImportDicomPage {
+
+  public ImportDicom(String title, DicomModel model, SkipUnsupportedSopNotifier skip) {
+    super(title, 0, model, skip);
+  }
+}

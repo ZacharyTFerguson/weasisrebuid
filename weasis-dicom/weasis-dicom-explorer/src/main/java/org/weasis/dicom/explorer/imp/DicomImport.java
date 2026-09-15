@@ -9,4 +9,15 @@
  */
 package org.weasis.dicom.explorer.imp;
 
-public class DicomImport {}
+import java.awt.Frame;
+import org.weasis.dicom.explorer.ImportDicomDialog;
+
+/** File &gt; Import DICOM / DICOM CD entry. */
+public final class DicomImport {
+
+  private DicomImport() {}
+
+  public static ImportDicomDialog open(Frame owner, boolean cd) {
+    return ImportDicomDialog.openFromFactories(owner, cd);
+  }
+}

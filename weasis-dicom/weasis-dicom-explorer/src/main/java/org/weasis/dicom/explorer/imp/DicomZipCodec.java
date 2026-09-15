@@ -9,4 +9,55 @@
  */
 package org.weasis.dicom.explorer.imp;
 
-public class DicomZipCodec {}
+import java.net.URI;
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.media.data.Codec;
+import org.weasis.core.api.media.data.MediaReader;
+
+/** DICOM ZIP codec at the Weasis explorer path. Password ZIP uses zip4j {@code char[]}. */
+@Component(service = Codec.class, immediate = true)
+public class DicomZipCodec implements Codec {
+
+  public static final String MIME = "application/dicom+zip";
+
+  @Override
+  public String getCodecName() {
+    return "DicomZipCodec";
+  }
+
+  @Override
+  public String[] getReaderMIMETypes() {
+    return new String[] {MIME, "application/zip"};
+  }
+
+  @Override
+  public String[] getReaderExtensions() {
+    return new String[] {"zip"};
+  }
+
+  @Override
+  public String[] getWriterMIMETypes() {
+    return new String[] {MIME};
+  }
+
+  @Override
+  public String[] getWriterExtensions() {
+    return new String[] {"zip"};
+  }
+
+  @Override
+  public boolean isMimeTypeSupported(String mimeType) {
+    return MIME.equals(mimeType) || "application/zip".equals(mimeType);
+  }
+
+  @Override
+  public MediaReader getMediaIO(URI media, String mimeType, Hashtable<String, Object> properties) {
+    if (media == null) {
+      return null;
+    }
+    Object pw = properties == null ? null : properties.get("zip.password");
+    String password = pw instanceof String s ? s : null;
+    return new DicomZipMediaIO(media, password);
+  }
+}

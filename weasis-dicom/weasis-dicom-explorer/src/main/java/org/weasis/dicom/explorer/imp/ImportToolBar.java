@@ -9,4 +9,17 @@
  */
 package org.weasis.dicom.explorer.imp;
 
-public class ImportToolBar {}
+import javax.swing.JButton;
+import org.weasis.core.ui.util.WtoolBar;
+import org.weasis.dicom.explorer.ImportDicomDialog;
+
+/** Explorer import toolbar. Opens File &gt; Import DICOM. */
+public class ImportToolBar extends WtoolBar {
+
+  public ImportToolBar() {
+    super("Import DICOM", 5);
+    JButton button = new JButton("Import DICOM");
+    button.addActionListener(e -> ImportDicomDialog.openFromFactories(null, false));
+    add(button);
+  }
+}

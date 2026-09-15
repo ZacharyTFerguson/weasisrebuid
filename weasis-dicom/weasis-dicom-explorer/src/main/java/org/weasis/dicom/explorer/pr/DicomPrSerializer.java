@@ -9,4 +9,37 @@
  */
 package org.weasis.dicom.explorer.pr;
 
-public class DicomPrSerializer {}
+import java.io.File;
+import java.io.IOException;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.UID;
+import org.dcm4che3.data.VR;
+import org.dcm4che3.io.DicomOutputStream;
+
+/** Writes a GSPS dataset as Part-10. */
+public final class DicomPrSerializer {
+
+  private DicomPrSerializer() {}
+
+  public static File write(Attributes pr, File dest) throws IOException {
+    if (pr == null || dest == null) {
+      throw new IOException("pr dest");
+    }
+    File parent = dest.getParentFile();
+    if (parent != null) {
+      parent.mkdirs();
+    }
+    Attributes fmi = new Attributes();
+    fmi.setString(
+        Tag.MediaStorageSOPClassUID,
+        VR.UI,
+        pr.getString(Tag.SOPClassUID, UID.GrayscaleSoftcopyPresentationStateStorage));
+    fmi.setString(Tag.MediaStorageSOPInstanceUID, VR.UI, pr.getString(Tag.SOPInstanceUID, ""));
+    fmi.setString(Tag.TransferSyntaxUID, VR.UI, UID.ExplicitVRLittleEndian);
+    try (DicomOutputStream out = new DicomOutputStream(dest)) {
+      out.writeDataset(fmi, pr);
+    }
+    return dest;
+  }
+}

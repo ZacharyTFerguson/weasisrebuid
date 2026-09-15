@@ -119,6 +119,16 @@
       <scope>runtime</scope>
     </dependency>
     <dependency>
+      <groupId>com.miglayout</groupId>
+      <artifactId>miglayout-core</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.miglayout</groupId>
+      <artifactId>miglayout-swing</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.weasis.imageio</groupId>
       <artifactId>weasis-imageio-codec</artifactId>
       <version>${project.version}</version>

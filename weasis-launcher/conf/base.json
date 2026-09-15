@@ -300,6 +300,38 @@
       "type": "F",
       "category": "LOG",
       "javaType": "INT"
+    },
+    {
+      "code": "weasis.import.dicom",
+      "value": "true",
+      "description": "File > Import DICOM visibility",
+      "type": "F",
+      "category": "UI",
+      "javaType": "BOOLEAN"
+    },
+    {
+      "code": "weasis.import.dicom.qr",
+      "value": "true",
+      "description": "Import DICOM Q/R visibility",
+      "type": "F",
+      "category": "UI",
+      "javaType": "BOOLEAN"
+    },
+    {
+      "code": "weasis.export.dicom",
+      "value": "true",
+      "description": "File > Export DICOM visibility",
+      "type": "F",
+      "category": "UI",
+      "javaType": "BOOLEAN"
+    },
+    {
+      "code": "weasis.send.dicom",
+      "value": "true",
+      "description": "DICOM send visibility",
+      "type": "F",
+      "category": "UI",
+      "javaType": "BOOLEAN"
     }
   ]
 }

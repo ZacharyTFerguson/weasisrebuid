@@ -9,4 +9,18 @@
  */
 package org.weasis.dicom.explorer.exp;
 
-public class ExportTree {}
+import javax.swing.JTree;
+
+/** Checkable explorer tree used by File &gt; Export DICOM. */
+public class ExportTree extends JTree {
+
+  public ExportTree(CheckTreeModel model) {
+    super(model == null ? new CheckTreeModel(null) : model);
+    setRootVisible(false);
+    setShowsRootHandles(true);
+  }
+
+  public CheckTreeModel getCheckModel() {
+    return (CheckTreeModel) getModel();
+  }
+}

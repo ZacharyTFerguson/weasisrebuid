@@ -32,6 +32,10 @@ public class AppPreferences extends WProperties {
     put("weasis.toolbar.mouse.left", "winLevel");
     put("locale.lang.code", "en");
     put("weasis.i18n.min.percent", "30");
+    put("weasis.import.dicom", "true");
+    put("weasis.import.dicom.qr", "true");
+    put("weasis.export.dicom", "true");
+    put("weasis.send.dicom", "true");
     put("felix.log.level", "1");
   }
 

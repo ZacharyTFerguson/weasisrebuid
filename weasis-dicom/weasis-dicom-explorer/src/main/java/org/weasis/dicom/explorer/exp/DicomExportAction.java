@@ -9,4 +9,18 @@
  */
 package org.weasis.dicom.explorer.exp;
 
-public class DicomExportAction {}
+import java.awt.Frame;
+import org.weasis.core.ui.util.DefaultAction;
+import org.weasis.dicom.explorer.DicomModel;
+
+/** File &gt; Export DICOM action. */
+public class DicomExportAction extends DefaultAction {
+
+  public DicomExportAction() {
+    this(null, null);
+  }
+
+  public DicomExportAction(Frame owner, DicomModel model) {
+    super("Export DICOM", () -> DicomExport.open(owner, model));
+  }
+}

@@ -9,4 +9,14 @@
  */
 package org.weasis.dicom.explorer.imp;
 
-public class LocalImport {}
+import org.weasis.dicom.explorer.DicomModel;
+import org.weasis.dicom.explorer.ImportDicomPage;
+import org.weasis.dicom.explorer.SkipUnsupportedSopNotifier;
+
+/** File &gt; Import DICOM (local files / folder). */
+public class LocalImport extends ImportDicomPage {
+
+  public LocalImport(DicomModel model, SkipUnsupportedSopNotifier skip) {
+    super(DicomImportFactory.PAGE_LOCAL, 0, model, skip);
+  }
+}

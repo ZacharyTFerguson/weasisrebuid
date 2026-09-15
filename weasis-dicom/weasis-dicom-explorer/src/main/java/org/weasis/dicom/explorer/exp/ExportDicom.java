@@ -9,4 +9,13 @@
  */
 package org.weasis.dicom.explorer.exp;
 
-public class ExportDicom {}
+import java.io.File;
+import java.io.IOException;
+
+/** One page of the File &gt; Export DICOM dialog. */
+public interface ExportDicom {
+
+  String getTitle();
+
+  File exportDICOM(CheckTreeModel tree, File dest) throws IOException;
+}

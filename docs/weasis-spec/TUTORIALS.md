@@ -11,7 +11,7 @@ Non-DICOM workspace: `non-dicom-explorer.json`. Dicomizer is a separate workspac
 | Tutorial | WP | Have (clone) | Pass |
 |---|---|---|---|
 | GUI overview / prefs | 0–1 | Felix + dummy viewer | headed UI |
-| DICOM Import / Explorer | 3 | DICOMDIR + filters + CD detect | tutorial |
+| DICOM Import / Explorer | 3 | DICOMDIR + filters + CD detect; File>Export files/ZIP/DICOMDIR | tutorial |
 | DICOM 2D / LUT / Zoom | 4 | W/L paints; zoom −200/−100 | tutorial |
 | Draw & Measure | 5 | graphic geometry + shortcuts D/A/Y | tutorial |
 | Build KO and PR | 5 | KO/PR objects with root UID 2.25 | tutorial |

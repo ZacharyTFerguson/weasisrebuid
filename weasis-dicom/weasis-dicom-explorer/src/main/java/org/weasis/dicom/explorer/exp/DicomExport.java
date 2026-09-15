@@ -9,4 +9,29 @@
  */
 package org.weasis.dicom.explorer.exp;
 
-public class DicomExport {}
+import java.awt.Frame;
+import org.weasis.core.api.service.UICore;
+import org.weasis.dicom.explorer.DicomModel;
+
+/** File &gt; Export DICOM entry. Honors {@code weasis.export.dicom}. */
+public final class DicomExport {
+
+  private DicomExport() {}
+
+  public static boolean isExportEnabled() {
+    String sys = System.getProperty(DicomExportFactory.PREF_EXPORT);
+    if (sys != null && !sys.isBlank()) {
+      return !"false".equalsIgnoreCase(sys.trim());
+    }
+    return UICore.getInstance()
+        .getSystemPreferences()
+        .getBooleanProperty(DicomExportFactory.PREF_EXPORT, true);
+  }
+
+  public static ExportDicomView open(Frame owner, DicomModel model) {
+    if (!isExportEnabled()) {
+      return null;
+    }
+    return new ExportDicomView(owner, model);
+  }
+}

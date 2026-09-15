@@ -89,6 +89,11 @@ if not viewer2d_ok:
     sys.exit("lb did not list weasis-dicom-viewer2d ACTIVE: %r" % lb)
 if not docking_ok:
     sys.exit("lb did not list docking-frames ACTIVE: %r" % lb)
+mig_core = bundle_state(lb, "MiGLayout Core") == "Active"
+mig_swing = bundle_state(lb, "MiGLayout Swing") == "Active"
+if not mig_core or not mig_swing:
+    sys.exit("lb did not list MigLayout Core+Swing ACTIVE @7: %r" % lb)
+print("gogo-smoke: MigLayout Active @7 (have)")
 if not opencv_ok:
     sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
 i18n_state = bundle_state(lb, "Weasis Core i18n")

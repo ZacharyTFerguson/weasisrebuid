@@ -9,47 +9,16 @@
  */
 package org.weasis.dicom.explorer;
 
-import java.util.Hashtable;
-import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
-import org.osgi.service.component.annotations.Deactivate;
-import org.weasis.core.api.explorer.DicomImportFactory;
-import org.weasis.core.api.explorer.ImportDicom;
-import org.weasis.core.api.service.UICore;
-import org.weasis.dicom.explorer.imp.DicomDirImport;
+import org.weasis.dicom.explorer.imp.DicomImportFactory;
 
-@Component(service = DicomImportFactory.class, immediate = true)
-public class LocalImportFactory implements DicomImportFactory {
+/**
+ * Clone-only alias for {@link DicomImportFactory} (Weasis 4.7.3 path). Constants stay here so
+ * existing import dialog call sites keep compiling.
+ */
+public class LocalImportFactory extends DicomImportFactory {
 
-  public static final String PAGE_LOCAL = "DICOM";
-  public static final String PAGE_CD = "DICOM CD";
-  public static final String PAGE_ZIP = "ZIP";
-  public static final String PAGE_DIR = "DICOMDIR";
-
-  @Activate
-  public void activate() {
-    UICore.getInstance().registerDicomImportFactory(this);
-  }
-
-  @Deactivate
-  public void deactivate() {
-    UICore.getInstance().unregisterDicomImportFactory(this);
-  }
-
-  @Override
-  public ImportDicom createDicomImportPage(Hashtable<String, Object> properties) {
-    String title = PAGE_LOCAL;
-    if (properties != null && properties.get("title") instanceof String s) {
-      title = s;
-    }
-    DicomModel model = new DicomModel();
-    if (properties != null && properties.get("model") instanceof DicomModel m) {
-      model = m;
-    }
-    SkipUnsupportedSopNotifier skip = new SkipUnsupportedSopNotifier();
-    if (PAGE_DIR.equals(title)) {
-      return new DicomDirImport(model, skip);
-    }
-    return new ImportDicomPage(title, 0, model, skip);
-  }
+  public static final String PAGE_LOCAL = DicomImportFactory.PAGE_LOCAL;
+  public static final String PAGE_CD = DicomImportFactory.PAGE_CD;
+  public static final String PAGE_ZIP = DicomImportFactory.PAGE_ZIP;
+  public static final String PAGE_DIR = DicomImportFactory.PAGE_DIR;
 }

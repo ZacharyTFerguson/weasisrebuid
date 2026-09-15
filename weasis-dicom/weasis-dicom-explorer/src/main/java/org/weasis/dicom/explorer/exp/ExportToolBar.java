@@ -9,4 +9,16 @@
  */
 package org.weasis.dicom.explorer.exp;
 
-public class ExportToolBar {}
+import javax.swing.JButton;
+import org.weasis.core.ui.util.WtoolBar;
+
+/** Explorer export toolbar. Opens File &gt; Export DICOM when {@code weasis.export.dicom}. */
+public class ExportToolBar extends WtoolBar {
+
+  public ExportToolBar() {
+    super("Export DICOM", 6);
+    JButton button = new JButton(new DicomExportAction());
+    button.setEnabled(DicomExport.isExportEnabled());
+    add(button);
+  }
+}
