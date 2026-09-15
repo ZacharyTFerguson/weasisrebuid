@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
-import org.weasis.dicom.codec.utils.InstanceSpacing;
 import org.weasis.dicom.codec.utils.RoiStatistics;
 
 /**
