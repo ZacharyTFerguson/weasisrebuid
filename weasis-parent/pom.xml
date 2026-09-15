@@ -218,6 +218,11 @@
         <artifactId>zip4j</artifactId>
         <version>${zip4j.version}</version>
       </dependency>
+      <dependency>
+        <groupId>org.weasis.thirdparty</groupId>
+        <artifactId>docking-frames</artifactId>
+        <version>${dockingframes.version}</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
 

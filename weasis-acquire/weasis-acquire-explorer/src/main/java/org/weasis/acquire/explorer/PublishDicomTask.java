@@ -9,4 +9,32 @@
  */
 package org.weasis.acquire.explorer;
 
-public class PublishDicomTask {}
+import java.util.Properties;
+
+/** Plans C-STORE publish using {@code weasis.acquire.dest.*} prefs (WP-12). */
+public class PublishDicomTask {
+
+  private final Properties preferences;
+  private final boolean selectionOnly;
+  private final int resolutionDownscale;
+
+  public PublishDicomTask(Properties preferences, boolean selectionOnly, int resolutionDownscale) {
+    this.preferences = preferences == null ? new Properties() : preferences;
+    this.selectionOnly = selectionOnly;
+    this.resolutionDownscale = Math.max(0, resolutionDownscale);
+  }
+
+  public AcquireDest.Publication plan(String callingAe) {
+    String host = preferences.getProperty("weasis.acquire.dest.host", "");
+    String dest =
+        host.isBlank()
+            ? AcquireDest.aet(preferences) + ":" + AcquireDest.port(preferences)
+            : host + ":" + AcquireDest.port(preferences) + "/" + AcquireDest.aet(preferences);
+    AcquireDest.PublishMode mode =
+        AcquireDest.destinationLocked(preferences)
+            ? AcquireDest.PublishMode.CSTORE
+            : AcquireDest.PublishMode.LOCAL_EXPORT;
+    return new AcquireDest.Publication(
+        selectionOnly, resolutionDownscale, dest, callingAe, false, mode);
+  }
+}

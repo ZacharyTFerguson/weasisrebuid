@@ -11,36 +11,48 @@ package org.weasis.launcher;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-/** MX-16: Gogo desktop 17179 is a VM property, not a base.json pref. Dicomizer 17181 is WP-12. */
+/** MX-16: Gogo desktop 17179 is a VM property, not a JSON pref. Dicomizer 17181. */
 class Mx16GogoPortTest {
 
   @Test
   void goshPortIsNotAJsonPref() throws Exception {
-    Path launcherJson = Mx03ShippingPrefsTest.moduleRoot().resolve("conf/base.json");
-    Path distJson =
-        Mx03ShippingPrefsTest.moduleRoot().resolve("../weasis-distributions/etc/config/base.json");
-    ConfigData launcher = ConfigData.load(launcherJson, Map.of("app.version", "4.7.3"));
-    ConfigData dist = ConfigData.load(distJson, Map.of("app.version", "4.7.3"));
-    assertFalse(launcher.containsCode("gosh.port"));
-    assertFalse(dist.containsCode("gosh.port"));
-    String launcherText = Files.readString(launcherJson);
-    String distText = Files.readString(distJson);
-    assertFalse(launcherText.contains("gosh.port"));
-    assertFalse(distText.contains("gosh.port"));
-    assertFalse(launcherText.contains("17179"));
-    assertFalse(distText.contains("17179"));
+    Path root = Mx03ShippingPrefsTest.moduleRoot();
+    Path[] jsons =
+        new Path[] {
+          root.resolve("conf/base.json"),
+          root.resolve("conf/dicomizer.json"),
+          root.resolve("../weasis-distributions/etc/config/base.json"),
+          root.resolve("../weasis-distributions/etc/config/dicomizer.json")
+        };
+    for (Path json : jsons) {
+      assertTrue(Files.isRegularFile(json), json.toString());
+      ConfigData data = ConfigData.load(json, Map.of("app.version", "4.7.3"));
+      assertFalse(data.containsCode("gosh.port"), json.toString());
+      String text = Files.readString(json);
+      assertFalse(text.contains("gosh.port"), json.toString());
+      assertFalse(text.contains("17179"), json.toString());
+      assertFalse(text.contains("17181"), json.toString());
+    }
   }
 
   @Test
   void defaultPortIs17179WhenUnset() {
-    assertEquals("17179", WeasisLauncher.resolveGogoPort(null));
-    assertEquals("17179", WeasisLauncher.resolveGogoPort(""));
-    assertEquals("17181", WeasisLauncher.resolveGogoPort("17181"));
+    assertEquals("17179", WeasisLauncher.resolveGogoPort(null, null));
+    assertEquals("17179", WeasisLauncher.resolveGogoPort("", "default"));
+    assertEquals("17181", WeasisLauncher.resolveGogoPort("17181", "default"));
+  }
+
+  @Test
+  void dicomizerProfileDefaultsTo17181() {
+    assertEquals("17181", WeasisLauncher.resolveGogoPort(null, "dicomizer"));
+    assertEquals("17181", WeasisLauncher.resolveGogoPort("", "dicomizer"));
+    assertEquals("17179", WeasisLauncher.resolveGogoPort(null, "default"));
   }
 }

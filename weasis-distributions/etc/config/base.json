@@ -88,8 +88,8 @@
     },
     {
       "code": "felix.auto.start.10",
-      "value": "file:${maven.localRepository}/org/weasis/core/weasis-core-img/${weasis.core.img.version}/weasis-core-img-${weasis.core.img.version}.jar file:${maven.localRepository}/net/lingala/zip4j/zip4j/${zip4j.version}/zip4j-${zip4j.version}.jar file:${maven.localRepository}/org/joml/joml/${joml.version}/joml-${joml.version}.jar",
-      "description": "core-img, zip4j, JOML (docking-frames in later WPs)",
+      "value": "file:${maven.localRepository}/org/weasis/core/weasis-core-img/${weasis.core.img.version}/weasis-core-img-${weasis.core.img.version}.jar file:${maven.localRepository}/net/lingala/zip4j/zip4j/${zip4j.version}/zip4j-${zip4j.version}.jar file:${maven.localRepository}/org/joml/joml/${joml.version}/joml-${joml.version}.jar file:${maven.localRepository}/org/weasis/thirdparty/docking-frames/${dockingframes.version}/docking-frames-${dockingframes.version}.jar",
+      "description": "core-img, zip4j, JOML, Docking Frames 1.1.7",
       "type": "A",
       "category": "FELIX_INSTALL"
     },

@@ -18,7 +18,7 @@ class AcquireManagerTest {
   @Test
   void loadsPatientContext() {
     AcquireManager m = new AcquireManager();
-    m.loadPatientContext("<PatientName>SYNTHETIC</PatientName>");
-    assertEquals("<PatientName>SYNTHETIC</PatientName>", m.getPatientXml());
+    m.loadPatientContext("<patient><name>SYNTHETIC</name><id>SYN-1</id></patient>");
+    assertEquals("SYN-1", m.getDemographics().patientId());
   }
 }

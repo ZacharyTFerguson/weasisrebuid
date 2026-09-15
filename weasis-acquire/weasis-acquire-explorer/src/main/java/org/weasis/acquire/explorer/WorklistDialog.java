@@ -9,4 +9,30 @@
  */
 package org.weasis.acquire.explorer;
 
-public class WorklistDialog {}
+import java.util.Properties;
+
+/** Modality worklist connection from {@code weasis.acquire.wkl.*} prefs (WP-12). */
+public class WorklistDialog {
+
+  public record WorklistEndpoint(String host, String aet, int port, String stationAet) {
+
+    public boolean configured() {
+      return host != null && !host.isBlank() && aet != null && !aet.isBlank();
+    }
+  }
+
+  public static WorklistEndpoint fromPreferences(Properties prefs) {
+    if (prefs == null) {
+      return new WorklistEndpoint("", "", 107, "");
+    }
+    String host = prefs.getProperty("weasis.acquire.wkl.host", "");
+    String aet = prefs.getProperty("weasis.acquire.wkl.aet", "");
+    String station = prefs.getProperty("weasis.acquire.wkl.station.aet", "");
+    int port = 107;
+    String portRaw = prefs.getProperty("weasis.acquire.wkl.port", "107");
+    if (portRaw != null && !portRaw.isBlank()) {
+      port = Integer.parseInt(portRaw.trim());
+    }
+    return new WorklistEndpoint(host, aet, port, station);
+  }
+}
