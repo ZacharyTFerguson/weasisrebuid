@@ -40,8 +40,7 @@ class DisplayLutTransferHaveTest {
     assertEquals(0xFF112233, exported.getRGB(0, 0));
     view.getSourceImage().setRGB(0, 0, 0x445566);
     assertEquals(0xFF112233, exported.getRGB(0, 0));
-    Object transferred =
-        images.createTransferable(view).getTransferData(DataFlavor.imageFlavor);
+    Object transferred = images.createTransferable(view).getTransferData(DataFlavor.imageFlavor);
     assertEquals(16, ((BufferedImage) transferred).getWidth());
 
     ViewTransferHandler views = new ViewTransferHandler();
