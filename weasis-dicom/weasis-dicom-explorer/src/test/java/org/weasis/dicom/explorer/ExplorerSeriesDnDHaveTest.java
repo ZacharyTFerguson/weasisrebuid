@@ -317,6 +317,9 @@ class ExplorerSeriesDnDHaveTest {
             MouseEvent.BUTTON1));
     ViewTransferHandler.endDrag();
   }
+
+  @Test
+  void leftDragBelowThresholdDoesNotExport() {
     SeriesPane pane = new SeriesPane();
     pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
     SeriesThumbnail thumb = pane.thumbnails().getFirst();
