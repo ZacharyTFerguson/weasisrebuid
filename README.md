@@ -12,12 +12,12 @@ Spec lives in [`docs/weasis-spec/`](docs/weasis-spec/README.md), derived from pu
 - **WP-3:** Import + Explorer on synthetic DICOMDIR; Detect CD-ROM.
 - **WP-4:** View2d LUT chain and `dcmview2d:*`.
 - **WP-5:** Draw & Measure geometry (angle, Cobb, 3-point circle, …), KO/PR objects (`weasis.dicom.root.uid` 2.25).
-- **WP-6 Have:** FoR vs manual synch are distinct (`SynchData.Kind`). Histogram dock types exist. Docking Frames jar at start level 10 is still missing.
+- **WP-6 Have:** FoR vs manual synch are distinct (`SynchData.Kind`). Docking Frames **Active @10**. MigLayout Core+Swing and JAXB-OSGi **Active @7**.
 - **WP-7 Have:** Orthogonal MPR + MIP None/Min/Mean/Max (`MipView.Type`). CPR sampler exists. `MprFactory` does not steal `image/dicom`.
 - **WP-8 Have:** `FusionController.targetViews` + SUVbw helper.
 - **WP-10 Have:** SR/AU/ECG/RT factories Active on `lb`.
-- **WP-11 Have:** QIDO URL + `application/dicom+json`, C-FIND identifier (`ISO_IR 192`), C-GET TCS map, STOW-RS multipart, ISO export, print options. MX-10/11 download caps unchanged (3 series / 4 images). No live PACS in unit tests.
-- Remaining ~326 Weasis 4.7.3 main Java paths are listed in `docs/weasis-spec/fixtures/source-surface-gap.txt`. Matching a path is not feature-complete.
+- **WP-11 Have:** QIDO URL + `application/dicom+json`, C-FIND identifier (`ISO_IR 192`), C-GET TCS map, STOW-RS multipart, ISO export, print options, XML/JSON WADO manifests (`dicom:get -w`) with WADO-URI / WADO-RS / DirectDownload. MX-10/11 download caps unchanged (3 series / 4 images). No live PACS in unit tests.
+- All **985** Weasis 4.7.3 main Java paths exist. Matching a path is not feature-complete.
 
 Spec: `docs/weasis-spec/` (built from weasis.org 4.7 docs + v4.7.3 public layout). Oracle: `scripts/source-surface-report.py`.
 

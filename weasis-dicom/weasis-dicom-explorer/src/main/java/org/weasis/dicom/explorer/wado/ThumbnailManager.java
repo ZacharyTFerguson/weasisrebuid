@@ -9,4 +9,26 @@
  */
 package org.weasis.dicom.explorer.wado;
 
-public class ThumbnailManager {}
+import org.weasis.dicom.explorer.wado.ManifestModelBuilder.ArcQuery;
+import org.weasis.dicom.explorer.wado.ManifestModelBuilder.QueryMode;
+import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Series;
+import org.weasis.dicom.explorer.wado.ManifestModelBuilder.Study;
+
+/**
+ * Series thumbnail URL: {@code DirectDownloadThumbnail} or WADO-URI {@code contentType=image/jpeg}.
+ */
+public class ThumbnailManager {
+
+  public String thumbnailUrl(ArcQuery arc, Study study, Series series) {
+    if (series != null && series.directDownloadThumbnail() != null && !series.directDownloadThumbnail().isBlank()) {
+      return new LoadRemoteDicomURL().join(arc == null ? "" : arc.baseUrl(), series.directDownloadThumbnail());
+    }
+    if (arc != null && arc.queryMode() == QueryMode.DICOM_WEB) {
+      String seriesUrl = new LoadRemoteDicomURL().wadoRsSeries(arc, study, series);
+      return seriesUrl + "/thumbnail";
+    }
+    ReaderParams params = new ReaderParams();
+    params.setContentType("image/jpeg");
+    return new LoadRemoteDicomURL().wadoUri(arc, study, series, null, params);
+  }
+}

@@ -21,6 +21,8 @@ public class AppPreferences extends WProperties {
     put("weasis.theme", "org.weasis.launcher.FlatWeasisTheme");
     put("weasis.dicom.root.uid", "2.25");
     put("weasis.download.immediately", "true");
+    put("weasis.manifest.accept", "xml");
+    put("weasis.dicom.web.series.bulk", "false");
     put("weasis.dicom.explorer.filter.mode", "TEXT");
     put("download.concurrent.series", "3");
     put("download.concurrent.series.images", "4");

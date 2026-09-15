@@ -9,4 +9,32 @@
  */
 package org.weasis.dicom.explorer.wado;
 
-public class DicomSeriesProgressMonitor {}
+/** Per-series retrieve progress (downloaded vs listed instances). */
+public class DicomSeriesProgressMonitor {
+
+  private int total;
+  private int done;
+
+  public void setTotal(int total) {
+    this.total = Math.max(0, total);
+  }
+
+  public int total() {
+    return total;
+  }
+
+  public int done() {
+    return done;
+  }
+
+  public void increment() {
+    done++;
+  }
+
+  public double ratio() {
+    if (total <= 0) {
+      return 0.0;
+    }
+    return Math.min(1.0, (double) done / (double) total);
+  }
+}

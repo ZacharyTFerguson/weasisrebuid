@@ -37,4 +37,16 @@ class RsQueryTest {
     assertTrue(url.contains("PatientID=SYNTH-001"));
     assertTrue(url.contains("limit=25"));
   }
+
+  @Test
+  void wadoRsRetrievePaths() {
+    RsQuery qido = new RsQuery();
+    assertEquals(
+        "https://pacs.example/dicom-web/studies/2.25.11/series/2.25.10",
+        qido.buildWadoRsSeriesUrl("https://pacs.example/dicom-web/", "2.25.11", "2.25.10"));
+    assertTrue(
+        qido.buildWadoRsInstanceUrl(
+                "https://pacs.example/dicom-web", "2.25.11", "2.25.10", "2.25.100")
+            .endsWith("/instances/2.25.100"));
+  }
 }

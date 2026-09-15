@@ -84,4 +84,23 @@ public final class RsQuery {
   public URI buildStudiesUri(String baseUrl, Map<String, String> queryParams) {
     return URI.create(buildStudiesUrl(baseUrl, queryParams));
   }
+
+  public String buildWadoRsSeriesUrl(String baseUrl, String studyUid, String seriesUid) {
+    String base = strip(baseUrl);
+    return base + "/studies/" + enc(studyUid) + "/series/" + enc(seriesUid);
+  }
+
+  public String buildWadoRsInstanceUrl(
+      String baseUrl, String studyUid, String seriesUid, String sopUid) {
+    return buildWadoRsSeriesUrl(baseUrl, studyUid, seriesUid) + "/instances/" + enc(sopUid);
+  }
+
+  static String strip(String baseUrl) {
+    Objects.requireNonNull(baseUrl, "baseUrl");
+    return baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
+  }
+
+  static String enc(String raw) {
+    return URLEncoder.encode(raw == null ? "" : raw, StandardCharsets.UTF_8).replace("+", "%20");
+  }
 }

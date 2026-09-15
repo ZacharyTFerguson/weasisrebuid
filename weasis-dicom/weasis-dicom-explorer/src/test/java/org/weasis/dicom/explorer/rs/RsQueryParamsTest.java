@@ -25,6 +25,8 @@ class RsQueryParamsTest {
     String built = params.buildQidoStudiesUrl();
     assertTrue(built.contains("/studies?"));
     assertTrue(built.contains("PatientID=SYNTH"));
+    params.setQueryExt("&includedefaults=false");
+    assertTrue(params.buildQidoStudiesUrl().contains("includedefaults=false"));
   }
 
   @Test

@@ -16,6 +16,8 @@ Type badges: **F** first launch only (then client UI), **A** every launch, **AP*
 |---|---|---|
 | `weasis.dicom.root.uid` | `2.25` | KO/PR SOP UIDs |
 | `weasis.download.immediately` | `true` | |
+| `weasis.manifest.accept` | `xml` | `json` requests JSON manifests (`-Dweasis.manifest.accept=json`) |
+| `weasis.dicom.web.series.bulk` | `false` | Fallback when `arcQuery/@seriesRetrieve` is absent (4.7.2+) |
 | `weasis.dicom.explorer.filter.mode` | `TEXT` | TEXT / DATE / MODALITY |
 | `download.concurrent.series` | `3` | MX-10 |
 | `download.concurrent.series.images` | `4` | MX-11 |
