@@ -26,6 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
+import javax.swing.text.JTextComponent;
 import org.osgi.framework.BundleContext;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
 import org.weasis.core.api.explorer.DicomImportFactory;
@@ -33,6 +34,7 @@ import org.weasis.core.api.gui.InsertableFactory;
 import org.weasis.core.api.gui.PreferencesPageFactory;
 import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
+import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 
 /**
@@ -254,15 +256,54 @@ public class UICore {
   }
 
   public void setSelectedViewerPlugin(ViewerPlugin<?> plugin) {
-    int idx = openPlugins.indexOf(plugin);
-    if (idx < 0) {
+    if (plugin == null) {
       return;
     }
-    selectedPluginIndex = idx;
+    ensureOpen(plugin);
+    selectedPluginIndex = openPlugins.indexOf(plugin);
+    markSelectedIndex(selectedPluginIndex);
+    selectViewerTab(plugin);
+  }
+
+  void ensureOpen(ViewerPlugin<?> plugin) {
+    if (!openPlugins.contains(plugin)) {
+      openPlugins.add(plugin);
+    }
+  }
+
+  void markSelectedIndex(int idx) {
     for (int i = 0; i < openPlugins.size(); i++) {
       openPlugins.get(i).setSelected(i == idx);
     }
-    selectViewerTab(plugin);
+  }
+
+  public ImageViewerPlugin<?> getFocusedImagePlugin() {
+    ImageViewerPlugin<?> fromTab = imagePluginFromSelectedTab();
+    if (fromTab != null) {
+      return fromTab;
+    }
+    return selectedImagePlugin();
+  }
+
+  ImageViewerPlugin<?> selectedImagePlugin() {
+    ViewerPlugin<?> selected = getSelectedViewerPlugin();
+    if (selected instanceof ImageViewerPlugin<?> image) {
+      return image;
+    }
+    return null;
+  }
+
+  ImageViewerPlugin<?> imagePluginFromSelectedTab() {
+    JTabbedPane tabs = viewerTabsOf(applicationWindow);
+    if (tabs == null) {
+      return null;
+    }
+    Component selected = tabs.getSelectedComponent();
+    if (!(selected instanceof ImageViewerPlugin<?> image)) {
+      return null;
+    }
+    setSelectedViewerPlugin(image);
+    return image;
   }
 
   public void cycleSelectedPlugin(boolean forward) {
@@ -320,6 +361,59 @@ public class UICore {
   }
 
   /**
+   * Viewer keys that must not require a focused {@code View2d}: unmodified 0–9 VOI presets, plus
+   * SHORTCUTS.md Ctrl docking keys.
+   */
+  public boolean handleViewerKey(KeyEvent e) {
+    if (e == null) {
+      return false;
+    }
+    return handlePresetDigit(e) || handleDockingKey(e);
+  }
+
+  boolean handlePresetDigit(KeyEvent e) {
+    if (typingInText() || presetModifiersBlock(e)) {
+      return false;
+    }
+    int index = presetIndex(e.getKeyCode());
+    if (index < 0) {
+      return false;
+    }
+    return applyPresetToFocused(index);
+  }
+
+  boolean typingInText() {
+    Component focus = KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+    return focus instanceof JTextComponent;
+  }
+
+  static boolean presetModifiersBlock(KeyEvent e) {
+    int mods = e.getModifiersEx();
+    int block =
+        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK | InputEvent.META_DOWN_MASK;
+    return (mods & block) != 0;
+  }
+
+  static int presetIndex(int keyCode) {
+    if (keyCode >= KeyEvent.VK_0 && keyCode <= KeyEvent.VK_9) {
+      return keyCode - KeyEvent.VK_0;
+    }
+    if (keyCode >= KeyEvent.VK_NUMPAD0 && keyCode <= KeyEvent.VK_NUMPAD9) {
+      return keyCode - KeyEvent.VK_NUMPAD0;
+    }
+    return -1;
+  }
+
+  boolean applyPresetToFocused(int index) {
+    ImageViewerPlugin<?> plugin = getFocusedImagePlugin();
+    if (plugin == null) {
+      return false;
+    }
+    plugin.applyPreset(index);
+    return true;
+  }
+
+  /**
    * Central-panel keys from SHORTCUTS.md: Ctrl+Tab cycle, Ctrl+M maximize/restore, Ctrl+W close,
    * Ctrl+E externalize, Ctrl+N normalize, Ctrl+Shift+E docking list.
    */
@@ -370,7 +464,7 @@ public class UICore {
       return;
     }
     KeyboardFocusManager.getCurrentKeyboardFocusManager()
-        .addKeyEventDispatcher(e -> e.getID() == KeyEvent.KEY_PRESSED && handleDockingKey(e));
+        .addKeyEventDispatcher(e -> e.getID() == KeyEvent.KEY_PRESSED && handleViewerKey(e));
   }
 
   void attachToWindow(ViewerPlugin<?> plugin) {

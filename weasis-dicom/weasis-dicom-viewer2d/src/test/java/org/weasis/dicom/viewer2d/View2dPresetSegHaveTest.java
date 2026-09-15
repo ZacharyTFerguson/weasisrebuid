@@ -87,6 +87,20 @@ class View2dPresetSegHaveTest {
   }
 
   @Test
+  void pluginApplyPresetUsesFocusedLayoutViewWithoutViewFocus() {
+    View2dContainer container = new View2dContainer();
+    container.setLayoutCount(2);
+    View2d first = container.getLayoutViews().get(0);
+    View2d second = container.getLayoutViews().get(1);
+    first.load(ctWithVoiPresets());
+    second.load(ctWithVoiPresets());
+    container.setLayoutIndex(1);
+    container.applyPreset(2);
+    assertEquals(400.0, first.getWindow(), 1e-9);
+    assertEquals(1500.0, second.getWindow(), 1e-9);
+  }
+
+  @Test
   void altSTogglesSegVisibilityPolicy() {
     View2d view = new View2d();
     assertTrue(view.isSegmentationsVisible());

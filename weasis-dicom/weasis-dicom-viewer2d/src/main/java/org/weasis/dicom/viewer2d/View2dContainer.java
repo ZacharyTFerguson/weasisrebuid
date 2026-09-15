@@ -179,6 +179,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     resetTools.apply(org.weasis.core.ui.editor.image.ResetTools.ALL);
   }
 
+  @Override
+  public void applyPreset(int index) {
+    focusedLayoutView().applyPreset(index);
+  }
+
+  View2d focusedLayoutView() {
+    if (layoutIndex >= 0 && layoutIndex < layout.size()) {
+      return layout.get(layoutIndex);
+    }
+    return view2d;
+  }
+
   public int getLayoutIndex() {
     return layoutIndex;
   }

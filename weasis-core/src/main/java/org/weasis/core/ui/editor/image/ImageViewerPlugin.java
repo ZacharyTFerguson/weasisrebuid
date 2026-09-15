@@ -34,4 +34,6 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
   }
 
   public void resetDisplay() {}
+
+  public void applyPreset(int index) {}
 }

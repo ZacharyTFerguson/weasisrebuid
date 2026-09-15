@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.KeyEvent;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.JMenu;
@@ -31,6 +32,7 @@ import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.gui.util.AppProperties;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.util.ToolBarContainer;
 
@@ -116,8 +118,65 @@ class WeasisWinChromeHaveTest {
     }
   }
 
+  @Test
+  void viewMenuAndDigitKeysUseFocusedTabPluginNotStaleCoreSelection() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> other = plugin("other");
+    LayoutPlugin image = new LayoutPlugin();
+    try {
+      core.openViewerPlugin(other);
+      win.getViewerTabs().addTab("DICOM 2D", image);
+      win.getViewerTabs().setSelectedComponent(image);
+      win.getJMenuBar().getMenu(1).getItem(2).doClick();
+      assertEquals(4, image.layout);
+      JPanel dockHost = new JPanel();
+      KeyEvent digit = new KeyEvent(dockHost, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_7, '7');
+      assertTrue(win.handleViewerKey(digit));
+      assertEquals(7, image.lastPreset);
+      assertSame(image, core.getSelectedViewerPlugin());
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  static void closeOpen(UICore core) {
+    for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
+      core.closeViewerPlugin(plugin);
+    }
+  }
+
   static ViewerPlugin<?> plugin(String name) {
     return new ViewerPlugin<MediaElement>(name) {};
+  }
+
+  static final class LayoutPlugin extends ImageViewerPlugin<MediaElement> {
+    int layout = 1;
+    int lastPreset = -1;
+
+    LayoutPlugin() {
+      super("layout");
+    }
+
+    @Override
+    public void setLayoutCount(int n) {
+      layout = n;
+    }
+
+    @Override
+    public int getLayoutCount() {
+      return layout;
+    }
+
+    @Override
+    public void applyPreset(int index) {
+      lastPreset = index;
+    }
   }
 
   static DataExplorerViewFactory stubExplorerFactory() {

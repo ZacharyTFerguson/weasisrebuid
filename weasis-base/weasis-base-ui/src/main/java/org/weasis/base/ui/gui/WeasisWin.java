@@ -156,6 +156,10 @@ public class WeasisWin extends JFrame {
     return UICore.getInstance().handleDockingKey(e);
   }
 
+  public boolean handleViewerKey(KeyEvent e) {
+    return UICore.getInstance().handleViewerKey(e);
+  }
+
   public JMenuBar createMenuBar() {
     JMenuBar bar = new JMenuBar();
     bar.add(createFileMenu());
@@ -206,17 +210,34 @@ public class WeasisWin extends JFrame {
   }
 
   void applyLayout(int count) {
-    ViewerPlugin<?> plugin = UICore.getInstance().getSelectedViewerPlugin();
-    if (plugin instanceof ImageViewerPlugin<?> image) {
+    ImageViewerPlugin<?> image = focusedImagePlugin();
+    if (image != null) {
       image.setLayoutCount(count);
     }
   }
 
   void resetSelectedView() {
-    ViewerPlugin<?> plugin = UICore.getInstance().getSelectedViewerPlugin();
-    if (plugin instanceof ImageViewerPlugin<?> image) {
+    ImageViewerPlugin<?> image = focusedImagePlugin();
+    if (image != null) {
       image.resetDisplay();
     }
+  }
+
+  ImageViewerPlugin<?> focusedImagePlugin() {
+    ImageViewerPlugin<?> fromTabs = imagePluginFromTabs();
+    if (fromTabs != null) {
+      return fromTabs;
+    }
+    return UICore.getInstance().getFocusedImagePlugin();
+  }
+
+  ImageViewerPlugin<?> imagePluginFromTabs() {
+    Component selected = viewerTabs.getSelectedComponent();
+    if (!(selected instanceof ImageViewerPlugin<?> image)) {
+      return null;
+    }
+    UICore.getInstance().setSelectedViewerPlugin(image);
+    return image;
   }
 
   JMenu createHelpMenu() {

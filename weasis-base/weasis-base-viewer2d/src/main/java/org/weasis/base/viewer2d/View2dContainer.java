@@ -38,6 +38,11 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   @Override
+  public void applyPreset(int index) {
+    view2d.applyPreset(index);
+  }
+
+  @Override
   public synchronized void addSeries(MediaSeries<MediaElement> sequence) {
     super.addSeries(sequence);
     if (sequence == null) {
