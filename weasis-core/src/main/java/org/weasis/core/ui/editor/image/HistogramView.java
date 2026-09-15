@@ -30,7 +30,7 @@ public class HistogramView extends PluginTool {
   private final ChannelHistogramPanel channels = new ChannelHistogramPanel();
   private final JLabel stats = new JLabel(" ");
   private DefaultView2d<?> view;
-  private ColorModel colorModel = ColorModel.GRAYSCALE;
+  private ColorModel histogramColorModel = ColorModel.GRAYSCALE;
   private boolean statisticsVisible = true;
 
   public HistogramView() {
@@ -58,12 +58,12 @@ public class HistogramView extends PluginTool {
     return view;
   }
 
-  public ColorModel getColorModel() {
-    return colorModel;
+  public ColorModel getHistogramColorModel() {
+    return histogramColorModel;
   }
 
-  public void setColorModel(ColorModel colorModel) {
-    this.colorModel = colorModel == null ? ColorModel.GRAYSCALE : colorModel;
+  public void setHistogramColorModel(ColorModel colorModel) {
+    this.histogramColorModel = colorModel == null ? ColorModel.GRAYSCALE : colorModel;
     refresh();
   }
 
@@ -103,7 +103,7 @@ public class HistogramView extends PluginTool {
   public void resetDisplay() {
     panel.resetDisplay();
     channels.resetDisplay();
-    colorModel = ColorModel.GRAYSCALE;
+    histogramColorModel = ColorModel.GRAYSCALE;
     refresh();
   }
 
@@ -117,11 +117,11 @@ public class HistogramView extends PluginTool {
           .getData()
           .setModalityLut(view.getModalityLutSlope(), view.getModalityLutIntercept());
     }
-    boolean multi = colorModel != ColorModel.GRAYSCALE;
+    boolean multi = histogramColorModel != ColorModel.GRAYSCALE;
     channels.setVisible(multi);
     panel.setVisible(!multi);
     if (multi) {
-      channels.update(image, roi, colorModel);
+      channels.update(image, roi, histogramColorModel);
       stats.setText(channels.getRed().getData().statisticsText());
     } else {
       panel.setChannel(HistogramData.Channel.LUMINANCE);

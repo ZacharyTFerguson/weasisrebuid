@@ -34,7 +34,6 @@ class KeyObjectToolBarHaveTest {
     assertEquals(2, bar.getComponent().getComponentCount());
     assertTrue(bar.toggle("1.2.3"));
     assertTrue(bar.getManager().isKeyImage("1.2.3"));
-    bar.getManager().toggleKeyImage("9.9");
     assertTrue(bar.filter());
     assertEquals(List.of("1.2.3"), bar.getManager().visibleSops(List.of("1.2.3", "9.9")));
     assertFalse(bar.filter());

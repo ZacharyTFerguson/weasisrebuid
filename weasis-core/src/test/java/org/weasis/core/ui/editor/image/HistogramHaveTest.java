@@ -101,7 +101,7 @@ class HistogramHaveTest {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setSourceImage(image);
     dock.bind(view);
-    dock.setColorModel(ColorModel.RGB);
+    dock.setHistogramColorModel(ColorModel.RGB);
     assertEquals(Channel.RED, dock.getChannels().getRed().getData().getChannel());
     assertEquals(255, dock.getChannels().getRed().getData().getMaxValue());
     assertEquals(0, dock.getChannels().getGreen().getData().getMaxValue());

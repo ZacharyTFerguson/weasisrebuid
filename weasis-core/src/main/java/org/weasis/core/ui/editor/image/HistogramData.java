@@ -203,7 +203,7 @@ public class HistogramData {
         if (roi != null && !roi.contains(x + 0.5, y + 0.5)) {
           continue;
         }
-        int v = sample(image.getRGB(x, y));
+        int v = sample(image, x, y);
         foundMin = Math.min(foundMin, v);
         foundMax = Math.max(foundMax, v);
         samples++;
@@ -229,7 +229,7 @@ public class HistogramData {
         if (roi != null && !roi.contains(x + 0.5, y + 0.5)) {
           continue;
         }
-        int v = sample(image.getRGB(x, y));
+        int v = sample(image, x, y);
         int bin = (int) ((v - minValue) * (bins.length - 1.0) / range);
         bin = Math.max(0, Math.min(bins.length - 1, bin));
         bins[bin]++;
@@ -302,20 +302,39 @@ public class HistogramData {
         + peak;
   }
 
-  int sample(int rgb) {
-    int r = (rgb >> 16) & 0xff;
-    int g = (rgb >> 8) & 0xff;
-    int b = rgb & 0xff;
+  int sample(BufferedImage image, int x, int y) {
+    int[] rgb = rgb(image, x, y);
+    int r = rgb[0];
+    int g = rgb[1];
+    int b = rgb[2];
     return switch (channel) {
       case RED -> r;
       case GREEN -> g;
       case BLUE -> b;
-      case HUE -> Math.round(Color.RGBtoHSB(r, g, b, null)[0] * 255f);
-      case SATURATION -> saturation(r, g, b);
+      case HUE -> Math.round(Color.RGBtoHSB(clamp8(r), clamp8(g), clamp8(b), null)[0] * 255f);
+      case SATURATION -> saturation(clamp8(r), clamp8(g), clamp8(b));
       case VALUE -> Math.max(r, Math.max(g, b));
       case LIGHTNESS -> (Math.max(r, Math.max(g, b)) + Math.min(r, Math.min(g, b))) / 2;
-      case LUMINANCE -> (int) Math.round(0.299 * r + 0.587 * g + 0.114 * b);
+      case LUMINANCE ->
+          image.getRaster().getNumBands() == 1
+              ? r
+              : (int) Math.round(0.299 * r + 0.587 * g + 0.114 * b);
     };
+  }
+
+  static int[] rgb(BufferedImage image, int x, int y) {
+    var raster = image.getRaster();
+    if (raster.getNumBands() == 1) {
+      int v = raster.getSample(x, y, 0);
+      return new int[] {v, v, v};
+    }
+    return new int[] {
+      raster.getSample(x, y, 0), raster.getSample(x, y, 1), raster.getSample(x, y, 2)
+    };
+  }
+
+  static int clamp8(int v) {
+    return Math.max(0, Math.min(255, v));
   }
 
   static int saturation(int r, int g, int b) {
