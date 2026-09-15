@@ -85,6 +85,8 @@ public class WeasisWin extends JFrame {
   static DefaultSingleCDockable uncloseableDock(String id, String title, Component content) {
     DefaultSingleCDockable dock = new DefaultSingleCDockable(id, title, content);
     dock.setCloseable(false);
+    dock.setMinimizable(true);
+    dock.setExternalizable(true);
     return dock;
   }
 

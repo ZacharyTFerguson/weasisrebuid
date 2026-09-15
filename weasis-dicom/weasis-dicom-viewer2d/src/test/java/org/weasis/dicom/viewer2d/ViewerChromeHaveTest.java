@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.GridLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import org.junit.jupiter.api.Test;
@@ -106,6 +107,26 @@ class ViewerChromeHaveTest {
     container.resetDisplay();
     assertEquals(0.0, container.getView2d().getPanX(), 1e-9);
     assertEquals(0.0, container.getView2d().getRotation(), 1e-9);
+  }
+
+  @Test
+  void oneByTwoAndTwoByTwoSplitTheSelectedPlugin() {
+    View2dContainer container = new View2dContainer();
+    assertEquals(1, container.getViewGrid().getComponentCount());
+    container.setLayoutCount(2);
+    assertEquals(2, container.getViewGrid().getComponentCount());
+    GridLayout oneByTwo = (GridLayout) container.getViewGrid().getLayout();
+    assertEquals(1, oneByTwo.getRows());
+    assertEquals(2, oneByTwo.getColumns());
+    assertSame(container.getLayoutViews().get(0), container.getViewGrid().getComponent(0));
+    assertSame(container.getLayoutViews().get(1), container.getViewGrid().getComponent(1));
+    container.setLayoutCount(4);
+    assertEquals(4, container.getViewGrid().getComponentCount());
+    GridLayout twoByTwo = (GridLayout) container.getViewGrid().getLayout();
+    assertEquals(2, twoByTwo.getRows());
+    assertEquals(2, twoByTwo.getColumns());
+    container.setLayoutCount(1);
+    assertEquals(1, container.getViewGrid().getComponentCount());
   }
 
   static KeyEvent tab(View2d view, int mods) {

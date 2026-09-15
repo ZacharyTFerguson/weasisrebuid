@@ -101,6 +101,8 @@ class WeasisWinChromeHaveTest {
       assertEquals(2, win.getDockingControl().getCDockableCount());
       assertFalse(win.getExplorerDock().isCloseable());
       assertFalse(win.getViewerDock().isCloseable());
+      assertTrue(win.getExplorerDock().isMinimizable());
+      assertTrue(win.getExplorerDock().isExternalizable());
       Object center =
           ((BorderLayout) win.getContentPane().getLayout()).getLayoutComponent(BorderLayout.CENTER);
       assertTrue(center.getClass().getName().contains("CContentArea"));
