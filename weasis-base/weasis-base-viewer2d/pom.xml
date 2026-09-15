@@ -22,6 +22,12 @@
       <artifactId>osgi.core</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.weasis.imageio</groupId>
+      <artifactId>weasis-imageio-codec</artifactId>
+      <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
 
   </dependencies>
   <build>
@@ -35,7 +41,7 @@ Bundle-SymbolicName: org.weasis.base.viewer2d
 Bundle-Name: Weasis Base 2D Viewer
 -dsannotations: *
 Export-Package: !org.weasis.base.viewer2d.internal.*, org.weasis.base.viewer2d
-Import-Package: org.weasis.core.*,org.osgi.service.component;resolution:=optional,*
+Import-Package: org.weasis.core.*,org.weasis.imageio.codec.*,org.osgi.service.component;resolution:=optional,*
 ]]></bnd>
         </configuration>
       </plugin>

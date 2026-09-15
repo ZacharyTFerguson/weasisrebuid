@@ -2,6 +2,7 @@
 weasis-base/weasis-base-ui/src/main/java/org/weasis/base/ui/gui/DummySeriesViewerFactory.java
 weasis-base/weasis-base-ui/src/main/java/org/weasis/base/ui/gui/DummyViewerPlugin.java
 weasis-base/weasis-base-ui/src/main/java/org/weasis/base/ui/internal/MainWindowActivator.java
+weasis-base/weasis-base-viewer2d/src/main/java/org/weasis/base/viewer2d/ImageCommands.java
 weasis-core/src/main/java/org/weasis/core/api/command/GraphicsEnvironmentNote.java
 weasis-core/src/main/java/org/weasis/core/api/command/WeasisInfoCommand.java
 weasis-core/src/main/java/org/weasis/core/api/command/WeasisUiCommand.java

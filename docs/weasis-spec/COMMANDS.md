@@ -34,8 +34,8 @@ At **launch**, prefix with `$`. In Gogo, no `$`. Commands containing `&` or spac
 | `dicom:get` | `-l PATH` `-w URI` `-r URI` `-z URI` `-p` `-i DATA` |
 | `dicom:close` | `-a` / `-p ID` (since 4.4.1) / `-y` study UID / `-s` series UID |
 | `dicom:rs` | DICOMweb QIDO/WADO-RS (`-u URL -r QUERYPARAMS` plus headers) |
-| `image:get` | `-f FILE` `-u URL` |
-| `image:close` | `-a` / `-g` group / `-s` series |
+| `image:get` | `([-f FILE]... [-u URL]...)` |
+| `image:close` | `-a` / `-g` group UID / `-s` series UID |
 | `weasis:info` | `-v` version / `-a` specifications |
 | `weasis:ui` | `-q` quit / `-v` window on top |
 | `acquire:patient` | `-x\|-i\|-s\|-u` patient context XML |

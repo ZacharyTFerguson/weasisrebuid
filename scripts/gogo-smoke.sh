@@ -123,6 +123,16 @@ if not viewer3d_ok:
     sys.exit("lb did not list weasis-dicom-viewer3d ACTIVE @120: %r" % lb)
 if not jogamp_native_ok:
     sys.exit("lb did not install JOGL native fragment @121 (Resolved): %r" % lb)
+base_viewer_ok = bundle_state(lb, "Weasis Base 2D Viewer") == "Active"
+if not base_viewer_ok:
+    sys.exit("lb did not list weasis-base-viewer2d ACTIVE @100: %r" % lb)
+img_get = send("image:get")
+if "image:get" not in img_get or "-f" not in img_get:
+    sys.exit("image:get Gogo command missing: %r" % img_get)
+img_url = send("image:get -u https://example.invalid/stills.jpg")
+if "example.invalid" not in img_url:
+    sys.exit("image:get -u did not parse a remote URI without fetch: %r" % img_url)
+print("gogo-smoke: image:get Have")
 send("weasis:ui -q")
 print("SMOKE_OK")
 PY
