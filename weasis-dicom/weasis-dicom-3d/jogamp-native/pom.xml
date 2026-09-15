@@ -31,6 +31,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.weasis.core</groupId>
+      <artifactId>weasis-core</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.weasis.thirdparty.org.jogamp</groupId>
       <artifactId>jogamp</artifactId>
       <version>${jogamp.version}</version>

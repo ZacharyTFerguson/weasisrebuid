@@ -20,6 +20,12 @@
 
   <dependencies>
     <dependency>
+      <groupId>org.weasis.core</groupId>
+      <artifactId>weasis-core</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.jogamp.gluegen</groupId>
       <artifactId>gluegen-rt</artifactId>
       <version>${jogamp.version}</version>
