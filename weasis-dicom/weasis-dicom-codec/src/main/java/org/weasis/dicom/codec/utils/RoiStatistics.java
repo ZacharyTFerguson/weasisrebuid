@@ -15,7 +15,9 @@ import java.util.Optional;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 
-/** ROI statistics on stored pixels through {@link LutPipeline#modalityValue} — never painted grey. */
+/**
+ * ROI statistics on stored pixels through {@link LutPipeline#modalityValue} — never painted grey.
+ */
 public final class RoiStatistics {
 
   public record RoiStats(
@@ -94,8 +96,7 @@ public final class RoiStatistics {
     if (stats == null) {
       return "";
     }
-    return String.format(
-        Locale.US, "%.1f %s (n=%d)", stats.mean(), stats.unit(), stats.n());
+    return String.format(Locale.US, "%.1f %s (n=%d)", stats.mean(), stats.unit(), stats.n());
   }
 
   private static String unitFrom(Attributes dcm) {

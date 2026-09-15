@@ -26,8 +26,8 @@ import org.weasis.dicom.codec.WindowLevelPainter;
 /**
  * Why stored PixelData + rescale: HU lives in modality space, not VOI-painted 0–255.
  *
- * <p>Why fail-closed: no BufferedImage input; ModalityLUTSequence present → refuse (slope-only would
- * lie).
+ * <p>Why fail-closed: no BufferedImage input; ModalityLUTSequence present → refuse (slope-only
+ * would lie).
  *
  * <p>Why not copy Weasis: WP-5 PixelStatistics reads painted grey — we sample only the dataset.
  */
@@ -42,8 +42,10 @@ class RoiStatisticsTest {
     for (int i = 0; i < px.length; i++) {
       px[i] = 24;
     }
+    writePixels(dcm, px);
     Ellipse2D roi = new Ellipse2D.Double(0, 0, 4, 4);
     RoiStatistics.RoiStats stats = RoiStatistics.ellipse(dcm, roi).orElseThrow();
+    assertEquals(centerInPixelCount(dcm, roi), stats.n());
     assertEquals(-1000.0, stats.mean(), 1e-6);
 
     var painted = WindowLevelPainter.paintMonochrome2(dcm, 400, 40);
@@ -58,23 +60,30 @@ class RoiStatisticsTest {
     Attributes dcm = ctSmall();
     dcm.setDouble(Tag.RescaleSlope, VR.DS, 2);
     dcm.setDouble(Tag.RescaleIntercept, VR.DS, -1024);
-    int[] px = dcm.getInts(Tag.PixelData);
-    px[5] = 10;
     Ellipse2D roi = new Ellipse2D.Double(1, 1, 2, 2);
+    int[] px = dcm.getInts(Tag.PixelData);
+    for (int index : centerInPixelIndices(dcm, roi)) {
+      px[index] = 10;
+    }
+    writePixels(dcm, px);
     RoiStatistics.RoiStats stats = RoiStatistics.ellipse(dcm, roi).orElseThrow();
+    assertEquals(4, stats.n());
     assertEquals(2 * 10 - 1024, stats.mean(), 1e-6);
   }
 
   @Test
   void paddingPixelsAreExcludedAndCounted() {
     Attributes dcm = ctSmall();
-    dcm.setInt(Tag.PixelPaddingValue, VR.US, 0);
-    int[] px = dcm.getInts(Tag.PixelData);
-    px[0] = 0;
-    px[1] = 100;
-    px[2] = 100;
-    px[3] = 100;
+    dcm.setInt(Tag.PixelPaddingValue, VR.US, 555);
     Ellipse2D roi = new Ellipse2D.Double(0, 0, 2, 2);
+    int[] px = dcm.getInts(Tag.PixelData);
+    int[] indices = centerInPixelIndices(dcm, roi);
+    assertEquals(4, indices.length);
+    px[indices[0]] = 555;
+    for (int i = 1; i < indices.length; i++) {
+      px[indices[i]] = 100;
+    }
+    writePixels(dcm, px);
     RoiStatistics.RoiStats stats = RoiStatistics.ellipse(dcm, roi).orElseThrow();
     assertEquals(1, stats.excluded());
     assertEquals(3, stats.n());
@@ -93,7 +102,6 @@ class RoiStatisticsTest {
     assertEquals("US", RoiStatistics.ellipse(dx, fullEllipse()).orElseThrow().unit());
 
     Attributes bare = ctSmall();
-    bare.removeTag(Tag.RescaleType);
     assertEquals("stored", RoiStatistics.ellipse(bare, fullEllipse()).orElseThrow().unit());
   }
 
@@ -113,8 +121,10 @@ class RoiStatisticsTest {
     px[6] = 30;
     px[9] = 50;
     px[10] = 70;
+    writePixels(dcm, px);
     Ellipse2D roi = new Ellipse2D.Double(0.5, 0.5, 3, 3);
     RoiStatistics.RoiStats stats = RoiStatistics.ellipse(dcm, roi).orElseThrow();
+    assertEquals(centerInPixelCount(dcm, roi), stats.n());
     assertEquals(4, stats.n());
     assertEquals(40.0, stats.mean(), 1e-6);
   }
@@ -128,11 +138,14 @@ class RoiStatisticsTest {
     for (int i = 0; i < px.length; i++) {
       px[i] = 24;
     }
-    RoiStatistics.RoiStats stats = RoiStatistics.ellipse(dcm, fullEllipse()).orElseThrow();
+    writePixels(dcm, px);
+    Ellipse2D roi = fullEllipse();
+    RoiStatistics.RoiStats stats = RoiStatistics.ellipse(dcm, roi).orElseThrow();
+    assertEquals(12, stats.n());
     String label = RoiStatistics.formatMeanLabel(stats);
     assertTrue(label.contains("-1000"));
     assertTrue(label.contains("HU"));
-    assertTrue(label.contains("n=16"));
+    assertTrue(label.contains("n=12"));
   }
 
   @Test
@@ -155,6 +168,32 @@ class RoiStatisticsTest {
 
   static Ellipse2D fullEllipse() {
     return new Ellipse2D.Double(0, 0, 4, 4);
+  }
+
+  /** Hand-count helper: must match {@link RoiStatistics} center-in rule. */
+  static int centerInPixelCount(Attributes dcm, Ellipse2D roi) {
+    return centerInPixelIndices(dcm, roi).length;
+  }
+
+  static int[] centerInPixelIndices(Attributes dcm, Ellipse2D roi) {
+    int rows = dcm.getInt(Tag.Rows, 0);
+    int cols = dcm.getInt(Tag.Columns, 0);
+    int[] out = new int[rows * cols];
+    int n = 0;
+    for (int row = 0; row < rows; row++) {
+      for (int col = 0; col < cols; col++) {
+        if (roi.contains(col + 0.5, row + 0.5)) {
+          out[n++] = row * cols + col;
+        }
+      }
+    }
+    int[] trimmed = new int[n];
+    System.arraycopy(out, 0, trimmed, 0, n);
+    return trimmed;
+  }
+
+  static void writePixels(Attributes dcm, int[] pixels) {
+    dcm.setInt(Tag.PixelData, VR.OW, pixels);
   }
 
   static double meanPaintedGrey(byte[] samples) {

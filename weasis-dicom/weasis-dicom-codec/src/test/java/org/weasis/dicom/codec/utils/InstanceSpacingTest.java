@@ -24,14 +24,11 @@ import org.dcm4che3.io.DicomInputStream;
 import org.dcm4che3.util.UIDUtils;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
-<<<<<<< HEAD
 import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.dicom.codec.utils.InstanceSpacing.Resolved;
 import org.weasis.dicom.codec.utils.InstanceSpacing.Source;
-=======
->>>>>>> c54f4bc (fix(test): roundtrip path helper without cross-package access)
 
 /**
  * Why (0028,0030) PixelSpacing / (0018,1164) ImagerPixelSpacing: PS3.3 row-first patient spacing vs
@@ -244,7 +241,6 @@ class InstanceSpacingTest {
   }
 
   static Path roundtripDir() {
-<<<<<<< HEAD
     Path module = Path.of(System.getProperty("basedir", System.getProperty("user.dir")));
     Path fromModule = module.resolve("../../testdata/weasis-roundtrip").normalize();
     if (Files.isDirectory(fromModule)) {
@@ -255,14 +251,6 @@ class InstanceSpacingTest {
 
   static Attributes readDataset(Path path) throws Exception {
     try (DicomInputStream in = new DicomInputStream(path.toFile())) {
-=======
-    Path module = Path.of(System.getProperty("user.dir"));
-    return module.resolve("../../../testdata/weasis-roundtrip").normalize();
-  }
-
-  static Attributes readDataset(Path file) throws Exception {
-    try (DicomInputStream in = new DicomInputStream(file.toFile())) {
->>>>>>> c54f4bc (fix(test): roundtrip path helper without cross-package access)
       in.setIncludeBulkData(DicomInputStream.IncludeBulkData.NO);
       return in.readDataset(-1, -1);
     }
