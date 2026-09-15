@@ -9,6 +9,7 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.api.image.FilterOp;
@@ -29,9 +31,12 @@ import org.weasis.core.api.image.util.WindLevelParameters;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
+import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.codec.WindowLevelPainter;
 import org.weasis.dicom.codec.utils.DicomMediaUtils;
+import org.weasis.dicom.codec.utils.InstanceSpacing;
+import org.weasis.dicom.codec.utils.RoiStatistics;
 
 /**
  * DICOM 2D view. Op chain: WindowAndPresets → Filter → PseudoColor → Shutter → Overlay → Affine.
@@ -45,6 +50,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private File file;
   private List<Attributes> stackDatasets = List.of();
   private List<File> stackFiles = List.of();
+  private Optional<InstanceSpacing.Resolved> resolvedInstanceSpacing = Optional.empty();
 
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
@@ -140,6 +146,21 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public File getFile() {
     return file;
+  }
+
+  public Optional<InstanceSpacing.Resolved> getResolvedInstanceSpacing() {
+    return resolvedInstanceSpacing;
+  }
+
+  public String formatLineMeasureLabel(LineGraphic line) {
+    return MeasurementLabel.formatLine(line, resolvedInstanceSpacing);
+  }
+
+  public String formatEllipseMeasureLabel(Ellipse2D roi) {
+    if (dataset == null || roi == null) {
+      return "";
+    }
+    return RoiStatistics.ellipse(dataset, roi).map(MeasurementLabel::formatEllipse).orElse("");
   }
 
   public double getWindow() {
@@ -272,8 +293,12 @@ public class View2d extends DefaultView2d<MediaElement> {
               ShutterOp.P_LOWER,
               dataset.getInt(Tag.ShutterLowerHorizontalEdge, dataset.getInt(Tag.Rows, 0) - 1));
     }
-    if (dataset.containsValue(Tag.PixelSpacing) || dataset.containsValue(Tag.ImagerPixelSpacing)) {
-      setGeometryWarning("");
+    resolvedInstanceSpacing = InstanceSpacing.resolve(dataset);
+    if (resolvedInstanceSpacing.isPresent()) {
+      String warn = resolvedInstanceSpacing.get().warning();
+      setGeometryWarning(warn == null ? "" : warn);
+    } else {
+      setGeometryWarning(MeasurementLabel.NO_USABLE_SPACING_WARNING);
     }
   }
 
