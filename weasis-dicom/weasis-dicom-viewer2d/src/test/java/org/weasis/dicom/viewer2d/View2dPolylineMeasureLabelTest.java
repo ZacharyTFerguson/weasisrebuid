@@ -23,13 +23,15 @@ import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 
 /**
- * View2d polyline measurement labels: same binding rules as {@link View2dMeasureLabelTest} for lines,
- * but millimetres come from {@link PolylineGraphic#getLengthMm} (sum of per-segment hypot lengths).
+ * View2d polyline measurement labels: same binding rules as {@link View2dMeasureLabelTest} for
+ * lines, but millimetres come from {@link PolylineGraphic#getLengthMm} (sum of per-segment hypot
+ * lengths).
  *
  * <p><b>Why UI after {@code getLengthMm}:</b> {@link MeasurementLabel#formatPolyline} only formats
  * values already proved in {@link org.weasis.core.ui.model.graphic.imp.line.PolylineGraphicMmTest}
  * and instance spacing in {@link org.weasis.dicom.codec.utils.InstanceSpacingTest}. A label that
- * recomputed mm from pixel distance or used end-point hypot would disagree with the segment-sum API.
+ * recomputed mm from pixel distance or used end-point hypot would disagree with the segment-sum
+ * API.
  *
  * <p><b>Why bind to {@code Resolved} + {@link PolylineGraphic#getLengthMm} only:</b> spacing comes
  * from {@link org.weasis.dicom.codec.utils.InstanceSpacing.Resolved#spacing()} on the current
@@ -49,9 +51,9 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
  * 20 px and 10.0 mm on isotropic 0.50 spacing — not the 14.14 px diagonal chord. The primary
  * discriminating assert is {@link #polylineLabelSumsSegmentsNotEndToEndHypot}.
  *
- * <p><b>Why not copy Weasis:</b> upstream measure tools mix polyline drawing, calibration prefs, and
- * file-extracted spacing; this slice adds {@code formatPolyline} beside the existing line formatter
- * without porting {@code MeasureTool} or {@code MeasurementsAdapter}.
+ * <p><b>Why not copy Weasis:</b> upstream measure tools mix polyline drawing, calibration prefs,
+ * and file-extracted spacing; this slice adds {@code formatPolyline} beside the existing line
+ * formatter without porting {@code MeasureTool} or {@code MeasurementsAdapter}.
  */
 class View2dPolylineMeasureLabelTest {
 
@@ -92,7 +94,8 @@ class View2dPolylineMeasureLabelTest {
     File dx = MeasureLabelFixtures.writeDxImager020(dir.resolve("dx_imager_020.dcm").toFile());
     View2d view = new View2d();
     view.load(dx);
-    assertEquals("2.0 mm (detector plane)", view.formatPolylineMeasureLabel(horizontalPolyline(10)));
+    assertEquals(
+        "2.0 mm (detector plane)", view.formatPolylineMeasureLabel(horizontalPolyline(10)));
   }
 
   @Test
