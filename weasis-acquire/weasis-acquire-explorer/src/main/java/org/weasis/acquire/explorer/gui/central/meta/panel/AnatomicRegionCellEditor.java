@@ -9,4 +9,46 @@
  */
 package org.weasis.acquire.explorer.gui.central.meta.panel;
 
-public class AnatomicRegionCellEditor {}
+import java.awt.Component;
+import java.util.Map;
+import javax.swing.AbstractCellEditor;
+import javax.swing.JTable;
+import javax.swing.table.TableCellEditor;
+import org.weasis.acquire.explorer.AcquireImageInfo;
+
+/** Table editor for AnatomicRegion / BodyPartExamined. */
+public class AnatomicRegionCellEditor extends AbstractCellEditor implements TableCellEditor {
+
+  private final AnatomicRegionView view = new AnatomicRegionView();
+  private String tag = AnatomicRegionView.BODY_PART_TAG;
+
+  public AnatomicRegionView view() {
+    return view;
+  }
+
+  public void setTag(String tag) {
+    this.tag = tag == null ? AnatomicRegionView.BODY_PART_TAG : tag;
+  }
+
+  public void apply(AcquireImageInfo image, Map<String, String> seriesMeta) {
+    view.apply(image, seriesMeta);
+  }
+
+  @Override
+  public Object getCellEditorValue() {
+    return view.cellValue(tag);
+  }
+
+  @Override
+  public Component getTableCellEditorComponent(
+      JTable table, Object value, boolean isSelected, int row, int column) {
+    if (table != null && table.getModel().getColumnCount() > 0 && row >= 0) {
+      Object tagValue = table.getValueAt(row, 0);
+      if (tagValue != null) {
+        setTag(String.valueOf(tagValue));
+      }
+    }
+    view.setSelectedCode(value == null ? "" : String.valueOf(value));
+    return view;
+  }
+}

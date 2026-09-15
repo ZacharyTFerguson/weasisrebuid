@@ -9,4 +9,42 @@
  */
 package org.weasis.acquire.dockable.components.actions.annotate;
 
-public class AnnotateAction {}
+import java.awt.geom.Point2D;
+import org.weasis.core.ui.model.AbstractGraphicModel;
+import org.weasis.core.ui.model.GraphicModel;
+import org.weasis.core.ui.model.graphic.Graphic;
+
+/** Adds WP-5 graphics from {@link AnnotatePanel} onto the photo-editor graphic model. */
+public class AnnotateAction {
+
+  private final AnnotatePanel panel = new AnnotatePanel();
+  private GraphicModel model = new AbstractGraphicModel();
+
+  public AnnotatePanel panel() {
+    return panel;
+  }
+
+  public AnnotationOptionsPanel options() {
+    return panel.options();
+  }
+
+  public void setModel(GraphicModel model) {
+    this.model = model == null ? new AbstractGraphicModel() : model;
+  }
+
+  public GraphicModel model() {
+    return model;
+  }
+
+  public void setTool(String tool) {
+    panel.setTool(tool);
+  }
+
+  public Graphic add(Point2D.Double... pts) {
+    Graphic graphic = panel.createGraphic(pts);
+    if (graphic != null) {
+      model.addGraphic(graphic);
+    }
+    return graphic;
+  }
+}

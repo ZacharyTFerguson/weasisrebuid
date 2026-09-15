@@ -9,4 +9,56 @@
  */
 package org.weasis.acquire.dockable.components;
 
-public class AcquireSubmitButtonsPanel {}
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import org.weasis.acquire.explorer.AcquireImageValues;
+
+/** Apply commits pending photo-editor values; Cancel restores the last committed snapshot. */
+public class AcquireSubmitButtonsPanel extends JPanel {
+
+  public static final String APPLY = "Apply";
+  public static final String CANCEL = "Cancel";
+
+  private final JButton apply = new JButton(APPLY);
+  private final JButton cancel = new JButton(CANCEL);
+  private AcquireImageValues pending = new AcquireImageValues();
+  private AcquireImageValues snapshot = new AcquireImageValues();
+
+  public AcquireSubmitButtonsPanel() {
+    apply.setName("apply");
+    cancel.setName("cancel");
+    apply.addActionListener(e -> apply());
+    cancel.addActionListener(e -> cancel());
+    add(apply);
+    add(cancel);
+  }
+
+  public JButton applyButton() {
+    return apply;
+  }
+
+  public JButton cancelButton() {
+    return cancel;
+  }
+
+  public void bind(AcquireImageValues values) {
+    this.pending = values == null ? new AcquireImageValues() : values;
+    this.snapshot = this.pending.copy();
+  }
+
+  public AcquireImageValues pending() {
+    return pending;
+  }
+
+  public AcquireImageValues snapshot() {
+    return snapshot;
+  }
+
+  public void apply() {
+    snapshot = pending.copy();
+  }
+
+  public void cancel() {
+    pending.restoreFrom(snapshot);
+  }
+}

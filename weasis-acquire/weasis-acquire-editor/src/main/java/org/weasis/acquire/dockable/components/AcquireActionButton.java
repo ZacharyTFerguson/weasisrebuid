@@ -9,4 +9,26 @@
  */
 package org.weasis.acquire.dockable.components;
 
-public class AcquireActionButton {}
+import javax.swing.JToggleButton;
+
+/** Exclusive edition-tool toggle (rectify / contrast / annotate / calibrate / metadata). */
+public class AcquireActionButton extends JToggleButton {
+
+  public static final String RECTIFY = "rectify";
+  public static final String CONTRAST = "contrast";
+  public static final String ANNOTATE = "annotate";
+  public static final String CALIBRATE = "calibrate";
+  public static final String METADATA = "metadata";
+
+  private final String actionId;
+
+  public AcquireActionButton(String actionId) {
+    super(actionId == null || actionId.isBlank() ? RECTIFY : actionId);
+    this.actionId = actionId == null || actionId.isBlank() ? RECTIFY : actionId;
+    setName(this.actionId);
+  }
+
+  public String actionId() {
+    return actionId;
+  }
+}

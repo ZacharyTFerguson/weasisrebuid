@@ -68,4 +68,21 @@ public class AcquireImageValues {
   public boolean isCalibrated() {
     return calibrationMmPerPixel > 0.0;
   }
+
+  public AcquireImageValues copy() {
+    AcquireImageValues copy = new AcquireImageValues();
+    copy.restoreFrom(this);
+    return copy;
+  }
+
+  public void restoreFrom(AcquireImageValues other) {
+    if (other == null) {
+      return;
+    }
+    this.rotation = other.rotation;
+    this.brightness = other.brightness;
+    this.contrast = other.contrast;
+    this.crop = other.getCrop();
+    this.calibrationMmPerPixel = other.calibrationMmPerPixel;
+  }
 }

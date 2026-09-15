@@ -9,4 +9,57 @@
  */
 package org.weasis.acquire.dockable.components;
 
-public class AcquireActionButtonsPanel {}
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.ButtonGroup;
+import javax.swing.JPanel;
+
+/** Exclusive rectify / contrast / annotate / calibrate / metadata tool buttons. */
+public class AcquireActionButtonsPanel extends JPanel {
+
+  public static final List<String> ACTIONS =
+      List.of(
+          AcquireActionButton.RECTIFY,
+          AcquireActionButton.CONTRAST,
+          AcquireActionButton.ANNOTATE,
+          AcquireActionButton.CALIBRATE,
+          AcquireActionButton.METADATA);
+
+  private final Map<String, AcquireActionButton> buttons = new LinkedHashMap<>();
+  private String selected = AcquireActionButton.RECTIFY;
+
+  public AcquireActionButtonsPanel() {
+    ButtonGroup group = new ButtonGroup();
+    for (String id : ACTIONS) {
+      AcquireActionButton button = new AcquireActionButton(id);
+      button.addActionListener(e -> select(id));
+      group.add(button);
+      buttons.put(id, button);
+      add(button);
+    }
+    select(AcquireActionButton.RECTIFY);
+  }
+
+  public void select(String actionId) {
+    if (!buttons.containsKey(actionId)) {
+      return;
+    }
+    selected = actionId;
+    for (Map.Entry<String, AcquireActionButton> entry : buttons.entrySet()) {
+      entry.getValue().setSelected(entry.getKey().equals(actionId));
+    }
+  }
+
+  public String selectedId() {
+    return selected;
+  }
+
+  public AcquireActionButton selectedButton() {
+    return buttons.get(selected);
+  }
+
+  public AcquireActionButton button(String actionId) {
+    return buttons.get(actionId);
+  }
+}

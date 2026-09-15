@@ -15,6 +15,8 @@ public class AcquireImageInfo {
 
   private Path file;
   private String comments = "";
+  private String anatomicRegionCode = "";
+  private String anatomicRegionLabel = "";
 
   public Path getFile() {
     return file;
@@ -30,5 +32,21 @@ public class AcquireImageInfo {
 
   public void setComments(String comments) {
     this.comments = comments == null ? "" : comments;
+  }
+
+  public String getAnatomicRegionCode() {
+    return anatomicRegionCode;
+  }
+
+  public void setAnatomicRegionCode(String anatomicRegionCode) {
+    this.anatomicRegionCode = anatomicRegionCode == null ? "" : anatomicRegionCode;
+  }
+
+  public String getAnatomicRegionLabel() {
+    return anatomicRegionLabel;
+  }
+
+  public void setAnatomicRegionLabel(String anatomicRegionLabel) {
+    this.anatomicRegionLabel = anatomicRegionLabel == null ? "" : anatomicRegionLabel;
   }
 }

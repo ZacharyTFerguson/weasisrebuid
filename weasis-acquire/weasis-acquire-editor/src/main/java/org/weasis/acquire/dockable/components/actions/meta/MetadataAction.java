@@ -9,4 +9,27 @@
  */
 package org.weasis.acquire.dockable.components.actions.meta;
 
-public class MetadataAction {}
+import java.util.Map;
+import java.util.Properties;
+
+/** Edition-tool metadata action: required tags gate publish. */
+public class MetadataAction {
+
+  private final MetadataPanel panel = new MetadataPanel();
+
+  public MetadataPanel panel() {
+    return panel;
+  }
+
+  public void bind(
+      Properties prefs,
+      Map<String, String> globalValues,
+      Map<String, String> seriesValues,
+      Map<String, String> imageValues) {
+    panel.bind(prefs, globalValues, seriesValues, imageValues);
+  }
+
+  public boolean requiredComplete() {
+    return panel.requiredComplete();
+  }
+}
