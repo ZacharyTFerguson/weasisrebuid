@@ -34,8 +34,7 @@ public class ConvexHull {
       addCopy(copy, p);
     }
     copy.sort(
-        Comparator.comparingDouble(Point2D.Double::getX)
-            .thenComparingDouble(Point2D.Double::getY));
+        Comparator.comparingDouble(Point2D.Double::getX).thenComparingDouble(Point2D.Double::getY));
     return dedupe(copy);
   }
 
