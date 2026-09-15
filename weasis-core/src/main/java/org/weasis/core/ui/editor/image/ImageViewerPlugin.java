@@ -65,8 +65,8 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
   }
 
   /**
-   * View cell whose on-screen bounds contain {@code screen}. Default is null so docking glass
-   * drops fall through to {@link #dropCellAt}.
+   * View cell whose on-screen bounds contain {@code screen}. Default is null so docking glass drops
+   * fall through to {@link #dropCellAt}.
    */
   public JComponent dropCellAtScreen(Point screen) {
     return null;
