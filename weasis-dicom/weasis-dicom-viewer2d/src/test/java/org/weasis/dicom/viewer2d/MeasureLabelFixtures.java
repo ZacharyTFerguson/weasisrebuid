@@ -9,6 +9,7 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.geom.Ellipse2D;
 import java.io.File;
 import java.io.FileOutputStream;
 import org.dcm4che3.data.Attributes;
@@ -42,16 +43,13 @@ final class MeasureLabelFixtures {
     int rows = dcm.getInt(Tag.Rows, 0);
     int cols = dcm.getInt(Tag.Columns, 0);
     int[] px = dcm.getInts(Tag.PixelData);
-    java.util.Arrays.fill(px, 1064);
-    int cx = cols / 2;
-    int cy = rows / 2;
-    int r = 2;
+    Ellipse2D roi = new Ellipse2D.Double(2, 2, 12, 12);
     for (int row = 0; row < rows; row++) {
       for (int col = 0; col < cols; col++) {
-        double dx = col - cx;
-        double dy = row - cy;
-        if (dx * dx + dy * dy <= r * r) {
+        if (roi.contains(col + 0.5, row + 0.5)) {
           px[row * cols + col] = 24;
+        } else {
+          px[row * cols + col] = 1064;
         }
       }
     }

@@ -36,7 +36,7 @@ public final class MeasurementLabel {
     if (mm.isEmpty()) {
       return formatPixels(px);
     }
-    String base = String.format(Locale.US, "%.1f mm", mm.get());
+    String base = formatMm(mm.get());
     return switch (r.source()) {
       case IMAGER_DETECTOR -> base + " (detector plane)";
       case IMAGER_OBJECT_ESTIMATE -> base + " (estimate)";
@@ -50,5 +50,17 @@ public final class MeasurementLabel {
 
   private static String formatPixels(double px) {
     return String.format(Locale.US, "%.1f px", px);
+  }
+
+  /** One decimal when the value is a half-millimetre step; two when spacing math needs it (e.g. ÷ M). */
+  static String formatMm(double mm) {
+    double rounded = Math.round(mm * 100.0) / 100.0;
+    if (Math.abs(rounded - Math.rint(rounded)) < 1e-9) {
+      return String.format(Locale.US, "%.1f mm", rounded);
+    }
+    if (Math.abs(rounded * 10.0 - Math.rint(rounded * 10.0)) < 1e-9) {
+      return String.format(Locale.US, "%.1f mm", rounded);
+    }
+    return String.format(Locale.US, "%.2f mm", rounded);
   }
 }
