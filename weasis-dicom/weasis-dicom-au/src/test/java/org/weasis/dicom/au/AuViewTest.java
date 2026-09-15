@@ -31,7 +31,7 @@ class AuViewTest {
 
   @Test
   void eightBitMonoPcmAndPlayPauseStop() {
-    Attributes au = voiceUb(8000.0, new byte[] {128, 255, 0, 128});
+    Attributes au = voiceUb(8000.0, new byte[] {(byte) 128, (byte) 255, 0, (byte) 128});
     AuView view = new AuView();
     view.display(au);
     assertEquals(1, view.channelCount());
