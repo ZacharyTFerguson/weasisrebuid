@@ -80,6 +80,7 @@
     <jackson.version>2.22.1</jackson.version>
     <jackson.annotations.version>2.22</jackson.annotations.version>
     <flatlaf.version>3.7.2</flatlaf.version>
+    <jsvg.version>2.1.0</jsvg.version>
     <miglayout.version>11.4.3</miglayout.version>
     <jaxb.osgi.version>4.0.3</jaxb.osgi.version>
     <xml.bind-api.version>4.0.5</xml.bind-api.version>
@@ -205,6 +206,11 @@
         <groupId>com.formdev</groupId>
         <artifactId>flatlaf-extras</artifactId>
         <version>${flatlaf.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.weisj</groupId>
+        <artifactId>jsvg</artifactId>
+        <version>${jsvg.version}</version>
       </dependency>
       <dependency>
         <groupId>com.miglayout</groupId>

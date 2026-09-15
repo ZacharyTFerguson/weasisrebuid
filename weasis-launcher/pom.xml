@@ -42,6 +42,10 @@
       <artifactId>flatlaf-extras</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.github.weisj</groupId>
+      <artifactId>jsvg</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.weasis.core</groupId>
       <artifactId>weasis-core</artifactId>
       <version>${project.version}</version>
@@ -227,6 +231,7 @@
                   <include>org.slf4j:*</include>
                   <include>ch.qos.logback:*</include>
                   <include>com.formdev:*</include>
+                  <include>com.github.weisj:jsvg</include>
                 </includes>
               </artifactSet>
             </configuration>

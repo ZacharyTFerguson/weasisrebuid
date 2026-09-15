@@ -41,7 +41,18 @@ class LookAndFeelsTest {
     assertTrue(extra.contains("com.formdev.flatlaf.extras"));
     assertTrue(extra.contains("com.formdev.flatlaf.ui"));
     assertTrue(extra.contains("com.formdev.flatlaf.util"));
+    assertTrue(extra.contains("com.github.weisj.jsvg"));
+    assertTrue(extra.contains("com.github.weisj.jsvg.parser"));
+    assertTrue(extra.contains("com.github.weisj.jsvg.view"));
     String boot = data.value("org.osgi.framework.bootdelegation");
     assertTrue(boot.contains("com.formdev.flatlaf.*"));
+    assertTrue(boot.contains("com.github.weisj.jsvg.*"));
+  }
+
+  @Test
+  void jsvgFloatSizeIsOnLauncherClasspath() throws ClassNotFoundException {
+    assertEquals(
+        "com.github.weisj.jsvg.view.FloatSize",
+        Class.forName("com.github.weisj.jsvg.view.FloatSize").getName());
   }
 }

@@ -36,6 +36,16 @@
       <artifactId>flatlaf</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf-extras</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>com.github.weisj</groupId>
+      <artifactId>jsvg</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
