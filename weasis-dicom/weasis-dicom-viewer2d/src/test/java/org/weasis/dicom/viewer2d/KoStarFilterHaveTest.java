@@ -64,8 +64,7 @@ class KoStarFilterHaveTest {
     sops.add(ref("2.25.a"));
     sops.add(ref("2.25.c"));
     seriesSeq.add(seriesItem);
-    KOSpecialElement ko =
-        new KOSpecialElement(new DicomMediaIO(dcm, UID.ExplicitVRLittleEndian));
+    KOSpecialElement ko = new KOSpecialElement(new DicomMediaIO(dcm, UID.ExplicitVRLittleEndian));
     KOManager manager = new KOManager();
     assertEquals(2, manager.applyDocument(ko));
     assertTrue(manager.isFilterKeyImages());
