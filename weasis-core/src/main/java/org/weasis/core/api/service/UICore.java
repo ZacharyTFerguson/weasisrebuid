@@ -538,6 +538,12 @@ public class UICore {
     if (tabs.indexOfComponent(plugin) < 0) {
       tabs.addTab(plugin.getPluginName(), plugin);
     }
-    tabs.setSelectedComponent(plugin);
+    selectTabIfPresent(tabs, plugin);
+  }
+
+  static void selectTabIfPresent(JTabbedPane tabs, ViewerPlugin<?> plugin) {
+    if (tabs.indexOfComponent(plugin) >= 0) {
+      tabs.setSelectedComponent(plugin);
+    }
   }
 }

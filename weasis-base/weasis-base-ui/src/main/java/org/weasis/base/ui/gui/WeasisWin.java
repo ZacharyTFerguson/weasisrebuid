@@ -12,7 +12,10 @@ package org.weasis.base.ui.gui;
 import bibliothek.gui.dock.common.CControl;
 import bibliothek.gui.dock.common.CGrid;
 import bibliothek.gui.dock.common.CLocation;
+import bibliothek.gui.dock.common.CWorkingArea;
 import bibliothek.gui.dock.common.DefaultSingleCDockable;
+import bibliothek.gui.dock.common.event.CFocusListener;
+import bibliothek.gui.dock.common.intern.CDockable;
 import bibliothek.gui.dock.security.GlassedPane;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -71,6 +74,7 @@ public class WeasisWin extends JFrame {
   private CControl dockingControl;
   private DefaultSingleCDockable explorerDock;
   private DefaultSingleCDockable viewerDock;
+  private CWorkingArea viewerWork;
   private DataExplorerView explorerView;
   private final Map<String, DefaultSingleCDockable> seriesDocks = new LinkedHashMap<>();
 
@@ -106,17 +110,49 @@ public class WeasisWin extends JFrame {
         });
     dockingControl = new CControl(this);
     explorerDock = uncloseableDock("explorer", "Explorer", explorerHost);
-    viewerDock = uncloseableDock("viewer", "Viewer", viewerTabs);
+    viewerDock = uncloseableDock("viewer", "Viewer", new JPanel());
+    viewerWork = dockingControl.createWorkingArea("viewer-work");
+    viewerWork.setTitleText("Viewer");
+    stashViewerTabs();
     deployExplorerAndViewer();
     add(dockingControl.getContentArea(), BorderLayout.CENTER);
     bindSeriesDrop();
+    bindWorkingFocus();
+  }
+
+  void stashViewerTabs() {
+    viewerTabs.setVisible(false);
+    explorerHost.add(viewerTabs, BorderLayout.SOUTH);
   }
 
   void bindSeriesDrop() {
     stealIfJc(dockingControl.getContentArea());
     bindDropPath(viewerTabs);
     stealIfJc(getGlassPane());
+    stealIfJc(viewerWork.getComponent());
     stealGlassedTree(dockingControl.getContentArea());
+  }
+
+  void bindWorkingFocus() {
+    dockingControl.addFocusListener(
+        new CFocusListener() {
+          @Override
+          public void focusGained(CDockable dockable) {
+            onSeriesFocus(dockable);
+          }
+
+          @Override
+          public void focusLost(CDockable dockable) {}
+        });
+  }
+
+  void onSeriesFocus(CDockable dockable) {
+    ViewerPlugin<?> plugin = pluginOfDock(dockable);
+    if (plugin == null) {
+      return;
+    }
+    UICore.getInstance().setSelectedViewerPlugin(plugin);
+    rebindToolBars(plugin);
   }
 
   void bindDropPath(Component start) {
@@ -169,7 +205,7 @@ public class WeasisWin extends JFrame {
   void deployExplorerAndViewer() {
     CGrid grid = new CGrid(dockingControl);
     grid.add(0, 0, 1, 1, explorerDock);
-    grid.add(1, 0, 3, 1, viewerDock);
+    grid.add(1, 0, 3, 1, viewerWork);
     dockingControl.getContentArea().deploy(grid);
   }
 
@@ -190,8 +226,30 @@ public class WeasisWin extends JFrame {
   }
 
   ViewerPlugin<?> selectedViewerPlugin() {
+    ViewerPlugin<?> focused = pluginOfDock(dockingControl.getFocusedCDockable());
+    if (focused != null) {
+      return focused;
+    }
     Component selected = viewerTabs.getSelectedComponent();
     return selected instanceof ViewerPlugin<?> plugin ? plugin : null;
+  }
+
+  ViewerPlugin<?> pluginOfDock(CDockable dockable) {
+    for (Map.Entry<String, DefaultSingleCDockable> e : seriesDocks.entrySet()) {
+      if (e.getValue() == dockable) {
+        return pluginWithUid(e.getKey());
+      }
+    }
+    return null;
+  }
+
+  static ViewerPlugin<?> pluginWithUid(String uid) {
+    for (ViewerPlugin<?> plugin : UICore.getInstance().getOpenViewerPlugins()) {
+      if (uid.equals(plugin.getDockableUID())) {
+        return plugin;
+      }
+    }
+    return null;
   }
 
   void rebindToolBars(ViewerPlugin<?> plugin) {
@@ -208,6 +266,27 @@ public class WeasisWin extends JFrame {
     plugin.putClientProperty("dockingBound", Boolean.TRUE);
     plugin.addPropertyChangeListener("dockingState", e -> applyDockingState(plugin));
     plugin.addPropertyChangeListener("closed", e -> removeSeriesDock(plugin));
+    placeInWorkingArea(plugin);
+  }
+
+  void placeInWorkingArea(ViewerPlugin<?> plugin) {
+    if (viewerWork == null) {
+      return;
+    }
+    viewerTabs.remove(plugin);
+    viewerWork.show(ensureSeriesDock(plugin));
+    UICore.getInstance().setSelectedViewerPlugin(plugin);
+    rebindToolBars(plugin);
+  }
+
+  DefaultSingleCDockable ensureSeriesDock(ViewerPlugin<?> plugin) {
+    DefaultSingleCDockable dock = seriesDocks.get(plugin.getDockableUID());
+    if (dock != null) {
+      return dock;
+    }
+    dock = seriesDock(plugin);
+    seriesDocks.put(plugin.getDockableUID(), dock);
+    return dock;
   }
 
   static boolean dockingBound(ViewerPlugin<?> plugin) {
@@ -225,13 +304,11 @@ public class WeasisWin extends JFrame {
   }
 
   void floatPlugin(ViewerPlugin<?> plugin) {
-    if (plugin == null || seriesDocks.containsKey(plugin.getDockableUID())) {
+    if (plugin == null) {
       return;
     }
     viewerTabs.remove(plugin);
-    DefaultSingleCDockable dock = seriesDock(plugin);
-    seriesDocks.put(plugin.getDockableUID(), dock);
-    dockingControl.addDockable(dock);
+    DefaultSingleCDockable dock = ensureSeriesDock(plugin);
     dock.setLocation(CLocation.external(80, 80, 640, 480));
     dock.setVisible(true);
     UICore.getInstance().setSelectedViewerPlugin(plugin);
@@ -247,12 +324,22 @@ public class WeasisWin extends JFrame {
   }
 
   void restorePlugin(ViewerPlugin<?> plugin) {
-    DefaultSingleCDockable dock = seriesDocks.remove(plugin.getDockableUID());
-    if (dock == null) {
+    DefaultSingleCDockable dock = seriesDockOf(plugin);
+    if (dock == null || viewerWork == null) {
       return;
     }
-    dockingControl.removeDockable(dock);
-    reinsertTab(plugin);
+    dock.setWorkingArea(viewerWork);
+    dock.setLocation(CLocation.working(viewerWork).stack());
+    dock.setVisible(true);
+  }
+
+  void splitSeries(ViewerPlugin<?> plugin) {
+    DefaultSingleCDockable dock = seriesDockOf(plugin);
+    if (dock == null || viewerWork == null) {
+      return;
+    }
+    dock.setLocation(CLocation.working(viewerWork).east(0.5));
+    dock.setVisible(true);
   }
 
   void reinsertTab(ViewerPlugin<?> plugin) {
@@ -304,6 +391,35 @@ public class WeasisWin extends JFrame {
 
   public DefaultSingleCDockable getViewerDock() {
     return viewerDock;
+  }
+
+  public CWorkingArea getViewerWork() {
+    return viewerWork;
+  }
+
+  public int seriesDockCount() {
+    return seriesDocks.size();
+  }
+
+  public DefaultSingleCDockable seriesDockOf(ViewerPlugin<?> plugin) {
+    return plugin == null ? null : seriesDocks.get(plugin.getDockableUID());
+  }
+
+  void focusSeries(ViewerPlugin<?> plugin) {
+    DefaultSingleCDockable dock = seriesDockOf(plugin);
+    if (dock == null) {
+      selectTab(plugin);
+      return;
+    }
+    dock.setVisible(true);
+    UICore.getInstance().setSelectedViewerPlugin(plugin);
+    rebindToolBars(plugin);
+  }
+
+  void selectTab(ViewerPlugin<?> plugin) {
+    if (plugin != null && viewerTabs.indexOfComponent(plugin) >= 0) {
+      viewerTabs.setSelectedComponent(plugin);
+    }
   }
 
   public DataExplorerView getExplorerView() {

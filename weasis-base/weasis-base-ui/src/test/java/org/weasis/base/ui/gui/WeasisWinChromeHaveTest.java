@@ -109,11 +109,13 @@ class WeasisWinChromeHaveTest {
     try {
       core.openViewerPlugin(first);
       core.openViewerPlugin(second);
-      assertEquals(2, win.getViewerTabs().getTabCount());
-      assertSame(second, win.getViewerTabs().getSelectedComponent());
+      assertEquals(2, win.seriesDockCount());
+      assertSame(second, core.getSelectedViewerPlugin());
+      assertSame(win.getViewerWork(), win.seriesDockOf(first).getWorkingArea());
+      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
       core.closeViewerPlugin(first);
-      assertEquals(1, win.getViewerTabs().getTabCount());
-      assertSame(second, win.getViewerTabs().getSelectedComponent());
+      assertEquals(1, win.seriesDockCount());
+      assertSame(second, core.getSelectedViewerPlugin());
     } finally {
       for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
         core.closeViewerPlugin(plugin);
@@ -136,6 +138,8 @@ class WeasisWinChromeHaveTest {
       assertEquals(2, win.getDockingControl().getCDockableCount());
       assertFalse(win.getExplorerDock().isCloseable());
       assertFalse(win.getViewerDock().isCloseable());
+      assertFalse(win.getViewerWork().isCloseable());
+      assertNotNull(win.getViewerWork());
       assertTrue(win.getExplorerDock().isMinimizable());
       assertTrue(win.getExplorerDock().isExternalizable());
       Object center =
@@ -166,8 +170,8 @@ class WeasisWinChromeHaveTest {
     LayoutPlugin image = new LayoutPlugin();
     try {
       core.openViewerPlugin(other);
-      win.getViewerTabs().addTab("DICOM 2D", image);
-      win.getViewerTabs().setSelectedComponent(image);
+      core.openViewerPlugin(image);
+      win.focusSeries(image);
       win.menuNamed("View").getItem(2).doClick();
       assertEquals(4, image.layout);
       JPanel dockHost = new JPanel();
@@ -196,7 +200,7 @@ class WeasisWinChromeHaveTest {
     LayoutPlugin image = new LayoutPlugin();
     try {
       core.openViewerPlugin(image);
-      win.getViewerTabs().setSelectedComponent(image);
+      win.focusSeries(image);
       win.menuNamed("Edit").getItem(0).doClick();
       assertTrue(image.selectedAll);
       win.menuNamed("Edit").getItem(1).doClick();
@@ -249,18 +253,45 @@ class WeasisWinChromeHaveTest {
     try {
       core.openViewerPlugin(first);
       core.openViewerPlugin(second);
-      assertEquals(2, win.getViewerTabs().getTabCount());
-      assertEquals(2, win.getDockingControl().getCDockableCount());
+      assertEquals(2, win.seriesDockCount());
+      assertEquals(4, win.getDockingControl().getCDockableCount());
       core.externalizeSelectedPlugin();
       assertEquals(ViewerPlugin.DockingState.EXTERNALIZED, second.getDockingState());
-      assertEquals(3, win.getDockingControl().getCDockableCount());
-      assertEquals(1, win.getViewerTabs().getTabCount());
-      assertSame(first, win.getViewerTabs().getSelectedComponent());
+      assertEquals(4, win.getDockingControl().getCDockableCount());
+      assertSame(win.getViewerWork(), win.seriesDockOf(first).getWorkingArea());
       assertSame(second, core.getSelectedViewerPlugin());
       core.normalizeSelectedPlugin();
       assertEquals(ViewerPlugin.DockingState.NORMAL, second.getDockingState());
-      assertEquals(2, win.getViewerTabs().getTabCount());
-      assertEquals(2, win.getDockingControl().getCDockableCount());
+      assertEquals(2, win.seriesDockCount());
+      assertEquals(4, win.getDockingControl().getCDockableCount());
+      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void remainingSeriesTabsSplitInWorkingArea() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    ViewerPlugin<?> second = plugin("B");
+    try {
+      core.openViewerPlugin(first);
+      core.openViewerPlugin(second);
+      win.splitSeries(second);
+      assertTrue(win.seriesDockOf(first).isVisible());
+      assertTrue(win.seriesDockOf(second).isVisible());
+      assertSame(win.getViewerWork(), win.seriesDockOf(first).getWorkingArea());
+      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
+      assertEquals(ViewerPlugin.DockingState.NORMAL, first.getDockingState());
+      assertEquals(ViewerPlugin.DockingState.NORMAL, second.getDockingState());
+      assertEquals(2, core.getOpenViewerPlugins().size());
     } finally {
       closeOpen(core);
       core.setApplicationWindow(null);
@@ -284,7 +315,7 @@ class WeasisWinChromeHaveTest {
       core.openViewerPlugin(audio);
       assertFalse(hasBar(win.getToolBarContainer(), "LUT"));
       assertTrue(hasBar(win.getToolBarContainer(), "Audio"));
-      win.getViewerTabs().setSelectedComponent(twoD);
+      win.focusSeries(twoD);
       assertTrue(hasBar(win.getToolBarContainer(), "LUT"));
       assertFalse(hasBar(win.getToolBarContainer(), "Audio"));
     } finally {
