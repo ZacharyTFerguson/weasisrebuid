@@ -6,12 +6,13 @@ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 export JAVA_HOME="${JAVA_HOME:-$HOME/tools/jdk-25}"
 export PATH="$JAVA_HOME/bin:$PATH"
-PORT="${GOSH_PORT:-17181}"
+PORT="${DICOMIZER_GOSH_PORT:-17181}"
 CACHE="${TMPDIR:-/tmp}/weasis-dicomizer-cache-$$"
 rm -rf "$CACHE"
 mvn -q install -DskipTests
 JAR=$(ls weasis-launcher/target/weasis-launcher-*.jar | grep -v original | head -1)
 java -Djava.awt.headless=true \
+  -Dgosh.port="$PORT" \
   -Dfelix.extended.config.properties="file:$ROOT/weasis-launcher/conf/dicomizer.json" \
   -Dweasis.base.json="$ROOT/weasis-launcher/conf/base.json" \
   -Dorg.osgi.framework.storage="$CACHE" \
@@ -58,6 +59,8 @@ info = send("weasis:info -a")
 print(info)
 if "17181" not in info:
     sys.exit("weasis:info -a did not print gosh.port 17181: %r" % info)
+if "17179" in info:
+    sys.exit("dicomizer Gogo must not print desktop 17179: %r" % info)
 if "dicomizer" not in info.lower():
     sys.exit("weasis:info -a did not print weasis.profile dicomizer: %r" % info)
 lb = send("lb")
