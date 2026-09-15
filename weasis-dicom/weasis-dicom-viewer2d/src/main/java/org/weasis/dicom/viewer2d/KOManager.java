@@ -23,6 +23,9 @@ import org.dcm4che3.data.UID;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.io.DicomOutputStream;
 import org.dcm4che3.util.UIDUtils;
+import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.TagW;
+import org.weasis.dicom.codec.KOSpecialElement;
 
 /**
  * Key images and Key Object Selection documents (docs: Build DICOM KO and PR). Root UID from {@code
@@ -60,6 +63,66 @@ public class KOManager {
 
   public void setFilterKeyImages(boolean filterKeyImages) {
     this.filterKeyImages = filterKeyImages;
+  }
+
+  public boolean addKeyImage(String sopInstanceUid) {
+    if (missingSop(sopInstanceUid)) {
+      return false;
+    }
+    return keySopInstanceUids.add(sopInstanceUid);
+  }
+
+  public int applyDocument(KOSpecialElement ko) {
+    if (ko == null) {
+      return 0;
+    }
+    int n = importRefs(ko);
+    setFilterKeyImages(true);
+    return n;
+  }
+
+  int importRefs(KOSpecialElement ko) {
+    int n = 0;
+    for (String sop : ko.getReferencedSopInstanceUIDList()) {
+      n += addKeyImage(sop) ? 1 : 0;
+    }
+    return n;
+  }
+
+  public List<MediaElement> visibleMedias(List<? extends MediaElement> all) {
+    if (all == null) {
+      return List.of();
+    }
+    if (!filterKeyImages) {
+      return List.copyOf(all);
+    }
+    return filterMedias(all);
+  }
+
+  List<MediaElement> filterMedias(List<? extends MediaElement> all) {
+    List<MediaElement> out = new ArrayList<>();
+    for (MediaElement media : all) {
+      addIfKey(out, media);
+    }
+    return List.copyOf(out);
+  }
+
+  void addIfKey(List<MediaElement> out, MediaElement media) {
+    if (isKeyImage(sopOf(media))) {
+      out.add(media);
+    }
+  }
+
+  public static String sopOf(MediaElement media) {
+    if (media == null) {
+      return "";
+    }
+    Object v = media.getTagValue(TagW.SOPInstanceUID);
+    return v == null ? "" : v.toString();
+  }
+
+  static boolean missingSop(String sopInstanceUid) {
+    return sopInstanceUid == null || sopInstanceUid.isBlank();
   }
 
   public List<String> visibleSops(Iterable<String> all) {

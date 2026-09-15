@@ -103,6 +103,48 @@ public class View2d extends DefaultView2d<MediaElement> {
     return koManager.toggleKeyImage(dataset.getString(Tag.SOPInstanceUID));
   }
 
+  public List<MediaElement> visibleMedias() {
+    MediaSeries<? extends MediaElement> s = getSeries();
+    return koManager.visibleMedias(s == null ? List.of() : s.getMedias());
+  }
+
+  public void applyKeyImageFilter() {
+    if (!koManager.isFilterKeyImages()) {
+      return;
+    }
+    jumpToVisible();
+  }
+
+  void jumpToVisible() {
+    List<MediaElement> visible = visibleMedias();
+    if (nothingToShow(visible)) {
+      return;
+    }
+    selectFirstIfHidden(getSeries().getMedias(), visible);
+  }
+
+  boolean nothingToShow(List<MediaElement> visible) {
+    return visible.isEmpty() || getSeries() == null;
+  }
+
+  void selectFirstIfHidden(List<? extends MediaElement> all, List<MediaElement> visible) {
+    if (currentIsVisible(all, visible)) {
+      return;
+    }
+    int idx = all.indexOf(visible.getFirst());
+    if (idx >= 0) {
+      setFrameIndex(idx);
+    }
+  }
+
+  boolean currentIsVisible(List<? extends MediaElement> all, List<MediaElement> visible) {
+    int idx = getFrameIndex();
+    if (idx < 0 || idx >= all.size()) {
+      return false;
+    }
+    return visible.contains(all.get(idx));
+  }
+
   public double getWindow() {
     return window;
   }

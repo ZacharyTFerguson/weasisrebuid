@@ -72,6 +72,9 @@ public class KeyObjectToolBar implements Toolbar {
   public boolean filter() {
     KOManager ko = getManager();
     ko.setFilterKeyImages(!ko.isFilterKeyImages());
+    if (view != null) {
+      view.applyKeyImageFilter();
+    }
     return ko.isFilterKeyImages();
   }
 
