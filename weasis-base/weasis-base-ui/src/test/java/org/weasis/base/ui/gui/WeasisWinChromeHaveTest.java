@@ -101,6 +101,7 @@ class WeasisWinChromeHaveTest {
       assertEquals("Keyboard Shortcuts", win.menuNamed("Help").getItem(0).getText());
       assertEquals("About", win.menuNamed("Help").getItem(1).getText());
       assertEquals("Licenses", win.menuNamed("Help").getItem(2).getText());
+      assertEquals("System resources", win.menuNamed("Help").getItem(3).getText());
     } finally {
       win.dispose();
     }
@@ -124,6 +125,27 @@ class WeasisWinChromeHaveTest {
       assertSame(ActionW.MEASURE, map.actionFor(KeyEvent.VK_M));
       assertTrue(map.listedRows().stream().anyMatch(row -> row.contains(ActionW.PAN.cmd())));
       assertTrue(map.listedRows().stream().anyMatch(row -> row.contains(ActionW.CINE.cmd())));
+    } finally {
+      if (dialog != null) {
+        dialog.dispose();
+      }
+      win.dispose();
+    }
+  }
+
+  @Test
+  void helpSystemResourcesShowsHeapAndNativeDiagnostic() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    ResourceMonitorDialog dialog = null;
+    try {
+      assertEquals("System resources", win.menuNamed("Help").getItem(3).getText());
+      dialog = win.systemResourcesDialog();
+      assertEquals("System resources", dialog.getTitle());
+      assertEquals("system-resources", dialog.getName());
+      assertTrue(dialog.statusText().startsWith("Heap "));
+      assertTrue(dialog.statusText().contains("Native "));
+      assertTrue(dialog.statusText().contains("%"));
     } finally {
       if (dialog != null) {
         dialog.dispose();

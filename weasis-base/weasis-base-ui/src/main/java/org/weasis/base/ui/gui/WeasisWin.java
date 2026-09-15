@@ -718,8 +718,11 @@ public class WeasisWin extends JFrame {
   }
 
   void showResourceMonitor() {
-    ResourceMonitorDialog dialog = new ResourceMonitorDialog(this);
-    dialog.setVisible(true);
+    systemResourcesDialog().setVisible(true);
+  }
+
+  ResourceMonitorDialog systemResourcesDialog() {
+    return new ResourceMonitorDialog(this);
   }
 
   JMenu createWindowMenu() {
@@ -839,6 +842,7 @@ public class WeasisWin extends JFrame {
     help.add(namedItem("Keyboard Shortcuts", this::showKeyboardShortcuts));
     help.add(namedItem("About", this::showAbout));
     help.add(namedItem("Licenses", this::showLicenses));
+    help.add(namedItem("System resources", this::showResourceMonitor));
     return help;
   }
 
