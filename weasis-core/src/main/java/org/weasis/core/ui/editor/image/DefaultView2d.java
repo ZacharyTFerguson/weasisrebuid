@@ -338,6 +338,35 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     paintDecorations((Graphics2D) g);
   }
 
+  public void paintView(Graphics2D g, boolean overlays) {
+    if (g == null) {
+      return;
+    }
+    g.setColor(Color.BLACK);
+    g.fillRect(0, 0, Math.max(1, getWidth()), Math.max(1, getHeight()));
+    if (source != null) {
+      Graphics2D g2 = (Graphics2D) g.create();
+      try {
+        g2.setRenderingHint(
+            RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        int w = Math.max(1, getWidth());
+        int h = Math.max(1, getHeight());
+        double scale = resolvedScale(w, h);
+        AffineTransform tx = new AffineTransform();
+        tx.translate(w / 2.0 + panX, h / 2.0 + panY);
+        tx.rotate(Math.toRadians(rotation));
+        tx.scale(scale, scale);
+        tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
+        g2.drawImage(source, tx, this);
+      } finally {
+        g2.dispose();
+      }
+    }
+    if (overlays) {
+      paintDecorations(g);
+    }
+  }
+
   void paintDecorations(Graphics2D g) {
     g.setColor(Color.YELLOW);
     int y = 16;

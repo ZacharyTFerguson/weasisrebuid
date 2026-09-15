@@ -9,4 +9,47 @@
  */
 package org.weasis.dicom.explorer.pref.node;
 
-public class DicomPrintNode {}
+/** Print SCP node: DIMSE AE plus grayscale vs color print management meta SOP. */
+public class DicomPrintNode {
+
+  private final DefaultDicomNode node;
+  private final boolean color;
+
+  public DicomPrintNode(String description, String aeTitle, String host, int port) {
+    this(description, aeTitle, host, port, false);
+  }
+
+  public DicomPrintNode(String description, String aeTitle, String host, int port, boolean color) {
+    this.node = new DefaultDicomNode(description, aeTitle, host, port);
+    this.color = color;
+  }
+
+  public DicomPrintNode(DefaultDicomNode node, boolean color) {
+    this.node = node;
+    this.color = color;
+  }
+
+  public DefaultDicomNode asNode() {
+    return node;
+  }
+
+  public String description() {
+    return node == null ? "" : node.description();
+  }
+
+  public String aeTitle() {
+    return node == null ? "" : node.aeTitle();
+  }
+
+  public String host() {
+    return node == null ? "" : node.host();
+  }
+
+  public int port() {
+    return node == null ? 0 : node.port();
+  }
+
+  public boolean color() {
+    return color;
+  }
+}

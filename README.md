@@ -10,7 +10,7 @@ Spec lives in [`docs/weasis-spec/`](docs/weasis-spec/README.md), derived from pu
 - **WP-1:** Core SDK — dummy `SeriesViewerFactory` opens a blank `ViewerPlugin`.
 - **WP-2:** OpenCV fragment (linux-x86-64), `weasis-core-img`, `weasis-imageio-codec`, `weasis-dicom-codec`. Explicit VR LE MONOCHROME2 CT paints with W/L.
 - **WP-3:** Import + Explorer on synthetic DICOMDIR; Detect CD-ROM.
-- **WP-4:** View2d LUT chain and `dcmview2d:*`.
+- **WP-4:** View2d LUT chain and `dcmview2d:*`. Zoom toolbar −200/−100; screenshot PNG/JPEG Have.
 - **WP-5:** Draw & Measure geometry (angle, Cobb, 3-point circle, …), KO/PR objects (`weasis.dicom.root.uid` 2.25).
 - **WP-6 Have:** FoR vs manual synch are distinct (`SynchData.Kind`). Docking Frames **Active @10**. MigLayout Core+Swing and JAXB-OSGi **Active @7**.
 - **WP-7 Have:** Orthogonal MPR + MIP None/Min/Mean/Max (`MipView.Type`). CPR sampler exists. `MprFactory` does not steal `image/dicom`.

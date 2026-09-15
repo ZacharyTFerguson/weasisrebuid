@@ -9,4 +9,24 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class ScreenshotToolBar {}
+import javax.swing.JButton;
+import org.weasis.core.ui.util.WtoolBar;
+
+/** Viewer screenshot toolbar. Opens {@link ScreenshotDialog}. */
+public class ScreenshotToolBar extends WtoolBar {
+
+  public static final String NAME = "Screenshot";
+
+  private final ScreenshotDialog dialog = new ScreenshotDialog();
+
+  public ScreenshotToolBar() {
+    super(NAME, 25);
+    JButton button = new JButton("Screenshot");
+    button.addActionListener(e -> dialog.setVisible(true));
+    add(button);
+  }
+
+  public ScreenshotDialog dialog() {
+    return dialog;
+  }
+}

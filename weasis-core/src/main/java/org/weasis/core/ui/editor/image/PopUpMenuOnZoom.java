@@ -9,4 +9,40 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class PopUpMenuOnZoom {}
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JPopupMenu;
+import org.weasis.core.api.image.AffineTransformOp;
+
+/** Context menu of zoom presets (best fit / real size / numeric). */
+public class PopUpMenuOnZoom extends JPopupMenu {
+
+  private double selected = AffineTransformOp.ZOOM_BEST_FIT;
+
+  public PopUpMenuOnZoom() {
+    add(item("Best Fit", AffineTransformOp.ZOOM_BEST_FIT));
+    add(item("Real Size", AffineTransformOp.ZOOM_REAL_SIZE));
+    add(item("1x", 1.0));
+    add(item("2x", 2.0));
+    add(item("4x", 4.0));
+  }
+
+  public double selectedZoom() {
+    return selected;
+  }
+
+  public void apply(DefaultView2d<?> view) {
+    if (view != null) {
+      view.setZoom(selected);
+    }
+  }
+
+  private AbstractAction item(String label, double zoom) {
+    return new AbstractAction(label) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        selected = zoom;
+      }
+    };
+  }
+}
