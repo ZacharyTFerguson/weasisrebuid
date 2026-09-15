@@ -27,6 +27,7 @@ import org.weasis.core.ui.editor.image.SynchView;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.util.ToolBarContainer;
+import org.weasis.dicom.codec.KOSpecialElement;
 
 /** One tab: ImageViewerPlugin holding a {@link View2d}. MPR is {@code mpr.MprContainer}. */
 public class View2dContainer extends ImageViewerPlugin<MediaElement> {
@@ -391,6 +392,40 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     } catch (Exception e) {
       cell.setGeometryWarning("Unable to open DICOM");
     }
+  }
+
+  @Override
+  public void applyOverlay(MediaSeries<MediaElement> sequence) {
+    if (sequence == null) {
+      return;
+    }
+    applyKoFrom(sequence);
+  }
+
+  void applyKoFrom(MediaSeries<MediaElement> sequence) {
+    for (MediaElement media : sequence.getMedias()) {
+      applyKoMedia(media);
+    }
+  }
+
+  void applyKoMedia(MediaElement media) {
+    if (media instanceof KOSpecialElement ko) {
+      applyKo(ko);
+    }
+  }
+
+  void applyKo(KOSpecialElement ko) {
+    for (View2d cell : layout) {
+      applyKoTo(cell, ko);
+    }
+  }
+
+  void applyKoTo(View2d cell, KOSpecialElement ko) {
+    if (cell == null) {
+      return;
+    }
+    cell.getKoManager().applyDocument(ko);
+    cell.applyKeyImageFilter();
   }
 
   @Override

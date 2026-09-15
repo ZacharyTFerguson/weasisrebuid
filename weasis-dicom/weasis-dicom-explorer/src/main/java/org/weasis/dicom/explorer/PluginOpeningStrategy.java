@@ -184,27 +184,78 @@ public class PluginOpeningStrategy {
     if (bucket == null || bucket.instances().isEmpty()) {
       return null;
     }
-    String mime = bucket.mime();
-    Kind kind = kindFor(mime);
+    return openBucket(bucket);
+  }
+
+  ViewerPlugin<?> openBucket(DicomSeriesHandler.SeriesBucket bucket) {
+    Kind kind = kindFor(bucket.mime());
     if (kind == Kind.SKIP) {
       return null;
     }
     if (kind == Kind.OVERLAY) {
-      overlaysRouted++;
-      return core.getSelectedViewerPlugin();
+      return routeOverlay(bucket);
     }
+    return openNonOverlay(bucket, kind);
+  }
+
+  ViewerPlugin<?> openNonOverlay(DicomSeriesHandler.SeriesBucket bucket, Kind kind) {
     String patient = patientKey(bucket);
-    if (kind == Kind.IMAGE) {
-      ViewerPlugin<?> existing = openExistingImage(bucket, patient, mime);
-      if (existing != null) {
-        return existing;
-      }
+    ViewerPlugin<?> existing = reuseImage(bucket, patient, kind);
+    if (existing != null) {
+      return existing;
     }
-    ViewerPlugin<?> plugin = createPlugin(bucket, mime, patient);
+    return createRemembered(bucket, patient, kind);
+  }
+
+  ViewerPlugin<?> reuseImage(DicomSeriesHandler.SeriesBucket bucket, String patient, Kind kind) {
+    if (kind != Kind.IMAGE) {
+      return null;
+    }
+    return openExistingImage(bucket, patient, bucket.mime());
+  }
+
+  ViewerPlugin<?> createRemembered(
+      DicomSeriesHandler.SeriesBucket bucket, String patient, Kind kind) {
+    ViewerPlugin<?> plugin = createPlugin(bucket, bucket.mime(), patient);
+    rememberPatient(plugin, patient, kind);
+    return plugin;
+  }
+
+  void rememberPatient(ViewerPlugin<?> plugin, String patient, Kind kind) {
     if (plugin != null && kind == Kind.IMAGE && !patient.isBlank()) {
       patientTabs.put(patient, plugin);
     }
-    return plugin;
+  }
+
+  ViewerPlugin<?> routeOverlay(DicomSeriesHandler.SeriesBucket bucket) {
+    overlaysRouted++;
+    ViewerPlugin<?> target = overlayTarget();
+    applyOverlay(target, handler.toMediaSeries(bucket));
+    return target;
+  }
+
+  ViewerPlugin<?> overlayTarget() {
+    ViewerPlugin<?> selected = core.getSelectedViewerPlugin();
+    if (selected != null) {
+      return selected;
+    }
+    return firstImagePlugin();
+  }
+
+  ViewerPlugin<?> firstImagePlugin() {
+    for (ViewerPlugin<?> plugin : core.getOpenViewerPlugins()) {
+      if (plugin instanceof ImageViewerPlugin<?>) {
+        return plugin;
+      }
+    }
+    return null;
+  }
+
+  @SuppressWarnings("unchecked")
+  static void applyOverlay(ViewerPlugin<?> plugin, MediaSeries<?> series) {
+    if (plugin instanceof ImageViewerPlugin<?> image) {
+      ((ImageViewerPlugin<MediaElement>) image).applyOverlay((MediaSeries<MediaElement>) series);
+    }
   }
 
   private ViewerPlugin<?> createPlugin(

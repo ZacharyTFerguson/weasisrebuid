@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,6 +33,8 @@ import org.weasis.core.ui.editor.SeriesViewerFactory;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMime;
 import org.weasis.dicom.explorer.exp.ExplorerTask;
+import org.weasis.dicom.viewer2d.View2dContainer;
+import org.weasis.dicom.viewer2d.View2dFactory;
 
 class ExplorerOpenHaveTest {
 
@@ -118,6 +121,43 @@ class ExplorerOpenHaveTest {
   }
 
   @Test
+  void koOverlayDoesNotCreateTabOrFillHangSlot() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      assertEquals(
+          PluginOpeningStrategy.Kind.OVERLAY,
+          opening.kindForSop(UID.KeyObjectSelectionDocumentStorage));
+      ViewerPlugin<?> plugin =
+          opening.open(
+              dx(
+                  "A",
+                  "1",
+                  "2.25.dx",
+                  UID.DigitalXRayImageStorageForPresentation,
+                  DicomMime.IMAGE_DICOM));
+      assertInstanceOf(View2dContainer.class, plugin);
+      View2dContainer container = (View2dContainer) plugin;
+      assertEquals(2, container.getLayoutCount());
+      assertNull(container.getLayoutViews().get(1).getSeries());
+      int series = plugin.getOpenSeries().size();
+      ViewerPlugin<?> overlay =
+          opening.open(
+              instance(
+                  "A", "1", "2.25.ko", UID.KeyObjectSelectionDocumentStorage, DicomMime.KO_DICOM));
+      assertEquals(1, opening.overlaysRouted());
+      assertSame(plugin, overlay);
+      assertEquals(series, plugin.getOpenSeries().size());
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertNull(container.getLayoutViews().get(1).getSeries());
+    } finally {
+      core.unregisterSeriesViewerFactory(factory);
+    }
+  }
+
+  @Test
   void mainExplorerLoadsPart10AndOpensDicomTab(@TempDir Path dir) throws Exception {
     File ct = dir.resolve("ct.dcm").toFile();
     LoadLocalDicomTest.writeCt(ct);
@@ -152,6 +192,23 @@ class ExplorerOpenHaveTest {
     assertTrue(factory.canReadMimeType(DicomMime.IMAGE_DICOM));
     assertFalse(factory.canReadMimeType(DicomMime.SR_DICOM));
     assertTrue(factory.isViewerCreatedByThisFactory(plugin));
+  }
+
+  static ImportedInstance dx(String name, String id, String series, String sopClass, String mime) {
+    return new ImportedInstance(
+        "SYNTHETIC^" + name,
+        "SYN-" + id,
+        "2.25.study." + id,
+        series,
+        series + ".1",
+        sopClass,
+        "DX",
+        series,
+        "20260101",
+        1,
+        1,
+        null,
+        mime);
   }
 
   static ImportedInstance instance(

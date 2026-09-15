@@ -54,6 +54,14 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
     return false;
   }
 
+  /**
+   * SEG / RT / PR / KO overlay. Default is a no-op so overlays never occupy hang slots via {@code
+   * addSeries}.
+   */
+  public void applyOverlay(MediaSeries<E> sequence) {
+    // overlays do not create a tab or fill hanging cells
+  }
+
   public void resetDisplay() {}
 
   public void applyPreset(int index) {}
