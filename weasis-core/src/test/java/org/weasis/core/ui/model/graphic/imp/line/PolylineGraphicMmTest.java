@@ -36,8 +36,8 @@ class PolylineGraphicMmTest {
   @Test
   void twoSegmentsSumMmNotEndToEndHypot() {
     // L-shape: 10 px horizontal then 10 px vertical → 2.5 + 5.0 = 7.5 mm, not hypot(10,10) in mm.
-    PolylineGraphic poly = polyline(
-        new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10));
+    PolylineGraphic poly =
+        polyline(new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10));
     assertEquals(7.5, poly.getLengthMm(ANISO).orElseThrow(), 1e-9);
   }
 
