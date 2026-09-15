@@ -105,6 +105,12 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private final ContextMenuHandler contextMenuHandler = new ContextMenuHandler();
   private SliderCineListener cine;
   private ImagePrint lastPrint;
+  private final List<MediaSeries<? extends MediaElement>> seriesStack = new ArrayList<>();
+  private final List<Integer> studyOfSeries = new ArrayList<>();
+  private final List<Integer> patientOfSeries = new ArrayList<>();
+  private int seriesIndex;
+  private boolean fullScreen;
+  private boolean segmentationsVisible = true;
 
   public DefaultView2d() {
     setBackground(Color.BLACK);
@@ -287,6 +293,170 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
 
   public void setSeries(MediaSeries<? extends MediaElement> series) {
     this.series = series;
+    for (int i = 0; i < seriesStack.size(); i++) {
+      if (seriesStack.get(i) == series) {
+        seriesIndex = i;
+        break;
+      }
+    }
+  }
+
+  public void setSeriesStack(
+      List<? extends MediaSeries<? extends MediaElement>> stack, int[] studies, int[] patients) {
+    seriesStack.clear();
+    studyOfSeries.clear();
+    patientOfSeries.clear();
+    if (stack != null) {
+      for (int i = 0; i < stack.size(); i++) {
+        seriesStack.add(stack.get(i));
+        studyOfSeries.add(studies != null && i < studies.length ? studies[i] : 0);
+        patientOfSeries.add(patients != null && i < patients.length ? patients[i] : 0);
+      }
+    }
+    seriesIndex = 0;
+    if (!seriesStack.isEmpty()) {
+      setSeries(seriesStack.get(0));
+      setFrameIndex(0);
+    }
+  }
+
+  public int getSeriesIndex() {
+    return seriesIndex;
+  }
+
+  public int getStudyIndex() {
+    return studyOfSeries.isEmpty()
+        ? 0
+        : studyOfSeries.get(Math.min(seriesIndex, studyOfSeries.size() - 1));
+  }
+
+  public int getPatientIndex() {
+    return patientOfSeries.isEmpty()
+        ? 0
+        : patientOfSeries.get(Math.min(seriesIndex, patientOfSeries.size() - 1));
+  }
+
+  public void nextFrame(int delta) {
+    int max = Math.max(0, getFrameCount() - 1);
+    int next = getFrameIndex() + delta;
+    if (next < 0) {
+      next = 0;
+    }
+    if (next > max) {
+      next = max;
+    }
+    setFrameIndex(next);
+  }
+
+  public void firstFrame() {
+    setFrameIndex(0);
+  }
+
+  public void lastFrame() {
+    setFrameIndex(Math.max(0, getFrameCount() - 1));
+  }
+
+  public void nextSeries(int delta) {
+    if (seriesStack.isEmpty()) {
+      return;
+    }
+    int study = getStudyIndex();
+    int step = delta < 0 ? -1 : 1;
+    int i = seriesIndex + step;
+    while (i >= 0 && i < seriesStack.size()) {
+      if (studyOfSeries.get(i) == study) {
+        showSeries(i);
+        return;
+      }
+      i += step;
+    }
+  }
+
+  public void firstSeries() {
+    selectFirstSeriesFor(studyOfSeries, getStudyIndex());
+  }
+
+  public void lastSeries() {
+    int study = getStudyIndex();
+    for (int i = seriesStack.size() - 1; i >= 0; i--) {
+      if (studyOfSeries.get(i) == study) {
+        showSeries(i);
+        return;
+      }
+    }
+  }
+
+  public void nextStudy(int delta) {
+    selectFirstSeriesFor(studyOfSeries, getStudyIndex() + delta);
+  }
+
+  public void firstStudy() {
+    selectExtreme(studyOfSeries, true);
+  }
+
+  public void lastStudy() {
+    selectExtreme(studyOfSeries, false);
+  }
+
+  public void nextPatient(int delta) {
+    selectFirstSeriesFor(patientOfSeries, getPatientIndex() + delta);
+  }
+
+  public void firstPatient() {
+    selectExtreme(patientOfSeries, true);
+  }
+
+  public void lastPatient() {
+    selectExtreme(patientOfSeries, false);
+  }
+
+  void showSeries(int index) {
+    if (seriesStack.isEmpty()) {
+      return;
+    }
+    seriesIndex = Math.max(0, Math.min(seriesStack.size() - 1, index));
+    setSeries(seriesStack.get(seriesIndex));
+    setFrameIndex(0);
+  }
+
+  void selectFirstSeriesFor(List<Integer> groups, int target) {
+    for (int i = 0; i < groups.size(); i++) {
+      if (groups.get(i) == target) {
+        showSeries(i);
+        return;
+      }
+    }
+  }
+
+  void selectExtreme(List<Integer> groups, boolean first) {
+    if (groups.isEmpty()) {
+      return;
+    }
+    int extreme = groups.get(0);
+    for (int g : groups) {
+      extreme = first ? Math.min(extreme, g) : Math.max(extreme, g);
+    }
+    selectFirstSeriesFor(groups, extreme);
+  }
+
+  public void toggleFullScreen() {
+    fullScreen = !fullScreen;
+  }
+
+  public boolean isFullScreen() {
+    return fullScreen;
+  }
+
+  public void toggleSegmentations() {
+    segmentationsVisible = !segmentationsVisible;
+  }
+
+  public boolean isSegmentationsVisible() {
+    return segmentationsVisible;
+  }
+
+  public void applyPreset(int index) {
+    // DICOM View2d applies VOI LUT presets
   }
 
   public SynchCineEvent lastCineEvent() {

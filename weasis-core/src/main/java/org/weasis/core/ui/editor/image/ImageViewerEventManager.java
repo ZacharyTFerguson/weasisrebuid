@@ -9,6 +9,7 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -116,6 +117,9 @@ public class ImageViewerEventManager {
     if (drawingsKeys.keyPressed(e)) {
       return;
     }
+    if (handleNavigation(e)) {
+      return;
+    }
     ActionW action = shortcuts.getAction(KeyStroke.getKeyStroke(e.getKeyCode(), 0));
     if (action == null) {
       return;
@@ -135,6 +139,121 @@ public class ImageViewerEventManager {
     } else if (mouseLeftAction(action)) {
       view.getMouseActions().setLeft(action.cmd());
     }
+  }
+
+  boolean handleNavigation(KeyEvent e) {
+    int mods = e.getModifiersEx();
+    boolean alt = (mods & InputEvent.ALT_DOWN_MASK) != 0;
+    boolean shift = (mods & InputEvent.SHIFT_DOWN_MASK) != 0;
+    boolean ctrl = (mods & InputEvent.CTRL_DOWN_MASK) != 0;
+    int code = e.getKeyCode();
+    if (alt && code == KeyEvent.VK_S && !ctrl) {
+      view.toggleSegmentations();
+      return true;
+    }
+    if (alt && isArrow(code)) {
+      int step = shift ? 10 : 5;
+      double dx = 0;
+      double dy = 0;
+      if (code == KeyEvent.VK_LEFT) {
+        dx = -step;
+      } else if (code == KeyEvent.VK_RIGHT) {
+        dx = step;
+      } else if (code == KeyEvent.VK_UP) {
+        dy = -step;
+      } else {
+        dy = step;
+      }
+      view.setPan(view.getPanX() + dx, view.getPanY() + dy);
+      return true;
+    }
+    if (code == KeyEvent.VK_F11) {
+      view.toggleFullScreen();
+      return true;
+    }
+    if (!ctrl && !alt && code >= KeyEvent.VK_0 && code <= KeyEvent.VK_9) {
+      view.applyPreset(code - KeyEvent.VK_0);
+      return true;
+    }
+    if (ctrl) {
+      return switch (code) {
+        case KeyEvent.VK_LEFT -> {
+          view.nextStudy(-1);
+          yield true;
+        }
+        case KeyEvent.VK_RIGHT -> {
+          view.nextStudy(1);
+          yield true;
+        }
+        case KeyEvent.VK_PAGE_UP -> {
+          view.firstStudy();
+          yield true;
+        }
+        case KeyEvent.VK_PAGE_DOWN -> {
+          view.lastStudy();
+          yield true;
+        }
+        case KeyEvent.VK_UP -> {
+          view.nextPatient(-1);
+          yield true;
+        }
+        case KeyEvent.VK_DOWN -> {
+          view.nextPatient(1);
+          yield true;
+        }
+        case KeyEvent.VK_HOME -> {
+          view.firstPatient();
+          yield true;
+        }
+        case KeyEvent.VK_END -> {
+          view.lastPatient();
+          yield true;
+        }
+        default -> false;
+      };
+    }
+    return switch (code) {
+      case KeyEvent.VK_UP -> {
+        view.nextFrame(shift ? -10 : -1);
+        yield true;
+      }
+      case KeyEvent.VK_DOWN -> {
+        view.nextFrame(shift ? 10 : 1);
+        yield true;
+      }
+      case KeyEvent.VK_HOME -> {
+        view.firstFrame();
+        yield true;
+      }
+      case KeyEvent.VK_END -> {
+        view.lastFrame();
+        yield true;
+      }
+      case KeyEvent.VK_LEFT -> {
+        view.nextSeries(-1);
+        yield true;
+      }
+      case KeyEvent.VK_RIGHT -> {
+        view.nextSeries(1);
+        yield true;
+      }
+      case KeyEvent.VK_PAGE_UP -> {
+        view.firstSeries();
+        yield true;
+      }
+      case KeyEvent.VK_PAGE_DOWN -> {
+        view.lastSeries();
+        yield true;
+      }
+      default -> false;
+    };
+  }
+
+  static boolean isArrow(int code) {
+    return code == KeyEvent.VK_LEFT
+        || code == KeyEvent.VK_RIGHT
+        || code == KeyEvent.VK_UP
+        || code == KeyEvent.VK_DOWN;
   }
 
   static boolean mouseLeftAction(ActionW action) {

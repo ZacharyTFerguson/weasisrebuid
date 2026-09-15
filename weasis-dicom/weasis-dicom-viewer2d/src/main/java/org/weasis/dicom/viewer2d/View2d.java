@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import org.dcm4che3.data.Attributes;
@@ -30,6 +31,7 @@ import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.codec.WindowLevelPainter;
+import org.weasis.dicom.codec.seg.SegVisibilityPolicy;
 import org.weasis.dicom.codec.utils.DicomMediaUtils;
 
 /**
@@ -43,6 +45,8 @@ public class View2d extends DefaultView2d<MediaElement> {
   private double level = 40;
   private File file;
   private final KOManager koManager = new KOManager();
+  private final List<WindLevelParameters> presets = new ArrayList<>();
+  private final SegVisibilityPolicy segVisibility = new SegVisibilityPolicy();
 
   public View2d() {
     super();
@@ -117,6 +121,37 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (fileWl != null) {
       setWindowLevel(fileWl.getWindow(), fileWl.getLevel());
     }
+  }
+
+  public void setPresets(List<WindLevelParameters> presets) {
+    this.presets.clear();
+    if (presets != null) {
+      this.presets.addAll(presets);
+    }
+  }
+
+  public List<WindLevelParameters> getPresets() {
+    return List.copyOf(presets);
+  }
+
+  @Override
+  public void applyPreset(int index) {
+    if (index <= 0 || presets.isEmpty()) {
+      resetWinLevelDefaults();
+      return;
+    }
+    WindLevelParameters preset = presets.get(Math.min(presets.size(), index) - 1);
+    setWindowLevel(preset.getWindow(), preset.getLevel());
+  }
+
+  public SegVisibilityPolicy getSegVisibility() {
+    return segVisibility;
+  }
+
+  @Override
+  public void toggleSegmentations() {
+    super.toggleSegmentations();
+    segVisibility.setVisible(isSegmentationsVisible());
   }
 
   public void render() {

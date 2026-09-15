@@ -9,4 +9,63 @@
  */
 package org.weasis.dicom.explorer.main;
 
-public class ThumbnailMouseAndKeyAdapter {}
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+
+/**
+ * Explorer thumbnail mouse/key map: Ctrl+click toggle, Shift+click range, Ctrl+A all, Enter open.
+ */
+public class ThumbnailMouseAndKeyAdapter extends MouseAdapter {
+
+  private final SeriesSelectionModel model;
+
+  public ThumbnailMouseAndKeyAdapter(SeriesSelectionModel model) {
+    this.model = model == null ? new SeriesSelectionModel() : model;
+  }
+
+  public SeriesSelectionModel getModel() {
+    return model;
+  }
+
+  public void pressed(int index, boolean ctrl, boolean shift) {
+    model.click(index, ctrl, shift);
+  }
+
+  public void pressed(int index, MouseEvent e) {
+    if (e == null) {
+      pressed(index, false, false);
+      return;
+    }
+    int mods = e.getModifiersEx();
+    pressed(
+        index, (mods & InputEvent.CTRL_DOWN_MASK) != 0, (mods & InputEvent.SHIFT_DOWN_MASK) != 0);
+  }
+
+  public boolean keyPressed(KeyEvent e) {
+    if (e == null) {
+      return false;
+    }
+    boolean ctrl = (e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0;
+    if (ctrl && e.getKeyCode() == KeyEvent.VK_A) {
+      model.selectAll();
+      return true;
+    }
+    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+      model.enter();
+      return true;
+    }
+    return false;
+  }
+
+  public KeyAdapter keyAdapter() {
+    return new KeyAdapter() {
+      @Override
+      public void keyPressed(KeyEvent e) {
+        ThumbnailMouseAndKeyAdapter.this.keyPressed(e);
+      }
+    };
+  }
+}

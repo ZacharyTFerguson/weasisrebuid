@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.explorer.main;
 
-public class SeriesPane {}
+import java.awt.BorderLayout;
+import javax.swing.JPanel;
+
+/** Explorer series thumbnail strip. Selection follows SHORTCUTS.md Explorer. */
+public class SeriesPane extends JPanel {
+
+  private final SeriesSelectionModel selection = new SeriesSelectionModel();
+  private final ThumbnailMouseAndKeyAdapter adapter = new ThumbnailMouseAndKeyAdapter(selection);
+
+  public SeriesPane() {
+    super(new BorderLayout());
+  }
+
+  public SeriesSelectionModel getSelectionModel() {
+    return selection;
+  }
+
+  public ThumbnailMouseAndKeyAdapter getAdapter() {
+    return adapter;
+  }
+}
