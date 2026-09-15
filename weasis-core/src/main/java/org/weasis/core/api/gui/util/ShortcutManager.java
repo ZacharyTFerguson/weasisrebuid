@@ -33,6 +33,8 @@ public final class ShortcutManager {
     bind(KeyEvent.VK_Q, ActionW.CONTEXTMENU);
     bind(KeyEvent.VK_K, ActionW.KO);
     bind(KeyEvent.VK_P, ActionW.PRINT);
+    bind(KeyEvent.VK_SPACE, ActionW.ANNOTATIONS);
+    bind(KeyEvent.VK_I, ActionW.ANNOTATIONS);
     map.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_DOWN_MASK), ActionW.PRINT);
   }
 

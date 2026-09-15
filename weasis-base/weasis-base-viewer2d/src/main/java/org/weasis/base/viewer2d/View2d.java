@@ -9,6 +9,7 @@
  */
 package org.weasis.base.viewer2d;
 
+import java.awt.Graphics2D;
 import java.io.File;
 import java.io.IOException;
 import org.weasis.core.api.media.MimeInspector;
@@ -16,10 +17,21 @@ import org.weasis.core.api.media.data.ImageElement;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaReader;
 import org.weasis.core.ui.editor.image.DefaultView2d;
+import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.imageio.codec.ImageioCodec;
 
 /** Non-DICOM 2D canvas. */
 public class View2d extends DefaultView2d<MediaElement> {
+
+  public View2d() {
+    super();
+    setInfoLayer(new InfoLayer());
+  }
+
+  @Override
+  public InfoLayer getInfoLayer() {
+    return infoLayer instanceof InfoLayer layer ? layer : new InfoLayer();
+  }
 
   public void load(File file) throws IOException {
     if (file == null || !file.isFile()) {
@@ -35,5 +47,18 @@ public class View2d extends DefaultView2d<MediaElement> {
       return;
     }
     throw new IOException("unreadable image");
+  }
+
+  @Override
+  protected void paintDecorations(Graphics2D g) {
+    super.paintDecorations(g);
+    if (getInfoLayer() instanceof InfoLayer layer) {
+      layer.paint(g, this);
+    }
+  }
+
+  @Override
+  protected ImageViewerEventManager createEventManager() {
+    return new EventManager(this);
   }
 }

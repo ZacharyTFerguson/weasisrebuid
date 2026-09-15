@@ -13,34 +13,49 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 
-/** Pixel overlay: patient/study/image annotations on {@link View2d}. */
-public class InfoLayer {
+/** Pixel overlay: patient/study/image annotations on {@link View2d}. Space/I cycles three states. */
+public class InfoLayer extends AbstractInfoLayer {
 
-  private boolean visible = true;
-
-  public boolean isVisible() {
-    return visible;
+  public String overlayText(String patient, String modality, double window, double level) {
+    if (!isVisible()) {
+      return "";
+    }
+    String wl = "W:" + (int) window + " L:" + (int) level;
+    if (isMinimal()) {
+      return wl;
+    }
+    String name = patient == null ? "" : patient;
+    String mod = modality == null ? "" : modality;
+    return (name + "  " + mod + "  " + wl).trim();
   }
 
-  public void setVisible(boolean visible) {
-    this.visible = visible;
+  public String overlayText(View2d view) {
+    if (view == null) {
+      return overlayText("", "", 0, 0);
+    }
+    if (view.getDataset() == null) {
+      return overlayText("", "", view.getWindow(), view.getLevel());
+    }
+    Attributes dcm = view.getDataset();
+    return overlayText(
+        dcm.getString(Tag.PatientName, ""),
+        dcm.getString(Tag.Modality, ""),
+        view.getWindow(),
+        view.getLevel());
   }
 
   public void paint(Graphics2D g, View2d view) {
-    if (!visible || g == null || view == null || view.getDataset() == null) {
+    if (!isVisible() || g == null || view == null) {
       return;
     }
-    Attributes dcm = view.getDataset();
+    String line = overlayText(view);
+    if (line.isBlank()) {
+      return;
+    }
     g.setColor(Color.YELLOW);
-    String line =
-        dcm.getString(Tag.PatientName, "")
-            + "  "
-            + dcm.getString(Tag.Modality, "")
-            + "  W:"
-            + (int) view.getWindow()
-            + " L:"
-            + (int) view.getLevel();
-    g.drawString(line.trim(), 8, view.getHeight() - 12);
+    int y = isMinimal() ? 16 : Math.max(16, view.getHeight() - 12);
+    g.drawString(line, 8, y);
   }
 }

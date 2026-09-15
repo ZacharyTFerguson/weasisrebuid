@@ -9,4 +9,12 @@
  */
 package org.weasis.base.viewer2d;
 
-public class EventManager {}
+import org.weasis.core.ui.editor.image.ImageViewerEventManager;
+
+/** Non-DICOM 2D event manager (Weasis type name). Inherits Space/I annotation cycling. */
+public class EventManager extends ImageViewerEventManager {
+
+  public EventManager(View2d view) {
+    super(view);
+  }
+}

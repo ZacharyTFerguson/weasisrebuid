@@ -9,4 +9,49 @@
  */
 package org.weasis.core.ui.model.layer;
 
-public class AbstractInfoLayer {}
+/**
+ * Annotation overlay state. SHORTCUTS.md: Space/I cycle three states (full → minimal → hidden).
+ */
+public class AbstractInfoLayer {
+
+  public enum Visibility {
+    FULL,
+    MINIMAL,
+    HIDDEN
+  }
+
+  private Visibility visibility = Visibility.FULL;
+
+  public Visibility getVisibility() {
+    return visibility;
+  }
+
+  public void setVisibility(Visibility visibility) {
+    this.visibility = visibility == null ? Visibility.FULL : visibility;
+  }
+
+  public void cycle() {
+    visibility =
+        switch (visibility) {
+          case FULL -> Visibility.MINIMAL;
+          case MINIMAL -> Visibility.HIDDEN;
+          case HIDDEN -> Visibility.FULL;
+        };
+  }
+
+  public boolean isVisible() {
+    return visibility != Visibility.HIDDEN;
+  }
+
+  public void setVisible(boolean visible) {
+    setVisibility(visible ? Visibility.FULL : Visibility.HIDDEN);
+  }
+
+  public boolean isFull() {
+    return visibility == Visibility.FULL;
+  }
+
+  public boolean isMinimal() {
+    return visibility == Visibility.MINIMAL;
+  }
+}

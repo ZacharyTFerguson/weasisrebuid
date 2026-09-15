@@ -39,6 +39,7 @@ public class ActionW extends Feature<Object> {
   public static final ActionW FILTER = new ActionW("filter", "None");
   public static final ActionW KO = new ActionW("ko", KeyEvent.VK_K, null);
   public static final ActionW PRINT = new ActionW("print", KeyEvent.VK_P, null);
+  public static final ActionW ANNOTATIONS = new ActionW("annotations", KeyEvent.VK_SPACE, null);
 
   public ActionW(String title, Object defaultValue) {
     super(title, defaultValue);
@@ -83,7 +84,8 @@ public class ActionW extends Feature<Object> {
           INVERSE_LUT,
           FILTER,
           KO,
-          PRINT
+          PRINT,
+          ANNOTATIONS
         }) {
       if (a.isAction(cmd)) {
         return a;

@@ -9,4 +9,41 @@
  */
 package org.weasis.base.viewer2d.dockable;
 
-public class ImageTool {}
+import java.awt.BorderLayout;
+import java.awt.image.BufferedImage;
+import javax.swing.JLabel;
+import org.weasis.core.ui.docking.PluginTool;
+import org.weasis.core.ui.editor.image.DefaultView2d;
+
+/** Image dock for non-DICOM 2D: zoom and pixel size. */
+public class ImageTool extends PluginTool {
+
+  public static final String NAME = "Image";
+
+  private final JLabel summary = new JLabel(" ");
+  private DefaultView2d<?> view;
+
+  public ImageTool() {
+    super(NAME, 20);
+    add(summary, BorderLayout.NORTH);
+  }
+
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+    refresh();
+  }
+
+  public void refresh() {
+    summary.setText(summaryText());
+  }
+
+  public String summaryText() {
+    if (view == null) {
+      return "";
+    }
+    BufferedImage src = view.getSourceImage();
+    int w = src == null ? 0 : src.getWidth();
+    int h = src == null ? 0 : src.getHeight();
+    return "zoom=" + view.getZoom() + " " + w + "x" + h;
+  }
+}

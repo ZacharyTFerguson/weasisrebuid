@@ -13,6 +13,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -29,6 +31,7 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
+import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 
 /**
  * Shared 2D canvas. Downstream DICOM {@code View2d} binds pixels; affine (zoom/rotation) is last.
@@ -54,6 +57,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private volatile SynchCineEvent lastCineEvent;
   private volatile String measureTool = MeasureTool.DISTANCE;
   private Graphic drawing;
+  protected AbstractInfoLayer infoLayer = new AbstractInfoLayer();
   private volatile SynchView synch = SynchView.STACK;
   private volatile SynchData synchData = new SynchData();
   private volatile SynchManager synchManager;
@@ -98,6 +102,14 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     addMouseListener(adapter);
     addMouseMotionListener(adapter);
     addMouseWheelListener(adapter);
+    setFocusable(true);
+    addKeyListener(
+        new KeyAdapter() {
+          @Override
+          public void keyPressed(KeyEvent e) {
+            eventManager.keyPressed(e);
+          }
+        });
   }
 
   public OpManager getDisplayOpManager() {
@@ -230,6 +242,19 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
 
   public void setDrawing(Graphic drawing) {
     this.drawing = drawing;
+  }
+
+  public AbstractInfoLayer getInfoLayer() {
+    return infoLayer;
+  }
+
+  public void setInfoLayer(AbstractInfoLayer infoLayer) {
+    this.infoLayer = infoLayer == null ? new AbstractInfoLayer() : infoLayer;
+  }
+
+  public void cycleAnnotations() {
+    infoLayer.cycle();
+    repaint();
   }
 
   public void setFrameIndex(int frameIndex) {
@@ -431,7 +456,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     }
   }
 
-  void paintDecorations(Graphics2D g) {
+  protected void paintDecorations(Graphics2D g) {
     g.setColor(Color.YELLOW);
     int y = 16;
     if (!lossyLabel.isBlank()) {

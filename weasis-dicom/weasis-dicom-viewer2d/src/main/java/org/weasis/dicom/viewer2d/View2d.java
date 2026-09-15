@@ -9,6 +9,7 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
@@ -44,6 +45,12 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public View2d() {
     super();
+    setInfoLayer(new InfoLayer());
+  }
+
+  @Override
+  public InfoLayer getInfoLayer() {
+    return infoLayer instanceof InfoLayer layer ? layer : new InfoLayer();
   }
 
   public void load(File dicom) throws Exception {
@@ -240,6 +247,14 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
     } catch (Exception ignored) {
       // stills with decoded pixels are applied in DefaultView2d.applyFramePixels
+    }
+  }
+
+  @Override
+  protected void paintDecorations(Graphics2D g) {
+    super.paintDecorations(g);
+    if (getInfoLayer() instanceof InfoLayer layer) {
+      layer.paint(g, this);
     }
   }
 

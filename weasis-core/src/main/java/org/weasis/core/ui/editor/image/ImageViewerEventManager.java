@@ -9,9 +9,13 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Point2D;
+import javax.swing.KeyStroke;
+import org.weasis.core.api.gui.util.ActionW;
+import org.weasis.core.api.gui.util.ShortcutManager;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.DragGraphic;
 import org.weasis.core.ui.model.graphic.Graphic;
@@ -23,6 +27,7 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 public class ImageViewerEventManager {
 
   private final DefaultView2d<?> view;
+  private final ShortcutManager shortcuts = new ShortcutManager();
   private int lastX;
   private int lastY;
   private int drawHandle;
@@ -70,6 +75,16 @@ public class ImageViewerEventManager {
       view.increaseZoom(-e.getWheelRotation());
     } else if (MouseActions.isScroll(action)) {
       view.setFrameIndex(view.getFrameIndex() + e.getWheelRotation());
+    }
+  }
+
+  public void keyPressed(KeyEvent e) {
+    if (e == null || view == null) {
+      return;
+    }
+    ActionW action = shortcuts.getAction(KeyStroke.getKeyStroke(e.getKeyCode(), 0));
+    if (action == ActionW.ANNOTATIONS) {
+      view.cycleAnnotations();
     }
   }
 
