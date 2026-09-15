@@ -18,6 +18,7 @@ import org.weasis.dicom.explorer.DicomModel;
 import org.weasis.dicom.explorer.DicomSeriesHandler;
 import org.weasis.dicom.explorer.LoadDicomObjects;
 import org.weasis.dicom.explorer.LoadLocalDicom;
+import org.weasis.dicom.explorer.LocalPersistence;
 import org.weasis.dicom.explorer.PluginOpeningStrategy;
 
 /**
@@ -30,11 +31,11 @@ public class DicomExplorer {
   private final PluginOpeningStrategy opening;
 
   public DicomExplorer() {
-    this(new DicomModel(), new UICore());
+    this(LocalPersistence.getDicomModel(), UICore.getInstance());
   }
 
   public DicomExplorer(DicomModel model) {
-    this(model, new UICore());
+    this(model, UICore.getInstance());
   }
 
   public DicomExplorer(DicomModel model, UICore core) {

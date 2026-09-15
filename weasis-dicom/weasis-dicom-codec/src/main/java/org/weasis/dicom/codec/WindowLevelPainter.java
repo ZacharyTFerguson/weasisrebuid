@@ -51,12 +51,12 @@ public final class WindowLevelPainter {
     BufferedImage image = new BufferedImage(cols, rows, BufferedImage.TYPE_BYTE_GRAY);
     byte[] out = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
     for (int i = 0; i < rows * cols; i++) {
-      int raw = pixels[i];
-      if (raw == pad) {
+      int stored = DicomMediaUtils.storedPixel(dcm, pixels[i]);
+      if (stored == pad) {
         out[i] = 0;
         continue;
       }
-      double modality = LutPipeline.modalityValue(dcm, raw);
+      double modality = LutPipeline.modalityValue(dcm, stored);
       out[i] =
           (byte)
               LutPipeline.applyPresentationIdentity(

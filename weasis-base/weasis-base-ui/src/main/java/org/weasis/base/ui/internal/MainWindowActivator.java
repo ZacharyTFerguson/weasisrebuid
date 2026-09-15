@@ -10,7 +10,6 @@
 package org.weasis.base.ui.internal;
 
 import java.awt.GraphicsEnvironment;
-import java.util.Hashtable;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -20,21 +19,21 @@ import org.weasis.base.ui.gui.DummySeriesViewerFactory;
 import org.weasis.base.ui.gui.WeasisWin;
 import org.weasis.core.api.gui.util.GuiExecutor;
 import org.weasis.core.api.service.UICore;
-import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.pref.DefaultPrefBootstrap;
 
-/** UI aggregator named by {@code weasis.main.ui}. WP-1 opens a dummy {@link ViewerPlugin}. */
+/**
+ * UI aggregator named by {@code weasis.main.ui}. Registers the WP-1 dummy factory without
+ * attaching a blank plugin; File &gt; Import puts a real series viewer in CENTER.
+ */
 public class MainWindowActivator implements BundleActivator {
 
   private JFrame window;
 
   @Override
   public void start(BundleContext context) {
-    DummySeriesViewerFactory factory = new DummySeriesViewerFactory();
-    factory.activate();
+    new DummySeriesViewerFactory().activate();
     DefaultPrefBootstrap.ensureRegistered(UICore.getInstance());
     if (GraphicsEnvironment.isHeadless()) {
-      UICore.getInstance().openBlankViewer(factory, new Hashtable<>());
       return;
     }
     GuiExecutor.invokeAndWait(
@@ -44,8 +43,6 @@ public class MainWindowActivator implements BundleActivator {
           win.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
           UICore.getInstance().setApplicationWindow(win);
           win.attachExplorer();
-          ViewerPlugin<?> plugin = UICore.getInstance().openBlankViewer(factory, new Hashtable<>());
-          win.attachViewer(plugin);
           win.setLocationRelativeTo(null);
           win.setVisible(true);
         });

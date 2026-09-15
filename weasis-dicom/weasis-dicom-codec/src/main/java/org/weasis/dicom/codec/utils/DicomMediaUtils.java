@@ -25,6 +25,32 @@ public final class DicomMediaUtils {
     return dcm != null && dcm.getInt(Tag.PixelRepresentation, 0) == 1;
   }
 
+  /**
+   * Interprets a dcm4che {@code getInts(PixelData)} sample using {@code PixelRepresentation}, {@code
+   * BitsAllocated}, and {@code BitsStored}. Unsigned 8-bit values must not sign-wrap.
+   */
+  public static int storedPixel(Attributes dcm, int raw) {
+    int allocated = dcm == null ? 16 : dcm.getInt(Tag.BitsAllocated, 16);
+    int stored = dcm == null ? allocated : dcm.getInt(Tag.BitsStored, allocated);
+    if (stored <= 0) {
+      stored = allocated <= 0 ? 16 : allocated;
+    }
+    if (stored > 32) {
+      stored = 32;
+    }
+    int mask = stored >= 32 ? 0xffffffff : (1 << stored) - 1;
+    if (!isSignedPixel(dcm)) {
+      int unsigned = allocated <= 8 ? raw & 0xff : raw & 0xffff;
+      return unsigned & mask;
+    }
+    int u = raw & mask;
+    int sign = 1 << (stored - 1);
+    if ((u & sign) != 0) {
+      return u | ~mask;
+    }
+    return u;
+  }
+
   public static String photometricInterpretation(Attributes dcm) {
     return dcm == null ? "" : dcm.getString(Tag.PhotometricInterpretation, "");
   }
@@ -34,11 +60,47 @@ public final class DicomMediaUtils {
     if (dcm == null) {
       return new WindLevelParameters(defaultWindow, defaultLevel);
     }
-    double window = dcm.getDouble(Tag.WindowWidth, defaultWindow);
-    double level = dcm.getDouble(Tag.WindowCenter, defaultLevel);
-    if (window <= 0) {
-      window = defaultWindow;
+    if (dcm.containsValue(Tag.WindowWidth) && dcm.containsValue(Tag.WindowCenter)) {
+      double window = dcm.getDouble(Tag.WindowWidth, defaultWindow);
+      double level = dcm.getDouble(Tag.WindowCenter, defaultLevel);
+      if (window <= 0) {
+        window = defaultWindow;
+      }
+      return new WindLevelParameters(window, level);
     }
+    WindLevelParameters fromData = dataRangeWindowLevel(dcm);
+    if (fromData != null) {
+      return fromData;
+    }
+    return new WindLevelParameters(defaultWindow, defaultLevel);
+  }
+
+  static WindLevelParameters dataRangeWindowLevel(Attributes dcm) {
+    int[] pixels = dcm.getInts(Tag.PixelData);
+    if (pixels == null || pixels.length == 0) {
+      return null;
+    }
+    int pad = pixelPaddingValue(dcm);
+    double min = Double.POSITIVE_INFINITY;
+    double max = Double.NEGATIVE_INFINITY;
+    for (int raw : pixels) {
+      int stored = storedPixel(dcm, raw);
+      if (stored == pad) {
+        continue;
+      }
+      double modality = LutPipeline.modalityValue(dcm, stored);
+      if (modality < min) {
+        min = modality;
+      }
+      if (modality > max) {
+        max = modality;
+      }
+    }
+    if (!Double.isFinite(min) || !Double.isFinite(max)) {
+      return null;
+    }
+    double window = Math.max(1.0, max - min);
+    double level = min + window / 2.0;
     return new WindLevelParameters(window, level);
   }
 

@@ -12,12 +12,16 @@ package org.weasis.dicom.explorer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import javax.swing.JFrame;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -27,6 +31,8 @@ import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.explorer.exp.ExplorerTask;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
 import org.weasis.dicom.explorer.main.LoadingTaskPanel;
+import org.weasis.dicom.viewer2d.View2dContainer;
+import org.weasis.dicom.viewer2d.View2dFactory;
 
 class ImportExplorerHaveTest {
 
@@ -89,6 +95,37 @@ class ImportExplorerHaveTest {
       assertInstanceOf(DicomViewerPlugin.class, opened.getFirst());
     } finally {
       UICore.getInstance().unregisterSeriesViewerFactory(images);
+    }
+  }
+
+  @Test
+  void importPutsView2dContainerInWindowCenter(@TempDir Path dir) throws Exception {
+    File ct = dir.resolve("series.dcm").toFile();
+    LoadLocalDicomTest.writeCt(ct);
+    JFrame win = new JFrame();
+    UICore core = UICore.getInstance();
+    core.setApplicationWindow(win);
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      DicomModel model = LocalPersistence.getDicomModel();
+      ImportDicomPage page =
+          new ImportDicomPage("DICOM", 0, model, new SkipUnsupportedSopNotifier());
+      page.importFiles(List.of(ct), null);
+      page.openViewerIfPresent();
+      Component center =
+          ((BorderLayout) win.getContentPane().getLayout()).getLayoutComponent(BorderLayout.CENTER);
+      assertInstanceOf(View2dContainer.class, center);
+      View2dContainer tab = (View2dContainer) center;
+      assertNotNull(tab.getView2d().getDataset());
+      assertSame(tab, core.getSelectedViewerPlugin());
+    } finally {
+      for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
+        core.closeViewerPlugin(plugin);
+      }
+      core.unregisterSeriesViewerFactory(factory);
+      core.setApplicationWindow(null);
+      win.dispose();
     }
   }
 

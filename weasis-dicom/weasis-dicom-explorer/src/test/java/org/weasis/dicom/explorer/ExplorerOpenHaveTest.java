@@ -136,6 +136,13 @@ class ExplorerOpenHaveTest {
   }
 
   @Test
+  void mainExplorerDefaultsToSharedUiCore() {
+    org.weasis.dicom.explorer.main.DicomExplorer explorer =
+        new org.weasis.dicom.explorer.main.DicomExplorer(new DicomModel());
+    assertSame(UICore.getInstance(), explorer.openingStrategy().getUICore());
+  }
+
+  @Test
   void dicomViewerPluginIsAViewerTab() {
     DicomViewerPlugin plugin = new DicomViewerPlugin("p\tid");
     assertInstanceOf(ViewerPlugin.class, plugin);

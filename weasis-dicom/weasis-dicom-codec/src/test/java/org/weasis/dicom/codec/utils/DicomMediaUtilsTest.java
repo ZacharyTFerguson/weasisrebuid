@@ -43,6 +43,18 @@ class DicomMediaUtilsTest {
   }
 
   @Test
+  void unsigned16BitDoesNotWrapAbove32767() {
+    Attributes dcm = new Attributes();
+    dcm.setInt(Tag.BitsAllocated, VR.US, 16);
+    dcm.setInt(Tag.BitsStored, VR.US, 16);
+    dcm.setInt(Tag.PixelRepresentation, VR.US, 0);
+    dcm.setInt(Tag.PixelData, VR.OW, 40000, 1000);
+    int[] raw = dcm.getInts(Tag.PixelData);
+    assertEquals(40000, DicomMediaUtils.storedPixel(dcm, raw[0]));
+    assertEquals(1000, DicomMediaUtils.storedPixel(dcm, raw[1]));
+  }
+
+  @Test
   void missingPaddingIsSentinel() {
     assertEquals(Integer.MIN_VALUE, DicomMediaUtils.pixelPaddingValue(new Attributes()));
   }
