@@ -11,62 +11,60 @@ package org.weasis.dicom.explorer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
 import org.weasis.core.api.service.WProperties;
 
 /**
- * Explorer series filter. Pref {@code weasis.dicom.explorer.filter.mode}: {@code all} / {@code
- * modality} / {@code description}.
+ * Clone-only facade over fixture {@code main/SeriesFilter}. Same documented pref {@code
+ * weasis.dicom.explorer.filter.mode}: TEXT / DATE / MODALITY (default TEXT).
  */
 public final class SeriesFilter {
 
-  public static final String PREF_MODE = "weasis.dicom.explorer.filter.mode";
-  public static final String MODE_ALL = "all";
-  public static final String MODE_MODALITY = "modality";
-  public static final String MODE_DESCRIPTION = "description";
+  public static final String PREF_MODE = org.weasis.dicom.explorer.main.SeriesFilter.PREF_MODE;
+  public static final String TEXT = org.weasis.dicom.explorer.main.SeriesFilter.TEXT;
+  public static final String DATE = org.weasis.dicom.explorer.main.SeriesFilter.DATE;
+  public static final String MODALITY = org.weasis.dicom.explorer.main.SeriesFilter.MODALITY;
 
-  private final String mode;
-  private final Set<String> modalities;
-  private final String descriptionContains;
+  private final org.weasis.dicom.explorer.main.SeriesFilter inner;
 
-  public SeriesFilter(String mode, Set<String> modalities, String descriptionContains) {
-    this.mode = mode == null || mode.isBlank() ? MODE_ALL : mode.toLowerCase(Locale.ROOT);
-    this.modalities = modalities == null ? Set.of() : Set.copyOf(modalities);
-    this.descriptionContains = descriptionContains == null ? "" : descriptionContains;
+  public SeriesFilter(String mode, String query) {
+    inner = new org.weasis.dicom.explorer.main.SeriesFilter();
+    inner.setMode(mode);
+    inner.setQuery(query);
   }
 
   public static SeriesFilter fromPrefs(WProperties prefs) {
-    String mode = prefs == null ? MODE_ALL : prefs.getProperty(PREF_MODE, MODE_ALL);
-    return new SeriesFilter(mode, Set.of(), "");
+    if (prefs == null) {
+      return new SeriesFilter(TEXT, "");
+    }
+    return new SeriesFilter(prefs.getProperty(PREF_MODE, TEXT), "");
   }
 
   public boolean accept(ImportedInstance inst) {
-    if (inst == null) {
-      return false;
-    }
-    if (MODE_MODALITY.equals(mode) && !modalities.isEmpty()) {
-      return modalities.contains(inst.modality().toUpperCase(Locale.ROOT));
-    }
-    if (MODE_DESCRIPTION.equals(mode) && !descriptionContains.isBlank()) {
-      return inst.seriesDescription()
-          .toLowerCase(Locale.ROOT)
-          .contains(descriptionContains.toLowerCase(Locale.ROOT));
-    }
-    return true;
+    return inner.accept(inst);
   }
 
   public List<ImportedInstance> apply(List<ImportedInstance> in) {
     List<ImportedInstance> out = new ArrayList<>();
+    if (in == null) {
+      return out;
+    }
     for (ImportedInstance inst : in) {
-      if (accept(inst)) {
-        out.add(inst);
-      }
+      addIfAccepted(out, inst);
     }
     return out;
   }
 
+  void addIfAccepted(List<ImportedInstance> out, ImportedInstance inst) {
+    if (accept(inst)) {
+      out.add(inst);
+    }
+  }
+
   public String mode() {
-    return mode;
+    return inner.getMode();
+  }
+
+  public String query() {
+    return inner.getQuery();
   }
 }
