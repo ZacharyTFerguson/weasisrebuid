@@ -23,6 +23,19 @@ public class PolylineGraphic extends AbstractDragGraphic {
     super(0);
   }
 
+  /** Pixel path length: sum of Euclidean distances along consecutive vertices. */
+  public double getLength() {
+    List<Point2D.Double> pts = getPts();
+    if (pts.size() < 2) {
+      return 0;
+    }
+    double sum = 0;
+    for (int i = 1; i < pts.size(); i++) {
+      sum += pts.get(i - 1).distance(pts.get(i));
+    }
+    return sum;
+  }
+
   /**
    * Physical path length in mm: sum of per-segment lengths using row spacing for vertical delta and
    * column spacing for horizontal delta (same rule as {@link LineGraphic#getLengthMm}).

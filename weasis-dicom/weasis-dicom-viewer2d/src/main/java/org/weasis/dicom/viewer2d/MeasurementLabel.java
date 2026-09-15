@@ -12,6 +12,7 @@ package org.weasis.dicom.viewer2d;
 import java.util.Locale;
 import java.util.Optional;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.utils.InstanceSpacing;
 import org.weasis.dicom.codec.utils.RoiStatistics;
 
@@ -27,16 +28,33 @@ public final class MeasurementLabel {
     if (line == null) {
       return "";
     }
-    double px = line.getLength();
+    return formatLengthMm(
+        line.getLength(),
+        line.getLengthMm(resolved.map(InstanceSpacing.Resolved::spacing).orElse(null)),
+        resolved);
+  }
+
+  public static String formatPolyline(
+      PolylineGraphic polyline, Optional<InstanceSpacing.Resolved> resolved) {
+    if (polyline == null) {
+      return "";
+    }
+    return formatLengthMm(
+        polyline.getLength(),
+        polyline.getLengthMm(resolved.map(InstanceSpacing.Resolved::spacing).orElse(null)),
+        resolved);
+  }
+
+  private static String formatLengthMm(
+      double pxLength, Optional<Double> mmOpt, Optional<InstanceSpacing.Resolved> resolved) {
     if (resolved.isEmpty()) {
-      return formatPixels(px);
+      return formatPixels(pxLength);
     }
+    if (mmOpt.isEmpty()) {
+      return formatPixels(pxLength);
+    }
+    String base = formatMm(mmOpt.get());
     InstanceSpacing.Resolved r = resolved.get();
-    Optional<Double> mm = line.getLengthMm(r.spacing());
-    if (mm.isEmpty()) {
-      return formatPixels(px);
-    }
-    String base = formatMm(mm.get());
     return switch (r.source()) {
       case IMAGER_DETECTOR -> base + " (detector plane)";
       case IMAGER_OBJECT_ESTIMATE -> base + " (estimate)";
