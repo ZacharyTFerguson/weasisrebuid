@@ -23,6 +23,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.dcm4che</groupId>
+      <artifactId>dcm4che-core</artifactId>
+      <version>${weasis-dicom-tools.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.service.component.annotations</artifactId>
       <scope>provided</scope>
@@ -45,7 +51,7 @@ Bundle-SymbolicName: org.weasis.dicom.au
 Bundle-Name: DICOM Audio Player
 -dsannotations: *
 Export-Package: !org.weasis.dicom.au.internal.*, org.weasis.dicom.au
-Import-Package: org.weasis.core.*,org.weasis.dicom.codec.*,org.osgi.service.component;resolution:=optional,*
+Import-Package: org.weasis.core.*,org.weasis.dicom.codec.*,org.dcm4che3.data,org.osgi.service.component;resolution:=optional,*
 ]]></bnd>
         </configuration>
       </plugin>

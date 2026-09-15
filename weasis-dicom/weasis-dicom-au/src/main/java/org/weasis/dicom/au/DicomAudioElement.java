@@ -9,4 +9,13 @@
  */
 package org.weasis.dicom.au;
 
-public class DicomAudioElement {}
+import org.weasis.dicom.codec.DcmMediaReader;
+import org.weasis.dicom.codec.DicomSpecialElement;
+
+/** AU waveform instance bound to the DICOM Audio Player. */
+public class DicomAudioElement extends DicomSpecialElement {
+
+  public DicomAudioElement(DcmMediaReader mediaIO) {
+    super(mediaIO);
+  }
+}

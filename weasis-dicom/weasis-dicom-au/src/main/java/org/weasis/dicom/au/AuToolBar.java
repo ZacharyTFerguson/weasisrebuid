@@ -9,4 +9,40 @@
  */
 package org.weasis.dicom.au;
 
-public class AuToolBar {}
+import javax.swing.JButton;
+import javax.swing.JToolBar;
+
+/** Play / pause / stop chrome for {@link AuView}. */
+public class AuToolBar extends JToolBar {
+
+  private final AuView view;
+
+  public AuToolBar(AuView view) {
+    this.view = view == null ? new AuView() : view;
+    JButton play = new JButton("Play");
+    play.addActionListener(e -> play());
+    JButton pause = new JButton("Pause");
+    pause.addActionListener(e -> pause());
+    JButton stop = new JButton("Stop");
+    stop.addActionListener(e -> stop());
+    add(play);
+    add(pause);
+    add(stop);
+  }
+
+  public AuView getView() {
+    return view;
+  }
+
+  public void play() {
+    view.play();
+  }
+
+  public void pause() {
+    view.pause();
+  }
+
+  public void stop() {
+    view.stop();
+  }
+}

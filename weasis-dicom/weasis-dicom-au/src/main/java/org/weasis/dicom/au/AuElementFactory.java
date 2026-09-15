@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.au;
 
-public class AuElementFactory {}
+import org.weasis.dicom.codec.DcmMediaReader;
+import org.weasis.dicom.codec.DicomMime;
+import org.weasis.dicom.codec.DicomSpecialElement;
+import org.weasis.dicom.codec.DicomSpecialElementFactory;
+
+public class AuElementFactory implements DicomSpecialElementFactory {
+
+  @Override
+  public String getSeriesMimeType() {
+    return DicomMime.AU_DICOM;
+  }
+
+  @Override
+  public String getModality() {
+    return "AU";
+  }
+
+  @Override
+  public DicomSpecialElement buildInstance(DcmMediaReader mediaIO) {
+    return new DicomAudioElement(mediaIO);
+  }
+}
