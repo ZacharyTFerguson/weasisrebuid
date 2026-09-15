@@ -9,4 +9,8 @@
  */
 package org.weasis.core.ui.model.layer;
 
-public interface GraphicModelChangeListener {}
+/** Notified when graphics are added, removed, or selected. */
+public interface GraphicModelChangeListener {
+
+  void handle();
+}

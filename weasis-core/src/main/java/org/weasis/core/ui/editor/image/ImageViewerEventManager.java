@@ -28,12 +28,15 @@ public class ImageViewerEventManager {
 
   private final DefaultView2d<?> view;
   private final ShortcutManager shortcuts = new ShortcutManager();
+  private final DrawingsKeyListeners drawingsKeys;
+  private final GraphicMouseHandler graphicMouse = new GraphicMouseHandler();
   private int lastX;
   private int lastY;
   private int drawHandle;
 
   public ImageViewerEventManager(DefaultView2d<?> view) {
     this.view = view;
+    this.drawingsKeys = new DrawingsKeyListeners(view);
   }
 
   public DefaultView2d<?> getView() {
@@ -47,6 +50,12 @@ public class ImageViewerEventManager {
     if (MouseActions.CROSSHAIR.equals(MouseActions.normalize(action))) {
       view.setCrosshairFromView(e.getX(), e.getY());
       return;
+    }
+    if (view.getDrawing() == null
+        && (view.graphicAt(e.getX(), e.getY()) != null || !drawingAction(action))) {
+      if (graphicMouse.mousePressed(e, view)) {
+        return;
+      }
     }
     if (drawingAction(action)) {
       onDrawPressed(e);
@@ -63,6 +72,10 @@ public class ImageViewerEventManager {
       view.setCrosshairFromView(e.getX(), e.getY());
       return;
     }
+    if (graphicMouse.isSelecting()) {
+      graphicMouse.mouseDragged(e, view);
+      return;
+    }
     if (drawingAction(action)) {
       onDrawDragged(e);
       return;
@@ -73,6 +86,10 @@ public class ImageViewerEventManager {
   public void mouseReleased(MouseEvent e) {
     lastX = e.getX();
     lastY = e.getY();
+    if (graphicMouse.isSelecting()) {
+      graphicMouse.mouseReleased(e, view);
+      return;
+    }
     if (drawingAction(view.getMouseActions().getLeft())) {
       onDrawReleased(e);
     }
@@ -91,6 +108,9 @@ public class ImageViewerEventManager {
     if (e == null || view == null) {
       return;
     }
+    if (drawingsKeys.keyPressed(e)) {
+      return;
+    }
     ActionW action = shortcuts.getAction(KeyStroke.getKeyStroke(e.getKeyCode(), 0));
     if (action == ActionW.ANNOTATIONS) {
       view.cycleAnnotations();
@@ -98,6 +118,14 @@ public class ImageViewerEventManager {
       view.toggleKeyImage();
     } else if (action == ActionW.CROSSHAIR) {
       view.getMouseActions().setLeft(MouseActions.CROSSHAIR);
+    } else if (action == ActionW.NONE) {
+      view.getMouseActions().setLeft(MouseActions.NONE);
+    } else if (action == ActionW.MEASURE) {
+      view.getMouseActions().setLeft(MouseActions.MEASURE);
+    } else if (action == ActionW.DRAW) {
+      view.getMouseActions().setLeft(MouseActions.DRAW);
+    } else if (action == ActionW.RESET) {
+      view.resetView("-a");
     }
   }
 

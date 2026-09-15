@@ -9,10 +9,13 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -33,8 +36,10 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
+import org.weasis.core.ui.model.graphic.GraphicSelectionListener;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 import org.weasis.core.ui.model.layer.GraphicLayer;
+import org.weasis.core.ui.model.layer.GraphicModelChangeListener;
 import org.weasis.core.ui.model.layer.Layer;
 import org.weasis.core.ui.model.layer.LayerItem;
 import org.weasis.core.ui.model.layer.LayerType;
@@ -50,6 +55,8 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private final SimpleOpManager displayOp = SimpleOpManager.view2dChain();
   private final MouseActions mouseActions = new MouseActions();
   private final List<Graphic> graphics = new ArrayList<>();
+  private final List<GraphicSelectionListener> selectionListeners = new ArrayList<>();
+  private final List<GraphicModelChangeListener> modelListeners = new ArrayList<>();
   private final ImageViewerEventManager eventManager;
 
   private BufferedImage source;
@@ -536,7 +543,124 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   public void addGraphic(Graphic graphic) {
     if (graphic != null) {
       graphics.add(graphic);
+      fireModelChanged();
       repaint();
+    }
+  }
+
+  public void removeGraphic(Graphic graphic) {
+    if (graphics.remove(graphic)) {
+      fireModelChanged();
+      fireSelection();
+      repaint();
+    }
+  }
+
+  public Graphic graphicAt(double x, double y) {
+    for (int i = graphics.size() - 1; i >= 0; i--) {
+      Graphic graphic = graphics.get(i);
+      Shape shape = graphic.getShape();
+      if (shape == null) {
+        continue;
+      }
+      if (shape.contains(x, y) || shape.intersects(x - 3, y - 3, 6, 6)) {
+        return graphic;
+      }
+    }
+    return null;
+  }
+
+  public List<Graphic> getSelectedGraphics() {
+    List<Graphic> selected = new ArrayList<>();
+    for (Graphic graphic : graphics) {
+      if (Boolean.TRUE.equals(graphic.getSelected())) {
+        selected.add(graphic);
+      }
+    }
+    return selected;
+  }
+
+  public void selectGraphic(Graphic graphic, boolean add) {
+    if (graphic == null) {
+      return;
+    }
+    if (!add) {
+      deselectAllGraphics();
+    }
+    graphic.setSelected(!add || !Boolean.TRUE.equals(graphic.getSelected()));
+    if (!add) {
+      graphic.setSelected(true);
+    }
+    fireSelection();
+    fireModelChanged();
+    repaint();
+  }
+
+  public void selectAllGraphics() {
+    for (Graphic graphic : graphics) {
+      graphic.setSelected(true);
+    }
+    fireSelection();
+    fireModelChanged();
+    repaint();
+  }
+
+  public void deselectAllGraphics() {
+    for (Graphic graphic : graphics) {
+      graphic.setSelected(false);
+    }
+    fireSelection();
+    fireModelChanged();
+    repaint();
+  }
+
+  public void deleteSelectedGraphics() {
+    graphics.removeIf(g -> Boolean.TRUE.equals(g.getSelected()));
+    fireSelection();
+    fireModelChanged();
+    repaint();
+  }
+
+  public void selectIntersecting(Graphic area) {
+    if (area == null || area.getShape() == null) {
+      return;
+    }
+    Shape bounds = area.getShape();
+    for (Graphic graphic : graphics) {
+      if (graphic == area || graphic.getShape() == null) {
+        continue;
+      }
+      if (bounds.intersects(graphic.getShape().getBounds2D())) {
+        graphic.setSelected(true);
+      }
+    }
+    fireSelection();
+    fireModelChanged();
+    repaint();
+  }
+
+  public void addGraphicSelectionListener(GraphicSelectionListener listener) {
+    if (listener != null) {
+      selectionListeners.add(listener);
+    }
+  }
+
+  public void addGraphicModelChangeListener(GraphicModelChangeListener listener) {
+    if (listener != null) {
+      modelListeners.add(listener);
+    }
+  }
+
+  void fireSelection() {
+    List<Graphic> selected = getSelectedGraphics();
+    for (GraphicSelectionListener listener : selectionListeners) {
+      listener.handle(selected);
+    }
+  }
+
+  void fireModelChanged() {
+    for (GraphicModelChangeListener listener : modelListeners) {
+      listener.handle();
     }
   }
 
@@ -648,7 +772,12 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
         continue;
       }
       g.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
+      Stroke previous = g.getStroke();
+      if (Boolean.TRUE.equals(graphic.getSelected())) {
+        g.setStroke(new BasicStroke(2.5f));
+      }
       g.draw(graphic.getShape());
+      g.setStroke(previous);
     }
   }
 }

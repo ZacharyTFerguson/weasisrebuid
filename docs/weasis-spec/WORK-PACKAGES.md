@@ -7,7 +7,7 @@
 | 2 | OpenCV fragment, imageio, dicom-codec | EVR LE MONOCHROME2 CT W/L paints |
 | 3 | Import + Explorer | synthetic DICOMDIR; File>Import DICOM and DICOM CD; File>Export DICOM files/ZIP/DICOMDIR |
 | 4 | View2d LUT chain, `dcmview2d:*` | W/L paints; zoom −200/−100 toolbar + screenshot PNG/JPEG Have; rotation 0/90/180/270 chrome; ViewerToolBar mouseLeftAction tokens; cine Play/Stop frame advance + loop; Space/I annotation visibility FULL/MINIMAL/HIDDEN; **no MPR** |
-| 5 | Draw & Measure, KO, PR/GSPS | every graphic `buildShape` non-null when complete; MeasureToolBar D/A/Y/G/B buttons + click-drag-release distance/angle Have; KO/PR files; Key Object star/filter chrome + K toggle; `XmlGraphicModel` JAXB round-trip (`@XmlRootElement` types, JAXB-OSGi @7) |
+| 5 | Draw & Measure, KO, PR/GSPS | every graphic `buildShape` non-null when complete; MeasureToolBar D/A/Y/G/B buttons + click-drag-release distance/angle Have; click-select / Shift+click / rubber-band / Ctrl+A/D / Delete Have; KO/PR files; Key Object star/filter chrome + K toggle; `XmlGraphicModel` JAXB round-trip (`@XmlRootElement` types, JAXB-OSGi @7) |
 | 6 | Docking Frames, FoR+manual sync, lens, 2D 3D-cursor | FoR vs MANUAL MX-14; docking-frames **Active** @10 (FlatLaf extras on system classpath); MigLayout Core+Swing **Active** @7; JAXB-OSGi **Active** @7; 2D lens `ZoomWin` factor Have; Display/Image dockables + InfoLayer 3-state; histogram dock bind + RGB/HSV/HLS + ROI + W/L output; `LayerType` IMAGE/MEASURE/DRAW/…; 3D cursor (H/crosshair) + PixelInfo + FoR/manual synch; Display `LayerItem` / `LayerAnnotation` |
 | 7 | MPR / CPR / MIP | `mpr` types; MIP None/Min/Mean/Max |
 | 8 | Fusion | `FusionController.targetViews`; SUVbw |

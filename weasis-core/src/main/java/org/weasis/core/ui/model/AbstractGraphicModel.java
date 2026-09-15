@@ -51,4 +51,20 @@ public class AbstractGraphicModel implements GraphicModel {
     }
     return selected;
   }
+
+  public void selectAll() {
+    for (Graphic g : models) {
+      g.setSelected(true);
+    }
+  }
+
+  public void deselectAll() {
+    for (Graphic g : models) {
+      g.setSelected(false);
+    }
+  }
+
+  public void deleteSelected() {
+    models.removeIf(g -> Boolean.TRUE.equals(g.getSelected()));
+  }
 }
