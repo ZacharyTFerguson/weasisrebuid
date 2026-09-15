@@ -57,6 +57,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
       View2d extra = new View2d();
       extra.setSynchManager(synchManager);
       synchManager.add(extra);
+      extra.putClientProperty(View2dContainer.class, this);
       layout.add(extra);
       View2dRegistry.register(extra);
     }
@@ -77,6 +78,13 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
       layoutIndex = index;
       View2dRegistry.select(layout.get(index));
     }
+  }
+
+  public void cycleLayout(int delta) {
+    if (layout.size() <= 1) {
+      return;
+    }
+    setLayoutIndex(Math.floorMod(layoutIndex + delta, layout.size()));
   }
 
   @Override

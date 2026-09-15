@@ -162,6 +162,38 @@ public class ImageViewerEventManager {
       view.toggleSegmentations();
       return true;
     }
+    if (alt && !ctrl) {
+      if (code == KeyEvent.VK_R) {
+        view.setRotation(view.getRotation() + 90);
+        return true;
+      }
+      if (code == KeyEvent.VK_L) {
+        view.setRotation(view.getRotation() - 90);
+        return true;
+      }
+      if (code == KeyEvent.VK_F) {
+        view.toggleFlip();
+        return true;
+      }
+    }
+    if (ctrl && !alt) {
+      if (code == KeyEvent.VK_SPACE) {
+        view.cycleLeftMouseAction();
+        return true;
+      }
+      if (code == KeyEvent.VK_ADD || code == KeyEvent.VK_PLUS || code == KeyEvent.VK_EQUALS) {
+        view.increaseZoom(1);
+        return true;
+      }
+      if (code == KeyEvent.VK_SUBTRACT || code == KeyEvent.VK_MINUS) {
+        view.increaseZoom(-1);
+        return true;
+      }
+      if (code == KeyEvent.VK_ENTER) {
+        view.resetView("zoom");
+        return true;
+      }
+    }
     if (alt && isArrow(code)) {
       int step = shift ? 10 : 5;
       double dx = 0;

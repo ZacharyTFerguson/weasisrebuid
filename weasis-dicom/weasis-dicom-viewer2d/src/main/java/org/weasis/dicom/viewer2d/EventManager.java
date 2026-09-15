@@ -32,10 +32,30 @@ public class EventManager extends ImageViewerEventManager {
 
   @Override
   public void keyPressed(KeyEvent e) {
+    if (handleLayoutTab(e)) {
+      return;
+    }
     if (handleMprShortcut(e)) {
       return;
     }
     super.keyPressed(e);
+  }
+
+  boolean handleLayoutTab(KeyEvent e) {
+    if (e == null || e.getKeyCode() != KeyEvent.VK_TAB) {
+      return false;
+    }
+    int mods = e.getModifiersEx();
+    if ((mods & InputEvent.CTRL_DOWN_MASK) != 0 || (mods & InputEvent.ALT_DOWN_MASK) != 0) {
+      return false;
+    }
+    Object host = view2d.getClientProperty(View2dContainer.class);
+    if (!(host instanceof View2dContainer container) || container.getLayoutViews().size() <= 1) {
+      return false;
+    }
+    boolean shift = (mods & InputEvent.SHIFT_DOWN_MASK) != 0;
+    container.cycleLayout(shift ? -1 : 1);
+    return true;
   }
 
   @Override

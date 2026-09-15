@@ -33,6 +33,7 @@ import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.gui.util.SliderCineListener;
 import org.weasis.core.api.image.AffineTransformOp;
 import org.weasis.core.api.image.OpManager;
+import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.image.SimpleOpManager;
 import org.weasis.core.api.media.data.ImageElement;
 import org.weasis.core.api.media.data.MediaElement;
@@ -69,6 +70,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   private volatile double panX;
   private volatile double panY;
   private volatile double rotation;
+  private volatile boolean flip;
   private volatile int frameIndex;
   private volatile int frameCount;
   private MediaSeries<? extends MediaElement> series;
@@ -267,9 +269,57 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   }
 
   public void setRotation(double rotation) {
-    this.rotation = rotation;
-    displayOp.setParamValue("op.affine", AffineTransformOp.P_ROTATION, rotation);
+    double wrapped = rotation % 360.0;
+    if (wrapped < 0) {
+      wrapped += 360.0;
+    }
+    this.rotation = wrapped;
+    displayOp.setParamValue("op.affine", AffineTransformOp.P_ROTATION, this.rotation);
     repaint();
+  }
+
+  public boolean isFlip() {
+    return flip;
+  }
+
+  public void setFlip(boolean flip) {
+    this.flip = flip;
+  }
+
+  public void toggleFlip() {
+    setFlip(!flip);
+  }
+
+  public void cycleLeftMouseAction() {
+    String current = MouseActions.normalize(getMouseActions().getLeft());
+    String[] actions = ViewerToolBar.ACTIONS;
+    int idx = 0;
+    for (int i = 0; i < actions.length; i++) {
+      if (MouseActions.normalize(actions[i]).equals(current)) {
+        idx = i;
+        break;
+      }
+    }
+    getMouseActions().setLeft(actions[(idx + 1) % actions.length]);
+  }
+
+  public void setLut(String lut) {
+    displayOp.setParamValue(
+        "op.pseudocolor", PseudoColorOp.P_LUT, lut == null || lut.isBlank() ? PseudoColorOp.GRAY : lut);
+  }
+
+  public String getLut() {
+    Object value = displayOp.getParamValue("op.pseudocolor", PseudoColorOp.P_LUT);
+    return value == null ? PseudoColorOp.GRAY : value.toString();
+  }
+
+  public void setInverseLut(boolean invert) {
+    displayOp.setParamValue("op.pseudocolor", PseudoColorOp.P_INVERT, invert);
+  }
+
+  public boolean isInverseLut() {
+    Object value = displayOp.getParamValue("op.pseudocolor", PseudoColorOp.P_INVERT);
+    return Boolean.TRUE.equals(value);
   }
 
   public int getFrameIndex() {
@@ -930,6 +980,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
       setZoom(ZOOM_BEST_FIT);
       setPan(0, 0);
       setRotation(0);
+      setFlip(false);
       resetWinLevelDefaults();
       return;
     }

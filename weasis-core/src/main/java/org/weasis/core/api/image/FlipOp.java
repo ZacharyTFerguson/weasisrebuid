@@ -12,7 +12,10 @@ package org.weasis.core.api.image;
 /** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
 public class FlipOp extends AbstractOp {
 
+  public static final String P_HORIZONTAL = "horizontal";
+
   public FlipOp() {
     super("op.flip");
+    setParam(P_HORIZONTAL, Boolean.FALSE);
   }
 }

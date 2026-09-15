@@ -123,6 +123,32 @@ class ViewerActionKeysHaveTest {
   }
 
   @Test
+  void altRotateFlipCtrlSpaceZoomAndEnter() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    view.setSourceImage(gray(new int[10][10]));
+    view.setSize(10, 10);
+    view.setZoom(1.0);
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_R, InputEvent.ALT_DOWN_MASK));
+    assertEquals(90.0, view.getRotation(), 1e-9);
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_L, InputEvent.ALT_DOWN_MASK));
+    assertEquals(0.0, view.getRotation(), 1e-9);
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_F, InputEvent.ALT_DOWN_MASK));
+    assertTrue(view.isFlip());
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_F, InputEvent.ALT_DOWN_MASK));
+    assertFalse(view.isFlip());
+    assertEquals(MouseActions.WINLEVEL, view.getMouseActions().getLeft());
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_SPACE, InputEvent.CTRL_DOWN_MASK));
+    assertEquals(MouseActions.ZOOM, view.getMouseActions().getLeft());
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_EQUALS, InputEvent.CTRL_DOWN_MASK));
+    assertEquals(1.1, view.getZoom(), 1e-9);
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_MINUS, InputEvent.CTRL_DOWN_MASK));
+    assertEquals(1.0, view.getZoom(), 1e-9);
+    view.setZoom(3.0);
+    view.getEventManager().keyPressed(key(view, KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK));
+    assertEquals(DefaultView2d.ZOOM_BEST_FIT, view.getZoom(), 1e-9);
+  }
+
+  @Test
   void miniToolSlidersAndPannerMoveTheView() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setSize(200, 200);

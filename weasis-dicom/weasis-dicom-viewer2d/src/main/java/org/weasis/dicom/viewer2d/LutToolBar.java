@@ -9,4 +9,80 @@
  */
 package org.weasis.dicom.viewer2d;
 
-public class LutToolBar {}
+import java.awt.event.ActionEvent;
+import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+import javax.swing.JToggleButton;
+import org.weasis.core.api.image.PseudoColorOp;
+import org.weasis.core.ui.editor.image.DefaultView2d;
+import org.weasis.core.ui.util.WtoolBar;
+
+/** 2D pseudo-color LUT chrome (Gray / Inverse). */
+public class LutToolBar extends WtoolBar {
+
+  public static final String NAME = "LUT";
+  public static final List<String> LUTS = List.of(PseudoColorOp.GRAY, "Sine", "HotIron");
+
+  private DefaultView2d<?> view;
+  private final JToggleButton invert = new JToggleButton("Inverse");
+
+  public LutToolBar() {
+    super(NAME, 15);
+    for (String lut : LUTS) {
+      add(lutButton(lut));
+    }
+    invert.setName("inverseLut");
+    invert.addActionListener(e -> setInverted(invert.isSelected()));
+    add(invert);
+  }
+
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+    if (view != null) {
+      invert.setSelected(view.isInverseLut());
+    }
+  }
+
+  public DefaultView2d<?> boundView() {
+    return view;
+  }
+
+  public void setLut(String lut) {
+    if (view != null) {
+      view.setLut(lut);
+    }
+  }
+
+  public String getLut() {
+    return view == null ? PseudoColorOp.GRAY : view.getLut();
+  }
+
+  public void setInverted(boolean inverted) {
+    invert.setSelected(inverted);
+    if (view != null) {
+      view.setInverseLut(inverted);
+    }
+  }
+
+  public boolean isInverted() {
+    return view != null && view.isInverseLut();
+  }
+
+  public void toggleInvert() {
+    setInverted(!isInverted());
+  }
+
+  private JButton lutButton(String lut) {
+    JButton button =
+        new JButton(
+            new AbstractAction(lut) {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                setLut(lut);
+              }
+            });
+    button.setName(lut);
+    return button;
+  }
+}
