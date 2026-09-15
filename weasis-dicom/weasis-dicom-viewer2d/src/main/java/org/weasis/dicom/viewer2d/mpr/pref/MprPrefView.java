@@ -11,9 +11,12 @@ package org.weasis.dicom.viewer2d.mpr.pref;
 
 import org.weasis.core.ui.pref.ShellPrefPage;
 
+/** Prefs &gt; MPR. Title-only: PREFERENCES.md has no MPR persist keys. */
 public class MprPrefView extends ShellPrefPage {
 
+  public static final String TITLE = "MPR";
+
   public MprPrefView() {
-    super("MPR", 420);
+    super(TITLE, 420);
   }
 }
