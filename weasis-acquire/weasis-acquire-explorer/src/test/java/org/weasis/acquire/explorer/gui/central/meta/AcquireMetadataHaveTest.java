@@ -35,7 +35,8 @@ class AcquireMetadataHaveTest {
         AcquireMeta.key(AcquireMeta.Scope.GLOBAL, AcquireMeta.SetKind.DISPLAY),
         "PatientName,PatientID,AccessionNumber");
     prefs.setProperty(
-        AcquireMeta.key(AcquireMeta.Scope.GLOBAL, AcquireMeta.SetKind.EDIT), "PatientName,PatientID");
+        AcquireMeta.key(AcquireMeta.Scope.GLOBAL, AcquireMeta.SetKind.EDIT),
+        "PatientName,PatientID");
     prefs.setProperty(
         AcquireMeta.key(AcquireMeta.Scope.GLOBAL, AcquireMeta.SetKind.REQUIRED),
         "PatientName,PatientID");
