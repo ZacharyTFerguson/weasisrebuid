@@ -23,13 +23,15 @@ import java.util.stream.Stream;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.weasis.base.explorer.JIThumbnailCache;
+import org.weasis.base.explorer.ThumbnailRenderer;
 import org.weasis.base.explorer.list.impl.DefaultThumbnailList;
 
 /** Scroll host for a thumbnail list plus a {@link JIThumbnailCache} keyed by URI. */
-public class AThumbnailListPane extends JPanel {
+public class AThumbnailListPane extends JPanel implements IThumbnailListPane {
 
   private final AbstractThumbnailList thumbnailList;
   private final JIThumbnailCache cache;
+  private final ThumbnailRenderer renderer;
 
   public AThumbnailListPane() {
     this(new DefaultThumbnailList());
@@ -43,25 +45,35 @@ public class AThumbnailListPane extends JPanel {
     super(new BorderLayout());
     this.thumbnailList = thumbnailList == null ? new DefaultThumbnailList(cache) : thumbnailList;
     this.cache = cache == null ? cacheOf(this.thumbnailList) : cache;
+    this.renderer = new ThumbnailRenderer(this.cache);
     add(new JLabel("Thumbnails"), BorderLayout.NORTH);
   }
 
+  @Override
   public AbstractThumbnailList thumbnailList() {
     return thumbnailList;
   }
 
+  @Override
   public JIThumbnailCache cache() {
     return cache;
   }
 
+  public ThumbnailRenderer renderer() {
+    return renderer;
+  }
+
+  @Override
   public void setItems(List<Path> items) {
     thumbnailList.setItems(items);
   }
 
+  @Override
   public void loadDirectory(File directory) throws IOException {
     loadDirectory(directory == null ? null : directory.toPath());
   }
 
+  @Override
   public void loadDirectory(Path directory) throws IOException {
     if (directory == null || !Files.isDirectory(directory)) {
       thumbnailList.setItems(List.of());
@@ -78,26 +90,32 @@ public class AThumbnailListPane extends JPanel {
     thumbnailList.setItems(files);
   }
 
+  @Override
   public void click(int index, boolean ctrl, boolean shift) {
     thumbnailList.click(index, ctrl, shift);
   }
 
+  @Override
   public boolean keyPressed(KeyEvent event) {
     return thumbnailList.keyPressed(event);
   }
 
+  @Override
   public List<Path> selected() {
     return thumbnailList.selectedItems();
   }
 
+  @Override
   public int getPriorityIndex() {
     return thumbnailList.getPriorityIndex();
   }
 
+  @Override
   public boolean isOpened() {
     return thumbnailList.isOpened();
   }
 
+  @Override
   public BufferedImage thumbnailAt(int index) {
     if (thumbnailList instanceof DefaultThumbnailList list) {
       return list.thumbnailAt(index);
@@ -106,7 +124,7 @@ public class AThumbnailListPane extends JPanel {
     if (path == null) {
       return null;
     }
-    return cache.getOrLoad(path);
+    return renderer.iconFor(path).getImage();
   }
 
   private static JIThumbnailCache cacheOf(AbstractThumbnailList list) {

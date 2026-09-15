@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.viewer2d.pref;
 
-public class ViewerPrefFactory {}
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.PreferencesPageFactory;
+import org.weasis.core.api.gui.util.AbstractItemDialogPage;
+import org.weasis.core.ui.pref.AbstractPreferencesPageFactory;
+
+@Component(service = PreferencesPageFactory.class)
+public class ViewerPrefFactory extends AbstractPreferencesPageFactory {
+
+  @Override
+  public AbstractItemDialogPage createInstance(Hashtable<String, Object> properties) {
+    return new ViewerPrefView();
+  }
+
+  @Override
+  public boolean isComponentCreatedByThisFactory(Insertable component) {
+    return component instanceof ViewerPrefView;
+  }
+}

@@ -9,4 +9,36 @@
  */
 package org.weasis.base.explorer.list;
 
-public class IThumbnailListPane {}
+import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import org.weasis.base.explorer.JIThumbnailCache;
+
+/** Scroll host for a {@link ThumbnailList} plus a {@link JIThumbnailCache} keyed by URI. */
+public interface IThumbnailListPane {
+
+  ThumbnailList thumbnailList();
+
+  JIThumbnailCache cache();
+
+  void setItems(List<Path> items);
+
+  void loadDirectory(File directory) throws IOException;
+
+  void loadDirectory(Path directory) throws IOException;
+
+  void click(int index, boolean ctrl, boolean shift);
+
+  boolean keyPressed(KeyEvent event);
+
+  List<Path> selected();
+
+  int getPriorityIndex();
+
+  boolean isOpened();
+
+  BufferedImage thumbnailAt(int index);
+}

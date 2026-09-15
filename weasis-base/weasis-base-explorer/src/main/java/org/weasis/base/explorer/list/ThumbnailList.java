@@ -9,4 +9,43 @@
  */
 package org.weasis.base.explorer.list;
 
-public class ThumbnailList {}
+import java.awt.event.KeyEvent;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+
+/** Non-DICOM explorer thumbnail list: selection plus the backing {@link AThumbnailModel}. */
+public interface ThumbnailList {
+
+  AThumbnailModel model();
+
+  void setItems(List<Path> items);
+
+  List<Path> getItems();
+
+  int size();
+
+  Path get(int index);
+
+  void click(int index, boolean ctrl, boolean shift);
+
+  void selectAll();
+
+  void enter();
+
+  boolean isOpened();
+
+  boolean keyPressed(KeyEvent event);
+
+  Set<Integer> selectedIndices();
+
+  List<Path> selectedItems();
+
+  int getAnchor();
+
+  int getLead();
+
+  int getPriorityIndex();
+
+  void clearSelection();
+}

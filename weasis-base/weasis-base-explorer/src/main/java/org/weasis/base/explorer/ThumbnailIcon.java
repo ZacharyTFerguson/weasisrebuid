@@ -9,4 +9,50 @@
  */
 package org.weasis.base.explorer;
 
-public class ThumbnailIcon {}
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import javax.swing.Icon;
+import org.weasis.core.api.media.data.Thumbnail;
+
+/** Icon wrapping a cache thumbnail image. */
+public class ThumbnailIcon implements Icon {
+
+  private final BufferedImage image;
+  private final int size;
+
+  public ThumbnailIcon(BufferedImage image) {
+    this.image = image;
+    this.size =
+        image == null
+            ? Thumbnail.DEFAULT_SIZE
+            : Math.max(1, Math.max(image.getWidth(), image.getHeight()));
+  }
+
+  public BufferedImage getImage() {
+    return image;
+  }
+
+  @Override
+  public void paintIcon(Component c, Graphics g, int x, int y) {
+    if (g == null) {
+      return;
+    }
+    if (image != null) {
+      g.drawImage(image, x, y, getIconWidth(), getIconHeight(), c);
+      return;
+    }
+    g.setColor(java.awt.Color.DARK_GRAY);
+    g.fillRect(x, y, getIconWidth(), getIconHeight());
+  }
+
+  @Override
+  public int getIconWidth() {
+    return image == null ? size : Math.max(1, image.getWidth());
+  }
+
+  @Override
+  public int getIconHeight() {
+    return image == null ? size : Math.max(1, image.getHeight());
+  }
+}
