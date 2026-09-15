@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
+import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.TagW;
@@ -93,6 +94,22 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     cineToolBar.bind(view2d);
     measureToolBar.bind(view2d);
     keyObjectToolBar.bind(view2d);
+    fillSeriesViewerUi();
+  }
+
+  void fillSeriesViewerUi() {
+    List<Insertable> ui = getSeriesViewerUI().getToolBar();
+    ui.clear();
+    ui.add(viewerToolBar);
+    ui.add(lutToolBar);
+    ui.add(zoomToolBar);
+    ui.add(rotationToolBar);
+    ui.add(resetTools);
+    ui.add(headerToolBar);
+    ui.add(screenshotToolBar);
+    ui.add(cineToolBar);
+    ui.add(measureToolBar);
+    ui.add(keyObjectToolBar);
   }
 
   public ToolBarContainer getToolBars() {

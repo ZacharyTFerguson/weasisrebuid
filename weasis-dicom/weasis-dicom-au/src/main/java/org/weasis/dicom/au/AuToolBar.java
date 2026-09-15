@@ -10,14 +10,15 @@
 package org.weasis.dicom.au;
 
 import javax.swing.JButton;
-import javax.swing.JToolBar;
+import org.weasis.core.ui.util.WtoolBar;
 
 /** Play / pause / stop chrome for {@link AuView}. */
-public class AuToolBar extends JToolBar {
+public class AuToolBar extends WtoolBar {
 
   private final AuView view;
 
   public AuToolBar(AuView view) {
+    super("Audio", 10);
     this.view = view == null ? new AuView() : view;
     JButton play = new JButton("Play");
     play.addActionListener(e -> play());

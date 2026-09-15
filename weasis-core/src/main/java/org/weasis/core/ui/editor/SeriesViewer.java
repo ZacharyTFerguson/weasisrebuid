@@ -29,6 +29,10 @@ public interface SeriesViewer<E extends MediaElement> {
 
   String getDockableUID();
 
+  default SeriesViewerUI getSeriesViewerUI() {
+    return null;
+  }
+
   void setSelected(boolean selected);
 
   boolean isSelected();

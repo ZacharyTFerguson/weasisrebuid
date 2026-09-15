@@ -11,6 +11,8 @@ package org.weasis.core.ui.util;
 
 import java.awt.Component;
 import java.awt.FlowLayout;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JPanel;
 import org.weasis.core.api.gui.Insertable;
 
@@ -26,6 +28,49 @@ public class ToolBarContainer extends JPanel {
     }
     if (bar instanceof Toolbar toolbar) {
       add(toolbar.getComponent());
+    }
+  }
+
+  public void replaceViewerBars(List<Insertable> bars) {
+    replaceViewerBars(bars, null);
+  }
+
+  public void replaceViewerBars(List<Insertable> bars, Object source) {
+    removeInsertables();
+    addBars(bars, source);
+    revalidate();
+    repaint();
+  }
+
+  void removeInsertables() {
+    List<Component> gone = new ArrayList<>();
+    for (Component c : getComponents()) {
+      if (c instanceof Insertable) {
+        gone.add(c);
+      }
+    }
+    for (Component c : gone) {
+      remove(c);
+    }
+  }
+
+  void addBars(List<Insertable> bars, Object source) {
+    if (bars == null) {
+      return;
+    }
+    for (Insertable bar : bars) {
+      addBar(bar, source);
+    }
+  }
+
+  void addBar(Insertable bar, Object source) {
+    registerToolBar(bar);
+    updateDynamic(bar, source);
+  }
+
+  void updateDynamic(Insertable bar, Object source) {
+    if (bar instanceof DynamicToolbar dyn) {
+      dyn.update(source);
     }
   }
 }

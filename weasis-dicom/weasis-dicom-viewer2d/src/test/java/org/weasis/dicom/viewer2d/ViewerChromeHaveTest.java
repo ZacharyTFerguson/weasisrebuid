@@ -83,6 +83,9 @@ class ViewerChromeHaveTest {
     assertEquals(Insertable.Type.TOOLBAR, container.getViewerToolBar().getType());
     assertSame(container.getView2d(), container.getViewerToolBar().boundView());
     assertSame(container.getView2d(), container.getLutToolBar().boundView());
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> "LUT".equals(b.getComponentName())));
   }
 
   @Test

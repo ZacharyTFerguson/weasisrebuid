@@ -43,6 +43,7 @@ import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.util.ToolBarContainer;
+import org.weasis.core.ui.util.WtoolBar;
 
 class WeasisWinChromeHaveTest {
 
@@ -227,6 +228,47 @@ class WeasisWinChromeHaveTest {
     } finally {
       win.dispose();
     }
+  }
+
+  @Test
+  void toolbarsFollowFocusedTabSeriesViewerUi() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> twoD = pluginWithBar("2d", "LUT");
+    ViewerPlugin<?> audio = pluginWithBar("au", "Audio");
+    try {
+      core.openViewerPlugin(twoD);
+      assertTrue(hasBar(win.getToolBarContainer(), "LUT"));
+      assertFalse(hasBar(win.getToolBarContainer(), "Audio"));
+      core.openViewerPlugin(audio);
+      assertFalse(hasBar(win.getToolBarContainer(), "LUT"));
+      assertTrue(hasBar(win.getToolBarContainer(), "Audio"));
+      win.getViewerTabs().setSelectedComponent(twoD);
+      assertTrue(hasBar(win.getToolBarContainer(), "LUT"));
+      assertFalse(hasBar(win.getToolBarContainer(), "Audio"));
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  static ViewerPlugin<?> pluginWithBar(String name, String bar) {
+    ViewerPlugin<?> plugin = plugin(name);
+    plugin.getSeriesViewerUI().getToolBar().add(new WtoolBar(bar, 10));
+    return plugin;
+  }
+
+  static boolean hasBar(ToolBarContainer bars, String name) {
+    for (Component c : bars.getComponents()) {
+      if (c instanceof Insertable ins && name.equals(ins.getComponentName())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   static void closeOpen(UICore core) {

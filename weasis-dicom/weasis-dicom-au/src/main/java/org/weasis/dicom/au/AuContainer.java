@@ -23,6 +23,7 @@ public class AuContainer extends ViewerPlugin<MediaElement> {
     super("DICOM Audio Player");
     add(toolBar, BorderLayout.NORTH);
     add(auView, BorderLayout.CENTER);
+    getSeriesViewerUI().getToolBar().add(toolBar);
   }
 
   public AuView getAuView() {

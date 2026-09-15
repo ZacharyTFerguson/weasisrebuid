@@ -117,10 +117,24 @@ public class WeasisWin extends JFrame {
   }
 
   void onViewerTabChanged() {
-    Component selected = viewerTabs.getSelectedComponent();
-    if (selected instanceof ViewerPlugin<?> plugin) {
-      UICore.getInstance().setSelectedViewerPlugin(plugin);
+    ViewerPlugin<?> plugin = selectedViewerPlugin();
+    if (plugin == null) {
+      return;
     }
+    UICore.getInstance().setSelectedViewerPlugin(plugin);
+    rebindToolBars(plugin);
+  }
+
+  ViewerPlugin<?> selectedViewerPlugin() {
+    Component selected = viewerTabs.getSelectedComponent();
+    return selected instanceof ViewerPlugin<?> plugin ? plugin : null;
+  }
+
+  void rebindToolBars(ViewerPlugin<?> plugin) {
+    if (plugin.getSeriesViewerUI() == null) {
+      return;
+    }
+    toolbars.replaceViewerBars(plugin.getSeriesViewerUI().getToolBar(), plugin);
   }
 
   public static String windowTitle() {

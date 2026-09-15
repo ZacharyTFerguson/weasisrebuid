@@ -18,6 +18,7 @@ import javax.swing.JPanel;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.SeriesViewer;
+import org.weasis.core.ui.editor.SeriesViewerUI;
 
 /** Central-panel viewer. Factories create instances on demand. */
 public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
@@ -35,6 +36,7 @@ public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
   private MediaSeries<E> selectedSeries;
   private boolean selected;
   private DockingState dockingState = DockingState.NORMAL;
+  private final SeriesViewerUI seriesViewerUI = new SeriesViewerUI();
 
   protected ViewerPlugin(String pluginName) {
     super(new BorderLayout());
@@ -92,6 +94,11 @@ public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
   @Override
   public boolean isSelected() {
     return selected;
+  }
+
+  @Override
+  public SeriesViewerUI getSeriesViewerUI() {
+    return seriesViewerUI;
   }
 
   public DockingState getDockingState() {
