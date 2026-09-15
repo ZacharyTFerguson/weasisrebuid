@@ -35,6 +35,7 @@ import org.weasis.core.api.image.AffineTransformOp;
 import org.weasis.core.api.image.OpManager;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.image.SimpleOpManager;
+import org.weasis.core.api.image.op.ByteLutCollection;
 import org.weasis.core.api.media.data.ImageElement;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
@@ -69,6 +70,13 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   private final ImageViewerEventManager eventManager;
   private final List<ViewButton> viewButtons = new ArrayList<>();
   private final PlayViewButton playButton = new PlayViewButton();
+  private final SequenceHandler sequenceHandler = new SequenceHandler();
+  private final FocusHandler focusHandler = new FocusHandler();
+  private final ShowPopup showPopup = new ShowPopup();
+  private final PropertyChangeHandler propertyChangeHandler = new PropertyChangeHandler();
+  private final ViewProgress viewProgress = new ViewProgress();
+  private final FrameOfReferenceColor frameOfReferenceColor = new FrameOfReferenceColor();
+  private DisplayByteLut displayByteLut = new DisplayByteLut(ByteLutCollection.GRAY);
 
   private BufferedImage source;
   private volatile double zoom = ZOOM_BEST_FIT;
@@ -123,6 +131,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     setBackground(Color.BLACK);
     setOpaque(true);
     this.eventManager = createEventManager();
+    addPropertyChangeListener(propertyChangeHandler);
     MouseAdapter adapter =
         new MouseAdapter() {
           @Override
@@ -227,8 +236,10 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   }
 
   public void setZoom(double zoom) {
+    double old = this.zoom;
     this.zoom = zoom;
     displayOp.setParamValue("op.affine", AffineTransformOp.P_ZOOM, zoom);
+    firePropertyChange("zoom", old, this.zoom);
     if (!freezeParameters) {
       repaint();
     }
@@ -774,8 +785,57 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     return contextMenuHandler;
   }
 
+  public ShowPopup getShowPopup() {
+    return showPopup;
+  }
+
   public void showContextMenu(int x, int y) {
-    contextMenuHandler.show(this, x, y);
+    showPopup.show(this, x, y);
+  }
+
+  public SequenceHandler getSequenceHandler() {
+    return sequenceHandler;
+  }
+
+  public FocusHandler getFocusHandler() {
+    return focusHandler;
+  }
+
+  public void selectInFocus() {
+    focusHandler.focus(this);
+  }
+
+  public PropertyChangeHandler getPropertyChangeHandler() {
+    return propertyChangeHandler;
+  }
+
+  public ViewProgress getViewProgress() {
+    return viewProgress;
+  }
+
+  public DisplayByteLut getDisplayByteLut() {
+    return displayByteLut;
+  }
+
+  public void setDisplayByteLut(DisplayByteLut lut) {
+    this.displayByteLut = lut == null ? new DisplayByteLut(ByteLutCollection.GRAY) : lut;
+    displayOp.setParamValue("op.pseudocolor", PseudoColorOp.P_LUT, displayByteLut.getName());
+    displayOp.setParamValue(
+        "op.pseudocolor",
+        PseudoColorOp.P_INVERT,
+        ByteLutCollection.INVERSE.equals(displayByteLut.getName()));
+  }
+
+  public FrameOfReferenceColor getFrameOfReferenceColor() {
+    return frameOfReferenceColor;
+  }
+
+  public Color colorForFrameOfReference() {
+    return frameOfReferenceColor.colorFor(frameOfReferenceUID);
+  }
+
+  public BufferedImage exportImage() {
+    return new ExportImage().render(this);
   }
 
   public List<ViewButton> getViewButtons() {

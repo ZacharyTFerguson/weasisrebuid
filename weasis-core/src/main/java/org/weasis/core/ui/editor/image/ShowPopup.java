@@ -9,4 +9,12 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class ShowPopup {}
+/** Viewer context menu (Q / right-click). Uses the view's {@link ContextMenuHandler}. */
+public class ShowPopup {
+
+  public void show(DefaultView2d<?> view, int x, int y) {
+    if (view != null) {
+      view.getContextMenuHandler().show(view, x, y);
+    }
+  }
+}

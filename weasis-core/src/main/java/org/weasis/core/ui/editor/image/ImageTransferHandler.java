@@ -9,4 +9,60 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class ImageTransferHandler {}
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.image.BufferedImage;
+import javax.swing.JComponent;
+import javax.swing.TransferHandler;
+
+/** Clipboard / DnD of a view's raster ({@link DataFlavor#imageFlavor}). */
+public class ImageTransferHandler extends TransferHandler {
+
+  @Override
+  public boolean canImport(JComponent comp, DataFlavor[] flavors) {
+    return flavorIn(flavors, DataFlavor.imageFlavor);
+  }
+
+  public Transferable createTransferable(DefaultView2d<?> view) {
+    return new ImageSelection(new ExportImage().render(view));
+  }
+
+  static boolean flavorIn(DataFlavor[] flavors, DataFlavor want) {
+    if (flavors == null) {
+      return false;
+    }
+    for (DataFlavor flavor : flavors) {
+      if (want.equals(flavor)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  static final class ImageSelection implements Transferable {
+    private final BufferedImage image;
+
+    ImageSelection(BufferedImage image) {
+      this.image = image;
+    }
+
+    @Override
+    public DataFlavor[] getTransferDataFlavors() {
+      return new DataFlavor[] {DataFlavor.imageFlavor};
+    }
+
+    @Override
+    public boolean isDataFlavorSupported(DataFlavor flavor) {
+      return DataFlavor.imageFlavor.equals(flavor);
+    }
+
+    @Override
+    public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException {
+      if (!isDataFlavorSupported(flavor)) {
+        throw new UnsupportedFlavorException(flavor);
+      }
+      return image;
+    }
+  }
+}

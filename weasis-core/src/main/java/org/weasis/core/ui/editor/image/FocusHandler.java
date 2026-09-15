@@ -9,4 +9,20 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class FocusHandler {}
+/** Which canvas is the focused 2D view (layout selection). */
+public class FocusHandler {
+
+  private DefaultView2d<?> focused;
+
+  public void focus(DefaultView2d<?> view) {
+    this.focused = view;
+  }
+
+  public DefaultView2d<?> focused() {
+    return focused;
+  }
+
+  public boolean isFocused(DefaultView2d<?> view) {
+    return view != null && view == focused;
+  }
+}

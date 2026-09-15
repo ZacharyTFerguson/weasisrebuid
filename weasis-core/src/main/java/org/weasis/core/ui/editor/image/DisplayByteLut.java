@@ -9,4 +9,43 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class DisplayByteLut {}
+import org.weasis.core.api.image.op.ByteLutCollection;
+
+/** Named 8-bit RGB LUT used by the 2D display pipeline. */
+public class DisplayByteLut {
+
+  private final String name;
+  private final byte[][] rgb;
+
+  public DisplayByteLut(String name) {
+    this.name = blank(name) ? ByteLutCollection.GRAY : name;
+    this.rgb = new ByteLutCollection().getLut(this.name);
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public byte[][] getLutTable() {
+    return rgb;
+  }
+
+  public int grayAt(int index) {
+    int i = clampIndex(index);
+    return rgb[0][i] & 0xFF;
+  }
+
+  static boolean blank(String name) {
+    return name == null || name.isBlank();
+  }
+
+  static int clampIndex(int index) {
+    if (index < 0) {
+      return 0;
+    }
+    if (index > 255) {
+      return 255;
+    }
+    return index;
+  }
+}

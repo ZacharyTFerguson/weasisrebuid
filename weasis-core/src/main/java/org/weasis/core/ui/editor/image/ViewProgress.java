@@ -9,4 +9,30 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class ViewProgress {}
+/** Load / decode progress for a 2D view (0–100). */
+public class ViewProgress {
+
+  private int percent;
+
+  public void setPercent(int percent) {
+    this.percent = clamp(percent);
+  }
+
+  public int getPercent() {
+    return percent;
+  }
+
+  public boolean isComplete() {
+    return percent >= 100;
+  }
+
+  static int clamp(int percent) {
+    if (percent < 0) {
+      return 0;
+    }
+    if (percent > 100) {
+      return 100;
+    }
+    return percent;
+  }
+}

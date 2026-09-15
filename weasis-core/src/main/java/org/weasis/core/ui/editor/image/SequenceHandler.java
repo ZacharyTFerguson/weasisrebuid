@@ -9,4 +9,24 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class SequenceHandler {}
+/** Scroll/cine sequence: map a vertical drag to one frame step. */
+public class SequenceHandler {
+
+  public int step(int dy) {
+    if (dy > 0) {
+      return 1;
+    }
+    if (dy < 0) {
+      return -1;
+    }
+    return 0;
+  }
+
+  public int apply(DefaultView2d<?> view, int dy) {
+    if (view == null) {
+      return 0;
+    }
+    view.setFrameIndex(view.getFrameIndex() + step(dy));
+    return view.getFrameIndex();
+  }
+}

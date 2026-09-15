@@ -9,4 +9,30 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class PropertyChangeHandler {}
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+
+/** Last view property change (zoom, and other JComponent fires). */
+public class PropertyChangeHandler implements PropertyChangeListener {
+
+  private PropertyChangeEvent last;
+
+  public void bind(DefaultView2d<?> view) {
+    if (view != null) {
+      view.addPropertyChangeListener(this);
+    }
+  }
+
+  @Override
+  public void propertyChange(PropertyChangeEvent evt) {
+    this.last = evt;
+  }
+
+  public PropertyChangeEvent last() {
+    return last;
+  }
+
+  public boolean saw(String name) {
+    return last != null && name.equals(last.getPropertyName());
+  }
+}

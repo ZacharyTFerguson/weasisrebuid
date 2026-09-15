@@ -9,4 +9,33 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class ExportImage {}
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
+/** Copy the view source raster for screenshot / transfer. */
+public class ExportImage {
+
+  public BufferedImage render(DefaultView2d<?> view) {
+    if (missing(view)) {
+      return empty();
+    }
+    return copy(view.getSourceImage());
+  }
+
+  boolean missing(DefaultView2d<?> view) {
+    return view == null || view.getSourceImage() == null;
+  }
+
+  static BufferedImage empty() {
+    return new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+  }
+
+  static BufferedImage copy(BufferedImage src) {
+    BufferedImage out =
+        new BufferedImage(src.getWidth(), src.getHeight(), BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = out.createGraphics();
+    g.drawImage(src, 0, 0, null);
+    g.dispose();
+    return out;
+  }
+}
