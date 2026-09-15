@@ -194,8 +194,8 @@ public class PluginOpeningStrategy {
     }
     String patient = patientKey(bucket);
     if (kind == Kind.IMAGE) {
-      ViewerPlugin<?> existing = patientTabs.get(patient);
-      if (stillOpen(existing) && canAddSeries(existing, mime)) {
+      ViewerPlugin<?> existing = pluginToReuse(patient, mime);
+      if (existing != null) {
         addSeries(existing, handler.toMediaSeries(bucket));
         core.setSelectedViewerPlugin(existing);
         return existing;
@@ -257,6 +257,37 @@ public class PluginOpeningStrategy {
       return "";
     }
     return bucket.instances().getFirst().modality();
+  }
+
+  private ViewerPlugin<?> pluginToReuse(String patient, String mime) {
+    ViewerPlugin<?> byPatient = patientTabs.get(patient);
+    if (stillOpen(byPatient) && canAddSeries(byPatient, mime)) {
+      return byPatient;
+    }
+    return hangingPlugin(mime);
+  }
+
+  ViewerPlugin<?> hangingPlugin(String mime) {
+    ViewerPlugin<?> selected = core.getSelectedViewerPlugin();
+    if (canHangMore(selected, mime)) {
+      return selected;
+    }
+    return firstHangSlot(mime);
+  }
+
+  ViewerPlugin<?> firstHangSlot(String mime) {
+    for (ViewerPlugin<?> plugin : core.getOpenViewerPlugins()) {
+      if (canHangMore(plugin, mime)) {
+        return plugin;
+      }
+    }
+    return null;
+  }
+
+  boolean canHangMore(ViewerPlugin<?> plugin, String mime) {
+    return plugin instanceof ImageViewerPlugin<?> image
+        && image.hasHangSlot()
+        && canAddSeries(plugin, mime);
   }
 
   @SuppressWarnings("unchecked")

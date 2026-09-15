@@ -68,6 +68,21 @@ class HangingProtocolContainerHaveTest {
     assertSame(lat, container.getLayoutViews().get(1).getSeries());
   }
 
+  @Test
+  void sameSeriesUidDoesNotFillTheHangSlot() {
+    View2dContainer container = new View2dContainer();
+    Series<MediaElement> pa = series("2.25.dx.pa");
+    Series<MediaElement> paAgain = series("2.25.dx.pa");
+    Series<MediaElement> lat = series("2.25.dx.lat");
+    container.applyHanging(1, 2);
+    container.addSeries(pa);
+    container.addSeries(paAgain);
+    assertSame(pa, container.getLayoutViews().get(1).getSeries());
+    container.addSeries(lat);
+    assertSame(pa, container.getLayoutViews().get(0).getSeries());
+    assertSame(lat, container.getLayoutViews().get(1).getSeries());
+  }
+
   static Series<MediaElement> series(String uid) {
     Series<MediaElement> series = new Series<>(uid);
     series.addMedia(new MediaElement());

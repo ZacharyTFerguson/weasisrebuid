@@ -65,7 +65,7 @@ public class DicomCommands {
       DicomModel model = LocalPersistence.getDicomModel();
       LoadLocalDicom.ImportResult result =
           new LoadDicom(model, List.of(new File(local)), null, null).load();
-      new PluginOpeningStrategy().openIfWindow(model);
+      LocalPersistence.openingStrategy().openIfWindow(model);
       return "local " + local + " imported=" + result.imported().size();
     } catch (IOException e) {
       return "local " + local + " error=" + e.getMessage();

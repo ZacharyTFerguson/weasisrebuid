@@ -18,6 +18,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JPanel;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
+import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MeasureToolBar;
 import org.weasis.core.ui.editor.image.RotationToolBar;
@@ -220,6 +221,11 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   @Override
+  public boolean hasHangSlot() {
+    return nextHangSlot() != 0;
+  }
+
+  @Override
   public synchronized void addSeries(MediaSeries<MediaElement> sequence) {
     super.addSeries(sequence);
     if (sequence == null || sequence.getMedias().isEmpty()) {
@@ -271,12 +277,24 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   void placeSeries(MediaSeries<MediaElement> sequence) {
+    if (alreadyHung(sequence)) {
+      return;
+    }
     int slot = nextHangSlot();
     if (slot == 0) {
       putPrimary(sequence);
       return;
     }
     hangCell(layout.get(slot), sequence);
+  }
+
+  boolean alreadyHung(MediaSeries<MediaElement> sequence) {
+    for (View2d cell : layout) {
+      if (sameSeries(cell.getSeries(), sequence)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void putPrimary(MediaSeries<MediaElement> sequence) {
@@ -304,7 +322,23 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   static boolean isCloneSlot(View2d cell, MediaSeries<?> primary) {
     MediaSeries<?> hung = cell.getSeries();
-    return hung == null || hung == primary;
+    return hung == null || sameSeries(hung, primary);
+  }
+
+  static boolean sameSeries(MediaSeries<?> a, MediaSeries<?> b) {
+    if (a == null || b == null) {
+      return false;
+    }
+    if (a == b) {
+      return true;
+    }
+    String uid = seriesUid(a);
+    return !uid.isEmpty() && uid.equals(seriesUid(b));
+  }
+
+  static String seriesUid(MediaSeries<?> series) {
+    Object v = series.getTagValue(TagW.SeriesInstanceUID);
+    return v == null ? "" : v.toString();
   }
 
   void hangCell(View2d cell, MediaSeries<MediaElement> sequence) {

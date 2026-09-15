@@ -119,7 +119,7 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
   }
 
   void openViewerIfPresent() {
-    new PluginOpeningStrategy().openIfWindow(model);
+    LocalPersistence.openingStrategy().openIfWindow(model);
   }
 
   @Override

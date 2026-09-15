@@ -11,12 +11,15 @@ package org.weasis.dicom.explorer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
 import java.util.List;
+import javax.swing.JFrame;
 import org.dcm4che3.data.UID;
 import org.junit.jupiter.api.Test;
+import org.weasis.core.api.media.data.MediaSeries;
+import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMime;
@@ -32,20 +35,42 @@ class HangingProtocolOpenHaveTest {
     core.registerSeriesViewerFactory(factory);
     PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
     try {
-      ViewerPlugin<?> first = opening.open(dx("2.25.dx.pa"));
+      ViewerPlugin<?> first = opening.open(dx("DX", "1", "2.25.dx.pa"));
       assertInstanceOf(View2dContainer.class, first);
       View2dContainer container = (View2dContainer) first;
       assertEquals(2, container.getLayoutCount());
-      ViewerPlugin<?> same = opening.open(dx("2.25.dx.lat"));
+      ViewerPlugin<?> same = opening.open(dx("DX", "1", "2.25.dx.lat"));
       assertSame(first, same);
-      assertNotSame(
-          container.getLayoutViews().get(0).getSeries(),
-          container.getLayoutViews().get(1).getSeries());
+      assertNotEquals(
+          seriesUid(container.getLayoutViews().get(0).getSeries()),
+          seriesUid(container.getLayoutViews().get(1).getSeries()));
     } finally {
-      for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
-        core.closeViewerPlugin(plugin);
-      }
-      core.unregisterSeriesViewerFactory(factory);
+      close(core, factory);
+    }
+  }
+
+  @Test
+  void chestThenKneeDxOnePluginDifferentSeriesNotClonesOrExtraTabs() {
+    UICore core = new UICore();
+    JFrame win = new JFrame();
+    core.setApplicationWindow(win);
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    DicomModel model = new DicomModel();
+    try {
+      model.addInstance(dx("CHEST", "P-CHEST", "2.25.chest"));
+      new PluginOpeningStrategy(core).openIfWindow(model);
+      model.addInstance(dx("KNEE", "P-KNEE", "2.25.knee"));
+      new PluginOpeningStrategy(core).openIfWindow(model);
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      View2dContainer container = (View2dContainer) core.getSelectedViewerPlugin();
+      assertEquals(2, container.getLayoutCount());
+      assertEquals("2.25.chest", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertEquals("2.25.knee", seriesUid(container.getLayoutViews().get(1).getSeries()));
+    } finally {
+      close(core, factory);
+      core.setApplicationWindow(null);
+      win.dispose();
     }
   }
 
@@ -61,18 +86,27 @@ class HangingProtocolOpenHaveTest {
       View2dContainer container = (View2dContainer) opened;
       assertEquals(1, container.getLayoutCount());
     } finally {
-      for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
-        core.closeViewerPlugin(plugin);
-      }
-      core.unregisterSeriesViewerFactory(factory);
+      close(core, factory);
     }
   }
 
-  static ImportedInstance dx(String seriesUid) {
+  static void close(UICore core, View2dFactory factory) {
+    for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
+      core.closeViewerPlugin(plugin);
+    }
+    core.unregisterSeriesViewerFactory(factory);
+  }
+
+  static String seriesUid(MediaSeries<?> series) {
+    Object v = series == null ? null : series.getTagValue(TagW.SeriesInstanceUID);
+    return v == null ? "" : v.toString();
+  }
+
+  static ImportedInstance dx(String name, String id, String seriesUid) {
     return new ImportedInstance(
-        "SYNTHETIC^DX",
-        "SYN-DX-1",
-        "2.25.dx.study",
+        "SYNTHETIC^" + name,
+        "SYN-" + id,
+        "2.25." + id + ".study",
         seriesUid,
         seriesUid + ".1",
         UID.DigitalXRayImageStorageForPresentation,

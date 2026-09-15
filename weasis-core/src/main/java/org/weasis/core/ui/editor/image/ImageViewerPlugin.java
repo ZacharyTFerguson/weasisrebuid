@@ -49,6 +49,11 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
     }
   }
 
+  /** True when hanging layout still has a clone or empty cell for another series. */
+  public boolean hasHangSlot() {
+    return false;
+  }
+
   public void resetDisplay() {}
 
   public void applyPreset(int index) {}

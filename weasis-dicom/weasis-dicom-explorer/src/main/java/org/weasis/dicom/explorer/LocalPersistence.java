@@ -13,6 +13,7 @@ package org.weasis.dicom.explorer;
 public class LocalPersistence {
 
   private static DicomModel model = new DicomModel();
+  private static PluginOpeningStrategy opening;
 
   private LocalPersistence() {}
 
@@ -23,7 +24,15 @@ public class LocalPersistence {
     return model;
   }
 
+  public static synchronized PluginOpeningStrategy openingStrategy() {
+    if (opening == null) {
+      opening = new PluginOpeningStrategy();
+    }
+    return opening;
+  }
+
   public static synchronized void reset() {
     model = new DicomModel();
+    opening = null;
   }
 }
