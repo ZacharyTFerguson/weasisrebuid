@@ -26,7 +26,6 @@ import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.gui.util.AbstractItemDialogPage;
-import org.weasis.core.api.service.UICore;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
 
 public class ImportDicomPage extends AbstractItemDialogPage implements ImportDicom {
@@ -120,10 +119,7 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
   }
 
   void openViewerIfPresent() {
-    if (model.getInstances().isEmpty() || UICore.getInstance().getApplicationWindow() == null) {
-      return;
-    }
-    new PluginOpeningStrategy().openModel(model);
+    new PluginOpeningStrategy().openIfWindow(model);
   }
 
   @Override

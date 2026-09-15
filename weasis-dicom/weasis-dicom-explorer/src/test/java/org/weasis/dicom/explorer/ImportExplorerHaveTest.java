@@ -130,6 +130,34 @@ class ImportExplorerHaveTest {
   }
 
   @Test
+  void gogoGetLocalPutsView2dContainerInWindowCenter(@TempDir Path dir) throws Exception {
+    File ct = dir.resolve("series.dcm").toFile();
+    LoadLocalDicomTest.writeCt(ct);
+    JFrame win = new JFrame();
+    UICore core = UICore.getInstance();
+    core.setApplicationWindow(win);
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      DicomExplorer explorer = new DicomExplorer(LocalPersistence.getDicomModel());
+      String out = new DicomCommands().get("-l", ct.getAbsolutePath());
+      assertTrue(out.contains("imported=1"));
+      assertEquals(1, explorer.patientPane().getSelectionManager().patientKeys().size());
+      Component center =
+          ((BorderLayout) win.getContentPane().getLayout()).getLayoutComponent(BorderLayout.CENTER);
+      assertInstanceOf(View2dContainer.class, center);
+      assertNotNull(((View2dContainer) center).getView2d().getDataset());
+    } finally {
+      for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
+        core.closeViewerPlugin(plugin);
+      }
+      core.unregisterSeriesViewerFactory(factory);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
   void seriesFilterHidesNonMatchingModality() {
     DicomModel model = new DicomModel();
     model.addInstance(

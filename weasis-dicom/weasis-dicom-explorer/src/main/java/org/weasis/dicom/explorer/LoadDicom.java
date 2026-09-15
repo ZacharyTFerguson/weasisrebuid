@@ -54,7 +54,7 @@ public class LoadDicom extends ExplorerTask<Boolean, String> {
       SkipUnsupportedSopNotifier skip,
       boolean recursive) {
     super("Loading DICOM", true);
-    this.model = model == null ? new DicomModel() : model;
+    this.model = model == null ? LocalPersistence.getDicomModel() : model;
     this.sources = files == null ? List.of() : List.copyOf(files);
     this.zipPassword = zipPassword;
     this.skip = skip;

@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import org.osgi.service.component.annotations.Component;
 import org.weasis.core.api.command.Option;
 import org.weasis.core.api.command.Options;
@@ -43,37 +44,48 @@ public class DicomCommands {
   public String get(String... args) {
     Option opt = Options.compile("l(local)w(wado)r(remote)z(zip)p(portable)i(iwado)").parse(args);
     List<String> lines = new ArrayList<>();
-    for (String local : opt.values("l")) {
-      if (local == null || local.isBlank()) {
-        continue;
-      }
-      try {
-        LoadLocalDicom.ImportResult result =
-            new LoadDicom(new DicomModel(), List.of(new File(local)), null, null).load();
-        lines.add("local " + local + " imported=" + result.imported().size());
-      } catch (IOException e) {
-        lines.add("local " + local + " error=" + e.getMessage());
-      }
-    }
-    for (String wado : opt.values("w")) {
-      lines.add(describeManifest(wado));
-    }
-    for (String remote : opt.values("r")) {
-      lines.add("remote " + remote);
-    }
-    for (String zip : opt.values("z")) {
-      lines.add("zip " + zip);
-    }
-    if (opt.isSet("p")) {
-      lines.add("portable");
-    }
-    for (String iwado : opt.values("i")) {
-      lines.add(describeManifest(iwado));
-    }
+    addLocalLoads(opt, lines);
+    addManifestAndRemote(opt, lines);
     if (lines.isEmpty()) {
       return "dicom:get -l PATH -w URI -r URI -z URI -p -i DATA";
     }
     return String.join("\n", lines);
+  }
+
+  void addLocalLoads(Option opt, List<String> lines) {
+    for (String local : opt.values("l")) {
+      if (local != null && !local.isBlank()) {
+        lines.add(loadLocal(local));
+      }
+    }
+  }
+
+  String loadLocal(String local) {
+    try {
+      DicomModel model = LocalPersistence.getDicomModel();
+      LoadLocalDicom.ImportResult result =
+          new LoadDicom(model, List.of(new File(local)), null, null).load();
+      new PluginOpeningStrategy().openIfWindow(model);
+      return "local " + local + " imported=" + result.imported().size();
+    } catch (IOException e) {
+      return "local " + local + " error=" + e.getMessage();
+    }
+  }
+
+  void addManifestAndRemote(Option opt, List<String> lines) {
+    addValues(opt, "w", spec -> lines.add(describeManifest(spec)));
+    addValues(opt, "r", remote -> lines.add("remote " + remote));
+    addValues(opt, "z", zip -> lines.add("zip " + zip));
+    if (opt.isSet("p")) {
+      lines.add("portable");
+    }
+    addValues(opt, "i", spec -> lines.add(describeManifest(spec)));
+  }
+
+  static void addValues(Option opt, String key, Consumer<String> sink) {
+    for (String value : opt.values(key)) {
+      sink.accept(value);
+    }
   }
 
   public String rs(String... args) {

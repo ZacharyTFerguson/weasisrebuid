@@ -16,6 +16,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.weasis.core.api.gui.util.GuiExecutor;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
@@ -160,6 +161,22 @@ public class PluginOpeningStrategy {
       }
     }
     return opened;
+  }
+
+  /** Opens series on the EDT when the live window exists (Gogo and File &gt; Import). */
+  public List<ViewerPlugin<?>> openIfWindow(DicomModel model) {
+    if (!canOpen(model)) {
+      return List.of();
+    }
+    List<ViewerPlugin<?>> opened = new ArrayList<>();
+    GuiExecutor.invokeAndWait(() -> opened.addAll(openModel(model)));
+    return opened;
+  }
+
+  boolean canOpen(DicomModel model) {
+    return model != null
+        && !model.getInstances().isEmpty()
+        && core.getApplicationWindow() != null;
   }
 
   public ViewerPlugin<?> open(DicomSeriesHandler.SeriesBucket bucket) {

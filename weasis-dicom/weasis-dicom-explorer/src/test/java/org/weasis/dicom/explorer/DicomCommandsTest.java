@@ -10,13 +10,23 @@
 package org.weasis.dicom.explorer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+import java.nio.file.Path;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 class DicomCommandsTest {
 
   private final DicomCommands commands = new DicomCommands();
+
+  @AfterEach
+  void resetSharedModel() {
+    LocalPersistence.reset();
+  }
 
   @Test
   void rsBuildsQidoUrl() {
@@ -38,6 +48,19 @@ class DicomCommandsTest {
         commands.get("-r", "https://example.invalid/a.dcm", "-w", "https://example.invalid/mf.xml");
     assertTrue(out.contains("remote https://example.invalid/a.dcm"));
     assertTrue(out.contains("manifest https://example.invalid/mf.xml"));
+  }
+
+  @Test
+  void getLocalLoadsSharedModel(@TempDir Path dir) throws Exception {
+    LocalPersistence.reset();
+    File ct = dir.resolve("ct.dcm").toFile();
+    LoadLocalDicomTest.writeCt(ct);
+    DicomExplorer explorer = new DicomExplorer(LocalPersistence.getDicomModel());
+    String out = commands.get("-l", ct.getAbsolutePath());
+    assertTrue(out.contains("imported=1"));
+    assertEquals(1, LocalPersistence.getDicomModel().getInstances().size());
+    assertEquals(1, explorer.patientPane().getSelectionManager().patientKeys().size());
+    assertFalse(explorer.studyPane().getSeriesPane().thumbnails().isEmpty());
   }
 
   @Test

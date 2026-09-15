@@ -23,6 +23,7 @@ import javax.swing.ListSelectionModel;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.util.GuiExecutor;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.explorer.main.DicomPaneManager;
@@ -51,11 +52,16 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
-    this.model = model == null ? new DicomModel() : model;
+    this.model = model == null ? LocalPersistence.getDicomModel() : model;
     this.panes = new DicomPaneManager(this.model);
     this.patientPane = panes.getPatientPane();
     this.studyPane = panes.getStudyPane();
     this.studyPane.getSeriesPane().setOnOpen(this::openSelected);
+    layoutChrome();
+    bindModel();
+  }
+
+  void layoutChrome() {
     JPanel hierarchy = new JPanel(new BorderLayout());
     hierarchy.add(patientPane, BorderLayout.NORTH);
     hierarchy.add(studyPane, BorderLayout.CENTER);
@@ -63,18 +69,24 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     add(new JScrollPane(list), BorderLayout.CENTER);
     add(DicomTaskManager.getInstance().getLoadingPanel(), BorderLayout.SOUTH);
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+  }
+
+  void bindModel() {
     list.addKeyListener(thumbs.keyAdapter());
-    list.addKeyListener(
-        new KeyAdapter() {
-          @Override
-          public void keyPressed(KeyEvent e) {
-            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-              openSelected();
-            }
-          }
-        });
-    this.model.addPropertyChangeListener(evt -> refresh());
+    list.addKeyListener(enterOpensSelected());
+    this.model.addPropertyChangeListener(evt -> GuiExecutor.invokeAndWait(this::refresh));
     refresh();
+  }
+
+  KeyAdapter enterOpensSelected() {
+    return new KeyAdapter() {
+      @Override
+      public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+          openSelected();
+        }
+      }
+    };
   }
 
   public PatientPane patientPane() {
