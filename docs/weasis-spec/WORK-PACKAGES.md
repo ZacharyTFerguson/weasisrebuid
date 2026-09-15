@@ -19,4 +19,4 @@
 | 14 | i18n fragments, ≥30 % lang pref, native zip | compressXZ without relying on Maven cache as the zip |
 | 15 | ViewerHub `/display`, dcm4chee IID | opens clone via `weasis://` |
 
-WP-0–4 Have is recorded in `docs/loops/TEAM-B-SCORE-wp0-4.md`. This branch adds Have tests for MX-14 (FoR vs manual), MPR/MIP, fusion `targetViews`, and special-SOP factories Active on `lb`. Docking Frames at start level 10, JOGL natives, headed §6 Pass, and remaining source-surface paths stay open. SCORE may only change Have boxes.
+WP-0–4 Have is recorded in `docs/loops/TEAM-B-SCORE-wp0-4.md`. This branch adds Have tests for MX-14 (FoR vs manual), MPR/MIP, fusion `targetViews`, special-SOP factories Active on `lb`, and WP-11 Q/R + DICOMweb + STOW + ISO + print. Docking Frames at start level 10, JOGL natives, headed §6 Pass, and remaining source-surface paths stay open. SCORE may only change Have boxes.

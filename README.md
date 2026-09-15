@@ -16,6 +16,7 @@ Spec lives in [`docs/weasis-spec/`](docs/weasis-spec/README.md), derived from pu
 - **WP-7 Have:** Orthogonal MPR + MIP None/Min/Mean/Max (`MipView.Type`). CPR sampler exists. `MprFactory` does not steal `image/dicom`.
 - **WP-8 Have:** `FusionController.targetViews` + SUVbw helper.
 - **WP-10 Have:** SR/AU/ECG/RT factories Active on `lb`.
+- **WP-11 Have:** QIDO URL + `application/dicom+json`, C-FIND identifier (`ISO_IR 192`), C-GET TCS map, STOW-RS multipart, ISO export, print options. MX-10/11 download caps unchanged (3 series / 4 images). No live PACS in unit tests.
 - Remaining ~326 Weasis 4.7.3 main Java paths are listed in `docs/weasis-spec/fixtures/source-surface-gap.txt`. Matching a path is not feature-complete.
 
 Spec: `docs/weasis-spec/` (built from weasis.org 4.7 docs + v4.7.3 public layout). Oracle: `scripts/source-surface-report.py`.
