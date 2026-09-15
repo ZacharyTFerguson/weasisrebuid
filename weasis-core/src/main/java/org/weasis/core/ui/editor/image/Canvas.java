@@ -9,4 +9,34 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class Canvas {}
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
+
+/** Geometric image canvas: source pixels plus zoom, pan, rotation, and view↔image mapping. */
+public interface Canvas {
+
+  BufferedImage getSourceImage();
+
+  void setSourceImage(BufferedImage source);
+
+  double getZoom();
+
+  void setZoom(double zoom);
+
+  double getPanX();
+
+  double getPanY();
+
+  void setPan(double x, double y);
+
+  double getRotation();
+
+  void setRotation(double rotation);
+
+  Point2D.Double viewToImage(double viewX, double viewY);
+
+  Point2D.Double imageToView(double imageX, double imageY);
+
+  AffineTransform getAffineTransform();
+}

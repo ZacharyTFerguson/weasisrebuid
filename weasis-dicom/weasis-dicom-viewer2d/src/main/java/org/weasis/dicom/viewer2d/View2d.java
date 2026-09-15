@@ -149,6 +149,12 @@ public class View2d extends DefaultView2d<MediaElement> {
   }
 
   @Override
+  public void setSegmentationsVisible(boolean visible) {
+    super.setSegmentationsVisible(visible);
+    segVisibility.setVisible(visible);
+  }
+
+  @Override
   public void toggleSegmentations() {
     super.toggleSegmentations();
     segVisibility.setVisible(isSegmentationsVisible());

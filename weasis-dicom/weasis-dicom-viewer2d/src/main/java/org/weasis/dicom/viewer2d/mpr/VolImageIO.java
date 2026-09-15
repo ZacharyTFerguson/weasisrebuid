@@ -39,6 +39,15 @@ public class VolImageIO {
     this.thickness = Math.max(1, thickness);
   }
 
+  public VolImageIO(BuildContext context) {
+    this(
+        context == null ? null : context.getVolume(),
+        context == null ? MprAxis.AXIAL : context.getAxis(),
+        context == null ? 0 : context.getIndex(),
+        context == null ? MipView.Type.NONE : context.getMip(),
+        context == null ? 1 : context.getThickness());
+  }
+
   public VolImageIO(Volume volume, AxesControl axes, int width, int height) {
     this.volume = volume;
     this.oblique = axes;

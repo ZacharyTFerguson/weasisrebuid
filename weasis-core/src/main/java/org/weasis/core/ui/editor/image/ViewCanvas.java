@@ -9,4 +9,34 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class ViewCanvas {}
+import java.awt.Graphics2D;
+import java.util.List;
+import org.weasis.core.api.image.OpManager;
+import org.weasis.core.api.media.data.MediaElement;
+import org.weasis.core.api.media.data.MediaSeries;
+import org.weasis.core.ui.model.graphic.Graphic;
+
+/**
+ * Series-bound 2D canvas used by DICOM {@code View2d} and MPR planes. Graphics and SEG overlay
+ * visibility live here so tools can attach without knowing the Swing subclass.
+ */
+public interface ViewCanvas extends Canvas {
+
+  MediaSeries<? extends MediaElement> getSeries();
+
+  ImageViewerEventManager getEventManager();
+
+  OpManager getDisplayOpManager();
+
+  List<Graphic> getGraphicList();
+
+  void addGraphic(Graphic graphic);
+
+  void removeGraphic(Graphic graphic);
+
+  boolean isSegmentationsVisible();
+
+  void setSegmentationsVisible(boolean visible);
+
+  void paintView(Graphics2D g, boolean overlays);
+}

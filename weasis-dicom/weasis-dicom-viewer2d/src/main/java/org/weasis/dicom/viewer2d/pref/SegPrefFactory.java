@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.viewer2d.pref;
 
-public class SegPrefFactory {}
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.PreferencesPageFactory;
+import org.weasis.core.api.gui.util.AbstractItemDialogPage;
+import org.weasis.core.ui.pref.AbstractPreferencesPageFactory;
+
+@Component(service = PreferencesPageFactory.class)
+public class SegPrefFactory extends AbstractPreferencesPageFactory {
+
+  @Override
+  public AbstractItemDialogPage createInstance(Hashtable<String, Object> properties) {
+    return new SegPrefView();
+  }
+
+  @Override
+  public boolean isComponentCreatedByThisFactory(Insertable component) {
+    return component instanceof SegPrefView;
+  }
+}

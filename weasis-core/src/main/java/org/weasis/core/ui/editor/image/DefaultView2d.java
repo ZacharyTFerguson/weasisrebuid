@@ -53,7 +53,7 @@ import org.weasis.core.ui.util.PrintOptions;
 /**
  * Shared 2D canvas. Downstream DICOM {@code View2d} binds pixels; affine (zoom/rotation) is last.
  */
-public class DefaultView2d<E extends MediaElement> extends JPanel {
+public class DefaultView2d<E extends MediaElement> extends JPanel implements ViewCanvas {
 
   public static final double ZOOM_BEST_FIT = AffineTransformOp.ZOOM_BEST_FIT;
   public static final double ZOOM_REAL_SIZE = AffineTransformOp.ZOOM_REAL_SIZE;
@@ -500,11 +500,17 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   }
 
   public void toggleSegmentations() {
-    segmentationsVisible = !segmentationsVisible;
+    setSegmentationsVisible(!segmentationsVisible);
   }
 
+  @Override
   public boolean isSegmentationsVisible() {
     return segmentationsVisible;
+  }
+
+  @Override
+  public void setSegmentationsVisible(boolean visible) {
+    this.segmentationsVisible = visible;
   }
 
   public void applyPreset(int index) {
@@ -828,6 +834,14 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     Point2D.Double out = new Point2D.Double();
     imageTransform(getWidth(), getHeight()).transform(new Point2D.Double(imageX, imageY), out);
     return out;
+  }
+
+  @Override
+  public AffineTransform getAffineTransform() {
+    if (source == null) {
+      return new AffineTransform();
+    }
+    return imageTransform(Math.max(1, getWidth()), Math.max(1, getHeight()));
   }
 
   AffineTransform imageTransform(int w, int h) {
