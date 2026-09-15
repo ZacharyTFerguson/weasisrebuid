@@ -77,11 +77,24 @@ public class MprView extends View2d {
     setPan(0, 0);
   }
 
+  public SplatContext splatContext(Volume volume) {
+    return new SplatContext(volume, axis, sliceIndex, mip.getType(), mip.getThickness());
+  }
+
+  public CrossLineGraphic[] buildCrossLines() {
+    BufferedImage src = getSourceImage();
+    int w = src == null ? 1 : Math.max(1, src.getWidth());
+    int h = src == null ? 1 : Math.max(1, src.getHeight());
+    double cx = hasCrosshair() ? getCrosshairX() : (w - 1) / 2.0;
+    double cy = hasCrosshair() ? getCrosshairY() : (h - 1) / 2.0;
+    return CrossLineGraphic.forView(axis, cx, cy, w, h, mip.getThickness());
+  }
+
   public double[][] rebuild(Volume volume) {
-    return new VolImageIO(volume, axis, sliceIndex, mip.getType(), mip.getThickness()).samples();
+    return splatContext(volume).samples();
   }
 
   public BufferedImage rebuildImage(Volume volume) {
-    return new VolImageIO(volume, axis, sliceIndex, mip.getType(), mip.getThickness()).getImage();
+    return splatContext(volume).toVolImageIO().getImage();
   }
 }

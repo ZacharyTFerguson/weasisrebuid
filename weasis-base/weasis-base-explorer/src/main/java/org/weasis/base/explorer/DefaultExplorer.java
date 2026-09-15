@@ -10,6 +10,7 @@
 package org.weasis.base.explorer;
 
 import java.beans.PropertyChangeListener;
+import org.weasis.base.explorer.list.impl.JIThumbnailListPane;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.ObservableEvent;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
@@ -21,6 +22,8 @@ import org.weasis.core.ui.docking.PluginTool;
 public class DefaultExplorer extends PluginTool implements DataExplorerView {
 
   public static final String NAME = "Media Explorer";
+
+  private final JIThumbnailListPane thumbnails = new JIThumbnailListPane();
 
   private final DataExplorerModel model =
       new DataExplorerModel() {
@@ -51,6 +54,10 @@ public class DefaultExplorer extends PluginTool implements DataExplorerView {
   @Override
   public DataExplorerModel getDataExplorerModel() {
     return model;
+  }
+
+  public JIThumbnailListPane thumbnailPane() {
+    return thumbnails;
   }
 
   @Override

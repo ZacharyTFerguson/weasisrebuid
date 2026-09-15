@@ -18,6 +18,8 @@ import javax.swing.JPanel;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.editor.image.ViewCanvas;
 import org.weasis.core.ui.model.graphic.imp.seg.SegRegion;
+import org.weasis.dicom.codec.seg.MaskFrames;
+import org.weasis.dicom.viewer2d.SegRegionLocator;
 import org.weasis.dicom.viewer2d.View2d;
 
 /** Dockable SEG overlay list. Alt+S on the bound view still toggles global visibility. */
@@ -114,6 +116,20 @@ public class SegmentationTool extends JPanel implements Insertable {
       }
     }
     return out;
+  }
+
+  public SegRegion locate(MaskFrames frames, int frameIndex, int x, int y) {
+    if (!isOverlayVisible()) {
+      return null;
+    }
+    return new SegRegionLocator().locate(frames, frameIndex, x, y, regions);
+  }
+
+  public SegRegion locateOnView(int x, int y) {
+    if (!isOverlayVisible()) {
+      return null;
+    }
+    return new SegRegionLocator().locateRegion(view, x, y);
   }
 
   @Override
