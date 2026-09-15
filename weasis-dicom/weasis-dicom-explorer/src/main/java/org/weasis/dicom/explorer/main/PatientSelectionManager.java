@@ -121,8 +121,7 @@ public class PatientSelectionManager {
     if (selectedPatientKey == null) {
       return model.getInstances();
     }
-    List<ImportedInstance> ofPatient =
-        model.patients().getOrDefault(selectedPatientKey, List.of());
+    List<ImportedInstance> ofPatient = model.patients().getOrDefault(selectedPatientKey, List.of());
     if (selectedStudyUid == null) {
       return List.copyOf(ofPatient);
     }

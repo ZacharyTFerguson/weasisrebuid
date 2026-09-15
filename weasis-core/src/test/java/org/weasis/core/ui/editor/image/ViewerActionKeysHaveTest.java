@@ -113,8 +113,7 @@ class ViewerActionKeysHaveTest {
     view.setPan(0, 0);
     view.getEventManager().mousePressed(mouse(view, 10, 10, 1, false));
     view.getEventManager()
-        .mouseDragged(
-            drag(view, 20, 10, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
+        .mouseDragged(drag(view, 20, 10, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK));
     assertEquals(40.0, view.getPanX(), 1e-9);
     view.getMouseActions().setLeft(MouseActions.NONE);
     view.setPan(0, 0);

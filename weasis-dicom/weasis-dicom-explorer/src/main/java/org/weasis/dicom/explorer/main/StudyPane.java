@@ -74,8 +74,7 @@ public class StudyPane extends JPanel {
   void refreshSeries() {
     List<String> labels = new ArrayList<>();
     for (ImportedInstance inst : DicomSorter.sortSeries(selection.selectedInstances())) {
-      labels.add(
-          inst.modality() + " #" + inst.seriesNumber() + " " + inst.seriesDescription());
+      labels.add(inst.modality() + " #" + inst.seriesNumber() + " " + inst.seriesDescription());
     }
     seriesPane.getSelectionModel().setItems(labels);
   }

@@ -37,83 +37,65 @@ class MprShortcutHaveTest {
     assertEquals(2, axial.getCrosshairX());
     assertEquals(2, axial.getCrosshairY());
     assertEquals(0, coronal.getCrosshairX());
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_X,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_X, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertEquals(2, coronal.getCrosshairX());
     assertTrue(axial.isCrosshairCenterVisible());
     axial.getEventManager().keyPressed(key(axial, KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK));
     assertFalse(axial.isCrosshairCenterVisible());
     assertTrue(coronal.isCrosshairCenterVisible());
     assertFalse(axial.cineListener().isCineRunning());
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_C,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertTrue(axial.isCrosshairCenterVisible());
     assertTrue(coronal.isCrosshairCenterVisible());
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_C,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_C, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertFalse(axial.isCrosshairCenterVisible());
     assertFalse(coronal.isCrosshairCenterVisible());
     assertTrue(axial.isLayerVisible(LayerType.CROSSLINES));
     axial.getEventManager().keyPressed(key(axial, KeyEvent.VK_V, InputEvent.ALT_DOWN_MASK));
     assertFalse(axial.isLayerVisible(LayerType.CROSSLINES));
     assertTrue(coronal.isLayerVisible(LayerType.CROSSLINES));
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_V,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_V, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertTrue(axial.isLayerVisible(LayerType.CROSSLINES));
     assertTrue(coronal.isLayerVisible(LayerType.CROSSLINES));
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_V,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_V, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertFalse(axial.isLayerVisible(LayerType.CROSSLINES));
     assertFalse(coronal.isLayerVisible(LayerType.CROSSLINES));
     assertEquals(MipView.Type.NONE, axial.getMip().getType());
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_B,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_B, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertEquals(MipView.Type.MIN, axial.getMip().getType());
     assertEquals(MipView.Type.MIN, coronal.getMip().getType());
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_B,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_B, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertEquals(MipView.Type.MEAN, axial.getMip().getType());
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_B,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_B, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertEquals(MipView.Type.MAX, axial.getMip().getType());
-    axial.getEventManager()
+    axial
+        .getEventManager()
         .keyPressed(
-            key(
-                axial,
-                KeyEvent.VK_B,
-                InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
+            key(axial, KeyEvent.VK_B, InputEvent.ALT_DOWN_MASK | InputEvent.CTRL_DOWN_MASK));
     assertEquals(MipView.Type.NONE, axial.getMip().getType());
   }
 
