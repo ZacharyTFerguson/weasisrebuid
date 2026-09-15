@@ -41,6 +41,7 @@ class InfoLayerHaveTest {
   @Test
   void displayToolAppliesVisibilityAndImageToolSummarizes() {
     View2d view = new View2d();
+    assertTrue(view.getInfoLayer().overlayText(view).contains("W:" + (int) view.getWindow()));
     DisplayTool display = new DisplayTool();
     assertEquals(Insertable.Type.TOOL, display.getType());
     display.bind(view.getInfoLayer());

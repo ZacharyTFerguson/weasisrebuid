@@ -75,6 +75,29 @@ class View2dPresetSegHaveTest {
   }
 
   @Test
+  void fullRangeSingleVoiKeyZeroHalvesOverlayWindow() {
+    View2d view = new View2d();
+    view.load(dxFullRangeVoi());
+    String loaded = view.getInfoLayer().overlayText(view);
+    assertTrue(loaded.contains("W:65535"), loaded);
+    assertEquals("W:" + (int) view.getWindow() + " L:" + (int) view.getLevel(), wlOnly(loaded));
+    view.applyPreset(0);
+    String key0 = view.getInfoLayer().overlayText(view);
+    assertTrue(key0.contains("W:32767"), key0);
+    assertEquals((int) view.getWindow(), 32767);
+    assertEquals(key0, view.getInfoLayer().overlayText(view));
+    view.applyPreset(1);
+    String key1 = view.getInfoLayer().overlayText(view);
+    assertTrue(key1.contains("W:65535"), key1);
+    assertNotEquals(key0, key1);
+  }
+
+  static String wlOnly(String overlay) {
+    int w = overlay.indexOf("W:");
+    return w < 0 ? overlay : overlay.substring(w);
+  }
+
+  @Test
   void singleWindowKeyZeroUsesDataRangeAndOneRestoresDataset() {
     View2d view = new View2d();
     view.load(dxWithSingleVoi());
@@ -212,6 +235,14 @@ class View2dPresetSegHaveTest {
     dcm.setDouble(Tag.WindowCenter, VR.DS, 40);
     dcm.setDouble(Tag.WindowWidth, VR.DS, 80);
     dcm.setInt(Tag.PixelData, VR.OW, 0, 50, 100, 200);
+    return dcm;
+  }
+
+  static Attributes dxFullRangeVoi() {
+    Attributes dcm = dxDxBase();
+    dcm.setDouble(Tag.WindowCenter, VR.DS, 32768);
+    dcm.setDouble(Tag.WindowWidth, VR.DS, 65535);
+    dcm.setInt(Tag.PixelData, VR.OW, 0, 65535, 1, 2);
     return dcm;
   }
 

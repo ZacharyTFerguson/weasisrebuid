@@ -169,17 +169,21 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (dataRangeWl == null) {
       return fileWl;
     }
-    if (presets.isEmpty() || !sameOverlay(dataRangeWl, fileWl)) {
+    if (presets.isEmpty() || !sameOverlayWindow(dataRangeWl, fileWl)) {
       return dataRangeWl;
     }
     return halfWindow(dataRangeWl);
   }
 
-  static boolean sameOverlay(WindLevelParameters a, WindLevelParameters b) {
+  static boolean sameOverlayWindow(WindLevelParameters a, WindLevelParameters b) {
     if (a == null || b == null) {
       return false;
     }
-    return (int) a.getWindow() == (int) b.getWindow() && (int) a.getLevel() == (int) b.getLevel();
+    return overlayWindow(a) == overlayWindow(b);
+  }
+
+  static int overlayWindow(WindLevelParameters range) {
+    return (int) range.getWindow();
   }
 
   static WindLevelParameters halfWindow(WindLevelParameters range) {

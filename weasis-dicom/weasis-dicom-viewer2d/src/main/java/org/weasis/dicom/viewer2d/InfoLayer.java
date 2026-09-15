@@ -11,7 +11,6 @@ package org.weasis.dicom.viewer2d;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 import org.weasis.core.ui.model.layer.LayerAnnotation;
@@ -41,15 +40,21 @@ public class InfoLayer extends AbstractInfoLayer {
     if (view == null) {
       return overlayText("", "", 0, 0);
     }
+    return overlayText(patientName(view), modality(view), view.getWindow(), view.getLevel());
+  }
+
+  static String patientName(View2d view) {
     if (view.getDataset() == null) {
-      return overlayText("", "", view.getWindow(), view.getLevel());
+      return "";
     }
-    Attributes dcm = view.getDataset();
-    return overlayText(
-        dcm.getString(Tag.PatientName, ""),
-        dcm.getString(Tag.Modality, ""),
-        view.getWindow(),
-        view.getLevel());
+    return view.getDataset().getString(Tag.PatientName, "");
+  }
+
+  static String modality(View2d view) {
+    if (view.getDataset() == null) {
+      return "";
+    }
+    return view.getDataset().getString(Tag.Modality, "");
   }
 
   public void paint(Graphics2D g, View2d view) {
