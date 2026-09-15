@@ -186,6 +186,7 @@ public class WeasisWin extends JFrame {
     c.setTransferHandler(null);
     c.setDropTarget(null);
     c.setTransferHandler(keep instanceof ViewTransferHandler ? keep : new ViewTransferHandler());
+    ViewTransferHandler.armDrop(c);
   }
 
   static DefaultSingleCDockable uncloseableDock(String id, String title, Component content) {
@@ -261,6 +262,7 @@ public class WeasisWin extends JFrame {
     plugin.putClientProperty("dockingBound", Boolean.TRUE);
     plugin.addPropertyChangeListener("dockingState", e -> applyDockingState(plugin));
     plugin.addPropertyChangeListener("closed", e -> removeSeriesDock(plugin));
+    bindSeriesDrop();
   }
 
   DefaultSingleCDockable ensureSeriesDock(ViewerPlugin<?> plugin) {

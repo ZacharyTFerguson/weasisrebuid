@@ -14,6 +14,10 @@ import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetAdapter;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
 import java.io.File;
 import java.util.List;
 import javax.swing.JComponent;
@@ -101,7 +105,7 @@ public class ViewTransferHandler extends TransferHandler {
 
   @Override
   public boolean importData(JComponent comp, Transferable t) {
-    return importTransferable(comp, t);
+    return importAt(comp, null, t);
   }
 
   @Override
@@ -109,20 +113,29 @@ public class ViewTransferHandler extends TransferHandler {
     if (support == null || !canImport(support)) {
       return false;
     }
-    Component onto = cellOf(support);
-    return importTransferable(onto, support.getTransferable());
+    Point p = support.isDrop() ? support.getDropLocation().getDropPoint() : null;
+    return importAt(support.getComponent(), p, support.getTransferable());
   }
 
-  Component cellOf(TransferSupport support) {
-    Component host = support.getComponent();
-    JComponent view = viewUnder(host);
-    if (view != null) {
-      return view;
+  /** Headed glass / CContentArea drops: hit-test the View2d under {@code drop}, then hangCell. */
+  public boolean importAt(Component host, Point drop, Transferable t) {
+    MediaSeries<?> series = dragging != null ? dragging : seriesFrom(t);
+    Component onto = cellAt(host, drop);
+    if (series != null && onto instanceof JComponent jc) {
+      return dropSeries(jc, series);
     }
-    if (!support.isDrop()) {
-      return host;
+    return importFilesFrom(t) > 0;
+  }
+
+  Component cellAt(Component host, Point p) {
+    if (host == null) {
+      return null;
     }
-    return viewAt(host, support.getDropLocation().getDropPoint());
+    if (p == null) {
+      JComponent view = viewUnder(host);
+      return view != null ? view : host;
+    }
+    return viewAt(host, p);
   }
 
   static JComponent viewAt(Component host, Point p) {
@@ -140,9 +153,18 @@ public class ViewTransferHandler extends TransferHandler {
     if (plugin == null) {
       return asJc(host);
     }
-    Point inPlugin = SwingUtilities.convertPoint(host, p, plugin);
-    JComponent cell = plugin.dropCellAt(inPlugin);
+    JComponent cell = plugin.dropCellAt(pointIn(host, p, plugin));
     return cell != null ? cell : plugin;
+  }
+
+  static Point pointIn(Component host, Point p, Component plugin) {
+    if (host.isShowing() && plugin.isShowing()) {
+      Point screen = new Point(p);
+      SwingUtilities.convertPointToScreen(screen, host);
+      SwingUtilities.convertPointFromScreen(screen, plugin);
+      return screen;
+    }
+    return SwingUtilities.convertPoint(host, p, plugin);
   }
 
   static JComponent asJc(Component c) {
@@ -159,15 +181,14 @@ public class ViewTransferHandler extends TransferHandler {
     return null;
   }
 
+  public static void armDrop(JComponent host) {
+    if (host != null) {
+      host.setDropTarget(new DropTarget(host, COPY, new SeriesDrop(host), true));
+    }
+  }
+
   boolean importTransferable(Component comp, Transferable t) {
-    MediaSeries<?> series = seriesFrom(t);
-    if (series == null) {
-      series = dragging;
-    }
-    if (series != null && comp instanceof JComponent jc) {
-      return dropSeries(jc, series);
-    }
-    return importFilesFrom(t) > 0;
+    return importAt(comp, null, t);
   }
 
   public boolean dropSeries(JComponent target, MediaSeries<?> series) {
@@ -187,26 +208,14 @@ public class ViewTransferHandler extends TransferHandler {
   }
 
   static ImageViewerPlugin<?> pluginOf(JComponent comp) {
-    if (comp instanceof ImageViewerPlugin<?> plugin) {
-      return plugin;
-    }
-    ImageViewerPlugin<?> fromProp = pluginProperty(comp);
-    if (fromProp != null) {
-      return fromProp;
-    }
-    return UICore.getInstance().getFocusedImagePlugin();
-  }
-
-  static ImageViewerPlugin<?> pluginProperty(JComponent comp) {
     Component c = comp;
-    while (c instanceof JComponent jc) {
-      Object host = jc.getClientProperty(ImageViewerPlugin.class);
-      if (host instanceof ImageViewerPlugin<?> plugin) {
+    while (c != null) {
+      if (c instanceof ImageViewerPlugin<?> plugin) {
         return plugin;
       }
-      c = jc.getParent();
+      c = c.getParent();
     }
-    return null;
+    return UICore.getInstance().getFocusedImagePlugin();
   }
 
   @SuppressWarnings({"unchecked", "rawtypes"})
@@ -251,6 +260,39 @@ public class ViewTransferHandler extends TransferHandler {
 
   public MediaSeries<?> lastSeries() {
     return lastSeries;
+  }
+
+  static final class SeriesDrop extends DropTargetAdapter {
+    private final JComponent host;
+
+    SeriesDrop(JComponent host) {
+      this.host = host;
+    }
+
+    @Override
+    public void dragEnter(DropTargetDragEvent e) {
+      acceptIfDragging(e);
+    }
+
+    @Override
+    public void dragOver(DropTargetDragEvent e) {
+      acceptIfDragging(e);
+    }
+
+    @Override
+    public void drop(DropTargetDropEvent e) {
+      e.acceptDrop(COPY);
+      boolean ok = new ViewTransferHandler().importAt(host, e.getLocation(), e.getTransferable());
+      e.dropComplete(ok);
+    }
+
+    static void acceptIfDragging(DropTargetDragEvent e) {
+      if (dragging != null) {
+        e.acceptDrag(COPY);
+      } else {
+        e.rejectDrag();
+      }
+    }
   }
 
   static final class SeriesSelection implements Transferable {

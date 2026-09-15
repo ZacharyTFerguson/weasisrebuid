@@ -80,6 +80,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     c.setTransferHandler(seriesDrop);
     c.putClientProperty(ImageViewerPlugin.class, this);
     c.putClientProperty(View2dContainer.class, this);
+    ViewTransferHandler.armDrop(c);
   }
 
   void bindToolBars() {

@@ -24,6 +24,7 @@ import java.awt.dnd.DragSource;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import org.dcm4che3.data.UID;
@@ -119,6 +120,84 @@ class ExplorerSeriesDnDHaveTest {
     } finally {
       HangingProtocolOpenHaveTest.close(core, factory);
     }
+  }
+
+  @Test
+  void glassHostDropFills2x2BottomLeftWithoutNewTab() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      JPanel glass = hostOver(container);
+      View2d bottomLeft = container.getLayoutViews().get(2);
+      assertNull(bottomLeft.getSeries());
+
+      SeriesPane pane = new SeriesPane();
+      pane.showThumbnails(List.of(dx("DX", "1", "2.25.dx.lat")));
+      SeriesThumbnail thumb = pane.thumbnails().getFirst();
+      Transferable transferable = new ViewTransferHandler().seriesTransferable(thumb.getSeries());
+      ViewTransferHandler drop = new ViewTransferHandler();
+      ViewTransferHandler.beginDrag(thumb.getSeries());
+      try {
+        assertTrue(drop.importAt(glass, overCell(container, glass, 2), transferable));
+      } finally {
+        ViewTransferHandler.endDrag();
+      }
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertNull(container.getLayoutViews().get(1).getSeries());
+      assertEquals("2.25.dx.lat", seriesUid(bottomLeft.getSeries()));
+      assertNull(container.getLayoutViews().get(3).getSeries());
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  @Test
+  void alreadyHungSeriesFillsEmptyBottomLeftCell() {
+    UICore core = new UICore();
+    View2dFactory factory = new View2dFactory();
+    core.registerSeriesViewerFactory(factory);
+    try {
+      PluginOpeningStrategy opening = new PluginOpeningStrategy(core);
+      View2dContainer container = (View2dContainer) opening.open(dx("DX", "1", "2.25.dx.pa"));
+      container.setLayoutCount(4);
+      layoutPlugin(container);
+      JPanel glass = hostOver(container);
+      MediaSeries<?> chest = container.getLayoutViews().get(0).getSeries();
+      View2d bottomLeft = container.getLayoutViews().get(2);
+      assertNull(bottomLeft.getSeries());
+      Transferable transferable = new ViewTransferHandler().seriesTransferable(chest);
+      ViewTransferHandler drop = new ViewTransferHandler();
+      ViewTransferHandler.beginDrag(chest);
+      try {
+        assertTrue(drop.importAt(glass, overCell(container, glass, 2), transferable));
+      } finally {
+        ViewTransferHandler.endDrag();
+      }
+      assertEquals(1, core.getOpenViewerPlugins().size());
+      assertEquals("2.25.dx.pa", seriesUid(container.getLayoutViews().get(0).getSeries()));
+      assertEquals("2.25.dx.pa", seriesUid(bottomLeft.getSeries()));
+      assertNull(container.getLayoutViews().get(1).getSeries());
+    } finally {
+      HangingProtocolOpenHaveTest.close(core, factory);
+    }
+  }
+
+  static JPanel hostOver(View2dContainer container) {
+    JPanel glass = new JPanel(null);
+    container.setBounds(0, 0, 480, 400);
+    glass.add(container);
+    glass.setSize(480, 400);
+    return glass;
+  }
+
+  static Point overCell(View2dContainer container, JPanel glass, int index) {
+    return SwingUtilities.convertPoint(container, cellCenter(container, index), glass);
   }
 
   static void layoutPlugin(View2dContainer container) {
