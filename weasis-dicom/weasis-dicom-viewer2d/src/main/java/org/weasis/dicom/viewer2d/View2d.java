@@ -13,6 +13,10 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -39,25 +43,96 @@ public class View2d extends DefaultView2d<MediaElement> {
   private double window = 400;
   private double level = 40;
   private File file;
+  private List<Attributes> stackDatasets = List.of();
+  private List<File> stackFiles = List.of();
+
+  static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
   public View2d() {
     super();
   }
 
   public void load(File dicom) throws Exception {
-    this.file = dicom;
-    DicomMediaIO io = DicomMediaIO.open(dicom);
-    load(io.getDataset());
+    loadStack(List.of(dicom));
+  }
+
+  public void loadStack(List<File> files) throws IOException {
+    if (files == null || files.isEmpty()) {
+      throw new IllegalArgumentException("empty stack");
+    }
+    List<StackEntry> entries = new ArrayList<>();
+    for (File f : files) {
+      DicomMediaIO io = DicomMediaIO.open(f);
+      Attributes dcm = io.getDataset();
+      int frames = dcm.getInt(Tag.NumberOfFrames, 1);
+      if (frames > 1) {
+        setGeometryWarning(MULTI_FRAME_REFUSED + " (NumberOfFrames=" + frames + ")");
+        throw new IllegalArgumentException(MULTI_FRAME_REFUSED);
+      }
+      entries.add(new StackEntry(f, dcm));
+    }
+    String seriesUid = entries.getFirst().dataset.getString(Tag.SeriesInstanceUID, "");
+    for (StackEntry entry : entries) {
+      if (!seriesUid.equals(entry.dataset.getString(Tag.SeriesInstanceUID, ""))) {
+        throw new IllegalArgumentException("mixed SeriesInstanceUID in stack");
+      }
+    }
+    entries.sort(
+        Comparator.comparingInt((StackEntry e) -> e.dataset.getInt(Tag.InstanceNumber, 0))
+            .thenComparing(e -> e.file.getName()));
+    List<Attributes> datasets = new ArrayList<>();
+    List<File> stack = new ArrayList<>();
+    for (StackEntry entry : entries) {
+      datasets.add(entry.dataset);
+      stack.add(entry.file);
+    }
+    this.stackDatasets = List.copyOf(datasets);
+    this.stackFiles = List.copyOf(stack);
+    showStackFrame(0);
   }
 
   public void load(Attributes dataset) {
     this.dataset = Objects.requireNonNull(dataset, "dataset");
-    fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
+    this.stackDatasets = List.of(this.dataset);
+    this.stackFiles = file != null ? List.of(file) : List.of();
+    bindDataset(this.dataset);
+  }
+
+  private void bindDataset(Attributes active) {
+    fileWl = DicomMediaUtils.windowLevel(active, 400, 40);
     this.window = fileWl.getWindow();
     this.level = fileWl.getLevel();
     applyDatasetFlags();
     render();
   }
+
+  private void showStackFrame(int requestedIndex) {
+    if (stackDatasets.isEmpty()) {
+      return;
+    }
+    int clamped = Math.max(0, Math.min(requestedIndex, stackDatasets.size() - 1));
+    super.setFrameIndex(clamped);
+    this.dataset = stackDatasets.get(clamped);
+    if (!stackFiles.isEmpty()) {
+      this.file = stackFiles.get(clamped);
+    }
+    bindDataset(this.dataset);
+  }
+
+  public int getStackSize() {
+    return stackDatasets.size();
+  }
+
+  @Override
+  public void setFrameIndex(int frameIndex) {
+    if (stackDatasets.isEmpty()) {
+      super.setFrameIndex(frameIndex);
+      return;
+    }
+    showStackFrame(frameIndex);
+  }
+
+  private record StackEntry(File file, Attributes dataset) {}
 
   public Attributes getDataset() {
     return dataset;
