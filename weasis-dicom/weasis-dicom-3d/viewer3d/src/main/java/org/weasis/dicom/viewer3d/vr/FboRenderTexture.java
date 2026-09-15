@@ -9,4 +9,34 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class FboRenderTexture {}
+public class FboRenderTexture {
+
+  private int width;
+  private int height;
+  private boolean bound;
+
+  public void resize(int width, int height) {
+    this.width = width;
+    this.height = height;
+  }
+
+  public void bind() {
+    bound = true;
+  }
+
+  public void unbind() {
+    bound = false;
+  }
+
+  public boolean isBound() {
+    return bound;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+}

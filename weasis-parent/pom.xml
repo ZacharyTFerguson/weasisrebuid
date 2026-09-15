@@ -39,6 +39,14 @@
         <enabled>false</enabled>
       </snapshots>
     </repository>
+    <repository>
+      <id>jogamp</id>
+      <name>JogAmp Maven Repository</name>
+      <url>https://jogamp.org/deployment/maven/</url>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
   </repositories>
 
   <properties>

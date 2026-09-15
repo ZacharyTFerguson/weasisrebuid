@@ -9,4 +9,11 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class DicomVolTextureFactory {}
+public class DicomVolTextureFactory {
+
+  public DicomVolTexture create(int width, int height, int depth) {
+    DicomVolTexture texture = new DicomVolTexture(new TextureData(width, height, depth));
+    texture.setModality("CT");
+    return texture;
+  }
+}

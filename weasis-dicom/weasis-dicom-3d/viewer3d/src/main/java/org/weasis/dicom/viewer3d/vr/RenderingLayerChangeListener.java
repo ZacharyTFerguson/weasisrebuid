@@ -9,4 +9,6 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public interface RenderingLayerChangeListener {}
+public interface RenderingLayerChangeListener {
+  void renderingLayerChanged(RenderingLayer layer);
+}

@@ -9,4 +9,26 @@
  */
 package org.weasis.dicom.viewer3d.geometry;
 
-public class ViewData {}
+public final class ViewData {
+
+  private CameraView cameraView = CameraView.axial();
+  private double zoom = 1.0;
+
+  public CameraView getCameraView() {
+    return cameraView;
+  }
+
+  public void setCameraView(CameraView cameraView) {
+    if (cameraView != null) {
+      this.cameraView = cameraView;
+    }
+  }
+
+  public double getZoom() {
+    return zoom;
+  }
+
+  public void setZoom(double zoom) {
+    this.zoom = Math.max(0.01, zoom);
+  }
+}

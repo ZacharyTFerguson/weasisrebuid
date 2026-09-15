@@ -9,4 +9,10 @@
  */
 package org.weasis.dicom.viewer3d.geometry;
 
-public class View {}
+/** Named camera orientation for the volume canvas. */
+public enum View {
+  AXIAL,
+  CORONAL,
+  SAGITTAL,
+  OBLIQUE
+}

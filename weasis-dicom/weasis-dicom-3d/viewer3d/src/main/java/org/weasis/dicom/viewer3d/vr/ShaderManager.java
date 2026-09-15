@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class ShaderManager {}
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+public class ShaderManager {
+
+  private final Map<RenderingType, Program> programs = new LinkedHashMap<>();
+
+  public ShaderManager() {
+    programs.put(
+        RenderingType.COMPOSITE,
+        new Program("composite", "// vertex", "// fragment composite"));
+    programs.put(RenderingType.MIP, new Program("mip", "// vertex", "// fragment mip"));
+    programs.put(RenderingType.MINIP, new Program("minip", "// vertex", "// fragment minip"));
+    programs.put(RenderingType.ISO, new Program("iso", "// vertex", "// fragment iso"));
+  }
+
+  public Program program(RenderingType type) {
+    return programs.get(type);
+  }
+}

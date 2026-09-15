@@ -9,4 +9,59 @@
  */
 package org.weasis.dicom.viewer3d.dockable;
 
-public class SegmentationTool {}
+import java.awt.BorderLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.dicom.viewer3d.vr.SegVolumeTexture;
+
+public class SegmentationTool extends JPanel implements Insertable {
+
+  public static final String NAME = "Segmentation";
+  private SegVolumeTexture texture;
+  private int position = 132;
+  private boolean enabled = true;
+
+  public SegmentationTool() {
+    super(new BorderLayout());
+    add(new JLabel(NAME), BorderLayout.CENTER);
+  }
+
+  public SegVolumeTexture getTexture() {
+    return texture;
+  }
+
+  public void setTexture(SegVolumeTexture texture) {
+    this.texture = texture;
+  }
+
+  @Override
+  public String getComponentName() {
+    return NAME;
+  }
+
+  @Override
+  public Type getType() {
+    return Type.TOOL;
+  }
+
+  @Override
+  public int getComponentPosition() {
+    return position;
+  }
+
+  @Override
+  public void setComponentPosition(int position) {
+    this.position = position;
+  }
+
+  @Override
+  public boolean isComponentEnabled() {
+    return enabled;
+  }
+
+  @Override
+  public void setComponentEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+}

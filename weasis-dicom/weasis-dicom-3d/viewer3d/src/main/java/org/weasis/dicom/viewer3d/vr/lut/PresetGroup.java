@@ -9,4 +9,8 @@
  */
 package org.weasis.dicom.viewer3d.vr.lut;
 
-public class PresetGroup {}
+public enum PresetGroup {
+  CT,
+  MR,
+  OTHER
+}

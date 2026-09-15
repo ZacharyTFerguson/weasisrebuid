@@ -9,4 +9,10 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class CrosshairCutMode {}
+public enum CrosshairCutMode {
+  NONE,
+  X,
+  Y,
+  Z,
+  ALL
+}

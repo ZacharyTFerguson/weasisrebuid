@@ -9,4 +9,27 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class ComputeTexture {}
+public class ComputeTexture {
+
+  private int width;
+  private int height;
+  private boolean allocated;
+
+  public void allocate(int width, int height) {
+    this.width = width;
+    this.height = height;
+    this.allocated = width > 0 && height > 0;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public boolean isAllocated() {
+    return allocated;
+  }
+}

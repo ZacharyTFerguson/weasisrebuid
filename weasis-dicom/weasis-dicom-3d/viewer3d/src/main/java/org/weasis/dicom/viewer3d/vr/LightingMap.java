@@ -9,4 +9,16 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class LightingMap {}
+public class LightingMap {
+
+  private final float[] ambient = {0.2f, 0.2f, 0.2f};
+  private final float[] diffuse = {0.8f, 0.8f, 0.8f};
+
+  public float[] getAmbient() {
+    return ambient;
+  }
+
+  public float[] getDiffuse() {
+    return diffuse;
+  }
+}

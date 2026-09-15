@@ -9,4 +9,10 @@
  */
 package org.weasis.dicom.viewer3d.geometry;
 
-public interface ArcballMouseListener {}
+/** Pointer gestures that orbit or zoom a {@link Camera}. */
+public interface ArcballMouseListener {
+
+  void onRotate(double yawRadians, double pitchRadians);
+
+  void onZoom(double factor);
+}

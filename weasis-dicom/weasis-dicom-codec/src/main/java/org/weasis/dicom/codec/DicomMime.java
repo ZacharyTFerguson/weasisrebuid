@@ -27,6 +27,7 @@ public final class DicomMime {
   public static final String RT_DICOM = "rt/dicom";
   public static final String ENCAP_DICOM = "encap/dicom";
   public static final String UNREADABLE_DICOM = "unreadable/dicom";
+  public static final String VOL_DICOM = "vol/dicom";
 
   private DicomMime() {}
 

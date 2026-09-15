@@ -9,4 +9,44 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class VolumeViewModel {}
+import org.weasis.dicom.viewer3d.geometry.ViewData;
+import org.weasis.dicom.viewer3d.vr.lut.VolumePreset;
+
+public class VolumeViewModel {
+
+  private DicomVolTexture volume;
+  private VolumePreset preset = VolumePreset.ctSoftTissue();
+  private final ViewData viewData = new ViewData();
+  private final RenderingLayer layer = new RenderingLayer();
+  private final ShadingOptions shading = new ShadingOptions();
+
+  public DicomVolTexture getVolume() {
+    return volume;
+  }
+
+  public void setVolume(DicomVolTexture volume) {
+    this.volume = volume;
+  }
+
+  public VolumePreset getPreset() {
+    return preset;
+  }
+
+  public void setPreset(VolumePreset preset) {
+    if (preset != null) {
+      this.preset = preset;
+    }
+  }
+
+  public ViewData getViewData() {
+    return viewData;
+  }
+
+  public RenderingLayer getLayer() {
+    return layer;
+  }
+
+  public ShadingOptions getShading() {
+    return shading;
+  }
+}

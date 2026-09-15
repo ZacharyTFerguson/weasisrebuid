@@ -11,10 +11,43 @@ package org.weasis.dicom.viewer3d;
 
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.dicom.viewer3d.vr.View3d;
+import org.weasis.dicom.viewer3d.vr.VolumeCanvas;
 
 public class View3DContainer extends ViewerPlugin<MediaElement> {
 
+  private final View3d view3d;
+  private final InfoLayer3d infoLayer;
+
   public View3DContainer() {
+    this(OpenGLInfo.describe(null, null));
+  }
+
+  public View3DContainer(OpenGLInfo.Caps caps) {
     super("DICOM 3D Viewer");
+    this.view3d = new View3d(caps == null ? OpenGLInfo.describe(null, null) : caps);
+    this.infoLayer = new InfoLayer3d(view3d);
+    add(view3d);
+    EventManager.getInstance().setSelectedView(view3d);
+  }
+
+  public View3d getView3d() {
+    return view3d;
+  }
+
+  public VolumeCanvas getCanvas() {
+    return view3d;
+  }
+
+  public InfoLayer3d getInfoLayer() {
+    return infoLayer;
+  }
+
+  public OpenGLInfo.Verdict gpuVerdict() {
+    return view3d.gpuCaps().verdict();
+  }
+
+  public boolean isVolumeRenderingAvailable() {
+    return view3d.isVolumeRenderingAvailable();
   }
 }

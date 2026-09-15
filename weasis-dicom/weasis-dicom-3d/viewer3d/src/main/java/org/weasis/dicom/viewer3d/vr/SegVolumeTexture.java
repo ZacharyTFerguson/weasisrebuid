@@ -9,4 +9,21 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class SegVolumeTexture {}
+public class SegVolumeTexture extends VolumeTexture {
+
+  private int labelCount;
+
+  public SegVolumeTexture() {}
+
+  public SegVolumeTexture(TextureData data) {
+    super(data);
+  }
+
+  public int getLabelCount() {
+    return labelCount;
+  }
+
+  public void setLabelCount(int labelCount) {
+    this.labelCount = Math.max(0, labelCount);
+  }
+}

@@ -9,10 +9,10 @@
  */
 package org.weasis.dicom.viewer3d;
 
-public class Messages {
+public final class Messages {
   private Messages() {}
 
   public static String getString(String key) {
-    return key;
+    return key == null ? "" : key;
   }
 }

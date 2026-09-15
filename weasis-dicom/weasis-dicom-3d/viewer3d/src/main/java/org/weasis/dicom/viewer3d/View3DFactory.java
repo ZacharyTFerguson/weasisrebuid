@@ -16,11 +16,13 @@ import org.osgi.service.component.annotations.Deactivate;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
+import org.weasis.dicom.codec.DicomMime;
 
 @Component(service = SeriesViewerFactory.class, immediate = true)
 public class View3DFactory implements SeriesViewerFactory {
 
   public static final String NAME = "DICOM 3D Viewer";
+  public static final int START_LEVEL = 120;
 
   @Activate
   public void activate() {
@@ -34,12 +36,24 @@ public class View3DFactory implements SeriesViewerFactory {
 
   @Override
   public SeriesViewer<?> createSeriesViewer(Hashtable<String, Object> properties) {
-    return new View3DContainer();
+    OpenGLInfo.Caps caps = capsFrom(properties);
+    return new View3DContainer(caps);
+  }
+
+  static OpenGLInfo.Caps capsFrom(Hashtable<String, Object> properties) {
+    if (properties == null) {
+      return OpenGLInfo.describe(null, null);
+    }
+    Object renderer = properties.get("opengl.renderer");
+    Object version = properties.get("opengl.version");
+    return OpenGLInfo.describe(
+        renderer == null ? null : renderer.toString(),
+        version == null ? null : version.toString());
   }
 
   @Override
   public boolean canReadMimeType(String mimeType) {
-    return "vol/dicom".equals(mimeType) || "image/dicom".equals(mimeType);
+    return DicomMime.VOL_DICOM.equals(mimeType) || DicomMime.IMAGE_DICOM.equals(mimeType);
   }
 
   @Override
@@ -49,7 +63,7 @@ public class View3DFactory implements SeriesViewerFactory {
 
   @Override
   public int getLevel() {
-    return 120;
+    return START_LEVEL;
   }
 
   @Override
@@ -69,7 +83,7 @@ public class View3DFactory implements SeriesViewerFactory {
 
   @Override
   public String getDescription() {
-    return NAME;
+    return "Volume rendering (OpenGL 3.3+)";
   }
 
   @Override

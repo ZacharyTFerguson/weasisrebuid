@@ -9,4 +9,58 @@
  */
 package org.weasis.dicom.viewer3d.dockable;
 
-public class DisplayTool {}
+import java.awt.BorderLayout;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import org.weasis.core.api.gui.Insertable;
+
+public class DisplayTool extends JPanel implements Insertable {
+
+  public static final String NAME = "Display";
+  private final JCheckBox info = new JCheckBox("Info", true);
+  private int position = 131;
+  private boolean enabled = true;
+
+  public DisplayTool() {
+    super(new BorderLayout());
+    add(info, BorderLayout.CENTER);
+  }
+
+  public boolean isInfoVisible() {
+    return info.isSelected();
+  }
+
+  public void setInfoVisible(boolean visible) {
+    info.setSelected(visible);
+  }
+
+  @Override
+  public String getComponentName() {
+    return NAME;
+  }
+
+  @Override
+  public Type getType() {
+    return Type.TOOL;
+  }
+
+  @Override
+  public int getComponentPosition() {
+    return position;
+  }
+
+  @Override
+  public void setComponentPosition(int position) {
+    this.position = position;
+  }
+
+  @Override
+  public boolean isComponentEnabled() {
+    return enabled;
+  }
+
+  @Override
+  public void setComponentEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+}

@@ -9,4 +9,15 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class View3d {}
+import org.weasis.dicom.viewer3d.OpenGLInfo;
+
+public class View3d extends VolumeCanvas {
+
+  public View3d() {
+    super();
+  }
+
+  public View3d(OpenGLInfo.Caps caps) {
+    super(caps);
+  }
+}

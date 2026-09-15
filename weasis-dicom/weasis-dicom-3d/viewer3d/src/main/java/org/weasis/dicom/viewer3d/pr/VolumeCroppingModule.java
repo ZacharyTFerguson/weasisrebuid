@@ -9,4 +9,60 @@
  */
 package org.weasis.dicom.viewer3d.pr;
 
-public class VolumeCroppingModule {}
+public class VolumeCroppingModule {
+
+  private float minX;
+  private float maxX = 1f;
+  private float minY;
+  private float maxY = 1f;
+  private float minZ;
+  private float maxZ = 1f;
+
+  public float getMinX() {
+    return minX;
+  }
+
+  public void setMinX(float minX) {
+    this.minX = minX;
+  }
+
+  public float getMaxX() {
+    return maxX;
+  }
+
+  public void setMaxX(float maxX) {
+    this.maxX = maxX;
+  }
+
+  public float getMinY() {
+    return minY;
+  }
+
+  public void setMinY(float minY) {
+    this.minY = minY;
+  }
+
+  public float getMaxY() {
+    return maxY;
+  }
+
+  public void setMaxY(float maxY) {
+    this.maxY = maxY;
+  }
+
+  public float getMinZ() {
+    return minZ;
+  }
+
+  public void setMinZ(float minZ) {
+    this.minZ = minZ;
+  }
+
+  public float getMaxZ() {
+    return maxZ;
+  }
+
+  public void setMaxZ(float maxZ) {
+    this.maxZ = maxZ;
+  }
+}

@@ -9,4 +9,24 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class VolumeBuilder {}
+public class VolumeBuilder {
+
+  private final DicomVolTextureFactory factory = new DicomVolTextureFactory();
+
+  public DicomVolTexture build(short[][] slices, int width, int height) {
+    if (slices == null || slices.length == 0) {
+      throw new IllegalArgumentException("slices");
+    }
+    DicomVolTexture texture = factory.create(width, height, slices.length);
+    for (int z = 0; z < slices.length; z++) {
+      TextureSliceDataBuffer buffer = new TextureSliceDataBuffer(width, height);
+      short[] src = slices[z];
+      if (src != null) {
+        int n = Math.min(src.length, buffer.getSlice().length);
+        System.arraycopy(src, 0, buffer.getSlice(), 0, n);
+      }
+      buffer.copyInto(texture.getData(), z);
+    }
+    return texture;
+  }
+}
