@@ -9,11 +9,14 @@
  */
 package org.weasis.core.api.image.util;
 
-/** Window / level pair used by {@code WindowOp}. */
+/** Window / level pair used by {@code WindowOp}. Optional VOI LUT table is Sequence, not linear. */
 public class WindLevelParameters {
 
   private double window;
   private double level;
+  private String lutShape = "LINEAR";
+  private int[] voiLut;
+  private int voiLutFirst;
 
   public WindLevelParameters(double window, double level) {
     this.window = window;
@@ -42,5 +45,30 @@ public class WindLevelParameters {
 
   public double getUpper() {
     return level + window / 2.0;
+  }
+
+  public String getLutShape() {
+    return lutShape == null || lutShape.isBlank() ? "LINEAR" : lutShape;
+  }
+
+  public void setLutShape(String lutShape) {
+    this.lutShape = lutShape == null || lutShape.isBlank() ? "LINEAR" : lutShape;
+  }
+
+  public boolean hasVoiLut() {
+    return voiLut != null && voiLut.length > 0;
+  }
+
+  public int[] getVoiLut() {
+    return voiLut;
+  }
+
+  public int getVoiLutFirst() {
+    return voiLutFirst;
+  }
+
+  public void setVoiLut(int[] lut, int firstMapped) {
+    this.voiLut = lut == null ? null : lut.clone();
+    this.voiLutFirst = firstMapped;
   }
 }

@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
 import org.dcm4che3.data.VR;
@@ -58,6 +59,50 @@ class WindowLevelPaintTest {
     int soft = img.getRaster().getSample(0, 0, 0);
     assertTrue(bone > soft, "unsigned 8-bit bone (>127) must not sign-wrap to black");
     assertTrue(bone - soft > 80);
+  }
+
+  @Test
+  void voiLutSequencePaintsTableNotLinearWindow() {
+    Attributes dcm = voiLutRamp();
+    BufferedImage lut = WindowLevelPainter.paintMonochrome2(dcm);
+    assertEquals(255, lut.getRaster().getSample(0, 0, 0));
+    assertEquals(0, lut.getRaster().getSample(7, 0, 0));
+    BufferedImage linear = WindowLevelPainter.paintMonochrome2(dcm, 7, 3.5);
+    assertTrue(linear.getRaster().getSample(0, 0, 0) < 40);
+    assertTrue(linear.getRaster().getSample(7, 0, 0) > 200);
+  }
+
+  @Test
+  void sigmoidFunctionIsSofterThanLinearAtWindowEdge() {
+    Attributes dcm = voiLutRamp();
+    dcm.setDouble(Tag.WindowWidth, VR.DS, 7);
+    dcm.setDouble(Tag.WindowCenter, VR.DS, 3.5);
+    dcm.setString(Tag.VOILUTFunction, VR.CS, "SIGMOID");
+    dcm.remove(Tag.VOILUTSequence);
+    BufferedImage img = WindowLevelPainter.paintMonochrome2(dcm);
+    int edge = img.getRaster().getSample(0, 0, 0);
+    assertTrue(edge > 20);
+    assertTrue(edge < 80);
+  }
+
+  /** 8 stored values, inverted 8-entry VOI LUT Sequence, no Window Center. */
+  static Attributes voiLutRamp() {
+    Attributes dcm = new Attributes();
+    dcm.setString(Tag.PhotometricInterpretation, VR.CS, "MONOCHROME2");
+    dcm.setInt(Tag.SamplesPerPixel, VR.US, 1);
+    dcm.setInt(Tag.Rows, VR.US, 1);
+    dcm.setInt(Tag.Columns, VR.US, 8);
+    dcm.setInt(Tag.BitsAllocated, VR.US, 8);
+    dcm.setInt(Tag.BitsStored, VR.US, 8);
+    dcm.setInt(Tag.HighBit, VR.US, 7);
+    dcm.setInt(Tag.PixelRepresentation, VR.US, 0);
+    dcm.setInt(Tag.PixelData, VR.OW, 0, 1, 2, 3, 4, 5, 6, 7);
+    Sequence seq = dcm.newSequence(Tag.VOILUTSequence, 1);
+    Attributes item = new Attributes();
+    item.setInt(Tag.LUTDescriptor, VR.US, 8, 0, 8);
+    item.setInt(Tag.LUTData, VR.US, 255, 200, 150, 100, 50, 20, 10, 0);
+    seq.add(item);
+    return dcm;
   }
 
   /** Hand DX pattern: 8-bit unsigned MONOCHROME2, no VOI tags, bone > 127. */

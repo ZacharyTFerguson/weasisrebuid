@@ -33,6 +33,7 @@ import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.codec.WindowLevelPainter;
 import org.weasis.dicom.codec.seg.SegVisibilityPolicy;
 import org.weasis.dicom.codec.utils.DicomMediaUtils;
+import org.weasis.dicom.codec.utils.LutPipeline;
 
 /**
  * DICOM 2D view. Op chain: WindowAndPresets → Filter → PseudoColor → Shutter → Overlay → Affine.
@@ -42,6 +43,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private Attributes dataset;
   private WindLevelParameters fileWl = new WindLevelParameters(400, 40);
   private WindLevelParameters dataRangeWl;
+  private WindLevelParameters activeVoi = new WindLevelParameters(400, 40);
   private double window = 400;
   private double level = 40;
   private File file;
@@ -78,9 +80,11 @@ public class View2d extends DefaultView2d<MediaElement> {
   void bindWindowLevel(Attributes dataset) {
     fileWl = DicomMediaUtils.windowLevel(dataset, 400, 40);
     dataRangeWl = DicomMediaUtils.dataRangeWindowLevel(dataset);
+    setPresets(DicomMediaUtils.voiPresets(dataset));
+    this.activeVoi = fileWl;
     this.window = fileWl.getWindow();
     this.level = fileWl.getLevel();
-    setPresets(DicomMediaUtils.voiPresets(dataset));
+    bindOp(fileWl);
   }
 
   public Attributes getDataset() {
@@ -154,11 +158,36 @@ public class View2d extends DefaultView2d<MediaElement> {
   }
 
   public void setWindowLevel(double window, double level) {
-    this.window = window;
-    this.level = level;
-    getDisplayOpManager().setParamValue("op.window.presets", WindowAndPresetsOp.P_WINDOW, window);
-    getDisplayOpManager().setParamValue("op.window.presets", WindowAndPresetsOp.P_LEVEL, level);
+    applyVoi(shapedVoi(window, level));
+  }
+
+  void applyVoi(WindLevelParameters voi) {
+    this.activeVoi = voi == null ? new WindLevelParameters(this.window, this.level) : voi;
+    this.window = activeVoi.getWindow();
+    this.level = activeVoi.getLevel();
+    bindOp(activeVoi);
     render();
+  }
+
+  void bindOp(WindLevelParameters voi) {
+    getDisplayOpManager()
+        .setParamValue("op.window.presets", WindowAndPresetsOp.P_WINDOW, voi.getWindow());
+    getDisplayOpManager()
+        .setParamValue("op.window.presets", WindowAndPresetsOp.P_LEVEL, voi.getLevel());
+    getDisplayOpManager()
+        .setParamValue("op.window.presets", WindowAndPresetsOp.P_VOI_LUT_SHAPE, voi.getLutShape());
+  }
+
+  WindLevelParameters shapedVoi(double window, double level) {
+    WindLevelParameters p = new WindLevelParameters(window, level);
+    if (dataset != null) {
+      p.setLutShape(LutPipeline.voiFunction(dataset));
+    }
+    return p;
+  }
+
+  public WindLevelParameters getActiveVoi() {
+    return activeVoi;
   }
 
   public WindLevelParameters getFileWindowLevel() {
@@ -168,7 +197,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   @Override
   public void resetWinLevelDefaults() {
     if (fileWl != null) {
-      setWindowLevel(fileWl.getWindow(), fileWl.getLevel());
+      applyVoi(fileWl);
     }
   }
 
@@ -234,8 +263,7 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   void applyIndexedPreset(int index) {
     int i = Math.min(presets.size(), index) - 1;
-    WindLevelParameters preset = presets.get(i);
-    setWindowLevel(preset.getWindow(), preset.getLevel());
+    applyVoi(presets.get(i));
   }
 
   public SegVisibilityPolicy getSegVisibility() {
@@ -258,7 +286,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (dataset == null) {
       return;
     }
-    BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, window, level);
+    BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, activeVoi);
     painted = applyFilterAndColor(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);

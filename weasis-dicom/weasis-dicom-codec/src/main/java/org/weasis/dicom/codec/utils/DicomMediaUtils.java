@@ -12,6 +12,7 @@ package org.weasis.dicom.codec.utils;
 import java.util.ArrayList;
 import java.util.List;
 import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.api.image.util.WindLevelParameters;
 import org.weasis.dicom.codec.PhotometricInterpretation;
@@ -62,52 +63,134 @@ public final class DicomMediaUtils {
     if (dcm == null) {
       return new WindLevelParameters(defaultWindow, defaultLevel);
     }
-    if (dcm.containsValue(Tag.WindowWidth) && dcm.containsValue(Tag.WindowCenter)) {
-      double window = dcm.getDouble(Tag.WindowWidth, defaultWindow);
-      double level = dcm.getDouble(Tag.WindowCenter, defaultLevel);
-      if (window <= 0) {
-        window = defaultWindow;
-      }
-      return new WindLevelParameters(window, level);
+    WindLevelParameters header = headerWindowLevel(dcm, defaultWindow, defaultLevel);
+    if (header != null) {
+      return header;
+    }
+    WindLevelParameters lut = firstVoiLut(dcm);
+    if (lut != null) {
+      return lut;
     }
     WindLevelParameters fromData = dataRangeWindowLevel(dcm);
-    if (fromData != null) {
-      return fromData;
+    return fromData != null ? fromData : new WindLevelParameters(defaultWindow, defaultLevel);
+  }
+
+  static WindLevelParameters headerWindowLevel(
+      Attributes dcm, double defaultWindow, double defaultLevel) {
+    if (!dcm.containsValue(Tag.WindowWidth) || !dcm.containsValue(Tag.WindowCenter)) {
+      return null;
     }
-    return new WindLevelParameters(defaultWindow, defaultLevel);
+    double window = dcm.getDouble(Tag.WindowWidth, defaultWindow);
+    double level = dcm.getDouble(Tag.WindowCenter, defaultLevel);
+    WindLevelParameters p = new WindLevelParameters(window > 0 ? window : defaultWindow, level);
+    p.setLutShape(LutPipeline.voiFunction(dcm));
+    return p;
+  }
+
+  static WindLevelParameters firstVoiLut(Attributes dcm) {
+    List<WindLevelParameters> items = voiLutItems(dcm);
+    return items.isEmpty() ? null : items.getFirst();
   }
 
   /**
-   * Linear VOI presets from multi-value Window Center/Width (keys 1–9). Empty when the dataset has
-   * no VOI; callers then keep {@link #windowLevel} (data-range or first WindowCenter).
+   * Linear Window Center/Width presets (keys 1–9) then VOI LUT Sequence items. Empty when the
+   * dataset has no VOI; callers then keep {@link #windowLevel} (data-range or first WindowCenter).
    */
   public static List<WindLevelParameters> voiPresets(Attributes dcm) {
     if (dcm == null) {
       return List.of();
     }
-    return pairPresets(dcm.getDoubles(Tag.WindowWidth), dcm.getDoubles(Tag.WindowCenter));
+    List<WindLevelParameters> out = new ArrayList<>();
+    out.addAll(
+        pairPresets(
+            dcm.getDoubles(Tag.WindowWidth),
+            dcm.getDoubles(Tag.WindowCenter),
+            LutPipeline.voiFunction(dcm)));
+    out.addAll(voiLutItems(dcm));
+    return List.copyOf(out);
   }
 
-  static List<WindLevelParameters> pairPresets(double[] widths, double[] centers) {
+  static List<WindLevelParameters> pairPresets(double[] widths, double[] centers, String shape) {
     if (widths == null || centers == null) {
       return List.of();
     }
-    return copyValidPairs(widths, centers);
+    return copyValidPairs(widths, centers, shape);
   }
 
-  static List<WindLevelParameters> copyValidPairs(double[] widths, double[] centers) {
+  static List<WindLevelParameters> copyValidPairs(double[] widths, double[] centers, String shape) {
     int n = Math.min(widths.length, centers.length);
     List<WindLevelParameters> out = new ArrayList<>();
     for (int i = 0; i < n; i++) {
-      addIfValid(out, widths[i], centers[i]);
+      addIfValid(out, widths[i], centers[i], shape);
     }
     return List.copyOf(out);
   }
 
-  static void addIfValid(List<WindLevelParameters> out, double window, double level) {
+  static void addIfValid(List<WindLevelParameters> out, double window, double level, String shape) {
     if (window > 0) {
-      out.add(new WindLevelParameters(window, level));
+      WindLevelParameters p = new WindLevelParameters(window, level);
+      p.setLutShape(shape);
+      out.add(p);
     }
+  }
+
+  static List<WindLevelParameters> voiLutItems(Attributes dcm) {
+    Sequence seq = dcm.getSequence(Tag.VOILUTSequence);
+    if (seq == null || seq.isEmpty()) {
+      return List.of();
+    }
+    return copyLutItems(seq);
+  }
+
+  static List<WindLevelParameters> copyLutItems(Sequence seq) {
+    List<WindLevelParameters> out = new ArrayList<>();
+    for (Attributes item : seq) {
+      WindLevelParameters p = lutItem(item);
+      if (p != null) {
+        out.add(p);
+      }
+    }
+    return out;
+  }
+
+  static WindLevelParameters lutItem(Attributes item) {
+    if (item == null) {
+      return null;
+    }
+    return lutPreset(item.getInts(Tag.LUTDescriptor), item.getInts(Tag.LUTData));
+  }
+
+  static WindLevelParameters lutPreset(int[] desc, int[] data) {
+    if (missingLut(desc, data)) {
+      return null;
+    }
+    int n = desc[0] == 0 ? 65536 : desc[0];
+    int first = desc[1];
+    WindLevelParameters p = new WindLevelParameters(Math.max(1, n), first + n / 2.0);
+    p.setVoiLut(toDisplayLut(data, n, desc[2]), first);
+    p.setLutShape(LutPipeline.SHAPE_NON_LINEAR);
+    return p;
+  }
+
+  static boolean missingLut(int[] desc, int[] data) {
+    return desc == null || desc.length < 3 || data == null || data.length == 0;
+  }
+
+  static int[] toDisplayLut(int[] data, int n, int bits) {
+    int[] out = new int[Math.max(1, n)];
+    int max = bits > 8 ? (1 << Math.min(16, bits)) - 1 : 255;
+    for (int i = 0; i < out.length; i++) {
+      int v = i < data.length ? data[i] : data[data.length - 1];
+      out[i] = scaleLutEntry(v, max);
+    }
+    return out;
+  }
+
+  static int scaleLutEntry(int v, int max) {
+    if (max <= 255) {
+      return LutPipeline.clamp8(v);
+    }
+    return LutPipeline.clamp8((int) Math.round(v * 255.0 / max));
   }
 
   public static WindLevelParameters dataRangeWindowLevel(Attributes dcm) {

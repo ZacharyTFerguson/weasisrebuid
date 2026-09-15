@@ -28,11 +28,14 @@ public final class WindowLevelPainter {
   private WindowLevelPainter() {}
 
   public static BufferedImage paintMonochrome2(Attributes dcm) {
-    WindLevelParameters wl = DicomMediaUtils.windowLevel(dcm, 400, 40);
-    return paintMonochrome2(dcm, wl.getWindow(), wl.getLevel());
+    return paintMonochrome2(dcm, DicomMediaUtils.windowLevel(dcm, 400, 40));
   }
 
   public static BufferedImage paintMonochrome2(Attributes dcm, double window, double level) {
+    return paintMonochrome2(dcm, new WindLevelParameters(window, level));
+  }
+
+  public static BufferedImage paintMonochrome2(Attributes dcm, WindLevelParameters voi) {
     if (dcm == null || !DicomMediaUtils.isMonochrome2(dcm)) {
       throw new IllegalArgumentException("MONOCHROME2 dataset required");
     }
@@ -42,26 +45,26 @@ public final class WindowLevelPainter {
     if (rows <= 0 || cols <= 0 || pixels == null || pixels.length < rows * cols) {
       throw new IllegalArgumentException("pixel data");
     }
+    WindLevelParameters wl = voi == null ? DicomMediaUtils.windowLevel(dcm, 400, 40) : voi;
     SimpleOpManager chain = SimpleOpManager.view2dChain();
-    chain.setParamValue("op.window.presets", WindowAndPresetsOp.P_WINDOW, window);
-    chain.setParamValue("op.window.presets", WindowAndPresetsOp.P_LEVEL, level);
-    window = (Double) chain.getParamValue("op.window.presets", WindowAndPresetsOp.P_WINDOW);
-    level = (Double) chain.getParamValue("op.window.presets", WindowAndPresetsOp.P_LEVEL);
+    chain.setParamValue("op.window.presets", WindowAndPresetsOp.P_WINDOW, wl.getWindow());
+    chain.setParamValue("op.window.presets", WindowAndPresetsOp.P_LEVEL, wl.getLevel());
+    chain.setParamValue("op.window.presets", WindowAndPresetsOp.P_VOI_LUT_SHAPE, wl.getLutShape());
     int pad = DicomMediaUtils.pixelPaddingValue(dcm);
     BufferedImage image = new BufferedImage(cols, rows, BufferedImage.TYPE_BYTE_GRAY);
     byte[] out = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
     for (int i = 0; i < rows * cols; i++) {
-      int stored = DicomMediaUtils.storedPixel(dcm, pixels[i]);
-      if (stored == pad) {
-        out[i] = 0;
-        continue;
-      }
-      double modality = LutPipeline.modalityValue(dcm, stored);
-      out[i] =
-          (byte)
-              LutPipeline.applyPresentationIdentity(
-                  LutPipeline.applyVoiLinear(modality, window, level));
+      out[i] = (byte) sampleDisplay(dcm, pixels[i], pad, wl);
     }
     return image;
+  }
+
+  static int sampleDisplay(Attributes dcm, int raw, int pad, WindLevelParameters wl) {
+    int stored = DicomMediaUtils.storedPixel(dcm, raw);
+    if (stored == pad) {
+      return 0;
+    }
+    double modality = LutPipeline.modalityValue(dcm, stored);
+    return LutPipeline.applyPresentationIdentity(LutPipeline.applyVoi(modality, wl));
   }
 }
