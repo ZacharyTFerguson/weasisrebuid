@@ -102,14 +102,14 @@ class ViewerActionKeysHaveTest {
     assertEquals(Insertable.Type.TOOL, mini.getType());
     mini.bind(view);
     assertSameView(view, mini.boundView());
-    mini.getZoomSlider().setValue(200);
-    assertEquals(2.0, view.getZoom(), 1e-9);
-    mini.getRotationSlider().setValue(90);
-    assertEquals(90.0, view.getRotation(), 1e-9);
     mini.getPanner().setSize(100, 100);
     mini.getPanner().panAt(0, 0);
     assertEquals(50.0, view.getPanX(), 1e-9);
     assertEquals(50.0, view.getPanY(), 1e-9);
+    mini.getZoomSlider().setValue(200);
+    assertEquals(2.0, view.getZoom(), 1e-9);
+    mini.getRotationSlider().setValue(90);
+    assertEquals(90.0, view.getRotation(), 1e-9);
   }
 
   @Test
