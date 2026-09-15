@@ -19,14 +19,12 @@ import org.dcm4che3.data.UID;
 import org.dcm4che3.io.DicomInputStream;
 import org.weasis.core.api.media.data.Codec;
 import org.weasis.core.api.media.data.MediaElement;
-import org.weasis.core.api.media.data.MediaReader;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.Series;
-import org.weasis.core.api.media.data.TagW;
 import org.weasis.dicom.codec.utils.DicomMediaUtils;
 
 /** Part-10 reader via weasis-dicom-tools / dcm4che. */
-public class DicomMediaIO implements MediaReader {
+public class DicomMediaIO implements DcmMediaReader {
 
   private final Attributes dataset;
   private final String transferSyntax;
@@ -68,7 +66,17 @@ public class DicomMediaIO implements MediaReader {
     return dataset;
   }
 
+  @Override
+  public Attributes getDicomObject() {
+    return dataset;
+  }
+
   public String getTransferSyntax() {
+    return transferSyntax;
+  }
+
+  @Override
+  public String getDicomTransferSyntax() {
     return transferSyntax;
   }
 
@@ -96,19 +104,36 @@ public class DicomMediaIO implements MediaReader {
 
   @Override
   public MediaElement getPreview() {
-    MediaElement element = new MediaElement();
-    element.setMediaURI(uri);
-    element.setMimeType(mimeType());
-    element.setTag(TagW.SOPInstanceUID, dataset.getString(Tag.SOPInstanceUID, ""));
-    element.setTag(TagW.Modality, dataset.getString(Tag.Modality, ""));
-    return element;
+    String mime = mimeType();
+    if (DicomMime.KO_DICOM.equals(mime)) {
+      return new KOSpecialElement(this);
+    }
+    if (DicomMime.PR_DICOM.equals(mime)) {
+      return new PRSpecialElement(this);
+    }
+    if (DicomMime.SEG_DICOM.equals(mime)) {
+      return new org.weasis.dicom.codec.seg.SegSpecialElement(this);
+    }
+    if (DicomMime.VIDEO_DICOM.equals(mime)) {
+      return new DicomVideoElement(this);
+    }
+    if (DicomMime.ENCAP_DICOM.equals(mime)) {
+      return new DicomEncapDocElement(this);
+    }
+    return new DicomImageElement(this);
   }
 
   @Override
   public MediaSeries<?> getMediaSeries() {
+    MediaElement preview = getPreview();
+    if (preview instanceof DicomImageElement image) {
+      DicomSeries series = new DicomSeries(dataset.getString(Tag.SeriesInstanceUID, "series"));
+      series.addMedia(image);
+      return series;
+    }
     Series<MediaElement> series = new Series<>(dataset.getString(Tag.SeriesInstanceUID, "series"));
-    series.setMimeType(DicomMime.SERIES_DICOM);
-    series.addMedia(getPreview());
+    series.setMimeType(mimeType());
+    series.addMedia(preview);
     return series;
   }
 

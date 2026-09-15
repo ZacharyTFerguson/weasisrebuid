@@ -9,4 +9,24 @@
  */
 package org.weasis.core.ui.editor.image;
 
-public class ResetTools {}
+/** Tokens for {@code dcmview2d:reset} ({@code -a} or {@code winLevel|zoom|pan|rotation}). */
+public enum ResetTools {
+  ALL,
+  WINLEVEL,
+  ZOOM,
+  PAN,
+  ROTATION;
+
+  public static ResetTools fromCommand(String token) {
+    if (token == null || token.isBlank() || "-a".equals(token) || "all".equalsIgnoreCase(token)) {
+      return ALL;
+    }
+    return switch (token) {
+      case "winLevel", "window", "level" -> WINLEVEL;
+      case "zoom" -> ZOOM;
+      case "pan" -> PAN;
+      case "rotation" -> ROTATION;
+      default -> ALL;
+    };
+  }
+}
