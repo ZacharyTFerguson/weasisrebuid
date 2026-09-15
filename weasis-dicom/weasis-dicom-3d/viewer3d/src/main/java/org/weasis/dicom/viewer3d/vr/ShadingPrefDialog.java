@@ -9,4 +9,15 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class ShadingPrefDialog {}
+public class ShadingPrefDialog {
+
+  private final ShadingOptions options;
+
+  public ShadingPrefDialog(ShadingOptions options) {
+    this.options = options == null ? new ShadingOptions() : options;
+  }
+
+  public ShadingOptions getOptions() {
+    return options;
+  }
+}

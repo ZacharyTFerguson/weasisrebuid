@@ -9,4 +9,33 @@
  */
 package org.weasis.dicom.viewer3d.geometry;
 
-public class CameraView {}
+public final class CameraView {
+
+  private final View view;
+  private final Camera camera;
+
+  public CameraView(View view, Camera camera) {
+    this.view = view == null ? View.AXIAL : view;
+    this.camera = camera == null ? Camera.axial() : camera;
+  }
+
+  public View getView() {
+    return view;
+  }
+
+  public Camera getCamera() {
+    return camera;
+  }
+
+  public static CameraView axial() {
+    return new CameraView(View.AXIAL, Camera.axial());
+  }
+
+  public static CameraView coronal() {
+    return new CameraView(View.CORONAL, Camera.coronal());
+  }
+
+  public static CameraView sagittal() {
+    return new CameraView(View.SAGITTAL, Camera.sagittal());
+  }
+}

@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class Preset {}
+import org.weasis.dicom.viewer3d.vr.lut.VolumePreset;
+
+public class Preset {
+
+  private VolumePreset volumePreset = VolumePreset.ctSoftTissue();
+
+  public VolumePreset getVolumePreset() {
+    return volumePreset;
+  }
+
+  public void setVolumePreset(VolumePreset volumePreset) {
+    if (volumePreset != null) {
+      this.volumePreset = volumePreset;
+    }
+  }
+
+  public String getName() {
+    return volumePreset.getName();
+  }
+}

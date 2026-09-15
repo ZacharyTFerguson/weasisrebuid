@@ -13,13 +13,19 @@
 
   <artifactId>weasis-dicom-viewer3d</artifactId>
   <name>3D Viewer</name>
-  <description>JOGL volume renderer. MX-15 refuse llvmpipe.</description>
+  <description>JOGL volume renderer. MX-15 OpenGL 3.3+; refuse llvmpipe; N/A when no GPU.</description>
 
   <dependencies>
     <dependency>
       <groupId>org.weasis.dicom</groupId>
       <artifactId>weasis-dicom-codec</artifactId>
       <version>${project.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.weasis.thirdparty.org.jogamp</groupId>
+      <artifactId>jogamp</artifactId>
+      <version>${jogamp.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
@@ -45,7 +51,7 @@ Bundle-SymbolicName: org.weasis.dicom.viewer3d
 Bundle-Name: Weasis DICOM 3D Viewer
 -dsannotations: *
 Export-Package: !org.weasis.dicom.viewer3d.internal.*, org.weasis.dicom.viewer3d.*
-Import-Package: org.weasis.core.*,org.weasis.dicom.codec.*,org.osgi.service.component;resolution:=optional,*
+Import-Package: org.slf4j;version=!,com.jogamp.*;resolution:=optional,jogamp.*;resolution:=optional,gluegen.*;resolution:=optional,org.weasis.core.*,org.weasis.dicom.codec.*,org.osgi.service.component;resolution:=optional,*
 ]]></bnd>
         </configuration>
       </plugin>

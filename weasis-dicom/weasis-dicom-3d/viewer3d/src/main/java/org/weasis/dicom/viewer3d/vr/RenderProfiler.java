@@ -9,4 +9,21 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class RenderProfiler {}
+public class RenderProfiler {
+
+  private long lastNanos;
+  private int frames;
+
+  public void frame(long nanos) {
+    lastNanos = nanos;
+    frames++;
+  }
+
+  public long getLastNanos() {
+    return lastNanos;
+  }
+
+  public int getFrames() {
+    return frames;
+  }
+}

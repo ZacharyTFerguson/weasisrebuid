@@ -9,4 +9,29 @@
  */
 package org.weasis.dicom.viewer3d;
 
-public class ExternalView3DBarFactory {}
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.InsertableFactory;
+
+@Component(service = InsertableFactory.class)
+public class ExternalView3DBarFactory implements InsertableFactory {
+
+  @Override
+  public Insertable createInstance(Hashtable<String, Object> properties) {
+    return new ExternalView3DToolbar();
+  }
+
+  @Override
+  public void dispose(Insertable component) {}
+
+  @Override
+  public boolean isComponentCreatedByThisFactory(Insertable component) {
+    return component instanceof ExternalView3DToolbar;
+  }
+
+  @Override
+  public Insertable.Type getType() {
+    return Insertable.Type.TOOLBAR;
+  }
+}

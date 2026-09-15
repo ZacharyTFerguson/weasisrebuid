@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class TextureSliceDataBuffer {}
+public class TextureSliceDataBuffer {
+
+  private final short[] slice;
+
+  public TextureSliceDataBuffer(int width, int height) {
+    this.slice = new short[width * height];
+  }
+
+  public short[] getSlice() {
+    return slice;
+  }
+
+  public void copyInto(TextureData volume, int z) {
+    int width = volume.getWidth();
+    int height = volume.getHeight();
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        volume.setVoxel(x, y, z, slice[x + y * width]);
+      }
+    }
+  }
+}

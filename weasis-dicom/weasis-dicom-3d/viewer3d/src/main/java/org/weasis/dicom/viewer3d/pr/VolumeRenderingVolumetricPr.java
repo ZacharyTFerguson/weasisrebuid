@@ -9,4 +9,19 @@
  */
 package org.weasis.dicom.viewer3d.pr;
 
-public class VolumeRenderingVolumetricPr {}
+import org.weasis.dicom.viewer3d.vr.RenderingType;
+
+public class VolumeRenderingVolumetricPr {
+
+  private RenderingType renderingType = RenderingType.COMPOSITE;
+
+  public RenderingType getRenderingType() {
+    return renderingType;
+  }
+
+  public void setRenderingType(RenderingType renderingType) {
+    if (renderingType != null) {
+      this.renderingType = renderingType;
+    }
+  }
+}

@@ -9,4 +9,11 @@
  */
 package org.weasis.dicom.viewer3d;
 
-public class ActionVol {}
+/** Named 3D volume actions (preset, shading, rendering type). */
+public enum ActionVol {
+  RENDERING_TYPE,
+  PRESET,
+  SHADING,
+  CROSSHAIR,
+  CROP
+}

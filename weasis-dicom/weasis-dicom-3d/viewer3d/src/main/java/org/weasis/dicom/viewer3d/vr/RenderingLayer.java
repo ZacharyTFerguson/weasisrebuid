@@ -9,4 +9,46 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class RenderingLayer {}
+import java.util.ArrayList;
+import java.util.List;
+
+public class RenderingLayer {
+
+  private RenderingType type = RenderingType.COMPOSITE;
+  private CrosshairCutMode cutMode = CrosshairCutMode.NONE;
+  private final List<RenderingLayerChangeListener> listeners = new ArrayList<>();
+
+  public RenderingType getType() {
+    return type;
+  }
+
+  public void setType(RenderingType type) {
+    if (type != null && type != this.type) {
+      this.type = type;
+      fire();
+    }
+  }
+
+  public CrosshairCutMode getCutMode() {
+    return cutMode;
+  }
+
+  public void setCutMode(CrosshairCutMode cutMode) {
+    if (cutMode != null && cutMode != this.cutMode) {
+      this.cutMode = cutMode;
+      fire();
+    }
+  }
+
+  public void addListener(RenderingLayerChangeListener listener) {
+    if (listener != null) {
+      listeners.add(listener);
+    }
+  }
+
+  private void fire() {
+    for (RenderingLayerChangeListener listener : List.copyOf(listeners)) {
+      listener.renderingLayerChanged(this);
+    }
+  }
+}

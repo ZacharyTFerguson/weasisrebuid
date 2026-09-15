@@ -9,4 +9,18 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class OpenglUtils {}
+import org.weasis.dicom.viewer3d.OpenGLInfo;
+
+/** Helpers around {@link OpenGLInfo} for the VR pipeline. Does not call JOGL. */
+public final class OpenglUtils {
+
+  private OpenglUtils() {}
+
+  public static OpenGLInfo.Caps probe(String renderer, String version) {
+    return OpenGLInfo.describe(renderer, version);
+  }
+
+  public static boolean allowVolumeRendering(OpenGLInfo.Caps caps) {
+    return caps != null && caps.canRenderVolume();
+  }
+}

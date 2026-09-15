@@ -13,7 +13,15 @@
   <artifactId>weasis-dicom-3d</artifactId>
   <packaging>pom</packaging>
   <name>Weasis DICOM 3D</name>
+  <description>jogamp, jogamp-native, viewer3d. WP-9 JOGL VR.</description>
+
+  <properties>
+    <sha1>${jogamp.version}</sha1>
+  </properties>
+
   <modules>
+    <module>jogamp</module>
+    <module>jogamp-native</module>
     <module>viewer3d</module>
   </modules>
 </project>

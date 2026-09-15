@@ -9,4 +9,29 @@
  */
 package org.weasis.dicom.viewer3d.dockable;
 
-public class SegmentationToolFactory {}
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.InsertableFactory;
+
+@Component(service = InsertableFactory.class)
+public class SegmentationToolFactory implements InsertableFactory {
+
+  @Override
+  public Insertable createInstance(Hashtable<String, Object> properties) {
+    return new SegmentationTool();
+  }
+
+  @Override
+  public void dispose(Insertable component) {}
+
+  @Override
+  public boolean isComponentCreatedByThisFactory(Insertable component) {
+    return component instanceof SegmentationTool;
+  }
+
+  @Override
+  public Insertable.Type getType() {
+    return Insertable.Type.TOOL;
+  }
+}

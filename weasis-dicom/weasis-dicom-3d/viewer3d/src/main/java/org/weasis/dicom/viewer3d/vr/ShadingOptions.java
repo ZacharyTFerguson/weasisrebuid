@@ -9,4 +9,46 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class ShadingOptions {}
+public class ShadingOptions {
+
+  private float ambient = 0.2f;
+  private float diffuse = 0.6f;
+  private float specular = 0.2f;
+  private boolean enabled;
+
+  public float getAmbient() {
+    return ambient;
+  }
+
+  public void setAmbient(float ambient) {
+    this.ambient = clamp(ambient);
+  }
+
+  public float getDiffuse() {
+    return diffuse;
+  }
+
+  public void setDiffuse(float diffuse) {
+    this.diffuse = clamp(diffuse);
+  }
+
+  public float getSpecular() {
+    return specular;
+  }
+
+  public void setSpecular(float specular) {
+    this.specular = clamp(specular);
+  }
+
+  public boolean isEnabled() {
+    return enabled;
+  }
+
+  public void setEnabled(boolean enabled) {
+    this.enabled = enabled;
+  }
+
+  private static float clamp(float v) {
+    return Math.max(0f, Math.min(1f, v));
+  }
+}

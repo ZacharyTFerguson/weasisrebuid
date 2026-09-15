@@ -9,4 +9,9 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class RenderingType {}
+public enum RenderingType {
+  COMPOSITE,
+  MIP,
+  MINIP,
+  ISO
+}

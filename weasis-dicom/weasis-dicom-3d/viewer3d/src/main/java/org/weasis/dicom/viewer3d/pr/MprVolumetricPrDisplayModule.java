@@ -9,4 +9,15 @@
  */
 package org.weasis.dicom.viewer3d.pr;
 
-public class MprVolumetricPrDisplayModule {}
+public class MprVolumetricPrDisplayModule {
+
+  private boolean visible = true;
+
+  public boolean isVisible() {
+    return visible;
+  }
+
+  public void setVisible(boolean visible) {
+    this.visible = visible;
+  }
+}

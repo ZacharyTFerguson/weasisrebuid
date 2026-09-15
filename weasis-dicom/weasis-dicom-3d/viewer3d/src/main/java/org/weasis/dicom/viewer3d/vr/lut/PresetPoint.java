@@ -9,4 +9,39 @@
  */
 package org.weasis.dicom.viewer3d.vr.lut;
 
-public class PresetPoint {}
+public final class PresetPoint {
+
+  private final float intensity;
+  private final float red;
+  private final float green;
+  private final float blue;
+  private final float opacity;
+
+  public PresetPoint(float intensity, float red, float green, float blue, float opacity) {
+    this.intensity = intensity;
+    this.red = red;
+    this.green = green;
+    this.blue = blue;
+    this.opacity = opacity;
+  }
+
+  public float getIntensity() {
+    return intensity;
+  }
+
+  public float getRed() {
+    return red;
+  }
+
+  public float getGreen() {
+    return green;
+  }
+
+  public float getBlue() {
+    return blue;
+  }
+
+  public float getOpacity() {
+    return opacity;
+  }
+}

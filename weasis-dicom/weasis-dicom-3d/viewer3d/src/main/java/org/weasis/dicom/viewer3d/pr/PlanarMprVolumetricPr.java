@@ -9,4 +9,19 @@
  */
 package org.weasis.dicom.viewer3d.pr;
 
-public class PlanarMprVolumetricPr {}
+import org.weasis.dicom.viewer3d.geometry.View;
+
+public class PlanarMprVolumetricPr {
+
+  private View plane = View.AXIAL;
+
+  public View getPlane() {
+    return plane;
+  }
+
+  public void setPlane(View plane) {
+    if (plane != null) {
+      this.plane = plane;
+    }
+  }
+}

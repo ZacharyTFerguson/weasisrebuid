@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class VolumeLutEditorDialog {}
+import org.weasis.dicom.viewer3d.vr.lut.VolumePreset;
+
+public class VolumeLutEditorDialog {
+
+  private VolumePreset preset;
+
+  public VolumeLutEditorDialog(VolumePreset preset) {
+    this.preset = preset == null ? VolumePreset.ctSoftTissue() : preset;
+  }
+
+  public VolumePreset getPreset() {
+    return preset;
+  }
+
+  public void setPreset(VolumePreset preset) {
+    if (preset != null) {
+      this.preset = preset;
+    }
+  }
+}

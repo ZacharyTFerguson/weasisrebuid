@@ -9,4 +9,36 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class Program {}
+public class Program {
+
+  private final String name;
+  private final String vertexSource;
+  private final String fragmentSource;
+  private boolean compiled;
+
+  public Program(String name, String vertexSource, String fragmentSource) {
+    this.name = name;
+    this.vertexSource = vertexSource == null ? "" : vertexSource;
+    this.fragmentSource = fragmentSource == null ? "" : fragmentSource;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getVertexSource() {
+    return vertexSource;
+  }
+
+  public String getFragmentSource() {
+    return fragmentSource;
+  }
+
+  public boolean isCompiled() {
+    return compiled;
+  }
+
+  public void markCompiled(boolean compiled) {
+    this.compiled = compiled;
+  }
+}

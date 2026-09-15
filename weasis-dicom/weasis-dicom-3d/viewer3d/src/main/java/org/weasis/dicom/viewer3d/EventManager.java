@@ -9,4 +9,37 @@
  */
 package org.weasis.dicom.viewer3d;
 
-public class EventManager {}
+import org.weasis.dicom.viewer3d.vr.View3d;
+
+/** Focused 3D view and current volume action. */
+public final class EventManager {
+
+  private static final EventManager INSTANCE = new EventManager();
+
+  private View3d selectedView;
+  private ActionVol action = ActionVol.RENDERING_TYPE;
+
+  private EventManager() {}
+
+  public static EventManager getInstance() {
+    return INSTANCE;
+  }
+
+  public View3d getSelectedView() {
+    return selectedView;
+  }
+
+  public void setSelectedView(View3d selectedView) {
+    this.selectedView = selectedView;
+  }
+
+  public ActionVol getAction() {
+    return action;
+  }
+
+  public void setAction(ActionVol action) {
+    if (action != null) {
+      this.action = action;
+    }
+  }
+}

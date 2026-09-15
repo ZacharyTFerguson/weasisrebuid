@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class VolumeTexture {}
+public class VolumeTexture {
+
+  private TextureData data;
+
+  public VolumeTexture() {}
+
+  public VolumeTexture(TextureData data) {
+    this.data = data;
+  }
+
+  public TextureData getData() {
+    return data;
+  }
+
+  public void setData(TextureData data) {
+    this.data = data;
+  }
+
+  public boolean isEmpty() {
+    return data == null || data.size() == 0;
+  }
+}

@@ -9,4 +9,32 @@
  */
 package org.weasis.dicom.viewer3d.vr;
 
-public class PresetRadioMenu {}
+import java.util.ArrayList;
+import java.util.List;
+import org.weasis.dicom.viewer3d.vr.lut.VolumePreset;
+
+public class PresetRadioMenu {
+
+  private final List<VolumePreset> presets = new ArrayList<>();
+  private VolumePreset selected;
+
+  public PresetRadioMenu() {
+    presets.add(VolumePreset.ctSoftTissue());
+    presets.add(VolumePreset.ctBone());
+    selected = presets.get(0);
+  }
+
+  public List<VolumePreset> getPresets() {
+    return List.copyOf(presets);
+  }
+
+  public VolumePreset getSelected() {
+    return selected;
+  }
+
+  public void setSelected(VolumePreset selected) {
+    if (selected != null) {
+      this.selected = selected;
+    }
+  }
+}

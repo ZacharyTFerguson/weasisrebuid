@@ -9,4 +9,12 @@
  */
 package org.weasis.dicom.viewer3d.pref;
 
-public class Viewer3dPrefView {}
+import org.weasis.core.ui.pref.ShellPrefPage;
+import org.weasis.dicom.viewer3d.OpenGLInfo;
+
+public class Viewer3dPrefView extends ShellPrefPage {
+
+  public Viewer3dPrefView() {
+    super("3D Viewer (OpenGL " + OpenGLInfo.MIN_VERSION + "+)", 520);
+  }
+}

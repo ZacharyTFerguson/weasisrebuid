@@ -9,4 +9,8 @@
  */
 package org.weasis.dicom.viewer3d.geometry;
 
-public class Axis {}
+public enum Axis {
+  X,
+  Y,
+  Z
+}

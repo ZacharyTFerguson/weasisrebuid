@@ -9,4 +9,25 @@
  */
 package org.weasis.dicom.viewer3d;
 
-public class InfoLayer3d {}
+import org.weasis.dicom.viewer3d.vr.View3d;
+
+/** Overlay text for the 3D canvas (GPU verdict, rendering type). */
+public class InfoLayer3d {
+
+  private final View3d view;
+
+  public InfoLayer3d(View3d view) {
+    this.view = view;
+  }
+
+  public String overlayText() {
+    if (view == null) {
+      return OpenGLInfo.Verdict.NA_NO_GPU.name();
+    }
+    return view.gpuCaps().verdict().name() + " " + view.getRenderingType();
+  }
+
+  public View3d getView() {
+    return view;
+  }
+}

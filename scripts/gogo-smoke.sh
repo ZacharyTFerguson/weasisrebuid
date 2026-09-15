@@ -91,6 +91,18 @@ if not docking_ok:
     sys.exit("lb did not list docking-frames ACTIVE: %r" % lb)
 if not opencv_ok:
     sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
+send_ok = bundle_state(lb, "Weasis DICOM Send") == "Active"
+qr_ok = bundle_state(lb, "Weasis DICOM Q/R") == "Active"
+iso_ok = bundle_state(lb, "Weasis DICOM ISO writer") == "Active"
+if not send_ok:
+    sys.exit("lb did not list weasis-dicom-send ACTIVE @110: %r" % lb)
+if not qr_ok:
+    sys.exit("lb did not list weasis-dicom-qr ACTIVE @110: %r" % lb)
+if not iso_ok:
+    sys.exit("lb did not list weasis-dicom-isowriter ACTIVE @110: %r" % lb)
+viewer3d_ok = bundle_state(lb, "Weasis DICOM 3D Viewer") == "Active"
+if not viewer3d_ok:
+    sys.exit("lb did not list weasis-dicom-viewer3d ACTIVE @120: %r" % lb)
 send("weasis:ui -q")
 print("SMOKE_OK")
 PY

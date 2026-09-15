@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis.thirdparty.org.jogamp</groupId>
+    <artifactId>jogamp-native</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <artifactId>jogamp-linux-aarch64</artifactId>
+  <version>${sha1}</version>
+  <packaging>jar</packaging>
+  <name>JOGL - Linux aarch64</name>
+
+  <properties>
+    <native.configuration>natives/linux-aarch64/libgluegen_rt.so; natives/linux-aarch64/libjocl.so; natives/linux-aarch64/libnativewindow_awt.so; natives/linux-aarch64/libnewt_drm.so; natives/linux-aarch64/libnativewindow_x11.so; natives/linux-aarch64/libnativewindow_drm.so; natives/linux-aarch64/libnewt_head.so; natives/linux-aarch64/libjogl_mobile.so; natives/linux-aarch64/libjogl_desktop.so; processor=aarch64; osname=Linux</native.configuration>
+    <jogamp.native.classifier>natives-linux-aarch64</jogamp.native.classifier>
+  </properties>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>unpack-jogamp-natives</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>unpack</goal>
+            </goals>
+            <configuration>
+              <artifactItems>
+                <artifactItem>
+                  <groupId>org.jogamp.gluegen</groupId>
+                  <artifactId>gluegen-rt</artifactId>
+                  <version>${jogamp.version}</version>
+                  <classifier>${jogamp.native.classifier}</classifier>
+                  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jogamp.jogl</groupId>
+                  <artifactId>jogl-all</artifactId>
+                  <version>${jogamp.version}</version>
+                  <classifier>${jogamp.native.classifier}</classifier>
+                  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                </artifactItem>
+                <artifactItem>
+                  <groupId>org.jogamp.jocl</groupId>
+                  <artifactId>jocl</artifactId>
+                  <version>${jogamp.version}</version>
+                  <classifier>${jogamp.native.classifier}</classifier>
+                  <outputDirectory>${project.build.outputDirectory}</outputDirectory>
+                </artifactItem>
+              </artifactItems>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd><![CDATA[
+Bundle-SymbolicName: jogamp-linux-aarch64
+Bundle-Name: JOGL - Linux aarch64
+Bundle-Version: ${jogamp.version}
+Bundle-NativeCode: ${native.configuration}
+Import-Package:
+Fragment-Host: jogamp;bundle-version="${jogamp.version}"
+Export-Package: !*
+]]></bnd>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

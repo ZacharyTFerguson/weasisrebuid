@@ -9,4 +9,23 @@
  */
 package org.weasis.dicom.viewer3d.pref;
 
-public class Viewer3dPrefFactory {}
+import java.util.Hashtable;
+import org.osgi.service.component.annotations.Component;
+import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.PreferencesPageFactory;
+import org.weasis.core.api.gui.util.AbstractItemDialogPage;
+import org.weasis.core.ui.pref.AbstractPreferencesPageFactory;
+
+@Component(service = PreferencesPageFactory.class)
+public class Viewer3dPrefFactory extends AbstractPreferencesPageFactory {
+
+  @Override
+  public AbstractItemDialogPage createInstance(Hashtable<String, Object> properties) {
+    return new Viewer3dPrefView();
+  }
+
+  @Override
+  public boolean isComponentCreatedByThisFactory(Insertable component) {
+    return component instanceof Viewer3dPrefView;
+  }
+}
