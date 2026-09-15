@@ -18,8 +18,7 @@ public class ShaderManager {
 
   public ShaderManager() {
     programs.put(
-        RenderingType.COMPOSITE,
-        new Program("composite", "// vertex", "// fragment composite"));
+        RenderingType.COMPOSITE, new Program("composite", "// vertex", "// fragment composite"));
     programs.put(RenderingType.MIP, new Program("mip", "// vertex", "// fragment mip"));
     programs.put(RenderingType.MINIP, new Program("minip", "// vertex", "// fragment minip"));
     programs.put(RenderingType.ISO, new Program("iso", "// vertex", "// fragment iso"));

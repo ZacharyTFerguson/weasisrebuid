@@ -71,7 +71,7 @@ Bundle-SymbolicName: jogamp
 Bundle-Name: JOGL - Java Bindings for OpenGL
 Bundle-Version: ${jogamp.version}
 -includeresource.all: lib/=target/dependency/;lib:=true
-Import-Package: !com.jogamp.openal.*,!org.eclipse.*,!com.jogamp.plugin.applet,!org.jdesktop.applet.*,!java.applet,javafx.*;resolution:=optional,com.jogamp.plugin.ui;resolution:=optional,com.sun.javafx.tk;resolution:=optional,jdk.internal.module;resolution:=optional,*
+Import-Package: !com.jogamp.openal.*,!org.eclipse.*,!com.jogamp.plugin.applet,!org.jdesktop.applet.*,!java.applet,javafx.*;resolution:=optional,com.jogamp.plugin.ui;resolution:=optional,com.sun.javafx.tk;resolution:=optional,jdk.internal.module;resolution:=optional,sun.*;resolution:=optional,com.sun.*;resolution:=optional,*
 -exportcontents: com.jogamp.*,gluegen.*,jogamp.*
 ]]></bnd>
         </configuration>

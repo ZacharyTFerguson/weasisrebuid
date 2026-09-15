@@ -27,14 +27,21 @@ class Mx15StartLevelTest {
     Path distJson =
         Mx03ShippingPrefsTest.moduleRoot().resolve("../weasis-distributions/etc/config/base.json");
     Map<String, String> build =
-        Map.of("app.version", "4.7.3", "jogamp.version", "2.6.0", "native.library.spec", "linux-x86-64");
+        Map.of(
+            "app.version",
+            "4.7.3",
+            "jogamp.version",
+            "2.6.0",
+            "native.library.spec",
+            "linux-x86-64");
     ConfigData launcher = ConfigData.load(launcherJson, build);
     ConfigData dist = ConfigData.load(distJson, build);
 
     String start120 = dist.value("felix.auto.start.120");
     assertTrue(start120.contains("weasis-dicom-viewer3d-4.7.3.jar"));
     assertTrue(start120.contains("/org/weasis/dicom/3d/weasis-dicom-viewer3d/"));
-    assertTrue(start120.contains("/org/weasis/thirdparty/org/jogamp/jogamp/2.6.0/jogamp-2.6.0.jar"));
+    assertTrue(
+        start120.contains("/org/weasis/thirdparty/org/jogamp/jogamp/2.6.0/jogamp-2.6.0.jar"));
     String install121 = dist.value("felix.auto.install.121");
     assertTrue(install121.contains("jogamp-linux-x86-64-2.6.0.jar"));
     assertFalse(install121.contains("weasis-dicom-viewer3d"));

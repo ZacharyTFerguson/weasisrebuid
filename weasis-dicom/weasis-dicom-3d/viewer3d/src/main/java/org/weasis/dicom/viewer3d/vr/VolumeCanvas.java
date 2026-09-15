@@ -17,8 +17,8 @@ import org.weasis.dicom.viewer3d.geometry.ArcballMouseListener;
 import org.weasis.dicom.viewer3d.geometry.Camera;
 
 /**
- * Headless-safe VR canvas. GPU capability is decided by {@link OpenGLInfo}; JOGL is not required
- * to record MX-15 refuse / N/A.
+ * Headless-safe VR canvas. GPU capability is decided by {@link OpenGLInfo}; JOGL is not required to
+ * record MX-15 refuse / N/A.
  */
 public class VolumeCanvas extends JPanel implements ArcballMouseListener {
 

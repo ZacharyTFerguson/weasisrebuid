@@ -20,8 +20,7 @@ class VolumeCanvasGpuGateTest {
 
   @Test
   void canvasRefusesSoftwareRasterizer() {
-    VolumeCanvas canvas =
-        new VolumeCanvas(OpenGLInfo.describe("llvmpipe (LLVM 15)", "4.5"));
+    VolumeCanvas canvas = new VolumeCanvas(OpenGLInfo.describe("llvmpipe (LLVM 15)", "4.5"));
     assertFalse(canvas.isVolumeRenderingAvailable());
     assertEquals(OpenGLInfo.Verdict.REFUSED_LLVMPIPE, canvas.gpuCaps().verdict());
     canvas.onRotate(0.2, 0.1);

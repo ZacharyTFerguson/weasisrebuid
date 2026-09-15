@@ -39,17 +39,13 @@ public final class VolumePreset {
     return new VolumePreset(
         "CT Soft Tissue",
         PresetGroup.CT,
-        List.of(
-            new PresetPoint(-160, 0, 0, 0, 0),
-            new PresetPoint(240, 1, 0.8f, 0.7f, 0.6f)));
+        List.of(new PresetPoint(-160, 0, 0, 0, 0), new PresetPoint(240, 1, 0.8f, 0.7f, 0.6f)));
   }
 
   public static VolumePreset ctBone() {
     return new VolumePreset(
         "CT Bone",
         PresetGroup.CT,
-        List.of(
-            new PresetPoint(100, 0, 0, 0, 0),
-            new PresetPoint(800, 1, 1, 0.9f, 0.8f)));
+        List.of(new PresetPoint(100, 0, 0, 0, 0), new PresetPoint(800, 1, 1, 0.9f, 0.8f)));
   }
 }

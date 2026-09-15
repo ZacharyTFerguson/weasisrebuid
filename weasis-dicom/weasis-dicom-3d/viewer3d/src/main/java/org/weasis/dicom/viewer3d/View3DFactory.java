@@ -47,8 +47,7 @@ public class View3DFactory implements SeriesViewerFactory {
     Object renderer = properties.get("opengl.renderer");
     Object version = properties.get("opengl.version");
     return OpenGLInfo.describe(
-        renderer == null ? null : renderer.toString(),
-        version == null ? null : version.toString());
+        renderer == null ? null : renderer.toString(), version == null ? null : version.toString());
   }
 
   @Override
