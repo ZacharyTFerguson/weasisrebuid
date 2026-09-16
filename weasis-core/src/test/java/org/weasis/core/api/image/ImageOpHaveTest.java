@@ -18,6 +18,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import org.junit.jupiter.api.Test;
+import org.weasis.core.api.image.util.KernelData;
 
 class ImageOpHaveTest {
 
@@ -259,6 +260,94 @@ class ImageOpHaveTest {
     assertNotSame(src, out);
     out.setRGB(0, 0, 0);
     assertEquals(0xFF000000, src.getRGB(0, 0));
+  }
+
+  @Test
+  void filterNonePassthroughAndSharpenRaisesCenter() throws Exception {
+    BufferedImage src = new BufferedImage(3, 3, BufferedImage.TYPE_BYTE_GRAY);
+    for (int y = 0; y < 3; y++) {
+      for (int x = 0; x < 3; x++) {
+        src.getRaster().setSample(x, y, 0, 10);
+      }
+    }
+    src.getRaster().setSample(1, 1, 0, 50);
+    FilterOp none = new FilterOp();
+    none.setParam(ImageOpNode.INPUT_IMG, src);
+    none.process();
+    assertSame(src, none.getParam(ImageOpNode.OUTPUT_IMG));
+
+    FilterOp sharpen = new FilterOp();
+    sharpen.setParam(FilterOp.P_FILTER, KernelData.SHARPEN);
+    sharpen.setParam(ImageOpNode.INPUT_IMG, src);
+    sharpen.process();
+    BufferedImage out = (BufferedImage) sharpen.getParam(ImageOpNode.OUTPUT_IMG);
+    assertEquals(210, out.getRaster().getSample(1, 1, 0));
+    assertNotSame(src, out);
+  }
+
+  @Test
+  void pseudoColorGrayPassthroughAndInverseMapsComplement() throws Exception {
+    BufferedImage src = gray(40);
+    PseudoColorOp gray = new PseudoColorOp();
+    gray.setParam(ImageOpNode.INPUT_IMG, src);
+    gray.process();
+    assertSame(src, gray.getParam(ImageOpNode.OUTPUT_IMG));
+
+    PseudoColorOp invert = new PseudoColorOp();
+    invert.setParam(PseudoColorOp.P_INVERT, Boolean.TRUE);
+    invert.setParam(ImageOpNode.INPUT_IMG, src);
+    invert.process();
+    assertEquals(215, grayAt(invert));
+    assertNotSame(src, invert.getParam(ImageOpNode.OUTPUT_IMG));
+  }
+
+  @Test
+  void shutterBlacksOutsideEnabledBox() throws Exception {
+    BufferedImage src = new BufferedImage(2, 2, BufferedImage.TYPE_BYTE_GRAY);
+    src.getRaster().setSample(0, 0, 0, 100);
+    src.getRaster().setSample(1, 0, 0, 200);
+    src.getRaster().setSample(0, 1, 0, 100);
+    src.getRaster().setSample(1, 1, 0, 200);
+    ShutterOp off = new ShutterOp();
+    off.setParam(ImageOpNode.INPUT_IMG, src);
+    off.process();
+    assertSame(src, off.getParam(ImageOpNode.OUTPUT_IMG));
+
+    ShutterOp on = new ShutterOp();
+    on.setParam(ShutterOp.P_ENABLED, Boolean.TRUE);
+    on.setParam(ShutterOp.P_LEFT, 1);
+    on.setParam(ShutterOp.P_RIGHT, 1);
+    on.setParam(ShutterOp.P_UPPER, 0);
+    on.setParam(ShutterOp.P_LOWER, 1);
+    on.setParam(ImageOpNode.INPUT_IMG, src);
+    on.process();
+    BufferedImage out = (BufferedImage) on.getParam(ImageOpNode.OUTPUT_IMG);
+    assertEquals(0, out.getRaster().getSample(0, 0, 0));
+    assertEquals(200, out.getRaster().getSample(1, 0, 0));
+    assertEquals(0, out.getRaster().getSample(0, 1, 0));
+    assertEquals(200, out.getRaster().getSample(1, 1, 0));
+  }
+
+  @Test
+  void overlayBitsOrOntoGrayWithoutSharingRaster() throws Exception {
+    BufferedImage src = new BufferedImage(2, 1, BufferedImage.TYPE_BYTE_GRAY);
+    src.getRaster().setSample(0, 0, 0, 40);
+    src.getRaster().setSample(1, 0, 0, 40);
+    OverlayOp none = new OverlayOp();
+    none.setParam(ImageOpNode.INPUT_IMG, src);
+    none.process();
+    assertSame(src, none.getParam(ImageOpNode.OUTPUT_IMG));
+
+    OverlayOp op = new OverlayOp();
+    op.setParam(OverlayOp.P_BITS, new byte[] {0b00000001});
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    op.process();
+    BufferedImage out = (BufferedImage) op.getParam(ImageOpNode.OUTPUT_IMG);
+    assertEquals(255, out.getRaster().getSample(0, 0, 0));
+    assertEquals(40, out.getRaster().getSample(1, 0, 0));
+    assertNotSame(src, out);
+    out.getRaster().setSample(0, 0, 0, 0);
+    assertEquals(40, src.getRaster().getSample(0, 0, 0));
   }
 
   static BufferedImage gray(int sample) {
