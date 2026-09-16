@@ -286,8 +286,7 @@ class ViewerChromeHaveTest {
     assertTrue(
         ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(1))
             .isSelected());
-    ((javax.swing.AbstractButton) container.getViewerToolBar().getComponent().getComponent(6))
-        .doClick();
+    ((javax.swing.AbstractButton) container.getViewerToolBar().getComponent(6)).doClick();
     assertEquals(
         org.weasis.core.ui.editor.image.dockable.MeasureTool.ANGLE, view.activeMeasureTool());
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 80));
@@ -301,8 +300,7 @@ class ViewerChromeHaveTest {
     assertTrue(
         ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(3))
             .isSelected());
-    ((javax.swing.AbstractButton) container.getViewerToolBar().getComponent().getComponent(6))
-        .doClick();
+    ((javax.swing.AbstractButton) container.getViewerToolBar().getComponent(6)).doClick();
     assertEquals(
         org.weasis.core.ui.editor.image.dockable.MeasureTool.RECTANGLE, view.activeMeasureTool());
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 60, 60));
