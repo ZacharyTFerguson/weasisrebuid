@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.weasis.core.api.image.BrightnessOp;
 import org.weasis.core.api.image.CropOp;
 import org.weasis.core.api.image.FilterOp;
 import org.weasis.core.api.image.ImageOpNode;
@@ -51,6 +52,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private double level = 40;
   private boolean windowChrome;
   private boolean cropChrome;
+  private boolean brightnessChrome;
   private File file;
   private final KOManager koManager = new KOManager();
   private final List<WindLevelParameters> presets = new ArrayList<>();
@@ -201,6 +203,15 @@ public class View2d extends DefaultView2d<MediaElement> {
     return cropChrome;
   }
 
+  public void applyBrightnessChrome(boolean on) {
+    brightnessChrome = on;
+    render();
+  }
+
+  public boolean isBrightnessChrome() {
+    return brightnessChrome;
+  }
+
   @Override
   public void setLut(String lut) {
     super.setLut(lut);
@@ -347,6 +358,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     }
     BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, activeVoi);
     painted = applyFilterAndColor(painted);
+    painted = applyBrightness(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);
     painted = applyCrop(painted);
@@ -376,6 +388,26 @@ public class View2d extends DefaultView2d<MediaElement> {
     this.activeVoi = from.activeVoi;
     this.window = from.window;
     this.level = from.level;
+  }
+
+  BufferedImage applyBrightness(BufferedImage src) {
+    if (!brightnessChrome) {
+      return src;
+    }
+    return runBrightnessOp(src);
+  }
+
+  static BufferedImage runBrightnessOp(BufferedImage src) {
+    BrightnessOp op = new BrightnessOp();
+    op.setParam(BrightnessOp.P_BRIGHTNESS, 48.0);
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    try {
+      op.process();
+    } catch (Exception e) {
+      return src;
+    }
+    Object out = op.getParam(ImageOpNode.OUTPUT_IMG);
+    return out instanceof BufferedImage img ? img : src;
   }
 
   BufferedImage applyCrop(BufferedImage src) {

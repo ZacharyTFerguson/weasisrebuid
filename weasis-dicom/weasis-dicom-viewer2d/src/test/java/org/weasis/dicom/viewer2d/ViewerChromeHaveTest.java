@@ -219,6 +219,41 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void brightnessClickLiftsPixelsWithoutChangingCropOrFlip(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    int before = view.getSourceImage().getRaster().getSample(4, 4, 0);
+    AbstractButton brightness = container.getImageTool().brightnessButton();
+    assertEquals("Brightness", brightness.getText());
+    assertEquals(ImageTool.BRIGHTNESS, brightness.getName());
+    assertEquals(ImageTool.CROP, container.getImageTool().cropButton().getName());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+    brightness.doClick();
+    assertTrue(view.isBrightnessChrome());
+    int lifted = view.getSourceImage().getRaster().getSample(4, 4, 0);
+    assertEquals(Math.min(255, before + 48), lifted);
+    view.setSize(8, 8);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    assertEquals(lifted, paint(view).getRGB(4, 4) & 0xFF);
+    assertFalse(view.isCropChrome());
+    assertFalse(view.isWindowChrome());
+    assertFalse(view.isFlip());
+    assertEquals(FilterOp.NONE, String.valueOf(view.getFilter()));
+    AffineTransformOp affine = new AffineTransformOp();
+    affine.setParam(ImageOpNode.INPUT_IMG, view.getSourceImage());
+    affine.process();
+    assertSame(view.getSourceImage(), affine.getParam(ImageOpNode.OUTPUT_IMG));
+    brightness.doClick();
+    assertFalse(view.isBrightnessChrome());
+    assertEquals(before, view.getSourceImage().getRaster().getSample(4, 4, 0));
+    assertEquals(before, paint(view).getRGB(4, 4) & 0xFF);
+  }
+
+  @Test
   void namedFlipMirrorsEveryDxHangCellWithoutRasterizingSource() throws Exception {
     View2dContainer container = new View2dContainer();
     container.applyHanging(1, 2);

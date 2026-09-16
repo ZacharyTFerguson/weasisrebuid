@@ -25,10 +25,12 @@ public class ImageTool extends PluginTool {
 
   public static final String NAME = "Image";
   public static final String CROP = "crop";
+  public static final String BRIGHTNESS = "brightness";
 
   private final JLabel summary = new JLabel(" ");
   private final JToggleButton window = new JToggleButton("Window");
   private final JToggleButton crop = new JToggleButton("Crop");
+  private final JToggleButton brightness = new JToggleButton("Brightness");
   private final JToggleButton flip = new JToggleButton("Flip");
   private View2d view;
 
@@ -38,12 +40,15 @@ public class ImageTool extends PluginTool {
     window.addActionListener(e -> applyWindow());
     crop.setName(CROP);
     crop.addActionListener(e -> applyCrop());
+    brightness.setName(BRIGHTNESS);
+    brightness.addActionListener(e -> applyBrightness());
     flip.setName(ActionW.FLIP.cmd());
     flip.addActionListener(e -> applyFlip());
     JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
     row.add(summary);
     row.add(window);
     row.add(crop);
+    row.add(brightness);
     row.add(flip);
     add(row, BorderLayout.NORTH);
   }
@@ -53,6 +58,7 @@ public class ImageTool extends PluginTool {
     if (view != null) {
       window.setSelected(view.isWindowChrome());
       crop.setSelected(view.isCropChrome());
+      brightness.setSelected(view.isBrightnessChrome());
       flip.setSelected(view.isFlip());
     }
     refresh();
@@ -64,6 +70,10 @@ public class ImageTool extends PluginTool {
 
   public JToggleButton cropButton() {
     return crop;
+  }
+
+  public JToggleButton brightnessButton() {
+    return brightness;
   }
 
   public JToggleButton flipButton() {
@@ -88,6 +98,17 @@ public class ImageTool extends PluginTool {
       host.applyCrop(on);
     } else if (view != null) {
       view.applyCropChrome(on);
+    }
+    refresh();
+  }
+
+  void applyBrightness() {
+    boolean on = brightness.isSelected();
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyBrightness(on);
+    } else if (view != null) {
+      view.applyBrightnessChrome(on);
     }
     refresh();
   }

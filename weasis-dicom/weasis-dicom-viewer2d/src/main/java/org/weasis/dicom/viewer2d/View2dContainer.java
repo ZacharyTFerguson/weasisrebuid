@@ -389,6 +389,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     flushFlipPaint();
   }
 
+  public void applyBrightness(boolean on) {
+    View2d painted = paintedCell();
+    for (View2d cell : layout) {
+      cell.applyBrightnessChrome(on);
+    }
+    if (painted != null) {
+      painted.applyBrightnessChrome(on);
+      imageTool.bind(painted);
+    }
+    flushFlipPaint();
+  }
+
   View2d paintedCell() {
     View2d showing = showingRasterCell();
     if (showing != null) {
