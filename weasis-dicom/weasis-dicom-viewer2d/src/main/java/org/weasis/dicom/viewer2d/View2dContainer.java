@@ -341,7 +341,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     }
   }
 
-  void applyFlip(boolean on) {
+  public void applyFlip(boolean on) {
     for (View2d cell : layout) {
       cell.setFlip(on);
     }
