@@ -99,6 +99,35 @@ public final class MeasureTool {
     return RECTANGLE.equals(c) || ELLIPSE.equals(c) || POLYGON.equals(c);
   }
 
+  public static String shortcut(String tool) {
+    return switch (canonical(tool)) {
+      case ANGLE -> "A";
+      case POLYLINE -> "Y";
+      case RECTANGLE -> "G";
+      case TEXTBOX -> "B";
+      default -> "D";
+    };
+  }
+
+  public static boolean isType(Graphic graphic, String tool) {
+    if (graphic == null) {
+      return false;
+    }
+    return switch (canonical(tool)) {
+      case ANGLE -> graphic instanceof AngleToolGraphic;
+      case POLYLINE -> graphic instanceof PolylineGraphic;
+      case RECTANGLE -> graphic instanceof RectangleGraphic;
+      case TEXTBOX -> graphic instanceof AnnotationGraphic;
+      case ELLIPSE -> graphic instanceof EllipseGraphic;
+      case POLYGON -> graphic instanceof PolygonGraphic;
+      default -> lineOnly(graphic);
+    };
+  }
+
+  static boolean lineOnly(Graphic graphic) {
+    return graphic instanceof LineGraphic && !(graphic instanceof PolylineGraphic);
+  }
+
   public static Graphic distance(Point2D.Double a, Point2D.Double b) {
     LineGraphic line = new LineGraphic();
     line.setHandlePoint(0, a);

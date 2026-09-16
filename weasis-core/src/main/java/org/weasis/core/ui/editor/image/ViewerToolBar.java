@@ -71,7 +71,35 @@ public class ViewerToolBar extends WtoolBar {
   }
 
   public static void bindMeasureTool(DefaultView2d<?> view) {
+    if (view == null) {
+      return;
+    }
     String left = MouseActions.normalize(view.getMouseActions().getLeft());
+    if (!drawingLeft(left)) {
+      return;
+    }
+    MeasureToolBar bar = view.getMeasureToolBar();
+    if (bar != null) {
+      view.setMeasureTool(MeasureTool.canonical(bar.getSelected()));
+      syncLeftToTool(view);
+      return;
+    }
+    bindWithoutBar(view, left);
+  }
+
+  static boolean drawingLeft(String left) {
+    return MouseActions.MEASURE.equals(left) || MouseActions.DRAW.equals(left);
+  }
+
+  static void syncLeftToTool(DefaultView2d<?> view) {
+    if (MeasureTool.drawFamily(view.activeMeasureTool())) {
+      view.getMouseActions().setLeft(MouseActions.DRAW);
+    } else {
+      view.getMouseActions().setLeft(MouseActions.MEASURE);
+    }
+  }
+
+  static void bindWithoutBar(DefaultView2d<?> view, String left) {
     if (MouseActions.MEASURE.equals(left)) {
       if (!MeasureTool.measureFamily(view.getMeasureTool())) {
         view.setMeasureTool(MeasureTool.DISTANCE);

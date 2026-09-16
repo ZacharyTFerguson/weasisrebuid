@@ -20,6 +20,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -31,6 +32,7 @@ import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.core.ui.util.PrintOptions;
 
@@ -390,25 +392,13 @@ public class ImageViewerEventManager {
 
   void onDrawPressed(MouseEvent e) {
     Point2D.Double p = imagePoint(e);
-    Graphic current = view.getDrawing();
+    Graphic current = matchingDrawing();
     if (e.getClickCount() > 1 && current != null) {
-      view.setDrawing(null);
-      drawHandle = 0;
-      DrawStroke.INSTANCE.drawingView = null;
+      finishDrawing();
       return;
     }
     if (current == null) {
-      Graphic created = MeasureTool.create(view.activeMeasureTool());
-      if (!(created instanceof DragGraphic drag)) {
-        return;
-      }
-      drag.setHandlePoint(0, p);
-      drag.setHandlePoint(1, p);
-      drawHandle = 1;
-      angleRayClicked = false;
-      view.addGraphic(created);
-      view.setDrawing(created);
-      DrawStroke.INSTANCE.drawingView = view;
+      startGraphic(p);
       return;
     }
     if (current instanceof DragGraphic drag && isOpenPath(current)) {
@@ -417,10 +407,40 @@ public class ImageViewerEventManager {
     } else if (current instanceof AngleToolGraphic angle) {
       angleRayClicked = true;
       angle.setHandlePoint(2, p);
-      view.setDrawing(null);
-      drawHandle = 0;
-      DrawStroke.INSTANCE.drawingView = null;
+      finishDrawing();
     }
+  }
+
+  Graphic matchingDrawing() {
+    Graphic current = view.getDrawing();
+    if (current != null && !MeasureTool.isType(current, view.activeMeasureTool())) {
+      view.abandonDrawing();
+      return null;
+    }
+    return current;
+  }
+
+  void startGraphic(Point2D.Double p) {
+    Graphic created = MeasureTool.create(view.activeMeasureTool());
+    if (!(created instanceof DragGraphic drag)) {
+      return;
+    }
+    drag.setHandlePoint(0, p);
+    drag.setHandlePoint(1, p);
+    if (created instanceof AngleToolGraphic) {
+      drag.setHandlePoint(2, p);
+    }
+    drawHandle = 1;
+    angleRayClicked = false;
+    view.addGraphic(created);
+    view.setDrawing(created);
+    DrawStroke.INSTANCE.drawingView = view;
+  }
+
+  void finishDrawing() {
+    view.setDrawing(null);
+    drawHandle = 0;
+    DrawStroke.INSTANCE.drawingView = null;
   }
 
   void onDrawDragged(MouseEvent e) {
@@ -440,26 +460,62 @@ public class ImageViewerEventManager {
       drag.setHandlePoint(drawHandle, imagePoint(e));
     }
     if (current instanceof AngleToolGraphic angle) {
-      if (!angleRayClicked) {
-        angle.setRightRay();
-        Point2D.Double p = angle.getHandlePoint(2);
-        if (p != null) {
-          angle.setHandlePoint(2, clampImage(p));
-        }
-      }
-      view.repaint();
+      completeAngle(angle);
       return;
     }
     if (isOpenPath(current)) {
+      dropIfDegenerate(current);
       view.repaint();
       return;
     }
-    view.setDrawing(null);
-    drawHandle = 0;
-    DrawStroke.INSTANCE.drawingView = null;
     if (current instanceof RectangleGraphic rect) {
       rect.ensureArea(32, view.getSourceImage());
     }
+    dropIfDegenerate(current);
+    finishDrawing();
+  }
+
+  void completeAngle(AngleToolGraphic angle) {
+    if (!angleRayClicked) {
+      angle.setRightRay();
+      Point2D.Double p = angle.getHandlePoint(2);
+      if (p != null) {
+        angle.setHandlePoint(2, clampImage(p));
+      }
+    }
+    dropIfDegenerate(angle);
+    finishDrawing();
+    view.repaint();
+  }
+
+  void dropIfDegenerate(Graphic graphic) {
+    if (degenerate(graphic)) {
+      view.removeGraphic(graphic);
+    }
+  }
+
+  public static boolean degenerate(Graphic graphic) {
+    if (graphic instanceof LineGraphic line && !(graphic instanceof PolylineGraphic)) {
+      return line.getLength() < 0.5;
+    }
+    if (graphic instanceof PolylineGraphic poly) {
+      return PolylineGraphic.pathLength(poly.getPts()) < 0.5;
+    }
+    if (graphic instanceof AngleToolGraphic angle) {
+      return angle.getAngleDegrees() < 0.5;
+    }
+    if (graphic instanceof RectangleGraphic rect) {
+      return thinRect(rect);
+    }
+    return false;
+  }
+
+  static boolean thinRect(RectangleGraphic rect) {
+    if (rect.getShape() == null) {
+      return true;
+    }
+    var box = rect.getShape().getBounds2D();
+    return box.getWidth() < 0.5 || box.getHeight() < 0.5;
   }
 
   static boolean isOpenPath(Graphic graphic) {
@@ -529,6 +585,9 @@ public class ImageViewerEventManager {
 
     void onPress(MouseEvent me) {
       if (!SwingUtilities.isLeftMouseButton(me)) {
+        return;
+      }
+      if (me.getComponent() instanceof AbstractButton) {
         return;
       }
       DefaultView2d<?> hit = viewAt(me);

@@ -38,10 +38,15 @@ public class PolylineGraphic extends AbstractDragGraphic {
       path.lineTo(p.x, p.y);
     }
     setShape(path);
-    setLabel(new String[] {String.format("%.1f px", pathLength(pts))});
+    double length = pathLength(pts);
+    if (length < 0.5) {
+      setLabel(new String[0]);
+    } else {
+      setLabel(new String[] {String.format("%.1f px", length)});
+    }
   }
 
-  static double pathLength(List<Point2D.Double> pts) {
+  public static double pathLength(List<Point2D.Double> pts) {
     double len = 0;
     for (int i = 1; i < pts.size(); i++) {
       len += pts.get(i - 1).distance(pts.get(i));

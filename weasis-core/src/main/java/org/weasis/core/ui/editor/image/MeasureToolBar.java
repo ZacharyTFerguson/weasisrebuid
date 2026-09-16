@@ -9,12 +9,12 @@
  */
 package org.weasis.core.ui.editor.image;
 
-import java.awt.event.ActionEvent;
+import java.awt.Component;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
+import javax.swing.ButtonGroup;
 import javax.swing.JComponent;
+import javax.swing.JToggleButton;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.util.Toolbar;
@@ -22,7 +22,8 @@ import org.weasis.core.ui.util.WtoolBar;
 
 /**
  * Measure/draw chrome. Headed buttons are SHORTCUTS.md D/A/Y/G/B (distance, angle, polyline, draw,
- * textbox). Selecting a tool sets the left mouse action to {@code measure}.
+ * textbox). Each tool is a {@link JToggleButton} in one {@link ButtonGroup} so A/G stay selected
+ * for the next View2d drag.
  */
 public class MeasureToolBar extends WtoolBar implements Toolbar {
 
@@ -31,6 +32,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   /** WP-5 headed row: D distance, A angle, Y polyline, G draw, B textbox. */
   public static final String[] BUTTONS = {"D", "A", "Y", "G", "B"};
 
+  private final ButtonGroup group = new ButtonGroup();
   private String selected = MeasureTool.DISTANCE;
   private DefaultView2d<?> view;
   private final List<DefaultView2d<?>> targets = new ArrayList<>();
@@ -40,6 +42,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     for (String key : BUTTONS) {
       add(button(key));
     }
+    setSelected(MeasureTool.DISTANCE);
   }
 
   public void bind(DefaultView2d<?> view) {
@@ -67,6 +70,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
 
   public void setSelected(String selected) {
     this.selected = selected == null || selected.isBlank() ? MeasureTool.DISTANCE : selected;
+    selectToggle(MeasureTool.shortcut(this.selected));
   }
 
   public String getSelected() {
@@ -80,6 +84,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     String tool = MeasureTool.canonical(selected);
     view.setMeasureToolBar(this);
     view.setMeasureTool(tool);
+    view.abandonDrawing();
     if (MeasureTool.drawFamily(tool)) {
       view.getMouseActions().setLeft(MouseActions.DRAW);
     } else {
@@ -96,19 +101,34 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     }
   }
 
-  private JButton button(String key) {
-    JButton button =
-        new JButton(
-            new AbstractAction(key) {
-              @Override
-              public void actionPerformed(ActionEvent e) {
-                setSelected(key);
-                applyAll();
-              }
-            });
+  private JToggleButton button(String key) {
+    JToggleButton button = new JToggleButton(key);
     button.setName(key);
     button.setToolTipText(tip(key));
+    button.setFocusable(false);
+    button.addActionListener(
+        e -> {
+          setSelected(key);
+          applyAll();
+        });
+    group.add(button);
     return button;
+  }
+
+  void selectToggle(String key) {
+    JToggleButton toggle = toggleNamed(key);
+    if (toggle != null && !toggle.isSelected()) {
+      toggle.setSelected(true);
+    }
+  }
+
+  JToggleButton toggleNamed(String key) {
+    for (Component c : getComponents()) {
+      if (c instanceof JToggleButton toggle && key.equals(toggle.getName())) {
+        return toggle;
+      }
+    }
+    return null;
   }
 
   static String tip(String key) {

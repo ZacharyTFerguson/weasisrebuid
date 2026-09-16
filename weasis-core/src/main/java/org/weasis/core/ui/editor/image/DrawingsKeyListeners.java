@@ -61,19 +61,26 @@ public class DrawingsKeyListeners {
       case KeyEvent.VK_M, KeyEvent.VK_D -> tool(MeasureTool.DISTANCE);
       case KeyEvent.VK_A -> tool(MeasureTool.ANGLE);
       case KeyEvent.VK_Y -> tool(MeasureTool.POLYLINE);
-      case KeyEvent.VK_G -> {
-        view.setMeasureTool(MeasureTool.RECTANGLE);
-        view.getMouseActions().setLeft(MouseActions.DRAW);
-        yield true;
-      }
+      case KeyEvent.VK_G -> tool(MeasureTool.RECTANGLE);
       case KeyEvent.VK_B -> tool(MeasureTool.TEXTBOX);
       default -> false;
     };
   }
 
   private boolean tool(String name) {
+    MeasureToolBar bar = view.getMeasureToolBar();
+    if (bar != null) {
+      bar.setSelected(name);
+      bar.applyAll();
+      return true;
+    }
     view.setMeasureTool(name);
-    view.getMouseActions().setLeft(MouseActions.MEASURE);
+    if (MeasureTool.drawFamily(name)) {
+      view.getMouseActions().setLeft(MouseActions.DRAW);
+    } else {
+      view.getMouseActions().setLeft(MouseActions.MEASURE);
+    }
+    view.abandonDrawing();
     return true;
   }
 }

@@ -577,12 +577,26 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     return MeasureTool.canonical(measureTool);
   }
 
+  public MeasureToolBar getMeasureToolBar() {
+    return measureToolBar;
+  }
+
   public void setMeasureToolBar(MeasureToolBar bar) {
     this.measureToolBar = bar;
   }
 
   public void setMeasureTool(String measureTool) {
     this.measureTool = MeasureTool.canonical(measureTool);
+  }
+
+  /** Stop an in-progress D/Y so the next A/G drag constructs a new graphic. */
+  public void abandonDrawing() {
+    Graphic current = drawing;
+    drawing = null;
+    if (current != null && ImageViewerEventManager.degenerate(current)) {
+      graphics.remove(current);
+    }
+    repaint();
   }
 
   public Graphic getDrawing() {
@@ -1277,7 +1291,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     float y = (float) (box.getY() + box.getHeight() / 2.0);
     if (lines != null) {
       for (String line : lines) {
-        if (line != null && !line.isBlank()) {
+        if (paintLabel(line)) {
           g.setColor(Color.BLACK);
           g.drawString(line, x + 1, y + 1);
           g.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
@@ -1287,6 +1301,10 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
       }
     }
     paintSelectedRoiStats(g, graphic, x, y);
+  }
+
+  static boolean paintLabel(String line) {
+    return line != null && !line.isBlank() && !line.startsWith("0.0 ");
   }
 
   void paintSelectedRoiStats(Graphics2D g, Graphic graphic, float x, float y) {

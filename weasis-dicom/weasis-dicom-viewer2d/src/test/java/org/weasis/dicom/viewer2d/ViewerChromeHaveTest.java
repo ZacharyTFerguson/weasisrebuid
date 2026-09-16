@@ -212,10 +212,14 @@ class ViewerChromeHaveTest {
     View2dContainer container = chestContainer();
     View2d view = container.getView2d();
     clickMeasure(container, 1);
+    assertTrue(
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(1))
+            .isSelected());
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 40, 160));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 40, 160));
     assertEquals(1, view.getGraphicList().size());
+    assertFalse(view.getGraphicList().getFirst() instanceof LineGraphic);
     org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic angle =
         (org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic)
             view.getGraphicList().getFirst();
@@ -245,10 +249,14 @@ class ViewerChromeHaveTest {
     View2dContainer container = chestContainer();
     View2d view = container.getView2d();
     clickMeasure(container, 3);
+    assertTrue(
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(3))
+            .isSelected());
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 200, 160));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 200, 160));
     assertEquals(1, view.getGraphicList().size());
+    assertFalse(view.getGraphicList().getFirst() instanceof LineGraphic);
     assertTrue(
         view.getGraphicList().getFirst()
             instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
@@ -263,6 +271,47 @@ class ViewerChromeHaveTest {
             > 0);
     BufferedImage page = paint(view);
     assertTrue(yellowStrokeOnChest(page));
+  }
+
+  @Test
+  void clickAAndGAfterDistanceMustNotCreateLineGraphic() {
+    View2dContainer container = chestContainer();
+    View2d view = container.getView2d();
+    clickMeasure(container, 0);
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 240, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 240, 40));
+    assertTrue(view.getGraphicList().getFirst() instanceof LineGraphic);
+    clickMeasure(container, 1);
+    assertTrue(
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(1))
+            .isSelected());
+    ((javax.swing.AbstractButton) container.getViewerToolBar().getComponent().getComponent(6))
+        .doClick();
+    assertEquals(
+        org.weasis.core.ui.editor.image.dockable.MeasureTool.ANGLE, view.activeMeasureTool());
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 80));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 40, 200));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 40, 200));
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(
+        view.getGraphicList().getLast()
+            instanceof org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic);
+    clickMeasure(container, 3);
+    assertTrue(
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(3))
+            .isSelected());
+    ((javax.swing.AbstractButton) container.getViewerToolBar().getComponent().getComponent(6))
+        .doClick();
+    assertEquals(
+        org.weasis.core.ui.editor.image.dockable.MeasureTool.RECTANGLE, view.activeMeasureTool());
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 60, 60));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 180, 160));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 180, 160));
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(
+        view.getGraphicList().getLast()
+            instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
   }
 
   @Test

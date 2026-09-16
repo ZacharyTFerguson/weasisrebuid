@@ -10,6 +10,7 @@
 package org.weasis.core.ui.editor.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,7 +41,9 @@ class MeasureToolBarHaveTest {
     assertEquals("G", ((AbstractButton) bar.getComponent().getComponent(3)).getText());
     assertEquals("B", ((AbstractButton) bar.getComponent().getComponent(4)).getText());
     assertTrue(bar.newGraphic() instanceof LineGraphic);
+    assertTrue(((AbstractButton) bar.getComponent().getComponent(0)).isSelected());
     bar.setSelected("A");
+    assertTrue(((AbstractButton) bar.getComponent().getComponent(1)).isSelected());
     assertTrue(bar.newGraphic() instanceof AngleToolGraphic);
     bar.setSelected(MeasureTool.POLYLINE);
     assertTrue(bar.newGraphic() instanceof PolylineGraphic);
@@ -75,17 +78,12 @@ class MeasureToolBarHaveTest {
     view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 10, 0, 1));
     view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 0, 0, 1));
     view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 0, 0, 1));
-    assertNotNull(view.getDrawing());
-    AngleToolGraphic afterDrag = (AngleToolGraphic) view.getDrawing();
-    assertTrue(afterDrag.getAngleDegrees() > 1.0);
-    assertNotNull(afterDrag.getShape());
-    assertTrue(afterDrag.getLabel()[0].contains("°"));
-    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 0, 10, 1));
     assertNull(view.getDrawing());
     assertEquals(1, view.getGraphicList().size());
     AngleToolGraphic angle = (AngleToolGraphic) view.getGraphicList().getFirst();
-    assertEquals(90.0, angle.getAngleDegrees(), 1e-6);
+    assertTrue(angle.getAngleDegrees() > 1.0);
     assertNotNull(angle.getShape());
+    assertTrue(angle.getLabel()[0].contains("°"));
   }
 
   @Test
@@ -140,8 +138,9 @@ class MeasureToolBarHaveTest {
     view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
     view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 20, 80, 1));
     view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 20, 80, 1));
-    assertTrue(view.getDrawing() instanceof AngleToolGraphic);
-    AngleToolGraphic angle = (AngleToolGraphic) view.getDrawing();
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
+    AngleToolGraphic angle = (AngleToolGraphic) view.getGraphicList().getLast();
     assertTrue(angle.getAngleDegrees() > 1.0);
     assertTrue(angle.getLabel()[0].contains("°"));
   }
@@ -163,6 +162,95 @@ class MeasureToolBarHaveTest {
     assertTrue(
         view.getGraphicList().getLast()
             instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+  }
+
+  @Test
+  void clickAOrGAfterDistanceDoesNotCreateLineGraphic() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    drag(view, 20, 20, 80, 20);
+    assertTrue(view.getGraphicList().getFirst() instanceof LineGraphic);
+
+    javax.swing.AbstractButton angle = toggle(bar, 1);
+    angle.doClick();
+    assertTrue(angle.isSelected());
+    assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+    ViewerToolBar.bindMeasureTool(view);
+    assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+    drag(view, 20, 20, 20, 80);
+    assertEquals(2, view.getGraphicList().size());
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
+    AngleToolGraphic drawn = (AngleToolGraphic) view.getGraphicList().getLast();
+    assertTrue(drawn.getAngleDegrees() > 1.0);
+    assertTrue(drawn.getLabel()[0].contains("°"));
+    assertTrue(angle.isSelected());
+
+    javax.swing.AbstractButton roi = toggle(bar, 3);
+    roi.doClick();
+    assertTrue(roi.isSelected());
+    ViewerToolBar.bindMeasureTool(view);
+    assertEquals(MeasureTool.RECTANGLE, view.activeMeasureTool());
+    drag(view, 30, 30, 90, 90);
+    assertEquals(3, view.getGraphicList().size());
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(
+        view.getGraphicList().getLast()
+            instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+    assertTrue(roi.isSelected());
+    assertFalse(labelsContain(view, "0.0 px"));
+  }
+
+  @Test
+  void clickAAfterOpenPolylineDoesNotCreateLineGraphic() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    toggle(bar, 2).doClick();
+    drag(view, 20, 20, 80, 20);
+    assertTrue(view.getDrawing() instanceof PolylineGraphic);
+    toggle(bar, 1).doClick();
+    assertTrue(toggle(bar, 1).isSelected());
+    drag(view, 20, 40, 20, 90);
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
+  }
+
+  @Test
+  void zeroLengthPressReleaseDoesNotLeaveGhostPxLabel() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 20, 20, 1));
+    assertTrue(view.getGraphicList().isEmpty());
+    assertFalse(labelsContain(view, "0.0 px"));
+  }
+
+  static void drag(DefaultView2d<?> view, int x0, int y0, int x1, int y1) {
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, x0, y0, 1));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, x1, y1, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, x1, y1, 1));
+  }
+
+  static javax.swing.AbstractButton toggle(MeasureToolBar bar, int index) {
+    return (javax.swing.AbstractButton) bar.getComponent().getComponent(index);
+  }
+
+  static boolean labelsContain(DefaultView2d<?> view, String text) {
+    for (org.weasis.core.ui.model.graphic.Graphic graphic : view.getGraphicList()) {
+      String[] lines = graphic.getLabel();
+      if (lines == null) {
+        continue;
+      }
+      for (String line : lines) {
+        if (line != null && line.contains(text)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   @Test

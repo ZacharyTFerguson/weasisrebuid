@@ -55,9 +55,14 @@ public class AngleToolGraphic extends AbstractDragGraphic {
     Path2D path = new Path2D.Double();
     path.moveTo(a.x, a.y);
     path.lineTo(v.x, v.y);
-    path.lineTo(b.x, b.y);
+    double degrees = getAngleDegrees();
+    if (degrees >= 0.5) {
+      path.lineTo(b.x, b.y);
+      setLabel(new String[] {String.format("%.1f°", degrees)});
+    } else {
+      setLabel(new String[0]);
+    }
     setShape(path);
-    setLabel(new String[] {String.format("%.1f°", getAngleDegrees())});
   }
 
   /** After click-drag-release, place a right-angle ray so degrees paint before the second click. */
