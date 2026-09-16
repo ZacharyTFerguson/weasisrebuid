@@ -492,10 +492,9 @@ public class ImageViewerEventManager {
         return;
       }
       drawingView = hit;
-      if (me.getComponent() == hit) {
-        return;
+      if (hit.getDrawing() == null) {
+        hit.getEventManager().onDrawPressed(local(me, hit));
       }
-      hit.getEventManager().onDrawPressed(local(me, hit));
     }
 
     static DefaultView2d<?> viewAt(MouseEvent me) {

@@ -182,6 +182,31 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void distancePaintsYellowOnBestFitChestRaster() {
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.setSize(400, 400);
+    view.setSourceImage(new BufferedImage(2000, 2000, BufferedImage.TYPE_BYTE_GRAY));
+    javax.swing.AbstractButton d =
+        (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0);
+    d.doClick();
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 240, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 240, 40));
+    assertEquals(1, view.getGraphicList().size());
+    assertTrue(((LineGraphic) view.getGraphicList().getFirst()).getLength() > 1.0);
+    assertTrue(view.getGraphicList().getFirst().getLabel()[0].contains("px"));
+    BufferedImage page = new BufferedImage(400, 400, BufferedImage.TYPE_INT_RGB);
+    java.awt.Graphics2D g = page.createGraphics();
+    try {
+      view.paint(g);
+    } finally {
+      g.dispose();
+    }
+    assertTrue(yellowStrokeOnChest(page));
+  }
+
+  @Test
   void tabCyclesLayoutViewsWhenMoreThanOne() {
     View2dContainer container = new View2dContainer();
     container.setLayoutCount(3);
@@ -250,8 +275,10 @@ class ViewerChromeHaveTest {
   }
 
   static boolean yellowStrokeOnChest(BufferedImage page) {
-    for (int y = 10; y < 120; y++) {
-      for (int x = 10; x < 190; x++) {
+    int maxX = Math.min(page.getWidth() - 1, 360);
+    int maxY = Math.min(page.getHeight() - 1, 200);
+    for (int y = 10; y < maxY; y++) {
+      for (int x = 10; x < maxX; x++) {
         if (yellowAt(page, x, y)) {
           return true;
         }

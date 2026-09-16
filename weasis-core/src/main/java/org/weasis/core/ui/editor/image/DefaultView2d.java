@@ -1174,6 +1174,9 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
         tx.scale(flip ? -scale : scale, scale);
         tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
         g2.drawImage(source, tx, this);
+        if (overlays) {
+          paintMeasureGraphics(g2);
+        }
       } finally {
         g2.dispose();
       }

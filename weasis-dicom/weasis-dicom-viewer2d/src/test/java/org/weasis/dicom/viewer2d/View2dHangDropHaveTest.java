@@ -27,6 +27,10 @@ class View2dHangDropHaveTest {
     assertSame(container.getLayoutViews().get(2), container.layoutCellAt(50, 150, 200, 200));
     assertSame(container.getLayoutViews().get(3), container.layoutCellAt(150, 150, 200, 200));
     assertSame(container.getLayoutViews().get(0), container.layoutCellAt(50, 50, 200, 200));
+    assertSame(
+        container.getLayoutViews().get(2),
+        View2dContainer.firstView(
+            container.layoutCellAt(50, 150, 200, 200), container.getLayoutViews().get(0), null));
   }
 
   @Test
@@ -37,6 +41,7 @@ class View2dHangDropHaveTest {
     Series<MediaElement> explorer = new Series<>("2.25.paint");
     explorer.addMedia(new MediaElement());
     View2d bottomLeft = container.getLayoutViews().get(2);
+    bottomLeft.setSourceImage(new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_GRAY));
     container.hangCell(bottomLeft, explorer);
     assertSame(img, bottomLeft.getSourceImage());
     Object uid = bottomLeft.getSeries().getTagValue(TagW.SeriesInstanceUID);

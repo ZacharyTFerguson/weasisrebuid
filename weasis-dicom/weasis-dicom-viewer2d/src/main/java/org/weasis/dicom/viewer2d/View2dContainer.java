@@ -345,7 +345,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (screen == null) {
       return null;
     }
-    View2d hit = firstView(viewOnScreen(screen), gridView(screen), localView(screen));
+    View2d hit = firstView(gridView(screen), viewOnScreen(screen), localView(screen));
     if (hit == null) {
       dumpCells(screen);
     }
@@ -429,12 +429,24 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   View2d viewOnScreen(Point screen) {
+    View2d hit = null;
+    long area = Long.MAX_VALUE;
     for (View2d v : layout) {
-      if (shownContains(v, screen)) {
-        return v;
+      Rectangle box = showingBox(v);
+      if (!boxContains(box, screen)) {
+        continue;
+      }
+      long a = (long) box.width * box.height;
+      if (a > 0 && a < area) {
+        area = a;
+        hit = v;
       }
     }
-    return null;
+    return hit;
+  }
+
+  static boolean boxContains(Rectangle box, Point screen) {
+    return box != null && screen != null && box.contains(screen);
   }
 
   static boolean shownContains(JComponent c, Point screen) {
@@ -593,9 +605,8 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     View2d from = paintedView(sequence);
     cell.setSeries(seriesToHang(sequence, from));
     loadInto(cell, cell.getSeries());
-    if (cell.getSourceImage() == null) {
-      copyPaint(cell, from != null ? from : paintedView(sequence));
-    }
+    copyPaint(cell, from != null ? from : paintedView(sequence));
+    cell.repaint();
   }
 
   MediaSeries<MediaElement> seriesToHang(MediaSeries<MediaElement> sequence, View2d from) {
