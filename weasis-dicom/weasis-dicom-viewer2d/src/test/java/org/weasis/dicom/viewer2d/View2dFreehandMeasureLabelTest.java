@@ -31,8 +31,8 @@ import org.weasis.dicom.codec.utils.InstanceSpacing;
 
 /**
  * View2d free-hand scribble measurement labels: same binding rules as {@link
- * View2dPolylineMeasureLabelTest}, but millimetres come from {@link FreehandGraphic#getLengthMm}
- * on consecutive dense samples — not from Catmull–Rom open/closed interpolants or sparse handle
+ * View2dPolylineMeasureLabelTest}, but millimetres come from {@link FreehandGraphic#getLengthMm} on
+ * consecutive dense samples — not from Catmull–Rom open/closed interpolants or sparse handle
  * polylines alone.
  *
  * <p><b>Why UI after {@code getLengthMm}:</b> {@link MeasurementLabel#formatFreehand} only formats

@@ -39,6 +39,7 @@ import org.weasis.core.ui.model.graphic.imp.area.EllipseGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.ClosedCurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.FreehandGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.DicomMediaIO;
@@ -956,6 +957,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public String formatClosedCurveMeasureLabel(ClosedCurveGraphic closedCurve) {
     return MeasurementLabel.formatClosedCurve(closedCurve, resolvedInstanceSpacing);
+  }
+
+  public String formatFreehandMeasureLabel(FreehandGraphic freehand) {
+    return MeasurementLabel.formatFreehand(freehand, resolvedInstanceSpacing);
   }
 
   public String formatAngleMeasureLabel(AngleToolGraphic angle) {
