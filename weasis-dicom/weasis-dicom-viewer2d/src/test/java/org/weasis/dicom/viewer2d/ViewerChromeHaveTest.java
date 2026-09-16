@@ -192,13 +192,13 @@ class ViewerChromeHaveTest {
     javax.swing.AbstractButton rect =
         (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(3);
     assertTrue(distance.isSelected());
-    assertEquals(
-        org.weasis.core.ui.editor.image.MouseActions.DRAW, cmd.mouseLeftAction("draw"));
+    assertEquals(org.weasis.core.ui.editor.image.MouseActions.DRAW, cmd.mouseLeftAction("draw"));
     assertTrue(rect.isSelected());
     assertFalse(distance.isSelected());
     assertEquals(
         org.weasis.core.ui.editor.image.dockable.MeasureTool.RECTANGLE, view.activeMeasureTool());
-    assertEquals(org.weasis.core.ui.editor.image.MouseActions.DRAW, view.getMouseActions().getLeft());
+    assertEquals(
+        org.weasis.core.ui.editor.image.MouseActions.DRAW, view.getMouseActions().getLeft());
     for (View2d cell : container.getLayoutViews()) {
       assertEquals(
           org.weasis.core.ui.editor.image.dockable.MeasureTool.RECTANGLE, cell.activeMeasureTool());
