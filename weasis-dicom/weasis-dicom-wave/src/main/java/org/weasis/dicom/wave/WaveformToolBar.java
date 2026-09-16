@@ -9,21 +9,49 @@
  */
 package org.weasis.dicom.wave;
 
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
-import javax.swing.JToolBar;
+import org.weasis.core.ui.util.WtoolBar;
 
-/** ECG format shortcuts. */
-public class WaveformToolBar extends JToolBar {
+/** ECG 2/4/12-lead format shortcuts. */
+public class WaveformToolBar extends WtoolBar {
+
+  public static final String NAME = "ECG";
+  private WaveView view;
+
+  public WaveformToolBar() {
+    this(null);
+  }
 
   public WaveformToolBar(WaveView view) {
-    JButton two = new JButton("2");
-    two.addActionListener(e -> view.setFormat(Format.TWO));
-    add(two);
-    JButton four = new JButton("4");
-    four.addActionListener(e -> view.setFormat(Format.FOUR));
-    add(four);
-    JButton twelve = new JButton("12");
-    twelve.addActionListener(e -> view.setFormat(Format.DEFAULT));
-    add(twelve);
+    super(NAME, 10);
+    this.view = view;
+    add(formatButton("2", Format.TWO));
+    add(formatButton("4", Format.FOUR));
+    add(formatButton("12", Format.DEFAULT));
+  }
+
+  public void bind(WaveView view) {
+    this.view = view;
+  }
+
+  public WaveView boundView() {
+    return view;
+  }
+
+  JButton formatButton(String name, Format format) {
+    JButton button =
+        new JButton(
+            new AbstractAction(name) {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                if (view != null) {
+                  view.setFormat(format);
+                }
+              }
+            });
+    button.setName(name);
+    return button;
   }
 }

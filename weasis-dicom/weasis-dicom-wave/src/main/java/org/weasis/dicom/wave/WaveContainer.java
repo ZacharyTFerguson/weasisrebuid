@@ -10,21 +10,37 @@
 package org.weasis.dicom.wave;
 
 import java.awt.BorderLayout;
+import java.util.List;
+import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 
 public class WaveContainer extends ViewerPlugin<MediaElement> {
 
+  public static final String NAME = "DICOM ECG Viewer";
   private final WaveView waveView = new WaveView();
+  private final WaveformToolBar waveformToolBar = new WaveformToolBar();
 
   public WaveContainer() {
-    super("DICOM ECG Viewer");
+    super(NAME);
+    waveformToolBar.bind(waveView);
     add(waveView, BorderLayout.CENTER);
+    fillSeriesViewerUi();
+  }
+
+  void fillSeriesViewerUi() {
+    List<Insertable> bars = getSeriesViewerUI().getToolBar();
+    bars.clear();
+    bars.add(waveformToolBar);
   }
 
   public WaveView getWaveView() {
     return waveView;
+  }
+
+  public WaveformToolBar getWaveformToolBar() {
+    return waveformToolBar;
   }
 
   @Override

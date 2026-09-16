@@ -9,26 +9,23 @@
  */
 package org.weasis.dicom.au;
 
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import org.weasis.core.ui.util.WtoolBar;
 
 /** Play / pause / stop chrome for {@link AuView}. */
 public class AuToolBar extends WtoolBar {
 
+  public static final String NAME = "Audio";
   private final AuView view;
 
   public AuToolBar(AuView view) {
-    super("Audio", 10);
+    super(NAME, 10);
     this.view = view == null ? new AuView() : view;
-    JButton play = new JButton("Play");
-    play.addActionListener(e -> play());
-    JButton pause = new JButton("Pause");
-    pause.addActionListener(e -> pause());
-    JButton stop = new JButton("Stop");
-    stop.addActionListener(e -> stop());
-    add(play);
-    add(pause);
-    add(stop);
+    add(control("Play", "play", this::play));
+    add(control("Pause", "pause", this::pause));
+    add(control("Stop", "stop", this::stop));
   }
 
   public AuView getView() {
@@ -45,5 +42,18 @@ public class AuToolBar extends WtoolBar {
 
   public void stop() {
     view.stop();
+  }
+
+  JButton control(String text, String name, Runnable action) {
+    JButton button =
+        new JButton(
+            new AbstractAction(text) {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                action.run();
+              }
+            });
+    button.setName(name);
+    return button;
   }
 }

@@ -10,20 +10,28 @@
 package org.weasis.dicom.au;
 
 import java.awt.BorderLayout;
+import java.util.List;
+import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 
 public class AuContainer extends ViewerPlugin<MediaElement> {
 
+  public static final String NAME = "DICOM Audio Player";
   private final AuView auView = new AuView();
   private final AuToolBar toolBar = new AuToolBar(auView);
 
   public AuContainer() {
-    super("DICOM Audio Player");
-    add(toolBar, BorderLayout.NORTH);
+    super(NAME);
     add(auView, BorderLayout.CENTER);
-    getSeriesViewerUI().getToolBar().add(toolBar);
+    fillSeriesViewerUi();
+  }
+
+  void fillSeriesViewerUi() {
+    List<Insertable> bars = getSeriesViewerUI().getToolBar();
+    bars.clear();
+    bars.add(toolBar);
   }
 
   public AuView getAuView() {

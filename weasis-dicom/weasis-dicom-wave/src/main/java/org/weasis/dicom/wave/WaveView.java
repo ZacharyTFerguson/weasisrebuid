@@ -37,7 +37,6 @@ public class WaveView extends JPanel {
     super(new BorderLayout());
     this.toolPanel = new ToolPanel(this);
     JPanel north = new JPanel(new BorderLayout());
-    north.add(new WaveformToolBar(this), BorderLayout.NORTH);
     north.add(toolPanel, BorderLayout.CENTER);
     north.add(infoPanel, BorderLayout.SOUTH);
     add(north, BorderLayout.NORTH);
