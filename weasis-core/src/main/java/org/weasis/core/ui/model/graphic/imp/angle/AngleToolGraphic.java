@@ -60,6 +60,21 @@ public class AngleToolGraphic extends AbstractDragGraphic {
     setLabel(new String[] {String.format("%.1f°", getAngleDegrees())});
   }
 
+  /** After click-drag-release, place a right-angle ray so degrees paint before the second click. */
+  public void setRightRay() {
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double v = getHandlePoint(1);
+    if (a == null || v == null) {
+      return;
+    }
+    double dx = a.x - v.x;
+    double dy = a.y - v.y;
+    if (dx == 0 && dy == 0) {
+      return;
+    }
+    setHandlePoint(2, new Point2D.Double(v.x - dy, v.y + dx));
+  }
+
   @Override
   protected AbstractGraphic newInstance() {
     return new AngleToolGraphic();

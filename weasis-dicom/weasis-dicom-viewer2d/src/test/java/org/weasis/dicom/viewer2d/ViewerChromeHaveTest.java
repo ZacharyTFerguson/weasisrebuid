@@ -207,6 +207,105 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void angleClickDragReleasePaintsDegreesOnChest() {
+    View2dContainer container = chestContainer();
+    View2d view = container.getView2d();
+    clickMeasure(container, 1);
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 40, 160));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 40, 160));
+    assertEquals(1, view.getGraphicList().size());
+    org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic angle =
+        (org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic)
+            view.getGraphicList().getFirst();
+    assertTrue(angle.getAngleDegrees() > 1.0);
+    assertTrue(angle.getLabel()[0].contains("°"));
+    assertTrue(yellowStrokeOnChest(paint(view)));
+  }
+
+  @Test
+  void polylineClickDragPaintsLengthOnChest() {
+    View2dContainer container = chestContainer();
+    View2d view = container.getView2d();
+    clickMeasure(container, 2);
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 240, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 240, 40));
+    assertEquals(1, view.getGraphicList().size());
+    org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic poly =
+        (org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic)
+            view.getGraphicList().getFirst();
+    assertTrue(poly.getLabel()[0].contains("px"));
+    assertTrue(yellowStrokeOnChest(paint(view)));
+  }
+
+  @Test
+  void rectangleGPaintsClosedRoiAndStatsOnChest() {
+    View2dContainer container = chestContainer();
+    View2d view = container.getView2d();
+    clickMeasure(container, 3);
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 200, 160));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 200, 160));
+    assertEquals(1, view.getGraphicList().size());
+    assertTrue(
+        view.getGraphicList().getFirst()
+            instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+    assertTrue(Boolean.TRUE.equals(view.getGraphicList().getFirst().getSelected()));
+    assertTrue(
+        org.weasis.core.ui.editor.image.ImageRegionStatistics.compute(view).getSamples() > 0);
+    BufferedImage page = paint(view);
+    assertTrue(yellowStrokeOnChest(page));
+    assertTrue(whiteHandleOnChest(page));
+  }
+
+  @Test
+  void selectThenDeleteRemovesPaintedGraphicFromChest() {
+    View2dContainer container = chestContainer();
+    View2d view = container.getView2d();
+    clickMeasure(container, 0);
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 240, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 240, 40));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 120, 40));
+    assertEquals(1, view.getSelectedGraphics().size());
+    BufferedImage selected = paint(view);
+    assertTrue(yellowStrokeOnChest(selected));
+    assertTrue(whiteHandleOnChest(selected));
+    view.getEventManager()
+        .keyPressed(new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_DELETE, '\0'));
+    assertTrue(view.getGraphicList().isEmpty());
+    assertFalse(yellowStrokeOnChest(paint(view)));
+    assertFalse(whiteHandleOnChest(paint(view)));
+  }
+
+  static View2dContainer chestContainer() {
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.setSize(400, 400);
+    view.setSourceImage(new BufferedImage(2000, 2000, BufferedImage.TYPE_BYTE_GRAY));
+    return container;
+  }
+
+  static void clickMeasure(View2dContainer container, int index) {
+    javax.swing.AbstractButton button =
+        (javax.swing.AbstractButton)
+            container.getMeasureToolBar().getComponent().getComponent(index);
+    button.doClick();
+  }
+
+  static BufferedImage paint(View2d view) {
+    BufferedImage page = new BufferedImage(400, 400, BufferedImage.TYPE_INT_RGB);
+    java.awt.Graphics2D g = page.createGraphics();
+    try {
+      view.paint(g);
+    } finally {
+      g.dispose();
+    }
+    return page;
+  }
+
+  @Test
   void tabCyclesLayoutViewsWhenMoreThanOne() {
     View2dContainer container = new View2dContainer();
     container.setLayoutCount(3);
@@ -300,6 +399,23 @@ class ViewerChromeHaveTest {
         int green = (rgb >> 8) & 255;
         int b = rgb & 255;
         if (r > 200 && green > 200 && b < 80) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static boolean whiteHandleOnChest(BufferedImage page) {
+    int maxX = Math.min(page.getWidth() - 1, 360);
+    int maxY = Math.min(page.getHeight() - 1, 200);
+    for (int y = 10; y < maxY; y++) {
+      for (int x = 10; x < maxX; x++) {
+        int rgb = page.getRGB(x, y);
+        int r = (rgb >> 16) & 255;
+        int green = (rgb >> 8) & 255;
+        int b = rgb & 255;
+        if (r > 220 && green > 220 && b > 220) {
           return true;
         }
       }

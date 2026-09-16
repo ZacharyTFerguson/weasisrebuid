@@ -1231,6 +1231,25 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     g.draw(shape);
     g.setStroke(previous);
     paintGraphicLabel(g, graphic, shape);
+    paintSelectionHandles(g, graphic);
+  }
+
+  void paintSelectionHandles(Graphics2D g, Graphic graphic) {
+    if (g == null || graphic == null || !Boolean.TRUE.equals(graphic.getSelected())) {
+      return;
+    }
+    for (Point2D.Double p : graphic.getPts()) {
+      if (p == null) {
+        continue;
+      }
+      Point2D.Double at = imageToView(p.x, p.y);
+      int x = (int) Math.round(at.x) - 3;
+      int y = (int) Math.round(at.y) - 3;
+      g.setColor(Color.WHITE);
+      g.fillRect(x, y, 7, 7);
+      g.setColor(Color.BLACK);
+      g.drawRect(x, y, 7, 7);
+    }
   }
 
   void paintGraphicLabel(Graphics2D g, Graphic graphic, Shape shape) {

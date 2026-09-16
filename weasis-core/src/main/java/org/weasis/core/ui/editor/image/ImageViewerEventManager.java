@@ -27,6 +27,7 @@ import org.weasis.core.api.gui.util.ShortcutManager;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.DragGraphic;
 import org.weasis.core.ui.model.graphic.Graphic;
+import org.weasis.core.ui.model.graphic.GraphicArea;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
@@ -42,6 +43,7 @@ public class ImageViewerEventManager {
   private int lastX;
   private int lastY;
   private int drawHandle;
+  private boolean angleRayClicked;
 
   public ImageViewerEventManager(DefaultView2d<?> view) {
     this.view = view;
@@ -388,11 +390,9 @@ public class ImageViewerEventManager {
         return;
       }
       drag.setHandlePoint(0, p);
-      drawHandle = 0;
-      if (!isOpenPath(created)) {
-        drag.setHandlePoint(1, p);
-        drawHandle = 1;
-      }
+      drag.setHandlePoint(1, p);
+      drawHandle = 1;
+      angleRayClicked = false;
       view.addGraphic(created);
       view.setDrawing(created);
       DrawStroke.INSTANCE.drawingView = view;
@@ -402,6 +402,7 @@ public class ImageViewerEventManager {
       drawHandle++;
       drag.setHandlePoint(drawHandle, p);
     } else if (current instanceof AngleToolGraphic angle) {
+      angleRayClicked = true;
       angle.setHandlePoint(2, p);
       view.setDrawing(null);
       drawHandle = 0;
@@ -425,13 +426,23 @@ public class ImageViewerEventManager {
     if (current instanceof DragGraphic drag) {
       drag.setHandlePoint(drawHandle, imagePoint(e));
     }
-    if (isOpenPath(current) || current instanceof AngleToolGraphic) {
+    if (current instanceof AngleToolGraphic angle) {
+      if (!angleRayClicked) {
+        angle.setRightRay();
+      }
+      view.repaint();
+      return;
+    }
+    if (isOpenPath(current)) {
       view.repaint();
       return;
     }
     view.setDrawing(null);
     drawHandle = 0;
     DrawStroke.INSTANCE.drawingView = null;
+    if (current instanceof GraphicArea) {
+      view.selectGraphic(current, false);
+    }
   }
 
   static boolean isOpenPath(Graphic graphic) {
@@ -440,12 +451,14 @@ public class ImageViewerEventManager {
 
   /**
    * Headed glass / TransferHandler can swallow {@code mouseDragged} on View2d. Toolkit events still
-   * reach here so D / {@code mouseLeftAction measure} paint a LineGraphic on the chest.
+   * reach here so D / A / Y / G paint on the chest, extra A/Y clicks land, and Delete removes a
+   * selected graphic.
    */
   static final class DrawStroke implements AWTEventListener {
     static final DrawStroke INSTANCE = new DrawStroke();
     private boolean armed;
     volatile DefaultView2d<?> drawingView;
+    volatile DefaultView2d<?> lastView;
 
     static void arm() {
       INSTANCE.armOnce();
@@ -457,13 +470,19 @@ public class ImageViewerEventManager {
       }
       armed = true;
       Toolkit.getDefaultToolkit()
-          .addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
+          .addAWTEventListener(
+              this,
+              AWTEvent.MOUSE_EVENT_MASK
+                  | AWTEvent.MOUSE_MOTION_EVENT_MASK
+                  | AWTEvent.KEY_EVENT_MASK);
     }
 
     @Override
     public void eventDispatched(AWTEvent event) {
       if (event instanceof MouseEvent me) {
         onMouse(me);
+      } else if (event instanceof KeyEvent ke) {
+        onKey(ke);
       }
     }
 
@@ -488,12 +507,30 @@ public class ImageViewerEventManager {
         return;
       }
       DefaultView2d<?> hit = viewAt(me);
-      if (hit == null || !drawingAction(hit.getMouseActions().getLeft())) {
+      if (hit == null) {
         return;
       }
+      lastView = hit;
       drawingView = hit;
-      if (hit.getDrawing() == null) {
-        hit.getEventManager().onDrawPressed(local(me, hit));
+      if (me.getComponent() == hit) {
+        return;
+      }
+      hit.getEventManager().mousePressed(local(me, hit));
+    }
+
+    void onKey(KeyEvent ke) {
+      if (ke.getID() != KeyEvent.KEY_PRESSED) {
+        return;
+      }
+      if (ke.getKeyCode() != KeyEvent.VK_DELETE && ke.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
+        return;
+      }
+      if (ke.getComponent() instanceof DefaultView2d) {
+        return;
+      }
+      DefaultView2d<?> view = lastView != null ? lastView : drawingView;
+      if (view != null) {
+        view.getEventManager().keyPressed(ke);
       }
     }
 

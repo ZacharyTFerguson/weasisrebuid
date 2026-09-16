@@ -76,6 +76,10 @@ class MeasureToolBarHaveTest {
     view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 0, 0, 1));
     view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 0, 0, 1));
     assertNotNull(view.getDrawing());
+    AngleToolGraphic afterDrag = (AngleToolGraphic) view.getDrawing();
+    assertTrue(afterDrag.getAngleDegrees() > 1.0);
+    assertNotNull(afterDrag.getShape());
+    assertTrue(afterDrag.getLabel()[0].contains("°"));
     view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 0, 10, 1));
     assertNull(view.getDrawing());
     assertEquals(1, view.getGraphicList().size());
@@ -105,6 +109,22 @@ class MeasureToolBarHaveTest {
     assertEquals(10.0, line.getHandlePoint(0).x, 0.01);
     assertEquals(40.0, line.getHandlePoint(1).x, 0.01);
     assertNotNull(view.graphicAt(75, 60));
+    assertTrue(paintsYellowOnSegment(view));
+  }
+
+  @Test
+  void polylineClickDragReleasePaintsLength() {
+    DefaultView2d<?> view = sizedGrayView();
+    view.setMeasureTool(MeasureTool.POLYLINE);
+    view.getMouseActions().setLeft(MouseActions.MEASURE);
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 80, 20, 1));
+    assertTrue(view.getDrawing() instanceof PolylineGraphic);
+    PolylineGraphic poly = (PolylineGraphic) view.getDrawing();
+    assertTrue(poly.getLabel()[0].contains("px"));
+    assertNotNull(poly.getShape());
+    view.setZoom(1.0);
     assertTrue(paintsYellowOnSegment(view));
   }
 

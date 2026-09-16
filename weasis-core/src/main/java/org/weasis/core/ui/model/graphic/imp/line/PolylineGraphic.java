@@ -12,6 +12,7 @@ package org.weasis.core.ui.model.graphic.imp.line;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.util.List;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
@@ -37,7 +38,15 @@ public class PolylineGraphic extends AbstractDragGraphic {
       path.lineTo(p.x, p.y);
     }
     setShape(path);
-    setLabel(new String[] {pts.size() + " pts"});
+    setLabel(new String[] {String.format("%.1f px", pathLength(pts))});
+  }
+
+  static double pathLength(List<Point2D.Double> pts) {
+    double len = 0;
+    for (int i = 1; i < pts.size(); i++) {
+      len += pts.get(i - 1).distance(pts.get(i));
+    }
+    return len;
   }
 
   @Override
