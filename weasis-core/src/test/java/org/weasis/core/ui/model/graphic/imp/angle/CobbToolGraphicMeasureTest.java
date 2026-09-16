@@ -24,15 +24,16 @@ import org.weasis.core.api.image.measure.ImageSpacing;
  * CobbToolGraphic#getCobbAngleDegrees()} uses raw pixel deltas per endplate, never mm-scaled
  * vectors (same rule as {@link AngleToolGraphic#getAngleDegrees()}).
  *
- * <p>Why endplate mm uses row/col spacing: each endplate is one segment between its two handles;
- * mm length applies PS3.3 PixelSpacing the same way as {@link
- * org.weasis.core.ui.model.graphic.imp.line.LineGraphic#getLengthMm} — column spacing on
- * horizontal delta, row spacing on vertical.
+ * <p>Why endplate mm uses row/col spacing: each endplate is one segment between its two handles; mm
+ * length applies PS3.3 PixelSpacing the same way as {@link
+ * org.weasis.core.ui.model.graphic.imp.line.LineGraphic#getLengthMm} — column spacing on horizontal
+ * delta, row spacing on vertical.
  *
- * <p>Why no spacing → px endplates / degrees still ok: {@link CobbToolGraphic#getEndplateLengthPx(int)}
- * and {@link CobbToolGraphic#getCobbAngleDegrees()} stay defined from handle geometry; {@link
- * CobbToolGraphic#getEndplateLengthMm(int, ImageSpacing)} returns empty when spacing is null or
- * invalid, without blocking the dimensionless Cobb angle or pixel endplate lengths.
+ * <p>Why no spacing → px endplates / degrees still ok: {@link
+ * CobbToolGraphic#getEndplateLengthPx(int)} and {@link CobbToolGraphic#getCobbAngleDegrees()} stay
+ * defined from handle geometry; {@link CobbToolGraphic#getEndplateLengthMm(int, ImageSpacing)}
+ * returns empty when spacing is null or invalid, without blocking the dimensionless Cobb angle or
+ * pixel endplate lengths.
  *
  * <p>Why not copy Weasis {@code MeasureTool}: upstream bundles drawing, calibration overrides, and
  * presentation; this rebuild keeps four image-space handles on {@link CobbToolGraphic} (upper then
