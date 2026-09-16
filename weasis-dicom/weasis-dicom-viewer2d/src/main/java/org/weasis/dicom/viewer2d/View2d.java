@@ -64,6 +64,9 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private PolylineGraphic draftPolylineCaliper;
 
+  private AngleToolGraphic draftAngleCaliper;
+  private int draftAngleClickStage;
+
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
   public View2d() {
@@ -226,6 +229,22 @@ public class View2d extends DefaultView2d<MediaElement> {
     addGraphic(poly);
   }
 
+  /**
+   * Adds an angle caliper in image pixel coordinates and binds its label to {@link
+   * #formatAngleMeasureLabel}. Handle order: arm end (0), vertex (1), arm end (2).
+   */
+  public void addAngleCaliper(Point2D armEndA, Point2D vertex, Point2D armEndB) {
+    if (armEndA == null || vertex == null || armEndB == null) {
+      return;
+    }
+    AngleToolGraphic angle = new AngleToolGraphic();
+    angle.setHandlePoint(0, copyPoint(armEndA));
+    angle.setHandlePoint(1, copyPoint(vertex));
+    angle.setHandlePoint(2, copyPoint(armEndB));
+    applyAngleCaliperLabel(angle);
+    addGraphic(angle);
+  }
+
   /** Test hook: two-click line draw in view coordinates when left action is {@code draw}. */
   public void simulateLineDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
     lineDrawViewPressed(viewX1, viewY1);
@@ -289,6 +308,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   boolean isPolylineDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.POLYLINE.equals(normalizedLeftAction);
+  }
+
+  boolean isAngleDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.ANGLE.equals(normalizedLeftAction);
   }
 
   /** Test hook: polyline vertex click in view coordinates when left action is {@code polyline}. */
@@ -375,6 +398,54 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private void applyPolylineCaliperLabel(PolylineGraphic poly) {
     poly.setLabel(new String[] {formatPolylineMeasureLabel(poly)});
+  }
+
+  /** Test hook: angle handle click in view coordinates when left action is {@code angle}. */
+  public void simulateAngleDrawClick(int viewX, int viewY) {
+    angleDrawViewPressed(viewX, viewY);
+    angleDrawViewReleased(viewX, viewY);
+  }
+
+  void angleDrawViewPressed(int viewX, int viewY) {
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftAngleCaliper == null) {
+      draftAngleCaliper = new AngleToolGraphic();
+      draftAngleCaliper.setHandlePoint(0, image);
+      draftAngleCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+      draftAngleCaliper.setHandlePoint(2, new Point2D.Double(image.x, image.y));
+      draftAngleClickStage = 1;
+      addGraphic(draftAngleCaliper);
+      repaint();
+      return;
+    }
+    if (draftAngleClickStage == 1) {
+      draftAngleCaliper.setHandlePoint(1, image);
+      draftAngleClickStage = 2;
+      repaint();
+      return;
+    }
+    if (draftAngleClickStage == 2) {
+      draftAngleCaliper.setHandlePoint(2, image);
+      finalizeDraftAngleCaliper();
+    }
+  }
+
+  void angleDrawViewReleased(int viewX, int viewY) {
+    // Three-click placement; release does not advance stage beyond press.
+  }
+
+  private void finalizeDraftAngleCaliper() {
+    if (draftAngleCaliper == null) {
+      return;
+    }
+    applyAngleCaliperLabel(draftAngleCaliper);
+    draftAngleCaliper = null;
+    draftAngleClickStage = 0;
+    repaint();
+  }
+
+  private void applyAngleCaliperLabel(AngleToolGraphic angle) {
+    angle.setLabel(new String[] {formatAngleMeasureLabel(angle)});
   }
 
   public String formatPolylineMeasureLabel(PolylineGraphic polyline) {
@@ -563,6 +634,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mousePressed(MouseEvent e) {
+      if (angleDrawActive(e)) {
+        view2d.angleDrawViewPressed(e.getX(), e.getY());
+        return;
+      }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
         return;
@@ -589,6 +664,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+      if (angleDrawActive(e)) {
+        view2d.angleDrawViewReleased(e.getX(), e.getY());
+        return;
+      }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
         return;
@@ -598,6 +677,19 @@ public class View2d extends DefaultView2d<MediaElement> {
         return;
       }
       super.mouseReleased(e);
+    }
+
+    private boolean angleDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isAngleDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return false;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
     }
 
     private boolean polylineDrawActive(MouseEvent e) {
