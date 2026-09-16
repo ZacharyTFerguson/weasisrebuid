@@ -39,6 +39,7 @@ import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
+import org.weasis.dicom.viewer2d.dockable.ImageTool;
 import org.weasis.dicom.viewer2d.mpr.MprAxis;
 import org.weasis.dicom.viewer2d.mpr.MprContainer;
 
@@ -101,6 +102,40 @@ class ViewerChromeHaveTest {
     inverse.doClick();
     assertFalse(view.isInverseLut());
     assertEquals(before, view.getSourceImage().getRaster().getSample(4, 4, 0));
+  }
+
+  @Test
+  void flipClickMirrorsPaintedPixelsWithoutRasterizingSource(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 32, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    view.setSize(32, 32);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    AbstractButton flip = container.getImageTool().flipButton();
+    assertEquals("Flip", flip.getText());
+    assertEquals("flip", flip.getName());
+    assertSame(view, container.getImageTool().boundView());
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> ImageTool.NAME.equals(b.getComponentName())));
+    int srcLeft = view.getSourceImage().getRaster().getSample(4, 16, 0);
+    int left = paint(view).getRGB(4, 16) & 0xFF;
+    int right = paint(view).getRGB(27, 16) & 0xFF;
+    assertTrue(left < right);
+    flip.doClick();
+    assertTrue(view.isFlip());
+    assertTrue(flip.isSelected());
+    assertEquals(srcLeft, view.getSourceImage().getRaster().getSample(4, 16, 0));
+    int flippedLeft = paint(view).getRGB(4, 16) & 0xFF;
+    int flippedRight = paint(view).getRGB(27, 16) & 0xFF;
+    assertTrue(flippedLeft > flippedRight);
+    flip.doClick();
+    assertFalse(view.isFlip());
+    assertEquals(left, paint(view).getRGB(4, 16) & 0xFF);
+    assertEquals(right, paint(view).getRGB(27, 16) & 0xFF);
   }
 
   @Test

@@ -40,6 +40,7 @@ import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.dicom.codec.KOSpecialElement;
+import org.weasis.dicom.viewer2d.dockable.ImageTool;
 import org.weasis.dicom.viewer2d.dockable.SegmentationTool;
 import org.weasis.dicom.viewer2d.fusion.FusionColorBar;
 import org.weasis.dicom.viewer2d.fusion.FusionController;
@@ -67,6 +68,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final KeyObjectToolBar keyObjectToolBar = new KeyObjectToolBar();
   private final Basic3DToolBar basic3DToolBar = new Basic3DToolBar();
   private final SegmentationTool segmentationTool = new SegmentationTool();
+  private final ImageTool imageTool = new ImageTool();
   private final ViewTransferHandler seriesDrop = new ViewTransferHandler();
   private int layoutIndex;
 
@@ -75,6 +77,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     layout.add(view2d);
     fusionController.addTarget(view2d);
     segmentationTool.bind(view2d);
+    imageTool.bind(view2d);
     bindToolBars();
     add(viewGrid, BorderLayout.CENTER);
     bindDrop(this);
@@ -120,6 +123,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     toolbars.registerToolBar(basic3DToolBar);
     toolbars.registerToolBar(fusionController.getColorBar());
     toolbars.registerToolBar(segmentationTool);
+    toolbars.registerToolBar(imageTool);
     viewerToolBar.bind(view2d);
     keyObjectToolBar.bind(view2d);
     lutToolBar.bind(view2d);
@@ -129,6 +133,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     headerToolBar.bind(view2d);
     cineToolBar.bind(view2d);
     measureToolBar.bind(view2d);
+    imageTool.bind(view2d);
     fillSeriesViewerUi();
   }
 
@@ -148,6 +153,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     ui.add(basic3DToolBar);
     ui.add(fusionController.getColorBar());
     ui.add(segmentationTool);
+    ui.add(imageTool);
   }
 
   public ToolBarContainer getToolBars() {
@@ -192,6 +198,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public SegmentationTool getSegmentationTool() {
     return segmentationTool;
+  }
+
+  public ImageTool getImageTool() {
+    return imageTool;
   }
 
   public View2d getView2d() {

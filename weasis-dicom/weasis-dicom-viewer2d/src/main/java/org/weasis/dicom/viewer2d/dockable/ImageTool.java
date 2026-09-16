@@ -10,25 +10,49 @@
 package org.weasis.dicom.viewer2d.dockable;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
+import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.dicom.viewer2d.View2d;
 
-/** Image dock: window/level, zoom, and pixel size for the selected 2D view. */
+/** Image dock: window/level, zoom, pixel size, and paint-time horizontal flip (Alt+F). */
 public class ImageTool extends PluginTool {
 
   public static final String NAME = "Image";
 
   private final JLabel summary = new JLabel(" ");
+  private final JToggleButton flip = new JToggleButton("Flip");
   private View2d view;
 
   public ImageTool() {
     super(NAME, 20);
-    add(summary, BorderLayout.NORTH);
+    flip.setName(ActionW.FLIP.cmd());
+    flip.addActionListener(e -> applyFlip());
+    JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+    row.add(summary);
+    row.add(flip);
+    add(row, BorderLayout.NORTH);
   }
 
   public void bind(View2d view) {
     this.view = view;
+    if (view != null) {
+      flip.setSelected(view.isFlip());
+    }
+    refresh();
+  }
+
+  public JToggleButton flipButton() {
+    return flip;
+  }
+
+  void applyFlip() {
+    if (view != null) {
+      view.setFlip(flip.isSelected());
+    }
     refresh();
   }
 
