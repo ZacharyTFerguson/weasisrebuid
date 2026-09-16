@@ -326,6 +326,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   public void setFlip(boolean flip) {
     this.flip = flip;
+    repaint();
   }
 
   public void toggleFlip() {
@@ -966,7 +967,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     AffineTransform tx = new AffineTransform();
     tx.translate(w / 2.0 + panX, h / 2.0 + panY);
     tx.rotate(Math.toRadians(rotation));
-    tx.scale(scale, scale);
+    tx.scale(flip ? -scale : scale, scale);
     tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
     return tx;
   }
@@ -1164,7 +1165,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
       AffineTransform tx = new AffineTransform();
       tx.translate(getWidth() / 2.0 + panX, getHeight() / 2.0 + panY);
       tx.rotate(Math.toRadians(rotation));
-      tx.scale(scale, scale);
+      tx.scale(flip ? -scale : scale, scale);
       tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
       g2.drawImage(source, tx, this);
     } finally {
@@ -1190,7 +1191,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
         AffineTransform tx = new AffineTransform();
         tx.translate(w / 2.0 + panX, h / 2.0 + panY);
         tx.rotate(Math.toRadians(rotation));
-        tx.scale(scale, scale);
+        tx.scale(flip ? -scale : scale, scale);
         tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
         g2.drawImage(source, tx, this);
       } finally {

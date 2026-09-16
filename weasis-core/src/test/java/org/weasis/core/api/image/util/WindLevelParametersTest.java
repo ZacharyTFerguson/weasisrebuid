@@ -26,5 +26,10 @@ class WindLevelParametersTest {
     assertEquals(5, p.getVoiLutFirst());
     p.setLutShape("SIGMOID");
     assertEquals("SIGMOID", p.getLutShape());
+    assertEquals(128, new WindLevelParameters(80, 40).toDisplay8(40));
+    assertEquals(255, new WindLevelParameters(80, 40).toDisplay8(80));
+    WindLevelParameters sigmoid = new WindLevelParameters(80, 40);
+    sigmoid.setLutShape("SIGMOID");
+    assertEquals(225, sigmoid.toDisplay8(80));
   }
 }

@@ -9,7 +9,10 @@
  */
 package org.weasis.core.api.image;
 
-/** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
+/** Horizontal flip (Alt+F). {@code P_HORIZONTAL=false} is a passthrough. */
 public class FlipOp extends AbstractOp {
 
   public static final String P_HORIZONTAL = "horizontal";
@@ -17,5 +20,37 @@ public class FlipOp extends AbstractOp {
   public FlipOp() {
     super("op.flip");
     setParam(P_HORIZONTAL, Boolean.FALSE);
+  }
+
+  @Override
+  protected void processEnabled() {
+    Object in = getParam(INPUT_IMG);
+    setParam(OUTPUT_IMG, flipIfNeeded(in));
+  }
+
+  Object flipIfNeeded(Object in) {
+    if (!(in instanceof BufferedImage src) || !horizontal()) {
+      return in;
+    }
+    return flipHorizontal(src);
+  }
+
+  boolean horizontal() {
+    Object value = getParam(P_HORIZONTAL);
+    return Boolean.TRUE.equals(value) || "true".equalsIgnoreCase(String.valueOf(value));
+  }
+
+  static BufferedImage flipHorizontal(BufferedImage src) {
+    int type =
+        src.getType() == BufferedImage.TYPE_CUSTOM ? BufferedImage.TYPE_INT_ARGB : src.getType();
+    BufferedImage dst = new BufferedImage(src.getWidth(), src.getHeight(), type);
+    Graphics2D g = dst.createGraphics();
+    try {
+      g.drawImage(
+          src, src.getWidth(), 0, 0, src.getHeight(), 0, 0, src.getWidth(), src.getHeight(), null);
+    } finally {
+      g.dispose();
+    }
+    return dst;
   }
 }

@@ -71,4 +71,50 @@ public class WindLevelParameters {
     this.voiLut = lut == null ? null : lut.clone();
     this.voiLutFirst = firstMapped;
   }
+
+  /** Map a stored/modality sample to 8-bit display (linear, SIGMOID, or VOI LUT table). */
+  public int toDisplay8(double value) {
+    if (hasVoiLut()) {
+      return lutSample(value);
+    }
+    if ("SIGMOID".equalsIgnoreCase(getLutShape())) {
+      return sigmoid8(value);
+    }
+    return linear8(value);
+  }
+
+  int linear8(double value) {
+    if (window <= 0) {
+      return 0;
+    }
+    double n = (value - getLower()) / window;
+    return clamp8((int) Math.round(n * 255.0));
+  }
+
+  /** DICOM VOI LUT Function SIGMOID: {@code ymax / (1 + exp(-4 * (x - xc) / ww))}. */
+  int sigmoid8(double value) {
+    if (window <= 0) {
+      return 0;
+    }
+    double n = 1.0 / (1.0 + Math.exp(-4.0 * (value - level) / window));
+    return clamp8((int) Math.round(n * 255.0));
+  }
+
+  int lutSample(double value) {
+    int[] lut = voiLut;
+    int i = (int) Math.floor(value) - voiLutFirst;
+    if (i < 0) {
+      i = 0;
+    } else if (i >= lut.length) {
+      i = lut.length - 1;
+    }
+    return clamp8(lut[i]);
+  }
+
+  static int clamp8(int v) {
+    if (v < 0) {
+      return 0;
+    }
+    return v > 255 ? 255 : v;
+  }
 }
