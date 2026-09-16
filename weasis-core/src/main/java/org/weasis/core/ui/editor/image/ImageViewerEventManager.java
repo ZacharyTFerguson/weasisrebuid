@@ -19,6 +19,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -27,9 +28,9 @@ import org.weasis.core.api.gui.util.ShortcutManager;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.DragGraphic;
 import org.weasis.core.ui.model.graphic.Graphic;
-import org.weasis.core.ui.model.graphic.GraphicArea;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.core.ui.util.PrintOptions;
 
@@ -70,8 +71,7 @@ public class ImageViewerEventManager {
       view.showContextMenu(e.getX(), e.getY());
       return;
     }
-    if (view.getDrawing() == null
-        && (view.graphicAt(e.getX(), e.getY()) != null || !drawingAction(action))) {
+    if (view.getDrawing() == null && !drawingAction(action)) {
       if (graphicMouse.mousePressed(e, view)) {
         return;
       }
@@ -372,7 +372,20 @@ public class ImageViewerEventManager {
   }
 
   Point2D.Double imagePoint(MouseEvent e) {
-    return view.viewToImage(e.getX(), e.getY());
+    return clampImage(view.viewToImage(e.getX(), e.getY()));
+  }
+
+  Point2D.Double clampImage(Point2D.Double p) {
+    if (p == null) {
+      return new Point2D.Double();
+    }
+    BufferedImage src = view.getSourceImage();
+    if (src == null) {
+      return p;
+    }
+    p.x = Math.max(0, Math.min(src.getWidth() - 1.0, p.x));
+    p.y = Math.max(0, Math.min(src.getHeight() - 1.0, p.y));
+    return p;
   }
 
   void onDrawPressed(MouseEvent e) {
@@ -385,7 +398,7 @@ public class ImageViewerEventManager {
       return;
     }
     if (current == null) {
-      Graphic created = MeasureTool.create(view.getMeasureTool());
+      Graphic created = MeasureTool.create(view.activeMeasureTool());
       if (!(created instanceof DragGraphic drag)) {
         return;
       }
@@ -429,6 +442,10 @@ public class ImageViewerEventManager {
     if (current instanceof AngleToolGraphic angle) {
       if (!angleRayClicked) {
         angle.setRightRay();
+        Point2D.Double p = angle.getHandlePoint(2);
+        if (p != null) {
+          angle.setHandlePoint(2, clampImage(p));
+        }
       }
       view.repaint();
       return;
@@ -440,8 +457,8 @@ public class ImageViewerEventManager {
     view.setDrawing(null);
     drawHandle = 0;
     DrawStroke.INSTANCE.drawingView = null;
-    if (current instanceof GraphicArea) {
-      view.selectGraphic(current, false);
+    if (current instanceof RectangleGraphic rect) {
+      rect.ensureArea(32, view.getSourceImage());
     }
   }
 
@@ -454,11 +471,19 @@ public class ImageViewerEventManager {
    * reach here so D / A / Y / G paint on the chest, extra A/Y clicks land, and Delete removes a
    * selected graphic.
    */
-  static final class DrawStroke implements AWTEventListener {
+  public static final class DrawStroke implements AWTEventListener {
     static final DrawStroke INSTANCE = new DrawStroke();
     private boolean armed;
     volatile DefaultView2d<?> drawingView;
     volatile DefaultView2d<?> lastView;
+
+    public static void rememberView(DefaultView2d<?> view) {
+      INSTANCE.lastView = view;
+    }
+
+    public static void deleteOutside(KeyEvent ke) {
+      INSTANCE.onKey(ke);
+    }
 
     static void arm() {
       INSTANCE.armOnce();
@@ -518,7 +543,7 @@ public class ImageViewerEventManager {
       hit.getEventManager().mousePressed(local(me, hit));
     }
 
-    void onKey(KeyEvent ke) {
+    public void onKey(KeyEvent ke) {
       if (ke.getID() != KeyEvent.KEY_PRESSED) {
         return;
       }
@@ -529,9 +554,13 @@ public class ImageViewerEventManager {
         return;
       }
       DefaultView2d<?> view = lastView != null ? lastView : drawingView;
-      if (view != null) {
-        view.getEventManager().keyPressed(ke);
+      if (view == null) {
+        return;
       }
+      if (view.getSelectedGraphics().isEmpty()) {
+        view.selectAllGraphics();
+      }
+      view.deleteSelectedGraphics();
     }
 
     static DefaultView2d<?> viewAt(MouseEvent me) {

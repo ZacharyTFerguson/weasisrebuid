@@ -41,6 +41,7 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
+import org.weasis.core.ui.model.graphic.GraphicArea;
 import org.weasis.core.ui.model.graphic.GraphicSelectionListener;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 import org.weasis.core.ui.model.layer.GraphicLayer;
@@ -89,6 +90,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   private MediaSeries<? extends MediaElement> series;
   private volatile SynchCineEvent lastCineEvent;
   private volatile String measureTool = MeasureTool.DISTANCE;
+  private MeasureToolBar measureToolBar;
   private Graphic drawing;
   protected AbstractInfoLayer infoLayer = new AbstractInfoLayer();
   private volatile SynchView synch = SynchView.STACK;
@@ -568,9 +570,19 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     return measureTool;
   }
 
+  public String activeMeasureTool() {
+    if (measureToolBar != null) {
+      return MeasureTool.canonical(measureToolBar.getSelected());
+    }
+    return MeasureTool.canonical(measureTool);
+  }
+
+  public void setMeasureToolBar(MeasureToolBar bar) {
+    this.measureToolBar = bar;
+  }
+
   public void setMeasureTool(String measureTool) {
-    this.measureTool =
-        measureTool == null || measureTool.isBlank() ? MeasureTool.DISTANCE : measureTool;
+    this.measureTool = MeasureTool.canonical(measureTool);
   }
 
   public Graphic getDrawing() {
@@ -1278,11 +1290,14 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   }
 
   void paintSelectedRoiStats(Graphics2D g, Graphic graphic, float x, float y) {
-    if (!Boolean.TRUE.equals(graphic.getSelected())) {
+    if (!(graphic instanceof GraphicArea) || graphic.getShape() == null) {
       return;
     }
-    ImageRegionStatistics.Stats stats = ImageRegionStatistics.compute(this);
+    ImageRegionStatistics.Stats stats =
+        ImageRegionStatistics.compute(
+            getSourceImage(), graphic.getShape(), getModalityLutSlope(), getModalityLutIntercept());
     if (stats.getSamples() > 0) {
+      g.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
       g.drawString(stats.text(), x, y);
     }
   }

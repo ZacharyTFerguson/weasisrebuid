@@ -52,6 +52,9 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     if (view != null && !targets.contains(view)) {
       targets.add(view);
     }
+    if (view != null) {
+      view.setMeasureToolBar(this);
+    }
   }
 
   public DefaultView2d<?> boundView() {
@@ -74,8 +77,10 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     if (view == null) {
       return;
     }
-    view.setMeasureTool(selected);
-    if ("G".equals(selected) || MeasureTool.RECTANGLE.equals(selected)) {
+    String tool = MeasureTool.canonical(selected);
+    view.setMeasureToolBar(this);
+    view.setMeasureTool(tool);
+    if (MeasureTool.drawFamily(tool)) {
       view.getMouseActions().setLeft(MouseActions.DRAW);
     } else {
       view.getMouseActions().setLeft(MouseActions.MEASURE);

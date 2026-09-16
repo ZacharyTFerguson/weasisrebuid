@@ -61,7 +61,10 @@ public final class MeasureTool {
     if (tool == null) {
       return null;
     }
-    Supplier<Graphic> s = TOOLS.get(tool);
+    Supplier<Graphic> s = TOOLS.get(canonical(tool));
+    if (s == null) {
+      s = TOOLS.get(tool);
+    }
     if (s == null) {
       s = TOOLS.get(tool.toLowerCase());
     }
@@ -70,6 +73,30 @@ public final class MeasureTool {
       graphic.setLineThickness(3.0f);
     }
     return graphic;
+  }
+
+  public static String canonical(String tool) {
+    if (tool == null || tool.isBlank()) {
+      return DISTANCE;
+    }
+    return switch (tool) {
+      case "A", "angle" -> ANGLE;
+      case "Y", "polyline" -> POLYLINE;
+      case "G", "rectangle", "draw" -> RECTANGLE;
+      case "B", "textbox" -> TEXTBOX;
+      case "M", "D", "distance", "measure" -> DISTANCE;
+      default -> tool.toLowerCase();
+    };
+  }
+
+  public static boolean measureFamily(String tool) {
+    String c = canonical(tool);
+    return DISTANCE.equals(c) || ANGLE.equals(c) || POLYLINE.equals(c) || TEXTBOX.equals(c);
+  }
+
+  public static boolean drawFamily(String tool) {
+    String c = canonical(tool);
+    return RECTANGLE.equals(c) || ELLIPSE.equals(c) || POLYGON.equals(c);
   }
 
   public static Graphic distance(Point2D.Double a, Point2D.Double b) {

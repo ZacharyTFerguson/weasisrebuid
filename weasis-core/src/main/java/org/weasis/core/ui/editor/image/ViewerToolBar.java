@@ -73,9 +73,13 @@ public class ViewerToolBar extends WtoolBar {
   public static void bindMeasureTool(DefaultView2d<?> view) {
     String left = MouseActions.normalize(view.getMouseActions().getLeft());
     if (MouseActions.MEASURE.equals(left)) {
-      view.setMeasureTool(MeasureTool.DISTANCE);
+      if (!MeasureTool.measureFamily(view.getMeasureTool())) {
+        view.setMeasureTool(MeasureTool.DISTANCE);
+      }
     } else if (MouseActions.DRAW.equals(left)) {
-      view.setMeasureTool(MeasureTool.RECTANGLE);
+      if (!MeasureTool.drawFamily(view.getMeasureTool())) {
+        view.setMeasureTool(MeasureTool.RECTANGLE);
+      }
     }
   }
 

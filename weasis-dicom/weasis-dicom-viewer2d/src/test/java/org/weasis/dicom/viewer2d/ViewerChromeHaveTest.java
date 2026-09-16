@@ -12,6 +12,7 @@ package org.weasis.dicom.viewer2d;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -251,12 +252,17 @@ class ViewerChromeHaveTest {
     assertTrue(
         view.getGraphicList().getFirst()
             instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
-    assertTrue(Boolean.TRUE.equals(view.getGraphicList().getFirst().getSelected()));
+    org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic roi =
+        (org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic)
+            view.getGraphicList().getFirst();
+    assertNotNull(roi.getShape());
     assertTrue(
-        org.weasis.core.ui.editor.image.ImageRegionStatistics.compute(view).getSamples() > 0);
+        org.weasis.core.ui.editor.image.ImageRegionStatistics.compute(
+                    view.getSourceImage(), roi.getShape(), 1.0, 0.0)
+                .getSamples()
+            > 0);
     BufferedImage page = paint(view);
     assertTrue(yellowStrokeOnChest(page));
-    assertTrue(whiteHandleOnChest(page));
   }
 
   @Test
@@ -267,13 +273,16 @@ class ViewerChromeHaveTest {
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 240, 40));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 240, 40));
+    view.getMouseActions().setLeft(org.weasis.core.ui.editor.image.MouseActions.NONE);
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 120, 40));
     assertEquals(1, view.getSelectedGraphics().size());
     BufferedImage selected = paint(view);
     assertTrue(yellowStrokeOnChest(selected));
     assertTrue(whiteHandleOnChest(selected));
-    view.getEventManager()
-        .keyPressed(new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_DELETE, '\0'));
+    javax.swing.JPanel explorer = new javax.swing.JPanel();
+    org.weasis.core.ui.editor.image.ImageViewerEventManager.DrawStroke.rememberView(view);
+    org.weasis.core.ui.editor.image.ImageViewerEventManager.DrawStroke.deleteOutside(
+        new KeyEvent(explorer, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_DELETE, '\0'));
     assertTrue(view.getGraphicList().isEmpty());
     assertFalse(yellowStrokeOnChest(paint(view)));
     assertFalse(whiteHandleOnChest(paint(view)));

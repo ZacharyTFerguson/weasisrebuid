@@ -128,6 +128,64 @@ class MeasureToolBarHaveTest {
     assertTrue(paintsYellowOnSegment(view));
   }
 
+  @Test
+  void angleStaysAngleAfterViewerMeasureBind() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    bar.setSelected("A");
+    bar.apply(view);
+    ViewerToolBar.bindMeasureTool(view);
+    assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 20, 80, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 20, 80, 1));
+    assertTrue(view.getDrawing() instanceof AngleToolGraphic);
+    AngleToolGraphic angle = (AngleToolGraphic) view.getDrawing();
+    assertTrue(angle.getAngleDegrees() > 1.0);
+    assertTrue(angle.getLabel()[0].contains("°"));
+  }
+
+  @Test
+  void drawGOverExistingLineCreatesRectangle() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 80, 20, 1));
+    bar.setSelected("G");
+    bar.apply(view);
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 30, 30, 1));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 90, 90, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 90, 90, 1));
+    assertEquals(2, view.getGraphicList().size());
+    assertTrue(
+        view.getGraphicList().getLast()
+            instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+  }
+
+  @Test
+  void explorerDeleteClearsChestGraphics() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20, 1));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 80, 20, 1));
+    assertEquals(1, view.getGraphicList().size());
+    ImageViewerEventManager.DrawStroke.rememberView(view);
+    ImageViewerEventManager.DrawStroke.deleteOutside(
+        new java.awt.event.KeyEvent(
+            new javax.swing.JPanel(),
+            java.awt.event.KeyEvent.KEY_PRESSED,
+            0L,
+            0,
+            java.awt.event.KeyEvent.VK_DELETE,
+            '\0'));
+    assertTrue(view.getGraphicList().isEmpty());
+  }
+
   static DefaultView2d<?> sizedGrayView() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setSize(200, 200);
