@@ -25,6 +25,12 @@ public final class MouseActions {
   /** Multi-vertex path measure; distinct from two-point {@link #DRAW} line caliper. */
   public static final String POLYLINE = "polyline";
 
+  /**
+   * Open interpolating curve measure (≥3 handles); distinct from {@link #POLYLINE} segment sum and
+   * {@link #DRAW}.
+   */
+  public static final String CURVE = "curve";
+
   /** Three-point angle measure; distinct from {@link #DRAW} line and {@link #POLYLINE}. */
   public static final String ANGLE = "angle";
 

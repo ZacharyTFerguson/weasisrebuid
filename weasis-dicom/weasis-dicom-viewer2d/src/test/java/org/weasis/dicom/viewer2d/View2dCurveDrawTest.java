@@ -25,8 +25,8 @@ import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 
 /**
- * Interactive open curve on {@link View2d}: image-space handles create a {@link CurveGraphic}
- * whose visible label is {@link View2d#formatCurveMeasureLabel} — not a recomputed mm, hypot, or
+ * Interactive open curve on {@link View2d}: image-space handles create a {@link CurveGraphic} whose
+ * visible label is {@link View2d#formatCurveMeasureLabel} — not a recomputed mm, hypot, or
  * Catmull–Rom sample sum in the mouse path.
  *
  * <p><b>Why (0028,0030) via landed APIs:</b> spacing comes from {@link
@@ -46,8 +46,8 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
  * guess.
  *
  * <p><b>Why not copy Weasis:</b> upstream spline measure tools mix free-hand scribble, closure, and
- * paint buffers; this slice adds image-space click-to-add beside existing polyline — no measure-tool
- * port and no change to landed {@code sampleOpenCatmullRom} / {@code formatCurve}.
+ * paint buffers; this slice adds image-space click-to-add beside existing polyline — no
+ * measure-tool port and no change to landed {@code sampleOpenCatmullRom} / {@code formatCurve}.
  */
 class View2dCurveDrawTest {
 
@@ -78,7 +78,7 @@ class View2dCurveDrawTest {
     CurveGraphic curve = (CurveGraphic) view.getGraphicList().getFirst();
     String label = view.formatCurveMeasureLabel(curve);
     assertEquals(label, curve.getLabel()[0]);
-    assert label.endsWith(" px");
+    assertTrue(label.endsWith(" px"));
   }
 
   @Test

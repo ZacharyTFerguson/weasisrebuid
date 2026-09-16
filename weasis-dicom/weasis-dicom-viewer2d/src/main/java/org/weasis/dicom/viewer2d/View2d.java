@@ -66,6 +66,8 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private PolylineGraphic draftPolylineCaliper;
 
+  private CurveGraphic draftCurveCaliper;
+
   private PolygonGraphic draftPolygonCaliper;
 
   private AngleToolGraphic draftAngleCaliper;
@@ -237,6 +239,26 @@ public class View2d extends DefaultView2d<MediaElement> {
     }
     applyPolylineCaliperLabel(poly);
     addGraphic(poly);
+  }
+
+  /**
+   * Adds an open curve caliper in image pixel coordinates and binds its label to {@link
+   * #formatCurveMeasureLabel}.
+   */
+  public void addCurveCaliper(List<? extends Point2D> imagePoints) {
+    if (imagePoints == null || imagePoints.size() < 3) {
+      return;
+    }
+    CurveGraphic curve = new CurveGraphic();
+    for (int i = 0; i < imagePoints.size(); i++) {
+      Point2D p = imagePoints.get(i);
+      if (p == null) {
+        return;
+      }
+      curve.setHandlePoint(i, copyPoint(p));
+    }
+    applyCurveCaliperLabel(curve);
+    addGraphic(curve);
   }
 
   /**
@@ -430,6 +452,10 @@ public class View2d extends DefaultView2d<MediaElement> {
     return org.weasis.core.ui.editor.image.MouseActions.POLYLINE.equals(normalizedLeftAction);
   }
 
+  boolean isCurveDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.CURVE.equals(normalizedLeftAction);
+  }
+
   boolean isPolygonDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.POLYGON.equals(normalizedLeftAction);
   }
@@ -491,6 +517,54 @@ public class View2d extends DefaultView2d<MediaElement> {
     }
     if (clickCount >= 2) {
       finalizeDraftPolylineCaliper();
+    }
+  }
+
+  /** Test hook: curve vertex click in view coordinates when left action is {@code curve}. */
+  public void simulateCurveDrawClick(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2) {
+      curveDrawViewPressed(viewX, viewY, 1);
+      curveDrawViewReleased(viewX, viewY, 1);
+    }
+    curveDrawViewPressed(viewX, viewY, clickCount);
+    curveDrawViewReleased(viewX, viewY, clickCount);
+  }
+
+  void curveDrawViewPressed(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2 && draftCurveCaliper != null) {
+      finalizeDraftCurveCaliper();
+      return;
+    }
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftCurveCaliper == null) {
+      draftCurveCaliper = new CurveGraphic();
+      draftCurveCaliper.setHandlePoint(0, image);
+      draftCurveCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+      addGraphic(draftCurveCaliper);
+      repaint();
+      return;
+    }
+    int last = draftCurveCaliper.getPts().size() - 1;
+    draftCurveCaliper.setHandlePoint(last, image);
+    draftCurveCaliper.setHandlePoint(last + 1, new Point2D.Double(image.x, image.y));
+    repaint();
+  }
+
+  void curveDrawViewDragged(int viewX, int viewY) {
+    if (draftCurveCaliper == null) {
+      return;
+    }
+    int last = draftCurveCaliper.getPts().size() - 1;
+    draftCurveCaliper.setHandlePoint(last, viewToImage(viewX, viewY));
+    repaint();
+  }
+
+  void curveDrawViewReleased(int viewX, int viewY, int clickCount) {
+    if (draftCurveCaliper == null) {
+      return;
+    }
+    if (clickCount >= 2) {
+      finalizeDraftCurveCaliper();
     }
   }
 
@@ -616,6 +690,44 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private void applyPolylineCaliperLabel(PolylineGraphic poly) {
     poly.setLabel(new String[] {formatPolylineMeasureLabel(poly)});
+  }
+
+  private void finalizeDraftCurveCaliper() {
+    if (draftCurveCaliper == null) {
+      return;
+    }
+    trimTrailingRubberBand(draftCurveCaliper);
+    if (draftCurveCaliper.getPts().size() < 3) {
+      getGraphicList().remove(draftCurveCaliper);
+    } else {
+      applyCurveCaliperLabel(draftCurveCaliper);
+    }
+    draftCurveCaliper = null;
+    repaint();
+  }
+
+  private static void trimTrailingRubberBand(CurveGraphic curve) {
+    List<Point2D.Double> pts = new ArrayList<>(curve.getPts());
+    while (pts.size() > 2) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) > 1e-6) {
+        break;
+      }
+      pts.removeLast();
+    }
+    if (pts.size() > 1) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) <= 1e-6) {
+        pts.removeLast();
+      }
+    }
+    curve.setPts(pts);
+  }
+
+  private void applyCurveCaliperLabel(CurveGraphic curve) {
+    curve.setLabel(new String[] {formatCurveMeasureLabel(curve)});
   }
 
   /** Test hook: angle handle click in view coordinates when left action is {@code angle}. */
@@ -927,6 +1039,10 @@ public class View2d extends DefaultView2d<MediaElement> {
         view2d.polylineDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
         return;
       }
+      if (curveDrawActive(e)) {
+        view2d.curveDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
       if (ellipseDrawActive(e)) {
         view2d.ellipseDrawViewPressed(e.getX(), e.getY());
         return;
@@ -946,6 +1062,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
+      if (curveDrawActive(e)) {
+        view2d.curveDrawViewDragged(e.getX(), e.getY());
         return;
       }
       if (ellipseDrawActive(e)) {
@@ -975,6 +1095,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
+      if (curveDrawActive(e)) {
+        view2d.curveDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
         return;
       }
       if (ellipseDrawActive(e)) {
@@ -1032,6 +1156,19 @@ public class View2d extends DefaultView2d<MediaElement> {
           org.weasis.core.ui.editor.image.MouseActions.normalize(
               view2d.getMouseActions().getLeft());
       if (!view2d.isPolylineDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
+    }
+
+    private boolean curveDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isCurveDrawMouseAction(left)) {
         return false;
       }
       if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
