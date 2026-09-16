@@ -10,21 +10,37 @@
 package org.weasis.dicom.sr;
 
 import java.awt.BorderLayout;
+import java.util.List;
+import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 
 public class SRContainer extends ViewerPlugin<MediaElement> {
 
+  public static final String NAME = "DICOM SR Viewer";
   private final SRView srView = new SRView();
+  private final SrToolBar srToolBar = new SrToolBar();
 
   public SRContainer() {
-    super("DICOM SR Viewer");
+    super(NAME);
     add(srView, BorderLayout.CENTER);
+    srToolBar.bind(srView);
+    fillSeriesViewerUi();
+  }
+
+  void fillSeriesViewerUi() {
+    List<Insertable> bars = getSeriesViewerUI().getToolBar();
+    bars.clear();
+    bars.add(srToolBar);
   }
 
   public SRView getSRView() {
     return srView;
+  }
+
+  public SrToolBar getSrToolBar() {
+    return srToolBar;
   }
 
   @Override

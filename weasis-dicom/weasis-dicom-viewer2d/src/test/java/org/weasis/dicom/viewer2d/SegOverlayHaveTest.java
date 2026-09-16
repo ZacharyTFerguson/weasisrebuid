@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import javax.swing.JCheckBox;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.service.WProperties;
@@ -102,5 +103,25 @@ class SegOverlayHaveTest {
     loaded.resetToDefaultValues();
     assertEquals(50, loaded.opacityPercent());
     assertTrue(loaded.fill());
+  }
+
+  @Test
+  void view2dContainerWiresSegmentationShowOverlayChrome() {
+    View2dContainer container = new View2dContainer();
+    SegmentationTool tool = container.getSegmentationTool();
+    assertEquals(container.getView2d(), tool.getView());
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> SegmentationTool.NAME.equals(b.getComponentName())));
+    JCheckBox overlay = (JCheckBox) tool.getComponent(0);
+    assertEquals("Show overlay", overlay.getText());
+    assertEquals("segOverlay", overlay.getName());
+    assertTrue(overlay.isSelected());
+    assertTrue(container.getView2d().isSegmentationsVisible());
+    overlay.doClick();
+    assertFalse(overlay.isSelected());
+    assertFalse(container.getView2d().isSegmentationsVisible());
+    overlay.doClick();
+    assertTrue(container.getView2d().isSegmentationsVisible());
   }
 }

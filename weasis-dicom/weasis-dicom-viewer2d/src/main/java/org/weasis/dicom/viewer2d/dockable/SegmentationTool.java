@@ -9,7 +9,7 @@
  */
 package org.weasis.dicom.viewer2d.dockable;
 
-import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,10 +35,10 @@ public class SegmentationTool extends JPanel implements Insertable {
   private float opacity = 0.5f;
 
   public SegmentationTool() {
-    super(new BorderLayout());
+    super(new FlowLayout(FlowLayout.LEFT, 4, 0));
     overlayBox.setName("segOverlay");
     overlayBox.addActionListener(e -> setOverlayVisible(overlayBox.isSelected()));
-    add(overlayBox, BorderLayout.NORTH);
+    add(overlayBox);
   }
 
   public void bind(ViewCanvas view) {

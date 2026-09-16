@@ -19,6 +19,7 @@ import java.awt.print.PageFormat;
 import java.awt.print.Paper;
 import java.awt.print.Printable;
 import java.util.List;
+import javax.swing.AbstractButton;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
@@ -69,6 +70,19 @@ class SrViewerHaveTest {
     assertEquals(Printable.PAGE_EXISTS, printer.print(preview.createGraphics(), format, 0));
     assertEquals(Printable.NO_SUCH_PAGE, printer.print(preview.createGraphics(), format, 1));
     assertFalse(bar.printPreview().getWidth() <= 0);
+  }
+
+  @Test
+  void srContainerWiresPrintChrome() {
+    SRContainer container = new SRContainer();
+    assertEquals(SRContainer.NAME, container.getPluginName());
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> SrToolBar.NAME.equals(b.getComponentName())));
+    AbstractButton print = (AbstractButton) container.getSrToolBar().getComponent(0);
+    assertEquals("Print", print.getText());
+    assertEquals("printSr", print.getName());
+    assertEquals(container.getSRView(), container.getSrToolBar().boundView());
   }
 
   static Attributes imageSr(String sopInstanceUid) {
