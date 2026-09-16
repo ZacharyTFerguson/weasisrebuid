@@ -529,13 +529,23 @@ public class ImageViewerEventManager {
     }
 
     static Point pointOn(MouseEvent me, DefaultView2d<?> view) {
+      if (me.getComponent() == view) {
+        return me.getPoint();
+      }
       try {
         Point p = new Point(me.getLocationOnScreen());
         SwingUtilities.convertPointFromScreen(p, view);
         return p;
-      } catch (IllegalComponentStateException e) {
+      } catch (Exception e) {
+        return convertOrPoint(me, view);
+      }
+    }
+
+    static Point convertOrPoint(MouseEvent me, DefaultView2d<?> view) {
+      if (me.getComponent() == null) {
         return me.getPoint();
       }
+      return SwingUtilities.convertPoint(me.getComponent(), me.getPoint(), view);
     }
   }
 }
