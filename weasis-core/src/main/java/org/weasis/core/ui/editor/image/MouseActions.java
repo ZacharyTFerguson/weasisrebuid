@@ -21,8 +21,10 @@ public final class MouseActions {
   public static final String SCROLL = "scroll";
   public static final String DRAW = "draw";
   public static final String DRAWINGS = "drawings";
+
   /** Multi-vertex path measure; distinct from two-point {@link #DRAW} line caliper. */
   public static final String POLYLINE = "polyline";
+
   public static final String CROSSHAIR = "crosshair";
 
   private String left = WINLEVEL;

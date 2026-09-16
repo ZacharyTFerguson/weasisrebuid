@@ -33,8 +33,8 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
  * MeasurementLabel#formatPolyline}. The draw handler must not sum {@code hypot(Δ·pitch)} itself or
  * use end-to-end chord length.
  *
- * <p><b>Why segment sum, not chord:</b> path (0,0)→(10,0)→(10,10) is 20 px and 10.0 mm on
- * isotropic 0.50 spacing — not the 14.14 px diagonal between endpoints. Labels must match {@link
+ * <p><b>Why segment sum, not chord:</b> path (0,0)→(10,0)→(10,10) is 20 px and 10.0 mm on isotropic
+ * 0.50 spacing — not the 14.14 px diagonal between endpoints. Labels must match {@link
  * View2dPolylineMeasureLabelTest#polylineLabelSumsSegmentsNotEndToEndHypot}.
  *
  * <p><b>Why fail-closed px:</b> when spacing is missing, vertices still store in image space but
