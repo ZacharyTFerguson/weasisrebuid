@@ -86,6 +86,9 @@ public class View2d extends DefaultView2d<MediaElement> {
   private EllipseGraphic draftEllipseCaliper;
   private boolean draftEllipseAwaitingSecondClick;
 
+  private RectangleGraphic draftRectangleCaliper;
+  private boolean draftRectangleAwaitingSecondClick;
+
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
   public View2d() {
@@ -378,6 +381,21 @@ public class View2d extends DefaultView2d<MediaElement> {
     addGraphic(ellipse);
   }
 
+  /**
+   * Adds a rectangle area caliper in image pixel coordinates and binds its label to {@link
+   * #formatRectangleMeasureLabel}.
+   */
+  public void addRectangleCaliper(Point2D cornerA, Point2D cornerB) {
+    if (cornerA == null || cornerB == null) {
+      return;
+    }
+    RectangleGraphic rectangle = new RectangleGraphic();
+    rectangle.setHandlePoint(0, copyPoint(cornerA));
+    rectangle.setHandlePoint(1, copyPoint(cornerB));
+    applyRectangleCaliperLabel(rectangle);
+    addGraphic(rectangle);
+  }
+
   /** Test hook: press-drag-release free-hand stroke when left action is {@code freehand}. */
   public void simulateFreehandDrawStroke(int startViewX, int startViewY, int... dragViewXY) {
     freehandDrawViewPressed(startViewX, startViewY);
@@ -403,6 +421,14 @@ public class View2d extends DefaultView2d<MediaElement> {
     ellipseDrawViewReleased(viewX1, viewY1);
     ellipseDrawViewPressed(viewX2, viewY2);
     ellipseDrawViewReleased(viewX2, viewY2);
+  }
+
+  /** Test hook: two-click rectangle draw in view coordinates when left action is {@code rectangle}. */
+  public void simulateRectangleDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
+    rectangleDrawViewPressed(viewX1, viewY1);
+    rectangleDrawViewReleased(viewX1, viewY1);
+    rectangleDrawViewPressed(viewX2, viewY2);
+    rectangleDrawViewReleased(viewX2, viewY2);
   }
 
   void lineDrawViewPressed(int viewX, int viewY) {
@@ -541,6 +567,51 @@ public class View2d extends DefaultView2d<MediaElement> {
     }
   }
 
+  void rectangleDrawViewPressed(int viewX, int viewY) {
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftRectangleCaliper != null && draftRectangleAwaitingSecondClick) {
+      draftRectangleCaliper.setHandlePoint(1, image);
+      finalizeDraftRectangleCaliper();
+      return;
+    }
+    draftRectangleCaliper = new RectangleGraphic();
+    draftRectangleCaliper.setHandlePoint(0, image);
+    draftRectangleCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+    draftRectangleAwaitingSecondClick = true;
+    addGraphic(draftRectangleCaliper);
+    repaint();
+  }
+
+  void rectangleDrawViewDragged(int viewX, int viewY) {
+    if (draftRectangleCaliper == null) {
+      return;
+    }
+    draftRectangleAwaitingSecondClick = false;
+    draftRectangleCaliper.setHandlePoint(1, viewToImage(viewX, viewY));
+    repaint();
+  }
+
+  void rectangleDrawViewReleased(int viewX, int viewY) {
+    if (draftRectangleCaliper == null) {
+      return;
+    }
+    if (!draftRectangleAwaitingSecondClick) {
+      draftRectangleCaliper.setHandlePoint(1, viewToImage(viewX, viewY));
+      finalizeDraftRectangleCaliper();
+    }
+  }
+
+  private void finalizeDraftRectangleCaliper() {
+    applyRectangleCaliperLabel(draftRectangleCaliper);
+    draftRectangleCaliper = null;
+    draftRectangleAwaitingSecondClick = false;
+    repaint();
+  }
+
+  private void applyRectangleCaliperLabel(RectangleGraphic rectangle) {
+    rectangle.setLabel(new String[] {formatRectangleMeasureLabel(rectangle)});
+  }
+
   private static Point2D.Double copyPoint(Point2D p) {
     return new Point2D.Double(p.getX(), p.getY());
   }
@@ -579,6 +650,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   boolean isEllipseDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.ELLIPSE.equals(normalizedLeftAction);
+  }
+
+  boolean isRectangleDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.RECTANGLE.equals(normalizedLeftAction);
   }
 
   /** Test hook: polyline vertex click in view coordinates when left action is {@code polyline}. */
@@ -1254,6 +1329,10 @@ public class View2d extends DefaultView2d<MediaElement> {
         view2d.closedCurveDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
         return;
       }
+      if (rectangleDrawActive(e)) {
+        view2d.rectangleDrawViewPressed(e.getX(), e.getY());
+        return;
+      }
       if (ellipseDrawActive(e)) {
         view2d.ellipseDrawViewPressed(e.getX(), e.getY());
         return;
@@ -1285,6 +1364,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (closedCurveDrawActive(e)) {
         view2d.closedCurveDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
+      if (rectangleDrawActive(e)) {
+        view2d.rectangleDrawViewDragged(e.getX(), e.getY());
         return;
       }
       if (ellipseDrawActive(e)) {
@@ -1326,6 +1409,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (closedCurveDrawActive(e)) {
         view2d.closedCurveDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
+      if (rectangleDrawActive(e)) {
+        view2d.rectangleDrawViewReleased(e.getX(), e.getY());
         return;
       }
       if (ellipseDrawActive(e)) {
@@ -1452,6 +1539,19 @@ public class View2d extends DefaultView2d<MediaElement> {
           org.weasis.core.ui.editor.image.MouseActions.normalize(
               view2d.getMouseActions().getLeft());
       if (!view2d.isEllipseDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
+    }
+
+    private boolean rectangleDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isRectangleDrawMouseAction(left)) {
         return false;
       }
       if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
