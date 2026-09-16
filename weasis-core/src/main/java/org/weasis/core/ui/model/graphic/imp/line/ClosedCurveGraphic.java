@@ -30,6 +30,23 @@ public class ClosedCurveGraphic extends AbstractDragGraphic {
     super(0);
   }
 
+  /** Pixel path length along the same sampled closed path as {@link #getLengthMm(ImageSpacing)}. */
+  public double getLength() {
+    List<Point2D.Double> pts = getPts();
+    if (pts.size() < 3) {
+      return 0;
+    }
+    List<Point2D.Double> samples = sampleClosedCatmullRom(pts);
+    if (samples.size() < 2) {
+      return 0;
+    }
+    double sum = 0;
+    for (int i = 1; i < samples.size(); i++) {
+      sum += samples.get(i - 1).distance(samples.get(i));
+    }
+    return sum;
+  }
+
   /**
    * Physical path length in mm along the closed interpolating curve: samples the smooth closed path
    * (including wrap from last handle to first) and sums per-step length using row spacing for
