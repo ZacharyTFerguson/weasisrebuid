@@ -245,7 +245,7 @@ class MeasureToolBarHaveTest {
         continue;
       }
       for (String line : lines) {
-        if (line != null && line.contains(text)) {
+        if (text.equals(line)) {
           return true;
         }
       }
