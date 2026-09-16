@@ -48,6 +48,9 @@ public class ImageViewerEventManager {
   public void mousePressed(MouseEvent e) {
     lastX = e.getX();
     lastY = e.getY();
+    if (view != null) {
+      view.requestFocusInWindow();
+    }
     String action = buttonAction(e);
     if (MouseActions.CROSSHAIR.equals(MouseActions.normalize(action))) {
       view.setCrosshairFromView(e.getX(), e.getY());
@@ -69,7 +72,7 @@ public class ImageViewerEventManager {
   }
 
   public void mouseDragged(MouseEvent e) {
-    if (ViewTransferHandler.dragging() != null) {
+    if (ViewTransferHandler.dragging() != null && !drawingAction(buttonAction(e))) {
       return;
     }
     int dx = e.getX() - lastX;

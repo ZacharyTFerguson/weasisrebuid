@@ -37,6 +37,7 @@ public class PolylineGraphic extends AbstractDragGraphic {
       path.lineTo(p.x, p.y);
     }
     setShape(path);
+    setLabel(new String[] {pts.size() + " pts"});
   }
 
   @Override

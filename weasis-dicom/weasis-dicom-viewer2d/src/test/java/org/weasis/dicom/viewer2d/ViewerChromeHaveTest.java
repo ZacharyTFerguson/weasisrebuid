@@ -18,7 +18,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.GridLayout;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.image.PseudoColorOp;
@@ -96,6 +98,58 @@ class ViewerChromeHaveTest {
     assertEquals("Star", star.getText());
     assertEquals("Filter", filter.getText());
     assertSame(container.getView2d(), container.getKeyObjectToolBar().boundView());
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> "Measure".equals(b.getComponentName())));
+    javax.swing.AbstractButton distance =
+        (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0);
+    javax.swing.AbstractButton angle =
+        (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(1);
+    javax.swing.AbstractButton polyline =
+        (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(2);
+    assertEquals("D", distance.getText());
+    assertEquals("A", angle.getText());
+    assertEquals("Y", polyline.getText());
+    assertEquals(
+        "G",
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(3))
+            .getText());
+    assertEquals(
+        "B",
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(4))
+            .getText());
+    assertSame(container.getView2d(), container.getMeasureToolBar().boundView());
+    assertEquals(
+        "Measure", container.getSeriesViewerUI().getToolBar().get(1).getComponentName());
+  }
+
+  @Test
+  void measureDayButtonsDrawAndPaintLengthOnView2d() {
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.setSize(200, 200);
+    view.setSourceImage(new BufferedImage(100, 100, BufferedImage.TYPE_BYTE_GRAY));
+    view.setZoom(2.0);
+    javax.swing.AbstractButton d =
+        (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0);
+    d.doClick();
+    assertEquals("D", container.getMeasureToolBar().getSelected());
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20));
+    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20));
+    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 80, 20));
+    assertEquals(1, view.getGraphicList().size());
+    assertTrue(view.getGraphicList().getFirst() instanceof LineGraphic);
+    LineGraphic line = (LineGraphic) view.getGraphicList().getFirst();
+    assertEquals(30.0, line.getLength(), 0.01);
+    assertTrue(line.getLabel()[0].contains("px"));
+    BufferedImage page = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+    java.awt.Graphics2D g = page.createGraphics();
+    try {
+      view.paintView(g, true);
+    } finally {
+      g.dispose();
+    }
+    assertTrue(yellowAt(page, 60, 60));
   }
 
   @Test
@@ -159,5 +213,30 @@ class ViewerChromeHaveTest {
 
   static KeyEvent tab(View2d view, int mods) {
     return new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, mods, KeyEvent.VK_TAB, '\t');
+  }
+
+  static MouseEvent mouse(View2d view, int id, int x, int y) {
+    int mods = id == MouseEvent.MOUSE_RELEASED ? 0 : InputEvent.BUTTON1_DOWN_MASK;
+    return new MouseEvent(view, id, 0L, mods, x, y, 1, false, MouseEvent.BUTTON1);
+  }
+
+  static boolean yellowAt(BufferedImage page, int x, int y) {
+    for (int dy = -2; dy <= 2; dy++) {
+      for (int dx = -2; dx <= 2; dx++) {
+        int px = x + dx;
+        int py = y + dy;
+        if (px < 0 || py < 0 || px >= page.getWidth() || py >= page.getHeight()) {
+          continue;
+        }
+        int rgb = page.getRGB(px, py);
+        int r = (rgb >> 16) & 255;
+        int green = (rgb >> 8) & 255;
+        int b = rgb & 255;
+        if (r > 200 && green > 200 && b < 80) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 }

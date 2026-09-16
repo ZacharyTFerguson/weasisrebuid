@@ -18,6 +18,7 @@ import java.awt.Graphics2D;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
@@ -32,7 +33,12 @@ class MeasureToolBarHaveTest {
     MeasureToolBar bar = new MeasureToolBar();
     assertEquals("Measure", bar.getComponentName());
     assertEquals(Insertable.Type.TOOLBAR, bar.getType());
-    assertEquals(MeasureTool.NAMES.size(), bar.getComponent().getComponentCount());
+    assertEquals(MeasureToolBar.BUTTONS.length, bar.getComponent().getComponentCount());
+    assertEquals("D", ((AbstractButton) bar.getComponent().getComponent(0)).getText());
+    assertEquals("A", ((AbstractButton) bar.getComponent().getComponent(1)).getText());
+    assertEquals("Y", ((AbstractButton) bar.getComponent().getComponent(2)).getText());
+    assertEquals("G", ((AbstractButton) bar.getComponent().getComponent(3)).getText());
+    assertEquals("B", ((AbstractButton) bar.getComponent().getComponent(4)).getText());
     assertTrue(bar.newGraphic() instanceof LineGraphic);
     bar.setSelected("A");
     assertTrue(bar.newGraphic() instanceof AngleToolGraphic);
@@ -57,6 +63,7 @@ class MeasureToolBarHaveTest {
     LineGraphic line = (LineGraphic) view.getGraphicList().getFirst();
     assertEquals(5.0, line.getLength(), 1e-9);
     assertNotNull(line.getShape());
+    assertTrue(line.getLabel()[0].contains("px"));
     assertNull(view.getDrawing());
   }
 

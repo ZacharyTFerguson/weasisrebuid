@@ -1247,6 +1247,39 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     g.setStroke(strokeFor(graphic));
     g.draw(shape);
     g.setStroke(previous);
+    paintGraphicLabel(g, graphic, shape);
+  }
+
+  void paintGraphicLabel(Graphics2D g, Graphic graphic, Shape shape) {
+    if (g == null || graphic == null || shape == null) {
+      return;
+    }
+    if (!Boolean.TRUE.equals(graphic.getLabelVisible())) {
+      return;
+    }
+    String[] lines = graphic.getLabel();
+    Rectangle2D box = shape.getBounds2D();
+    float x = (float) (box.getX() + box.getWidth() / 2.0);
+    float y = (float) (box.getY() + box.getHeight() / 2.0);
+    if (lines != null) {
+      for (String line : lines) {
+        if (line != null && !line.isBlank()) {
+          g.drawString(line, x, y);
+          y += 14;
+        }
+      }
+    }
+    paintSelectedRoiStats(g, graphic, x, y);
+  }
+
+  void paintSelectedRoiStats(Graphics2D g, Graphic graphic, float x, float y) {
+    if (!Boolean.TRUE.equals(graphic.getSelected())) {
+      return;
+    }
+    ImageRegionStatistics.Stats stats = ImageRegionStatistics.compute(this);
+    if (stats.getSamples() > 0) {
+      g.drawString(stats.text(), x, y);
+    }
   }
 
   static Stroke strokeFor(Graphic graphic) {

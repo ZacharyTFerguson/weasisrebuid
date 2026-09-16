@@ -53,6 +53,7 @@ public class LineGraphic extends AbstractDragGraphic {
       return;
     }
     setShape(new Line2D.Double(a, b));
+    setLabel(new String[] {String.format("%.1f px", getLength())});
   }
 
   @Override

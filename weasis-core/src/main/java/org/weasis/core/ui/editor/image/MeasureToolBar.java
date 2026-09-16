@@ -13,29 +13,29 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JToolBar;
-import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.util.Toolbar;
+import org.weasis.core.ui.util.WtoolBar;
 
 /**
- * Measure/draw chrome. Buttons are SHORTCUTS.md tools (D distance, A angle, Y polyline, B textbox,
- * G draw rectangle). Selecting a tool sets the left mouse action to {@code measure}.
+ * Measure/draw chrome. Headed buttons are SHORTCUTS.md D/A/Y/G/B (distance, angle, polyline, draw,
+ * textbox). Selecting a tool sets the left mouse action to {@code measure}.
  */
-public class MeasureToolBar implements Toolbar {
+public class MeasureToolBar extends WtoolBar implements Toolbar {
 
   public static final String NAME = "Measure";
 
-  private final JToolBar bar = new JToolBar(NAME);
+  /** WP-5 headed row: D distance, A angle, Y polyline, G draw, B textbox. */
+  public static final String[] BUTTONS = {"D", "A", "Y", "G", "B"};
+
   private String selected = MeasureTool.DISTANCE;
-  private int position = 40;
-  private boolean enabled = true;
   private DefaultView2d<?> view;
 
   public MeasureToolBar() {
-    for (String tool : MeasureTool.NAMES) {
-      bar.add(button(tool));
+    super(NAME, 11);
+    for (String key : BUTTONS) {
+      add(button(key));
     }
   }
 
@@ -67,56 +67,40 @@ public class MeasureToolBar implements Toolbar {
       return;
     }
     view.setMeasureTool(selected);
-    view.getMouseActions().setLeft(MouseActions.MEASURE);
+    if ("G".equals(selected) || MeasureTool.RECTANGLE.equals(selected)) {
+      view.getMouseActions().setLeft(MouseActions.DRAW);
+    } else {
+      view.getMouseActions().setLeft(MouseActions.MEASURE);
+    }
   }
 
-  private JButton button(String tool) {
+  private JButton button(String key) {
     JButton button =
         new JButton(
-            new AbstractAction(tool) {
+            new AbstractAction(key) {
               @Override
               public void actionPerformed(ActionEvent e) {
-                setSelected(tool);
+                setSelected(key);
                 apply(view);
               }
             });
-    button.setName(tool);
-    button.setToolTipText(tool);
+    button.setName(key);
+    button.setToolTipText(tip(key));
     return button;
+  }
+
+  static String tip(String key) {
+    return switch (key) {
+      case "A" -> "Angle";
+      case "Y" -> "Polyline";
+      case "G" -> "Draw";
+      case "B" -> "Textbox";
+      default -> "Distance";
+    };
   }
 
   @Override
   public JComponent getComponent() {
-    return bar;
-  }
-
-  @Override
-  public String getComponentName() {
-    return NAME;
-  }
-
-  @Override
-  public Insertable.Type getType() {
-    return Insertable.Type.TOOLBAR;
-  }
-
-  @Override
-  public int getComponentPosition() {
-    return position;
-  }
-
-  @Override
-  public void setComponentPosition(int position) {
-    this.position = position;
-  }
-
-  @Override
-  public boolean isComponentEnabled() {
-    return enabled;
-  }
-
-  @Override
-  public void setComponentEnabled(boolean enabled) {
-    this.enabled = enabled;
+    return this;
   }
 }

@@ -87,6 +87,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   void bindToolBars() {
     toolbars.registerToolBar(viewerToolBar);
+    toolbars.registerToolBar(measureToolBar);
     toolbars.registerToolBar(keyObjectToolBar);
     toolbars.registerToolBar(lutToolBar);
     toolbars.registerToolBar(zoomToolBar);
@@ -95,7 +96,6 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     toolbars.registerToolBar(headerToolBar);
     toolbars.registerToolBar(screenshotToolBar);
     toolbars.registerToolBar(cineToolBar);
-    toolbars.registerToolBar(measureToolBar);
     viewerToolBar.bind(view2d);
     keyObjectToolBar.bind(view2d);
     lutToolBar.bind(view2d);
@@ -110,6 +110,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     List<Insertable> ui = getSeriesViewerUI().getToolBar();
     ui.clear();
     ui.add(viewerToolBar);
+    ui.add(measureToolBar);
     ui.add(keyObjectToolBar);
     ui.add(lutToolBar);
     ui.add(zoomToolBar);
@@ -118,7 +119,6 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     ui.add(headerToolBar);
     ui.add(screenshotToolBar);
     ui.add(cineToolBar);
-    ui.add(measureToolBar);
   }
 
   public ToolBarContainer getToolBars() {
@@ -135,6 +135,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public KeyObjectToolBar getKeyObjectToolBar() {
     return keyObjectToolBar;
+  }
+
+  public MeasureToolBar getMeasureToolBar() {
+    return measureToolBar;
   }
 
   public View2d getView2d() {
