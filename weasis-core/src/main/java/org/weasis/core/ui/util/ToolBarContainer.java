@@ -78,8 +78,8 @@ public class ToolBarContainer extends JPanel {
   }
 
   /**
-   * FlowLayout preferred-height uses unbounded width, so BorderLayout.NORTH clips wrapped bars
-   * (Key Object Star/Filter after Viewer). Measure height against the real parent width.
+   * FlowLayout preferred-height uses unbounded width, so BorderLayout.NORTH clips wrapped bars (Key
+   * Object Star/Filter after Viewer). Measure height against the real parent width.
    */
   static final class WrapFlow extends FlowLayout {
     WrapFlow() {
