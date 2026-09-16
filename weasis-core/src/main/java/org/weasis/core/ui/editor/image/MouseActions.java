@@ -63,6 +63,12 @@ public final class MouseActions {
    */
   public static final String ELLIPSE = "ellipse";
 
+  /**
+   * Two-handle bbox rectangle area; distinct from {@link #DRAW}, {@link #POLYLINE}, {@link
+   * #POLYGON}, and {@link #ELLIPSE}.
+   */
+  public static final String RECTANGLE = "rectangle";
+
   public static final String CROSSHAIR = "crosshair";
 
   private String left = WINLEVEL;
