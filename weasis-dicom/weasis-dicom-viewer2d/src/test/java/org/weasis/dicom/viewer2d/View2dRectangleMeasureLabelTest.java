@@ -45,8 +45,8 @@ import org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic;
  * — it cannot read paint or re-resolve tags when window/level changes.
  *
  * <p><b>Why {@code px²} never coexists with {@code mm²}:</b> when resolve is empty, spacing is
- * unusable, or a corner handle is missing and {@link RectangleGraphic#getAreaMm} is empty, the label
- * uses pixel bbox area only — no imager fallback on CT and no dual unit string.
+ * unusable, or a corner handle is missing and {@link RectangleGraphic#getAreaMm} is empty, the
+ * label uses pixel bbox area only — no imager fallback on CT and no dual unit string.
  *
  * <p><b>Why the DX warning travels with the area number:</b> {@code (detector plane)} / {@code
  * (estimate)} suffixes follow {@link org.weasis.dicom.codec.utils.InstanceSpacing.Source} on the
