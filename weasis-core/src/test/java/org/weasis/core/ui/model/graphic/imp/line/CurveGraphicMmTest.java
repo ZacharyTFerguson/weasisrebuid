@@ -45,9 +45,7 @@ class CurveGraphicMmTest {
     CurveGraphic curve = curve(p0, p1, p2, p3);
     PolylineGraphic poly = polyline(p0, p1, p2, p3);
     assertEquals(
-        poly.getLengthMm(ANISO).orElseThrow(),
-        curve.getLengthMm(ANISO).orElseThrow(),
-        1e-6);
+        poly.getLengthMm(ANISO).orElseThrow(), curve.getLengthMm(ANISO).orElseThrow(), 1e-6);
   }
 
   @Test
@@ -67,10 +65,7 @@ class CurveGraphicMmTest {
   @Test
   void bowUsesAnisotropicRowColScaling() {
     CurveGraphic curve =
-        curve(
-            new Point2D.Double(0, 0),
-            new Point2D.Double(5, 10),
-            new Point2D.Double(10, 0));
+        curve(new Point2D.Double(0, 0), new Point2D.Double(5, 10), new Point2D.Double(10, 0));
     Optional<Double> mm = curve.getLengthMm(ANISO);
     Optional<Double> isoWrong = curve.getLengthMm(new ImageSpacing(0.375, 0.375));
     assertTrue(mm.isPresent());
@@ -80,7 +75,8 @@ class CurveGraphicMmTest {
 
   @Test
   void noSpacingGivesEmptyMm() {
-    CurveGraphic curve = curve(new Point2D.Double(0, 0), new Point2D.Double(5, 5), new Point2D.Double(10, 0));
+    CurveGraphic curve =
+        curve(new Point2D.Double(0, 0), new Point2D.Double(5, 5), new Point2D.Double(10, 0));
     assertEquals(Optional.empty(), curve.getLengthMm(null));
     assertTrue(curve.getLengthMm(new ImageSpacing(0, 0.25)).isEmpty());
   }
