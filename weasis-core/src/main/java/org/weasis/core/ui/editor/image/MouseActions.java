@@ -22,6 +22,12 @@ public final class MouseActions {
   public static final String DRAW = "draw";
   public static final String DRAWINGS = "drawings";
 
+  /**
+   * Dense free-hand scribble measure (≥2 samples); distinct from two-point {@link #DRAW} line and
+   * sparse-vertex {@link #POLYLINE}.
+   */
+  public static final String FREEHAND = "freehand";
+
   /** Multi-vertex path measure; distinct from two-point {@link #DRAW} line caliper. */
   public static final String POLYLINE = "polyline";
 
