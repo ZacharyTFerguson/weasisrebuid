@@ -25,34 +25,36 @@ import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 
 /**
- * View2d open-curve measurement labels: same binding rules as {@link View2dPolylineMeasureLabelTest},
- * but millimetres come from {@link CurveGraphic#getLengthMm} on the sampled interpolating path — not
- * from vertex-to-vertex polyline sums.
+ * View2d open-curve measurement labels: same binding rules as {@link
+ * View2dPolylineMeasureLabelTest}, but millimetres come from {@link CurveGraphic#getLengthMm} on
+ * the sampled interpolating path — not from vertex-to-vertex polyline sums.
  *
- * <p><b>Why UI after {@code getLengthMm}:</b> {@link MeasurementLabel#formatCurve} only formats values
- * already proved in {@link org.weasis.core.ui.model.graphic.imp.line.CurveGraphicMmTest} and instance
- * spacing in {@link org.weasis.dicom.codec.utils.InstanceSpacingTest}. A label that recomputed mm from
- * handle chords or reused {@link PolylineGraphic#getLengthMm} would disagree with the landed curve API.
+ * <p><b>Why UI after {@code getLengthMm}:</b> {@link MeasurementLabel#formatCurve} only formats
+ * values already proved in {@link org.weasis.core.ui.model.graphic.imp.line.CurveGraphicMmTest} and
+ * instance spacing in {@link org.weasis.dicom.codec.utils.InstanceSpacingTest}. A label that
+ * recomputed mm from handle chords or reused {@link PolylineGraphic#getLengthMm} would disagree
+ * with the landed curve API.
  *
- * <p><b>Why bind to {@code Resolved} + {@link CurveGraphic#getLengthMm} only:</b> spacing comes from
- * {@link org.weasis.dicom.codec.utils.InstanceSpacing.Resolved#spacing()} on the current {@link View2d}
- * dataset; the formatter has no {@code BufferedImage}, no {@link View2d}, and no dataset parameter — it
- * cannot read paint or re-resolve tags when window/level changes.
+ * <p><b>Why bind to {@code Resolved} + {@link CurveGraphic#getLengthMm} only:</b> spacing comes
+ * from {@link org.weasis.dicom.codec.utils.InstanceSpacing.Resolved#spacing()} on the current
+ * {@link View2d} dataset; the formatter has no {@code BufferedImage}, no {@link View2d}, and no
+ * dataset parameter — it cannot read paint or re-resolve tags when window/level changes.
  *
- * <p><b>Why {@code px} never coexists with {@code mm}:</b> when resolve is empty or spacing is unusable,
- * the label uses sampled pixel path length only; no imager fallback on CT and no dual unit string.
+ * <p><b>Why {@code px} never coexists with {@code mm}:</b> when resolve is empty or spacing is
+ * unusable, the label uses sampled pixel path length only; no imager fallback on CT and no dual
+ * unit string.
  *
- * <p><b>Why the DX warning travels with the number:</b> {@code (detector plane)} / {@code (estimate)}
- * suffixes follow {@link org.weasis.dicom.codec.utils.InstanceSpacing.Source} on the same {@code Resolved}
- * value as line and polyline labels.
+ * <p><b>Why the DX warning travels with the number:</b> {@code (detector plane)} / {@code
+ * (estimate)} suffixes follow {@link org.weasis.dicom.codec.utils.InstanceSpacing.Source} on the
+ * same {@code Resolved} value as line and polyline labels.
  *
- * <p><b>Why smooth path, not handle polyline:</b> an L-shaped handle triple yields a longer smooth corner
- * than the broken-line path through the same handles — the primary discriminating assert is {@link
- * #curveLabelDiffersFromPolylineForLShapedPath}.
+ * <p><b>Why smooth path, not handle polyline:</b> an L-shaped handle triple yields a longer smooth
+ * corner than the broken-line path through the same handles — the primary discriminating assert is
+ * {@link #curveLabelDiffersFromPolylineForLShapedPath}.
  *
- * <p><b>Why not copy Weasis:</b> upstream spline measure tools mix interactive draw, closure, and paint
- * buffers; this slice adds {@code formatCurve} beside existing line/polyline formatters without porting
- * draw handlers or {@code MouseActions} tokens.
+ * <p><b>Why not copy Weasis:</b> upstream spline measure tools mix interactive draw, closure, and
+ * paint buffers; this slice adds {@code formatCurve} beside existing line/polyline formatters
+ * without porting draw handlers or {@code MouseActions} tokens.
  */
 class View2dCurveMeasureLabelTest {
 
@@ -128,8 +130,7 @@ class View2dCurveMeasureLabelTest {
     PolylineGraphic poly = polyline(p0, p1, p2);
     CurveGraphic curve = curve(p0, p1, p2);
     assertEquals("10.0 mm", view.formatPolylineMeasureLabel(poly));
-    assertNotEquals(
-        view.formatPolylineMeasureLabel(poly), view.formatCurveMeasureLabel(curve));
+    assertNotEquals(view.formatPolylineMeasureLabel(poly), view.formatCurveMeasureLabel(curve));
   }
 
   @Test
@@ -152,8 +153,7 @@ class View2dCurveMeasureLabelTest {
   }
 
   private static CurveGraphic lShapeCurve() {
-    return curve(
-        new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10));
+    return curve(new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10));
   }
 
   private static CurveGraphic curve(Point2D.Double... points) {
