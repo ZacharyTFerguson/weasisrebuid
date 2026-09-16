@@ -8,7 +8,8 @@ Independent reconstruction of **[Weasis](https://weasis.org)** **4.7.3** (Java, 
 
 - **WP-0:** `AppLauncher` boots Felix **7.0.5**. Gogo `gosh.port` **17179**. `weasis:info -v`; `lb` lists Felix + core.
 - **WP-1:** Core SDK — dummy `SeriesViewerFactory` opens a blank `ViewerPlugin`.
-- **WP-2 (this branch):** OpenCV fragment (linux-x86-64), `weasis-core-img`, `weasis-imageio-codec`, `weasis-dicom-codec`. Explicit VR LE MONOCHROME2 CT paints with W/L.
+- **WP-2:** OpenCV fragment (linux-x86-64), `weasis-core-img`, `weasis-imageio-codec`, `weasis-dicom-codec`. Explicit VR LE MONOCHROME2 CT paints with W/L.
+- **DICOM oracle:** `scripts/dicom-oracle.sh <part-10.dcm>` — JSON verdict, single gate in `DicomUnderstandingLimits`. Architecture: `docs/architecture/clean-room-and-understanding.md`.
 
 Shipping prefs (MX-03) are `weasis-distributions/etc/config/base.json` (INFO, stack **3**, `felix.log.level` **1**). `weasis-launcher/conf/base.json` is IDE/DEBUG.
 

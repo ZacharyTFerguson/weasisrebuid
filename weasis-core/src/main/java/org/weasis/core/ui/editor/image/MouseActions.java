@@ -21,6 +21,54 @@ public final class MouseActions {
   public static final String SCROLL = "scroll";
   public static final String DRAW = "draw";
   public static final String DRAWINGS = "drawings";
+
+  /**
+   * Dense free-hand scribble measure (≥2 samples); distinct from two-point {@link #DRAW} line and
+   * sparse-vertex {@link #POLYLINE}.
+   */
+  public static final String FREEHAND = "freehand";
+
+  /** Multi-vertex path measure; distinct from two-point {@link #DRAW} line caliper. */
+  public static final String POLYLINE = "polyline";
+
+  /**
+   * Open interpolating curve measure (≥3 handles); distinct from {@link #POLYLINE} segment sum and
+   * {@link #DRAW}.
+   */
+  public static final String CURVE = "curve";
+
+  /**
+   * Closed interpolating curve measure (≥3 handles); distinct from {@link #CURVE}, {@link
+   * #POLYLINE}, and {@link #POLYGON}.
+   */
+  public static final String CLOSED_CURVE = "closedCurve";
+
+  /** Three-point angle measure; distinct from {@link #DRAW} line and {@link #POLYLINE}. */
+  public static final String ANGLE = "angle";
+
+  /**
+   * Four-point Cobb measure; distinct from {@link #DRAW}, {@link #POLYLINE}, and {@link #ANGLE}.
+   */
+  public static final String COBB = "cobb";
+
+  /**
+   * Closed polygon area measure; distinct from {@link #DRAW}, {@link #POLYLINE}, {@link #ANGLE},
+   * and {@link #COBB}.
+   */
+  public static final String POLYGON = "polygon";
+
+  /**
+   * Two-handle bbox ellipse ROI; distinct from {@link #DRAW}, {@link #POLYLINE}, {@link #ANGLE},
+   * {@link #COBB}, and {@link #POLYGON}.
+   */
+  public static final String ELLIPSE = "ellipse";
+
+  /**
+   * Two-handle bbox rectangle area; distinct from {@link #DRAW}, {@link #POLYLINE}, {@link
+   * #POLYGON}, and {@link #ELLIPSE}.
+   */
+  public static final String RECTANGLE = "rectangle";
+
   public static final String CROSSHAIR = "crosshair";
 
   private String left = WINLEVEL;
