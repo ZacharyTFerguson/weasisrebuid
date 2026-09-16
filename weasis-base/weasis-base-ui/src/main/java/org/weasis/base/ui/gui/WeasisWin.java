@@ -62,6 +62,7 @@ import org.weasis.core.api.gui.util.AppProperties;
 import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
+import org.weasis.core.ui.editor.image.MeasureToolBar;
 import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ScreenshotToolBar;
 import org.weasis.core.ui.editor.image.TabPlacement;
@@ -202,6 +203,7 @@ public class WeasisWin extends JFrame {
     c.setDropTarget(null);
     c.setTransferHandler(keep instanceof ViewTransferHandler ? keep : new ViewTransferHandler());
     ViewTransferHandler.armDrop(c);
+    MeasureToolBar.installGlass(c);
     stampPlugin(c);
   }
 

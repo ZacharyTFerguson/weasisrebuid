@@ -15,11 +15,19 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
+import java.awt.Point;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.AbstractButton;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
@@ -282,42 +290,143 @@ class MeasureToolBarHaveTest {
   }
 
   @Test
+  void unselectedAnglePaintsLightBorderBox() {
+    MeasureToolBar bar = new MeasureToolBar();
+    javax.swing.JToggleButton angle = findToggle(bar, "measure-angle");
+    javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+    assertFalse(angle.isSelected());
+    assertTrue(distance.isSelected());
+    assertEquals(MeasureToolBar.HIT, angle.getPreferredSize());
+    angle.setSize(MeasureToolBar.HIT);
+    BufferedImage img =
+        new BufferedImage(
+            MeasureToolBar.HIT.width, MeasureToolBar.HIT.height, BufferedImage.TYPE_INT_RGB);
+    Graphics2D g = img.createGraphics();
+    try {
+      g.setColor(Color.BLACK);
+      g.fillRect(0, 0, img.getWidth(), img.getHeight());
+      angle.paint(g);
+    } finally {
+      g.dispose();
+    }
+    assertTrue(lightPixel(img, 0, 0));
+    assertTrue(lightPixel(img, img.getWidth() - 1, 0));
+    assertTrue(lightPixel(img, 0, img.getHeight() - 1));
+  }
+
+  @Test
   void mousePressOnAngleCenterSelectsANotDThenDrawsAngle() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     DefaultView2d<?> view = sizedGrayView();
     MeasureToolBar bar = new MeasureToolBar();
     bar.bind(view);
-    javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
-    javax.swing.JToggleButton angle = findToggle(bar, "measure-angle");
-    assertTrue(distance.isSelected());
-    assertFalse(angle.isSelected());
-    MeasureToolBar.pressRelease(angle);
-    assertTrue(angle.isSelected());
-    assertFalse(distance.isSelected());
-    assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
-    drag(view, 20, 20, 20, 80);
-    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
-    assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
-    AngleToolGraphic drawn = (AngleToolGraphic) view.getGraphicList().getLast();
-    assertTrue(drawn.getAngleDegrees() > 1.0);
-    assertTrue(drawn.getLabel()[0].contains("°"));
+    JFrame frame = new JFrame();
+    try {
+      JComponent glass = showWithGlass(frame, bar, view);
+      javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+      javax.swing.JToggleButton angle = findToggle(bar, "measure-angle");
+      assertTrue(distance.isSelected());
+      assertFalse(angle.isSelected());
+      clickGlass(glass, angle);
+      assertTrue(angle.isSelected());
+      assertFalse(distance.isSelected());
+      assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+      drag(view, 20, 20, 20, 80);
+      assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+      assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
+      AngleToolGraphic drawn = (AngleToolGraphic) view.getGraphicList().getLast();
+      assertTrue(drawn.getAngleDegrees() > 1.0);
+      assertTrue(drawn.getLabel()[0].contains("°"));
+    } finally {
+      frame.dispose();
+    }
   }
 
   @Test
   void mousePressOnRectCenterSelectsGNotDThenDrawsRectangle() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     DefaultView2d<?> view = sizedGrayView();
     MeasureToolBar bar = new MeasureToolBar();
     bar.bind(view);
-    javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
-    javax.swing.JToggleButton rect = findToggle(bar, "measure-rect");
-    MeasureToolBar.pressRelease(rect);
-    assertTrue(rect.isSelected());
-    assertFalse(distance.isSelected());
-    assertEquals(MeasureTool.RECTANGLE, view.activeMeasureTool());
-    drag(view, 30, 30, 90, 90);
-    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
-    assertTrue(
-        view.getGraphicList().getLast()
-            instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+    JFrame frame = new JFrame();
+    try {
+      JComponent glass = showWithGlass(frame, bar, view);
+      javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+      javax.swing.JToggleButton rect = findToggle(bar, "measure-rect");
+      clickGlass(glass, rect);
+      assertTrue(rect.isSelected());
+      assertFalse(distance.isSelected());
+      assertEquals(MeasureTool.RECTANGLE, view.activeMeasureTool());
+      drag(view, 30, 30, 90, 90);
+      assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+      assertTrue(
+          view.getGraphicList().getLast()
+              instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+    } finally {
+      frame.dispose();
+    }
+  }
+
+  static JComponent showWithGlass(JFrame frame, MeasureToolBar bar, DefaultView2d<?> view) {
+    JPanel content = new JPanel(new BorderLayout());
+    content.add(bar, BorderLayout.NORTH);
+    content.add(view, BorderLayout.CENTER);
+    frame.setContentPane(content);
+    JPanel glass = new JPanel(null);
+    glass.setOpaque(false);
+    glass.setName("measure-glass");
+    frame.setGlassPane(glass);
+    MeasureToolBar.installGlass(glass);
+    frame.pack();
+    frame.setVisible(true);
+    glass.setVisible(true);
+    glass.setSize(frame.getRootPane().getSize());
+    return glass;
+  }
+
+  static void clickGlass(JComponent glass, javax.swing.JToggleButton button) {
+    Point onGlass = pointOnGlass(glass, button);
+    pressOn(glass, onGlass);
+  }
+
+  static Point pointOnGlass(JComponent glass, javax.swing.JToggleButton button) {
+    Point screen = button.getLocationOnScreen();
+    screen.translate(Math.max(1, button.getWidth() / 2), Math.max(1, button.getHeight() / 2));
+    Point onGlass = new Point(screen);
+    javax.swing.SwingUtilities.convertPointFromScreen(onGlass, glass);
+    return onGlass;
+  }
+
+  static void pressOn(JComponent glass, Point p) {
+    Point screen = new Point(p);
+    javax.swing.SwingUtilities.convertPointToScreen(screen, glass);
+    glass.dispatchEvent(mouseOn(glass, MouseEvent.MOUSE_PRESSED, p, screen, true));
+    glass.dispatchEvent(mouseOn(glass, MouseEvent.MOUSE_RELEASED, p, screen, false));
+    glass.dispatchEvent(mouseOn(glass, MouseEvent.MOUSE_CLICKED, p, screen, false));
+  }
+
+  static MouseEvent mouseOn(JComponent glass, int id, Point local, Point screen, boolean down) {
+    int mods = down ? MouseEvent.BUTTON1_DOWN_MASK : 0;
+    return new MouseEvent(
+        glass,
+        id,
+        0L,
+        mods,
+        local.x,
+        local.y,
+        screen.x,
+        screen.y,
+        1,
+        false,
+        MouseEvent.BUTTON1);
+  }
+
+  static boolean lightPixel(BufferedImage img, int x, int y) {
+    int rgb = img.getRGB(x, y);
+    int r = (rgb >> 16) & 255;
+    int green = (rgb >> 8) & 255;
+    int b = rgb & 255;
+    return r > 140 && green > 140 && b > 140;
   }
 
   static javax.swing.JToggleButton findToggle(java.awt.Container root, String name) {

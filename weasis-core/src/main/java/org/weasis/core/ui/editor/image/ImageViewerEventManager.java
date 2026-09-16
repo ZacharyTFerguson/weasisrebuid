@@ -568,6 +568,12 @@ public class ImageViewerEventManager {
     }
 
     void onMouse(MouseEvent me) {
+      if (me.isConsumed()) {
+        return;
+      }
+      if (MeasureToolBar.redispatch(me)) {
+        return;
+      }
       if (me.getID() == MouseEvent.MOUSE_PRESSED) {
         onPress(me);
         return;

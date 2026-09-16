@@ -417,6 +417,7 @@ public class ViewTransferHandler extends TransferHandler {
   public static void armDrop(JComponent host) {
     if (host != null) {
       host.setDropTarget(new DropTarget(host, COPY_OR_MOVE, new SeriesDrop(host), true));
+      MeasureToolBar.installGlass(host);
     }
   }
 
