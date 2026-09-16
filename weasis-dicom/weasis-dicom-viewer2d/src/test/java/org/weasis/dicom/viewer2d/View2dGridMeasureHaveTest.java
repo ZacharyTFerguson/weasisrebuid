@@ -187,8 +187,7 @@ class View2dGridMeasureHaveTest {
     }
   }
 
-  static JComponent showGridWithExplorer(
-      JFrame frame, View2dContainer container, JPanel explorer) {
+  static JComponent showGridWithExplorer(JFrame frame, View2dContainer container, JPanel explorer) {
     container.setPreferredSize(new Dimension(400, 400));
     JPanel content = new JPanel(new BorderLayout());
     content.add(container.getMeasureToolBar(), BorderLayout.NORTH);
