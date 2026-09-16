@@ -31,6 +31,12 @@ public final class MouseActions {
    */
   public static final String CURVE = "curve";
 
+  /**
+   * Closed interpolating curve measure (≥3 handles); distinct from {@link #CURVE}, {@link
+   * #POLYLINE}, and {@link #POLYGON}.
+   */
+  public static final String CLOSED_CURVE = "closedCurve";
+
   /** Three-point angle measure; distinct from {@link #DRAW} line and {@link #POLYLINE}. */
   public static final String ANGLE = "angle";
 
