@@ -20,7 +20,8 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * WP-14 native zip. {@code mvn -P compressXZ -f weasis-distributions package} writes {@code
- * weasis-native.zip}. The zip is a portable tree, not a dump of the Maven cache.
+ * weasis-native.zip}. The zip is a portable tree, not a dump of the Maven cache. Production
+ * versions must not be SNAPSHOT.
  */
 public final class NativeDistribution {
 
@@ -54,25 +55,42 @@ public final class NativeDistribution {
 
   public static void write(Path zip, Path launcherJar, Path etcDir, Path binDir)
       throws IOException {
+    write(zip, launcherJar, etcDir, binDir, System.getProperty("app.version"));
+  }
+
+  public static void write(Path zip, Path launcherJar, Path etcDir, Path binDir, String version)
+      throws IOException {
+    refuseSnapshot(version);
+    requireZipAndLauncher(zip, launcherJar);
+    Path parent = zip.getParent();
+    Files.createDirectories(parent == null ? Path.of(".") : parent);
+    try (OutputStream raw = Files.newOutputStream(zip);
+        ZipOutputStream zos = new ZipOutputStream(raw)) {
+      putFile(zos, LAUNCHER_JAR, launcherJar);
+      putOptionalTree(zos, "etc/config", etcDir);
+      putOptionalTree(zos, "bin", binDir);
+    }
+  }
+
+  static void refuseSnapshot(String version) {
+    if (version == null || version.isBlank()) {
+      return;
+    }
+    if (snapshotToken(version)) {
+      throw new IllegalArgumentException("production versions must not be SNAPSHOT: " + version);
+    }
+  }
+
+  static boolean snapshotToken(String version) {
+    return version.toUpperCase(Locale.ROOT).contains("SNAPSHOT");
+  }
+
+  static void requireZipAndLauncher(Path zip, Path launcherJar) {
     if (zip == null) {
       throw new IllegalArgumentException("zip");
     }
     if (launcherJar == null || !Files.isRegularFile(launcherJar)) {
       throw new IllegalArgumentException("launcher jar missing: " + launcherJar);
-    }
-    if (looksLikeMavenCache(launcherJar.getParent())) {
-      // still copy the single jar; refuse to zip the cache directory itself
-    }
-    Files.createDirectories(zip.getParent() == null ? Path.of(".") : zip.getParent());
-    try (OutputStream raw = Files.newOutputStream(zip);
-        ZipOutputStream zos = new ZipOutputStream(raw)) {
-      putFile(zos, LAUNCHER_JAR, launcherJar);
-      if (etcDir != null && Files.isDirectory(etcDir)) {
-        putTree(zos, "etc/config", etcDir);
-      }
-      if (binDir != null && Files.isDirectory(binDir)) {
-        putTree(zos, "bin", binDir);
-      }
     }
   }
 
@@ -82,6 +100,12 @@ public final class NativeDistribution {
     }
     String p = dir.toAbsolutePath().toString().toLowerCase(Locale.ROOT);
     return p.contains("/.m2/repository") || p.endsWith("/repository");
+  }
+
+  static void putOptionalTree(ZipOutputStream zos, String prefix, Path dir) throws IOException {
+    if (dir != null && Files.isDirectory(dir)) {
+      putTree(zos, prefix, dir);
+    }
   }
 
   static void putTree(ZipOutputStream zos, String prefix, Path root) throws IOException {

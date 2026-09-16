@@ -63,6 +63,12 @@
                 </goals>
                 <configuration>
                   <mainClass>org.weasis.launcher.NativeDistribution</mainClass>
+                  <systemProperties>
+                    <systemProperty>
+                      <key>app.version</key>
+                      <value>${app.version}</value>
+                    </systemProperty>
+                  </systemProperties>
                   <arguments>
                     <argument>--out</argument>
                     <argument>${project.build.directory}/weasis-native.zip</argument>
