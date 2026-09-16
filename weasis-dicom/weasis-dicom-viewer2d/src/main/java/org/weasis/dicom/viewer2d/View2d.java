@@ -59,6 +59,8 @@ public class View2d extends DefaultView2d<MediaElement> {
   private LineGraphic draftLineCaliper;
   private boolean draftLineAwaitingSecondClick;
 
+  private PolylineGraphic draftPolylineCaliper;
+
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
   public View2d() {
@@ -201,6 +203,26 @@ public class View2d extends DefaultView2d<MediaElement> {
     addGraphic(line);
   }
 
+  /**
+   * Adds a polyline caliper in image pixel coordinates and binds its label to {@link
+   * #formatPolylineMeasureLabel}.
+   */
+  public void addPolylineCaliper(List<? extends Point2D> imagePoints) {
+    if (imagePoints == null || imagePoints.size() < 2) {
+      return;
+    }
+    PolylineGraphic poly = new PolylineGraphic();
+    for (int i = 0; i < imagePoints.size(); i++) {
+      Point2D p = imagePoints.get(i);
+      if (p == null) {
+        return;
+      }
+      poly.setHandlePoint(i, copyPoint(p));
+    }
+    applyPolylineCaliperLabel(poly);
+    addGraphic(poly);
+  }
+
   /** Test hook: two-click line draw in view coordinates when left action is {@code draw}. */
   public void simulateLineDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
     lineDrawViewPressed(viewX1, viewY1);
@@ -260,6 +282,96 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   boolean isLineDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.DRAW.equals(normalizedLeftAction);
+  }
+
+  boolean isPolylineDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.POLYLINE.equals(normalizedLeftAction);
+  }
+
+  /** Test hook: polyline vertex click in view coordinates when left action is {@code polyline}. */
+  public void simulatePolylineDrawClick(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2) {
+      polylineDrawViewPressed(viewX, viewY, 1);
+      polylineDrawViewReleased(viewX, viewY, 1);
+    }
+    polylineDrawViewPressed(viewX, viewY, clickCount);
+    polylineDrawViewReleased(viewX, viewY, clickCount);
+  }
+
+  void polylineDrawViewPressed(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2 && draftPolylineCaliper != null) {
+      finalizeDraftPolylineCaliper();
+      return;
+    }
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftPolylineCaliper == null) {
+      draftPolylineCaliper = new PolylineGraphic();
+      draftPolylineCaliper.setHandlePoint(0, image);
+      draftPolylineCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+      addGraphic(draftPolylineCaliper);
+      repaint();
+      return;
+    }
+    int last = draftPolylineCaliper.getPts().size() - 1;
+    draftPolylineCaliper.setHandlePoint(last, image);
+    draftPolylineCaliper.setHandlePoint(last + 1, new Point2D.Double(image.x, image.y));
+    repaint();
+  }
+
+  void polylineDrawViewDragged(int viewX, int viewY) {
+    if (draftPolylineCaliper == null) {
+      return;
+    }
+    int last = draftPolylineCaliper.getPts().size() - 1;
+    draftPolylineCaliper.setHandlePoint(last, viewToImage(viewX, viewY));
+    repaint();
+  }
+
+  void polylineDrawViewReleased(int viewX, int viewY, int clickCount) {
+    if (draftPolylineCaliper == null) {
+      return;
+    }
+    if (clickCount >= 2) {
+      finalizeDraftPolylineCaliper();
+    }
+  }
+
+  private void finalizeDraftPolylineCaliper() {
+    if (draftPolylineCaliper == null) {
+      return;
+    }
+    trimTrailingRubberBand(draftPolylineCaliper);
+    if (draftPolylineCaliper.getPts().size() < 2) {
+      getGraphicList().remove(draftPolylineCaliper);
+    } else {
+      applyPolylineCaliperLabel(draftPolylineCaliper);
+    }
+    draftPolylineCaliper = null;
+    repaint();
+  }
+
+  private static void trimTrailingRubberBand(PolylineGraphic poly) {
+    List<Point2D.Double> pts = new ArrayList<>(poly.getPts());
+    while (pts.size() > 2) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) > 1e-6) {
+        break;
+      }
+      pts.removeLast();
+    }
+    if (pts.size() > 1) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) <= 1e-6) {
+        pts.removeLast();
+      }
+    }
+    poly.setPts(pts);
+  }
+
+  private void applyPolylineCaliperLabel(PolylineGraphic poly) {
+    poly.setLabel(new String[] {formatPolylineMeasureLabel(poly)});
   }
 
   public String formatPolylineMeasureLabel(PolylineGraphic polyline) {
@@ -436,6 +548,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mousePressed(MouseEvent e) {
+      if (polylineDrawActive(e)) {
+        view2d.polylineDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
       if (lineDrawActive(e)) {
         view2d.lineDrawViewPressed(e.getX(), e.getY());
         return;
@@ -445,6 +561,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mouseDragged(MouseEvent e) {
+      if (polylineDrawActive(e)) {
+        view2d.polylineDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
       if (lineDrawActive(e)) {
         view2d.lineDrawViewDragged(e.getX(), e.getY());
         return;
@@ -454,11 +574,28 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+      if (polylineDrawActive(e)) {
+        view2d.polylineDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
       if (lineDrawActive(e)) {
         view2d.lineDrawViewReleased(e.getX(), e.getY());
         return;
       }
       super.mouseReleased(e);
+    }
+
+    private boolean polylineDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isPolylineDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
     }
 
     private boolean lineDrawActive(MouseEvent e) {
