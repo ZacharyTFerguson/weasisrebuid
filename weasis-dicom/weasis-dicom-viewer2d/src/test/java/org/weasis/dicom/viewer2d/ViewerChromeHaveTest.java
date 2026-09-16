@@ -105,12 +105,14 @@ class ViewerChromeHaveTest {
   }
 
   @Test
-  void flipClickMirrorsPaintedPixelsWithoutRasterizingSource(@TempDir Path dir) throws Exception {
-    Path file = dir.resolve("ct.dcm");
-    TestCt.write(file.toFile(), 8, 40, 400);
+  void flipClickMirrorsBestFitCanvasWithoutRasterizingSource() throws Exception {
     View2dContainer container = new View2dContainer();
     View2d view = container.getView2d();
-    view.load(file.toFile());
+    BufferedImage src = splitGray(512, 256);
+    view.setSourceImage(src);
+    view.setSize(400, 300);
+    view.setZoom(AffineTransformOp.ZOOM_BEST_FIT);
+    view.setRotation(0);
     AbstractButton flip = container.getImageTool().flipButton();
     assertEquals("Flip", flip.getText());
     assertEquals("flip", flip.getName());
@@ -118,19 +120,26 @@ class ViewerChromeHaveTest {
     assertTrue(
         container.getSeriesViewerUI().getToolBar().stream()
             .anyMatch(b -> ImageTool.NAME.equals(b.getComponentName())));
-    int srcLeft = view.getSourceImage().getRaster().getSample(1, 4, 0);
-    int left = gray(view, 1, 4);
-    int right = gray(view, 6, 4);
+    BufferedImage before = paintAt(view, 400, 300);
+    int left = band(before, 24, 80);
+    int right = band(before, 320, 376);
     assertTrue(left < right);
+    int srcLeft = src.getRaster().getSample(16, 128, 0);
     flip.doClick();
     assertTrue(view.isFlip());
     assertTrue(flip.isSelected());
-    assertEquals(srcLeft, view.getSourceImage().getRaster().getSample(1, 4, 0));
-    assertTrue(gray(view, 1, 4) > gray(view, 6, 4));
+    assertEquals(srcLeft, src.getRaster().getSample(16, 128, 0));
+    BufferedImage after = paintAt(view, 400, 300);
+    assertTrue(band(after, 24, 80) > band(after, 320, 376));
+    AffineTransformOp affine = new AffineTransformOp();
+    affine.setParam(org.weasis.core.api.image.ImageOpNode.INPUT_IMG, src);
+    affine.process();
+    assertSame(src, affine.getParam(org.weasis.core.api.image.ImageOpNode.OUTPUT_IMG));
     flip.doClick();
     assertFalse(view.isFlip());
-    assertEquals(left, gray(view, 1, 4));
-    assertEquals(right, gray(view, 6, 4));
+    BufferedImage restored = paintAt(view, 400, 300);
+    assertEquals(left, band(restored, 24, 80));
+    assertEquals(right, band(restored, 320, 376));
   }
 
   @Test
@@ -560,11 +569,40 @@ class ViewerChromeHaveTest {
     return page;
   }
 
-  static int gray(View2d view, int x, int y) {
-    view.setSize(8, 8);
-    view.setZoom(1.0);
-    view.setRotation(0);
-    return paint(view).getRGB(x, y) & 0xFF;
+  static BufferedImage paintAt(View2d view, int w, int h) {
+    view.setSize(w, h);
+    BufferedImage page = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+    java.awt.Graphics2D g = page.createGraphics();
+    try {
+      view.paint(g);
+    } finally {
+      g.dispose();
+    }
+    return page;
+  }
+
+  static BufferedImage splitGray(int w, int h) {
+    BufferedImage src = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+    for (int y = 0; y < h; y++) {
+      for (int x = 0; x < w; x++) {
+        src.getRaster().setSample(x, y, 0, x < w / 2 ? 20 : 220);
+      }
+    }
+    return src;
+  }
+
+  static int band(BufferedImage page, int x0, int x1) {
+    int y0 = page.getHeight() / 2 - 8;
+    int y1 = page.getHeight() / 2 + 8;
+    long sum = 0;
+    int n = 0;
+    for (int y = y0; y < y1; y++) {
+      for (int x = x0; x < x1; x++) {
+        sum += page.getRGB(x, y) & 0xFF;
+        n++;
+      }
+    }
+    return n == 0 ? 0 : (int) (sum / n);
   }
 
   @Test

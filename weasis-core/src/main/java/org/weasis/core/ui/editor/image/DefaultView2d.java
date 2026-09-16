@@ -1341,32 +1341,47 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     if (g == null) {
       return;
     }
+    int w = Math.max(1, getWidth());
+    int h = Math.max(1, getHeight());
     g.setColor(Color.BLACK);
-    g.fillRect(0, 0, Math.max(1, getWidth()), Math.max(1, getHeight()));
+    g.fillRect(0, 0, w, h);
     if (source != null) {
-      Graphics2D g2 = (Graphics2D) g.create();
+      Graphics2D imgG = (Graphics2D) g.create();
       try {
-        g2.setRenderingHint(
-            RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        int w = Math.max(1, getWidth());
-        int h = Math.max(1, getHeight());
-        double scale = resolvedScale(w, h);
-        AffineTransform tx = new AffineTransform();
-        tx.translate(w / 2.0 + panX, h / 2.0 + panY);
-        tx.rotate(Math.toRadians(rotation));
-        tx.scale(flip ? -scale : scale, scale);
-        tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
-        g2.drawImage(source, tx, this);
-        if (overlays) {
-          paintMeasureGraphics(g2);
-        }
+        paintFlippedSource(imgG, w, h);
       } finally {
-        g2.dispose();
+        imgG.dispose();
+      }
+      if (overlays) {
+        paintMeasureGraphics(g);
       }
     }
     if (overlays) {
       paintDecorations(g);
     }
+  }
+
+  /**
+   * Zoom/rotation stay a positive-scale CTM (headed-OK). Horizontal flip is dest-X swap so
+   * on-screen pipelines cannot drop a reflecting {@code drawImage(img, AffineTransform)}.
+   */
+  void paintFlippedSource(Graphics2D g2, int w, int h) {
+    g2.setRenderingHint(
+        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    double scale = resolvedScale(w, h);
+    AffineTransform tx = new AffineTransform();
+    tx.translate(w / 2.0 + panX, h / 2.0 + panY);
+    tx.rotate(Math.toRadians(rotation));
+    tx.scale(scale, scale);
+    tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
+    g2.transform(tx);
+    int sw = source.getWidth();
+    int sh = source.getHeight();
+    if (flip) {
+      g2.drawImage(source, sw, 0, 0, sh, 0, 0, sw, sh, this);
+      return;
+    }
+    g2.drawImage(source, 0, 0, this);
   }
 
   protected void paintDecorations(Graphics2D g) {
