@@ -9,6 +9,7 @@
  */
 package org.weasis.core.ui.model.graphic.imp.angle;
 
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.Optional;
 import org.weasis.core.api.image.measure.ImageSpacing;
@@ -84,7 +85,18 @@ public class AngleToolGraphic extends AbstractDragGraphic {
 
   @Override
   public void buildShape() {
-    setShape(null);
+    Point2D.Double arm0 = getHandlePoint(0);
+    Point2D.Double vertex = getHandlePoint(VERTEX);
+    Point2D.Double arm2 = getHandlePoint(2);
+    if (arm0 == null || vertex == null || arm2 == null) {
+      setShape(null);
+      return;
+    }
+    Path2D path = new Path2D.Double();
+    path.moveTo(arm0.x, arm0.y);
+    path.lineTo(vertex.x, vertex.y);
+    path.lineTo(arm2.x, arm2.y);
+    setShape(path);
   }
 
   @Override
