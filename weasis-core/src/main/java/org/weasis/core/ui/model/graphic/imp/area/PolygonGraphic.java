@@ -11,6 +11,8 @@ package org.weasis.core.ui.model.graphic.imp.area;
 
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.util.Optional;
+import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
@@ -18,6 +20,25 @@ public class PolygonGraphic extends AbstractDragGraphicArea {
 
   public PolygonGraphic() {
     super(0);
+  }
+
+  /**
+   * Physical area in mm² from the closed vertex path: pixel shoelace area times row spacing times
+   * column spacing (anisotropic voxels).
+   */
+  public Optional<Double> getAreaMm(ImageSpacing spacing) {
+    if (spacing == null) {
+      return Optional.empty();
+    }
+    double row = spacing.rowMm();
+    double col = spacing.colMm();
+    if (row <= 0 || col <= 0 || !Double.isFinite(row) || !Double.isFinite(col)) {
+      return Optional.empty();
+    }
+    if (getPts().size() < 3) {
+      return Optional.empty();
+    }
+    return Optional.of(getAreaValue() * Math.abs(row * col));
   }
 
   @Override
