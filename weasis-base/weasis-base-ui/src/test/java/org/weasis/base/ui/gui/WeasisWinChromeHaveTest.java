@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import bibliothek.gui.dock.common.CLocation;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog;
@@ -353,13 +354,7 @@ class WeasisWinChromeHaveTest {
       core.openViewerPlugin(second);
       assertEquals(2, win.getViewerTabs().getTabCount());
       win.splitSeries(second);
-      assertEquals(1, win.getViewerTabs().getTabCount());
-      assertSame(first, win.getViewerTabs().getComponentAt(0));
-      assertTrue(win.seriesDockOf(second).isVisible());
-      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
-      assertEquals("east", WeasisWin.dockSide(win.seriesDockOf(second)));
-      assertEquals(ViewerPlugin.DockingState.NORMAL, first.getDockingState());
-      assertEquals(ViewerPlugin.DockingState.NORMAL, second.getDockingState());
+      assertWorkingSplit(win, first, second, "east");
       assertEquals(2, core.getOpenViewerPlugins().size());
     } finally {
       closeOpen(core);
@@ -394,12 +389,7 @@ class WeasisWinChromeHaveTest {
       core.openViewerPlugin(first);
       core.openViewerPlugin(second);
       win.splitAt(second, "south");
-      assertEquals(1, win.getViewerTabs().getTabCount());
-      assertSame(first, win.getViewerTabs().getComponentAt(0));
-      assertTrue(win.seriesDockOf(second).isVisible());
-      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
-      assertEquals("south", WeasisWin.dockSide(win.seriesDockOf(second)));
-      assertEquals(ViewerPlugin.DockingState.NORMAL, first.getDockingState());
+      assertWorkingSplit(win, first, second, "south");
     } finally {
       closeOpen(core);
       core.setApplicationWindow(null);
@@ -423,11 +413,7 @@ class WeasisWinChromeHaveTest {
       win.setVisible(true);
       win.validate();
       dragTabToWorkEdge(win, 1, "east");
-      assertEquals(1, win.getViewerTabs().getTabCount());
-      assertSame(first, win.getViewerTabs().getComponentAt(0));
-      assertTrue(win.seriesDockOf(second).isVisible());
-      assertSame(win.getViewerWork(), win.seriesDockOf(second).getWorkingArea());
-      assertEquals("east", WeasisWin.dockSide(win.seriesDockOf(second)));
+      assertWorkingSplit(win, first, second, "east");
     } finally {
       win.setVisible(false);
       closeOpen(core);
@@ -467,6 +453,164 @@ class WeasisWinChromeHaveTest {
     }
   }
 
+  @Test
+  void workingLocationUsesCLocationWorkingOnViewerWork() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals(
+          WeasisWin.sideLocation(CLocation.working(win.getViewerWork()), "east").toString(),
+          win.workingLocation("east").toString());
+      assertEquals(
+          WeasisWin.sideLocation(CLocation.working(win.getViewerWork()), "west").toString(),
+          win.workingLocation("west").toString());
+      assertEquals(
+          WeasisWin.sideLocation(CLocation.working(win.getViewerWork()), "south").toString(),
+          win.workingLocation("south").toString());
+      assertEquals(
+          WeasisWin.sideLocation(CLocation.working(win.getViewerWork()), "north").toString(),
+          win.workingLocation("north").toString());
+      assertEquals(null, win.workingLocation("center"));
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
+  void remainingSeriesTabWestAndNorthSplitUseWorkingAreaCLocation() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    for (String side : List.of("west", "north")) {
+      WeasisWin win = new WeasisWin();
+      UICore core = UICore.getInstance();
+      closeOpen(core);
+      core.setApplicationWindow(win);
+      ViewerPlugin<?> first = plugin("A");
+      ViewerPlugin<?> second = plugin("B");
+      try {
+        core.openViewerPlugin(first);
+        core.openViewerPlugin(second);
+        win.splitAt(second, side);
+        assertWorkingSplit(win, first, second, side);
+      } finally {
+        closeOpen(core);
+        core.setApplicationWindow(null);
+        win.dispose();
+      }
+    }
+  }
+
+  @Test
+  void draggedFirstTabLeavesRemainingTabOnViewerTabs() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    ViewerPlugin<?> second = plugin("B");
+    try {
+      core.openViewerPlugin(first);
+      core.openViewerPlugin(second);
+      win.splitAt(first, "east");
+      assertWorkingSplit(win, second, first, "east");
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void loneViewerTabDoesNotSplitWorkingArea() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> first = plugin("A");
+    try {
+      core.openViewerPlugin(first);
+      win.splitSeries(first);
+      win.splitAt(first, "west");
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertSame(first, win.getViewerTabs().getComponentAt(0));
+      assertEquals(0, win.seriesDockCount());
+      assertEquals(0, DummyHaveTest.dummyCount(core));
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void hangLayoutOnSingleTabDoesNotSplitWorkingArea() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    LayoutPlugin image = new LayoutPlugin();
+    try {
+      core.openViewerPlugin(image);
+      image.setLayoutCount(2);
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertEquals(0, win.seriesDockCount());
+      win.splitSeries(image);
+      assertEquals(1, win.getViewerTabs().getTabCount());
+      assertSame(image, win.getViewerTabs().getComponentAt(0));
+      assertEquals(0, win.seriesDockCount());
+      assertEquals(0, DummyHaveTest.dummyCount(core));
+    } finally {
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  @Test
+  void viewerTabDragToWestSouthNorthEdgesSplitsWorkingArea() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    for (String side : List.of("west", "south", "north")) {
+      WeasisWin win = new WeasisWin();
+      UICore core = UICore.getInstance();
+      closeOpen(core);
+      core.setApplicationWindow(win);
+      ViewerPlugin<?> first = plugin("A");
+      ViewerPlugin<?> second = plugin("B");
+      try {
+        core.openViewerPlugin(first);
+        core.openViewerPlugin(second);
+        win.setSize(960, 640);
+        win.setVisible(true);
+        win.validate();
+        dragTabToWorkEdge(win, 1, side);
+        assertWorkingSplit(win, first, second, side);
+      } finally {
+        win.setVisible(false);
+        closeOpen(core);
+        core.setApplicationWindow(null);
+        win.dispose();
+      }
+    }
+  }
+
+  static void assertWorkingSplit(
+      WeasisWin win, ViewerPlugin<?> leftover, ViewerPlugin<?> split, String side) {
+    assertEquals(1, win.getViewerTabs().getTabCount());
+    assertSame(leftover, win.getViewerTabs().getComponentAt(0));
+    assertTrue(win.seriesDockOf(split).isVisible());
+    assertSame(win.getViewerWork(), win.seriesDockOf(split).getWorkingArea());
+    assertEquals(side, WeasisWin.dockSide(win.seriesDockOf(split)));
+    assertEquals("viewer-tabs", win.getViewerTabs().getName());
+    assertSame(win.getViewerWork(), win.getViewerDock().getWorkingArea());
+    assertEquals(0, DummyHaveTest.dummyCount(UICore.getInstance()));
+    assertFalse(leftover instanceof DummyViewerPlugin);
+    assertFalse(split instanceof DummyViewerPlugin);
+    assertEquals(ViewerPlugin.DockingState.NORMAL, leftover.getDockingState());
+    assertEquals(ViewerPlugin.DockingState.NORMAL, split.getDockingState());
+  }
+
   static void dragTabToWorkEdge(WeasisWin win, int tab, String side) {
     Point press = tabPoint(win, tab);
     Point release = workEdge(win, side);
@@ -500,9 +644,16 @@ class WeasisWinChromeHaveTest {
       return new Point(2, h / 2);
     }
     if ("north".equals(side)) {
-      return new Point(w / 2, Math.min(h - 2, 2));
+      return new Point(w / 2, northDropY(win, h));
     }
     return new Point(w - 2, h / 2);
+  }
+
+  static int northDropY(WeasisWin win, int h) {
+    Rectangle strip = win.getViewerTabs().getBoundsAt(0);
+    int below = strip == null ? 32 : strip.y + strip.height + 2;
+    int north = Math.max(2, Math.min(below, Math.max(2, h / 8)));
+    return Math.min(h - 2, north);
   }
 
   static MouseEvent mouse(Component c, int id, Point p) {
