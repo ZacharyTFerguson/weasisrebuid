@@ -305,7 +305,9 @@ public class View2d extends DefaultView2d<MediaElement> {
     setSourceImage(painted);
   }
 
-  /** Copy already-painted pixels and VOI chrome; do not re-run {@link #render()}. */
+  /**
+   * Copy already-painted pixels, VOI chrome, and paint-time flip; do not re-run {@link #render()}.
+   */
   public void copyDisplay(View2d from) {
     if (from == null || from == this) {
       return;
@@ -315,6 +317,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (image != null) {
       setSourceImage(image);
     }
+    setFlip(from.isFlip());
   }
 
   void copyMetadata(View2d from) {

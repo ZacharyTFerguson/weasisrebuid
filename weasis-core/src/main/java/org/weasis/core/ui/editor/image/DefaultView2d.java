@@ -119,6 +119,8 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   private DisplayByteLut displayByteLut = new DisplayByteLut(ByteLutCollection.GRAY);
 
   private BufferedImage source;
+  private BufferedImage flipBlit;
+  private BufferedImage flipBlitSrc;
   private volatile double zoom = ZOOM_BEST_FIT;
   private volatile double panX;
   private volatile double panY;
@@ -353,6 +355,8 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   public void setSourceImage(BufferedImage source) {
     this.source = source;
+    this.flipBlit = null;
+    this.flipBlitSrc = null;
     displayOp.setFirstNode(source);
     displayOp.setParamValue("op.affine", AffineTransformOp.P_ZOOM, zoom);
     bindImageLayer(source);
@@ -1362,8 +1366,9 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   }
 
   /**
-   * Zoom/rotation stay a positive-scale CTM (headed-OK). Horizontal flip is dest-X swap so
-   * on-screen pipelines cannot drop a reflecting {@code drawImage(img, AffineTransform)}.
+   * Zoom/rotation stay a positive-scale CTM (headed-OK). Horizontal flip is a paint-time mirror
+   * buffer: headed X11 {@code Graphics2D} drops both negative scale and dest-X swap on the
+   * on-screen pipeline, the same path {@link #paintComponent(Graphics)} uses.
    */
   void paintFlippedSource(Graphics2D g2, int w, int h) {
     g2.setRenderingHint(
@@ -1375,13 +1380,37 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     tx.scale(scale, scale);
     tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
     g2.transform(tx);
-    int sw = source.getWidth();
-    int sh = source.getHeight();
-    if (flip) {
-      g2.drawImage(source, sw, 0, 0, sh, 0, 0, sw, sh, this);
-      return;
+    g2.drawImage(blitSource(), 0, 0, this);
+  }
+
+  BufferedImage blitSource() {
+    return flip ? mirroredSource() : source;
+  }
+
+  BufferedImage mirroredSource() {
+    if (flipBlit != null && flipBlitSrc == source) {
+      return flipBlit;
     }
-    g2.drawImage(source, 0, 0, this);
+    flipBlit = horizontalMirror(source);
+    flipBlitSrc = source;
+    return flipBlit;
+  }
+
+  static BufferedImage horizontalMirror(BufferedImage src) {
+    int w = src.getWidth();
+    int h = src.getHeight();
+    int type = src.getType();
+    BufferedImage dst =
+        new BufferedImage(w, h, type == 0 ? BufferedImage.TYPE_INT_ARGB : type);
+    int bands = src.getRaster().getNumBands();
+    int[] pixel = new int[bands];
+    for (int y = 0; y < h; y++) {
+      for (int x = 0; x < w; x++) {
+        src.getRaster().getPixel(x, y, pixel);
+        dst.getRaster().setPixel(w - 1 - x, y, pixel);
+      }
+    }
+    return dst;
   }
 
   protected void paintDecorations(Graphics2D g) {

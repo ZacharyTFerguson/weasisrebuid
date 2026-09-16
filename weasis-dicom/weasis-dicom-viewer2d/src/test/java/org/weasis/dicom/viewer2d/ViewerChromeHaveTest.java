@@ -105,41 +105,50 @@ class ViewerChromeHaveTest {
   }
 
   @Test
-  void flipClickMirrorsBestFitCanvasWithoutRasterizingSource() throws Exception {
+  void namedFlipMirrorsEveryDxHangCellWithoutRasterizingSource() throws Exception {
     View2dContainer container = new View2dContainer();
-    View2d view = container.getView2d();
+    container.applyHanging(1, 2);
+    assertEquals(2, container.getLayoutCount());
     BufferedImage src = splitGray(512, 256);
-    view.setSourceImage(src);
-    view.setSize(400, 300);
-    view.setZoom(AffineTransformOp.ZOOM_BEST_FIT);
-    view.setRotation(0);
+    View2d primary = container.getView2d();
+    View2d extra = container.getLayoutViews().get(1);
+    primary.setSourceImage(src);
+    primary.setZoom(AffineTransformOp.ZOOM_BEST_FIT);
+    primary.setRotation(0);
+    extra.copyDisplay(primary);
+    extra.setZoom(AffineTransformOp.ZOOM_BEST_FIT);
+    extra.setRotation(0);
     AbstractButton flip = container.getImageTool().flipButton();
     assertEquals("Flip", flip.getText());
     assertEquals("flip", flip.getName());
-    assertSame(view, container.getImageTool().boundView());
     assertTrue(
         container.getSeriesViewerUI().getToolBar().stream()
             .anyMatch(b -> ImageTool.NAME.equals(b.getComponentName())));
-    BufferedImage before = paintAt(view, 400, 300);
-    int left = band(before, 24, 80);
-    int right = band(before, 320, 376);
+    int left = band(paintAt(primary, 400, 300), 24, 80);
+    int right = band(paintAt(primary, 400, 300), 320, 376);
     assertTrue(left < right);
+    assertTrue(band(paintAt(extra, 400, 300), 24, 80) < band(paintAt(extra, 400, 300), 320, 376));
     int srcLeft = src.getRaster().getSample(16, 128, 0);
     flip.doClick();
-    assertTrue(view.isFlip());
+    assertTrue(primary.isFlip());
+    assertTrue(extra.isFlip());
     assertTrue(flip.isSelected());
     assertEquals(srcLeft, src.getRaster().getSample(16, 128, 0));
-    BufferedImage after = paintAt(view, 400, 300);
-    assertTrue(band(after, 24, 80) > band(after, 320, 376));
+    assertSame(src, primary.getSourceImage());
+    assertSame(src, extra.getSourceImage());
+    assertTrue(band(paintAt(primary, 400, 300), 24, 80) > band(paintAt(primary, 400, 300), 320, 376));
+    assertTrue(band(paintAt(extra, 400, 300), 24, 80) > band(paintAt(extra, 400, 300), 320, 376));
     AffineTransformOp affine = new AffineTransformOp();
     affine.setParam(org.weasis.core.api.image.ImageOpNode.INPUT_IMG, src);
     affine.process();
     assertSame(src, affine.getParam(org.weasis.core.api.image.ImageOpNode.OUTPUT_IMG));
     flip.doClick();
-    assertFalse(view.isFlip());
-    BufferedImage restored = paintAt(view, 400, 300);
-    assertEquals(left, band(restored, 24, 80));
-    assertEquals(right, band(restored, 320, 376));
+    assertFalse(primary.isFlip());
+    assertFalse(extra.isFlip());
+    assertEquals(left, band(paintAt(primary, 400, 300), 24, 80));
+    assertEquals(right, band(paintAt(primary, 400, 300), 320, 376));
+    assertEquals(left, band(paintAt(extra, 400, 300), 24, 80));
+    assertEquals(right, band(paintAt(extra, 400, 300), 320, 376));
   }
 
   @Test

@@ -13,6 +13,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.event.InputEvent;
@@ -134,8 +136,14 @@ class ViewerActionKeysHaveTest {
     assertEquals(0.0, view.getRotation(), 1e-9);
     view.getEventManager().keyPressed(key(view, KeyEvent.VK_F, InputEvent.ALT_DOWN_MASK));
     assertTrue(view.isFlip());
+    BufferedImage blit = view.blitSource();
+    assertNotSame(view.getSourceImage(), blit);
+    assertEquals(
+        view.getSourceImage().getRaster().getSample(0, 5, 0),
+        blit.getRaster().getSample(9, 5, 0));
     view.getEventManager().keyPressed(key(view, KeyEvent.VK_F, InputEvent.ALT_DOWN_MASK));
     assertFalse(view.isFlip());
+    assertSame(view.getSourceImage(), view.blitSource());
     assertEquals(MouseActions.WINLEVEL, view.getMouseActions().getLeft());
     view.getEventManager().keyPressed(key(view, KeyEvent.VK_SPACE, InputEvent.CTRL_DOWN_MASK));
     assertEquals(MouseActions.ZOOM, view.getMouseActions().getLeft());

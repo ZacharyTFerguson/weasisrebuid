@@ -17,6 +17,7 @@ import javax.swing.JToggleButton;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.dicom.viewer2d.View2d;
+import org.weasis.dicom.viewer2d.View2dContainer;
 
 /** Image dock: window/level, zoom, pixel size, and paint-time horizontal flip (Alt+F). */
 public class ImageTool extends PluginTool {
@@ -50,8 +51,12 @@ public class ImageTool extends PluginTool {
   }
 
   void applyFlip() {
-    if (view != null) {
-      view.setFlip(flip.isSelected());
+    boolean on = flip.isSelected();
+    Object host = view == null ? null : view.getClientProperty(View2dContainer.class);
+    if (host instanceof View2dContainer container) {
+      container.applyFlip(on);
+    } else if (view != null) {
+      view.setFlip(on);
     }
     refresh();
   }

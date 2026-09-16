@@ -337,7 +337,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (index >= 0 && index < layout.size()) {
       layoutIndex = index;
       View2dRegistry.select(layout.get(index));
+      refreshImageTool();
     }
+  }
+
+  void applyFlip(boolean on) {
+    for (View2d cell : layout) {
+      cell.setFlip(on);
+    }
+  }
+
+  void refreshImageTool() {
+    imageTool.bind(focusedLayoutView());
   }
 
   public void cycleLayout(int delta) {
@@ -674,6 +685,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     loadInto(cell, cell.getSeries());
     copyPaint(cell, from != null ? from : paintedView(sequence));
     cell.repaint();
+    refreshImageTool();
   }
 
   MediaSeries<MediaElement> seriesToHang(MediaSeries<MediaElement> sequence, View2d from) {
@@ -744,6 +756,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   void loadFirstMedia(MediaSeries<MediaElement> sequence) {
     loadInto(view2d, sequence);
     view2d.setSynch(SynchView.STACK);
+    refreshImageTool();
   }
 
   void loadInto(View2d cell, MediaSeries<? extends MediaElement> sequence) {
