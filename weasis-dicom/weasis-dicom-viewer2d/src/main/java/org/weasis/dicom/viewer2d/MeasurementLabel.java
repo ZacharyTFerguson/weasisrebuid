@@ -15,6 +15,7 @@ import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.utils.InstanceSpacing;
@@ -46,6 +47,17 @@ public final class MeasurementLabel {
     return formatLengthMm(
         polyline.getLength(),
         polyline.getLengthMm(resolved.map(InstanceSpacing.Resolved::spacing).orElse(null)),
+        resolved);
+  }
+
+  public static String formatCurve(
+      CurveGraphic curve, Optional<InstanceSpacing.Resolved> resolved) {
+    if (curve == null) {
+      return "";
+    }
+    return formatLengthMm(
+        curve.getLength(),
+        curve.getLengthMm(resolved.map(InstanceSpacing.Resolved::spacing).orElse(null)),
         resolved);
   }
 
