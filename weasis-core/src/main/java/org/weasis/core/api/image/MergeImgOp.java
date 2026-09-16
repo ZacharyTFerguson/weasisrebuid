@@ -9,10 +9,46 @@
  */
 package org.weasis.core.api.image;
 
-/** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+
+/**
+ * Draw {@code P_OVERLAY} onto the source at (0,0). Missing overlay is a passthrough. Output is a
+ * copy.
+ */
 public class MergeImgOp extends AbstractOp {
+
+  public static final String P_OVERLAY = "overlay";
 
   public MergeImgOp() {
     super("op.merge");
+  }
+
+  @Override
+  protected void processEnabled() {
+    setParam(OUTPUT_IMG, mergeIfNeeded(getParam(INPUT_IMG)));
+  }
+
+  Object mergeIfNeeded(Object in) {
+    if (!(in instanceof BufferedImage src)) {
+      return in;
+    }
+    Object value = getParam(P_OVERLAY);
+    if (!(value instanceof BufferedImage overlay)) {
+      return in;
+    }
+    return merge(src, overlay);
+  }
+
+  static BufferedImage merge(BufferedImage src, BufferedImage overlay) {
+    BufferedImage dst = BrightnessOp.canvas(src);
+    Graphics2D g = dst.createGraphics();
+    try {
+      g.drawImage(src, 0, 0, null);
+      g.drawImage(overlay, 0, 0, null);
+    } finally {
+      g.dispose();
+    }
+    return dst;
   }
 }

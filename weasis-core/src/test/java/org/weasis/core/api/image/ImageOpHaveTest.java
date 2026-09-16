@@ -179,6 +179,88 @@ class ImageOpHaveTest {
     assertEquals(0xFF00FF00, src.getRGB(1, 0));
   }
 
+  @Test
+  void brightnessIdentityPassthroughAndRescaleMapsGray() throws Exception {
+    BufferedImage src = gray(40);
+    BrightnessOp identity = new BrightnessOp();
+    identity.setParam(ImageOpNode.INPUT_IMG, src);
+    identity.process();
+    assertSame(src, identity.getParam(ImageOpNode.OUTPUT_IMG));
+
+    BrightnessOp two = new BrightnessOp();
+    two.setParam(BrightnessOp.P_CONTRAST, 2.0);
+    two.setParam(BrightnessOp.P_BRIGHTNESS, 0.0);
+    two.setParam(ImageOpNode.INPUT_IMG, src);
+    two.process();
+    assertEquals(80, grayAt(two));
+  }
+
+  @Test
+  void autoLevelsStretchesMinMaxToFullRange() throws Exception {
+    BufferedImage src = new BufferedImage(2, 1, BufferedImage.TYPE_BYTE_GRAY);
+    src.getRaster().setSample(0, 0, 0, 64);
+    src.getRaster().setSample(1, 0, 0, 192);
+    AutoLevelsOp stretch = new AutoLevelsOp();
+    stretch.setParam(ImageOpNode.INPUT_IMG, src);
+    stretch.process();
+    BufferedImage out = (BufferedImage) stretch.getParam(ImageOpNode.OUTPUT_IMG);
+    assertEquals(0, out.getRaster().getSample(0, 0, 0));
+    assertEquals(255, out.getRaster().getSample(1, 0, 0));
+
+    BufferedImage flat = gray(80);
+    AutoLevelsOp none = new AutoLevelsOp();
+    none.setParam(ImageOpNode.INPUT_IMG, flat);
+    none.process();
+    assertSame(flat, none.getParam(ImageOpNode.OUTPUT_IMG));
+  }
+
+  @Test
+  void maskZerosBlackenSourcePixels() throws Exception {
+    BufferedImage src = new BufferedImage(2, 1, BufferedImage.TYPE_INT_RGB);
+    src.setRGB(0, 0, 0xFF0000);
+    src.setRGB(1, 0, 0x0000FF);
+    MaskOp none = new MaskOp();
+    none.setParam(ImageOpNode.INPUT_IMG, src);
+    none.process();
+    assertSame(src, none.getParam(ImageOpNode.OUTPUT_IMG));
+
+    BufferedImage mask = new BufferedImage(2, 1, BufferedImage.TYPE_BYTE_GRAY);
+    mask.getRaster().setSample(0, 0, 0, 255);
+    mask.getRaster().setSample(1, 0, 0, 0);
+    MaskOp op = new MaskOp();
+    op.setParam(MaskOp.P_MASK, mask);
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    op.process();
+    BufferedImage out = (BufferedImage) op.getParam(ImageOpNode.OUTPUT_IMG);
+    assertEquals(0xFFFF0000, out.getRGB(0, 0));
+    assertEquals(0xFF000000, out.getRGB(1, 0));
+    assertNotSame(src, out);
+  }
+
+  @Test
+  void mergeOverlayDrawsOnTopWithoutSharingRaster() throws Exception {
+    BufferedImage src = new BufferedImage(2, 1, BufferedImage.TYPE_INT_RGB);
+    src.setRGB(0, 0, 0x000000);
+    src.setRGB(1, 0, 0x0000FF);
+    MergeImgOp none = new MergeImgOp();
+    none.setParam(ImageOpNode.INPUT_IMG, src);
+    none.process();
+    assertSame(src, none.getParam(ImageOpNode.OUTPUT_IMG));
+
+    BufferedImage overlay = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
+    overlay.setRGB(0, 0, 0xFF0000);
+    MergeImgOp op = new MergeImgOp();
+    op.setParam(MergeImgOp.P_OVERLAY, overlay);
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    op.process();
+    BufferedImage out = (BufferedImage) op.getParam(ImageOpNode.OUTPUT_IMG);
+    assertEquals(0xFFFF0000, out.getRGB(0, 0));
+    assertEquals(0xFF0000FF, out.getRGB(1, 0));
+    assertNotSame(src, out);
+    out.setRGB(0, 0, 0);
+    assertEquals(0xFF000000, src.getRGB(0, 0));
+  }
+
   static BufferedImage gray(int sample) {
     BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_BYTE_GRAY);
     image.getRaster().setSample(0, 0, 0, sample);
