@@ -10,6 +10,8 @@
 package org.weasis.core.ui.editor.image;
 
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -31,6 +33,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
 
   private String selected = MeasureTool.DISTANCE;
   private DefaultView2d<?> view;
+  private final List<DefaultView2d<?>> targets = new ArrayList<>();
 
   public MeasureToolBar() {
     super(NAME, 11);
@@ -41,8 +44,13 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
 
   public void bind(DefaultView2d<?> view) {
     this.view = view;
-    if (view != null) {
-      apply(view);
+    attach(view);
+    apply(view);
+  }
+
+  public void attach(DefaultView2d<?> view) {
+    if (view != null && !targets.contains(view)) {
+      targets.add(view);
     }
   }
 
@@ -74,6 +82,15 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     }
   }
 
+  void applyAll() {
+    apply(view);
+    for (DefaultView2d<?> target : targets) {
+      if (target != view) {
+        apply(target);
+      }
+    }
+  }
+
   private JButton button(String key) {
     JButton button =
         new JButton(
@@ -81,7 +98,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
               @Override
               public void actionPerformed(ActionEvent e) {
                 setSelected(key);
-                apply(view);
+                applyAll();
               }
             });
     button.setName(key);

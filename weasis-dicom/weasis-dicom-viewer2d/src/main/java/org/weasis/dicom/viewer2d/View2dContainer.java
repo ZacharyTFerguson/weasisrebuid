@@ -188,6 +188,9 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     synchManager.add(extra);
     bindDrop(extra);
     View2dRegistry.register(extra);
+    measureToolBar.attach(extra);
+    extra.getMouseActions().setLeft(view2d.getMouseActions().getLeft());
+    extra.setMeasureTool(view2d.getMeasureTool());
     return extra;
   }
 

@@ -67,7 +67,7 @@ public final class MeasureTool {
     }
     Graphic graphic = s == null ? null : s.get();
     if (graphic != null) {
-      graphic.setLineThickness(2.0f);
+      graphic.setLineThickness(3.0f);
     }
     return graphic;
   }

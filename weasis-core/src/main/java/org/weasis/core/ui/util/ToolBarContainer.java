@@ -10,7 +10,10 @@
 package org.weasis.core.ui.util;
 
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPanel;
@@ -18,7 +21,7 @@ import org.weasis.core.api.gui.Insertable;
 
 public class ToolBarContainer extends JPanel {
   public ToolBarContainer() {
-    super(new FlowLayout(FlowLayout.LEADING, 0, 0));
+    super(new WrapFlow());
   }
 
   public void registerToolBar(Insertable bar) {
@@ -71,6 +74,72 @@ public class ToolBarContainer extends JPanel {
   void updateDynamic(Insertable bar, Object source) {
     if (bar instanceof DynamicToolbar dyn) {
       dyn.update(source);
+    }
+  }
+
+  /**
+   * FlowLayout preferred-height uses unbounded width, so BorderLayout.NORTH clips wrapped bars
+   * (Key Object Star/Filter after Viewer). Measure height against the real parent width.
+   */
+  static final class WrapFlow extends FlowLayout {
+    WrapFlow() {
+      super(LEADING, 0, 0);
+    }
+
+    @Override
+    public Dimension preferredLayoutSize(Container target) {
+      return wrapSize(target, true);
+    }
+
+    @Override
+    public Dimension minimumLayoutSize(Container target) {
+      return wrapSize(target, false);
+    }
+
+    Dimension wrapSize(Container target, boolean pref) {
+      synchronized (target.getTreeLock()) {
+        return measured(target, pref, wrapWidth(target));
+      }
+    }
+
+    static int wrapWidth(Container target) {
+      if (target.getWidth() > 0) {
+        return target.getWidth();
+      }
+      Container parent = target.getParent();
+      if (parent != null && parent.getWidth() > 0) {
+        return parent.getWidth();
+      }
+      return Integer.MAX_VALUE;
+    }
+
+    Dimension measured(Container target, boolean pref, int max) {
+      int x = 0;
+      int y = 0;
+      int rowH = 0;
+      int wide = 0;
+      int hgap = getHgap();
+      int vgap = getVgap();
+      for (Component m : target.getComponents()) {
+        if (!m.isVisible()) {
+          continue;
+        }
+        Dimension d = pref ? m.getPreferredSize() : m.getMinimumSize();
+        if (needWrap(x, d.width, max)) {
+          y += rowH + vgap;
+          x = 0;
+          rowH = 0;
+        }
+        x += d.width + hgap;
+        wide = Math.max(wide, x);
+        rowH = Math.max(rowH, d.height);
+      }
+      Insets in = target.getInsets();
+      return new Dimension(wide + in.left + in.right, y + rowH + in.top + in.bottom);
+    }
+
+    static boolean needWrap(int x, int width, int max) {
+      return x > 0 && max < Integer.MAX_VALUE && x + width > max;
     }
   }
 }

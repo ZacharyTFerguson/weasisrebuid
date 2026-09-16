@@ -1151,27 +1151,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   @Override
   protected void paintComponent(Graphics g) {
     super.paintComponent(g);
-    if (source == null || freezeImage && source != null) {
-      paintDecorations((Graphics2D) g);
-      if (source == null) {
-        return;
-      }
-    }
-    Graphics2D g2 = (Graphics2D) g.create();
-    try {
-      g2.setRenderingHint(
-          RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-      double scale = resolvedScale(getWidth(), getHeight());
-      AffineTransform tx = new AffineTransform();
-      tx.translate(getWidth() / 2.0 + panX, getHeight() / 2.0 + panY);
-      tx.rotate(Math.toRadians(rotation));
-      tx.scale(flip ? -scale : scale, scale);
-      tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
-      g2.drawImage(source, tx, this);
-    } finally {
-      g2.dispose();
-    }
-    paintDecorations((Graphics2D) g);
+    paintView((Graphics2D) g, true);
   }
 
   public void paintView(Graphics2D g, boolean overlays) {
@@ -1264,6 +1244,9 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     if (lines != null) {
       for (String line : lines) {
         if (line != null && !line.isBlank()) {
+          g.setColor(Color.BLACK);
+          g.drawString(line, x + 1, y + 1);
+          g.setPaint(graphic.getColorPaint() == null ? Color.YELLOW : graphic.getColorPaint());
           g.drawString(line, x, y);
           y += 14;
         }
@@ -1283,10 +1266,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   }
 
   static Stroke strokeFor(Graphic graphic) {
-    float width = graphic.getLineThickness() == null ? 1.0f : graphic.getLineThickness();
-    if (Boolean.TRUE.equals(graphic.getSelected())) {
-      return new BasicStroke(Math.max(2.5f, width));
-    }
-    return new BasicStroke(Math.max(1.0f, width));
+    float width = graphic.getLineThickness() == null ? 2.5f : graphic.getLineThickness();
+    return new BasicStroke(Math.max(2.5f, width));
   }
 }

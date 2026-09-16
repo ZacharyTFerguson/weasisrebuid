@@ -135,9 +135,9 @@ class ViewerChromeHaveTest {
         (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0);
     d.doClick();
     assertEquals("D", container.getMeasureToolBar().getSelected());
-    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20));
-    view.getEventManager().mouseDragged(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20));
-    view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 80, 20));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20));
+    view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 80, 20));
     assertEquals(1, view.getGraphicList().size());
     assertTrue(view.getGraphicList().getFirst() instanceof LineGraphic);
     LineGraphic line = (LineGraphic) view.getGraphicList().getFirst();
@@ -146,7 +146,35 @@ class ViewerChromeHaveTest {
     BufferedImage page = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
     java.awt.Graphics2D g = page.createGraphics();
     try {
-      view.paintView(g, true);
+      view.paint(g);
+    } finally {
+      g.dispose();
+    }
+    assertTrue(yellowStrokeOnChest(page));
+  }
+
+  @Test
+  void mouseLeftActionMeasurePaintsOnLayoutExtra() {
+    View2dContainer container = new View2dContainer();
+    container.setLayoutCount(2);
+    View2d extra = container.getLayoutViews().get(1);
+    extra.setSize(200, 200);
+    extra.setSourceImage(new BufferedImage(100, 100, BufferedImage.TYPE_BYTE_GRAY));
+    extra.setZoom(2.0);
+    DicomView2dCommands cmd = new DicomView2dCommands(container.getView2d());
+    assertEquals(
+        org.weasis.core.ui.editor.image.MouseActions.MEASURE, cmd.mouseLeftAction("measure"));
+    assertEquals(
+        org.weasis.core.ui.editor.image.MouseActions.MEASURE, extra.getMouseActions().getLeft());
+    extra.dispatchEvent(mouse(extra, MouseEvent.MOUSE_PRESSED, 20, 20));
+    extra.dispatchEvent(mouse(extra, MouseEvent.MOUSE_DRAGGED, 80, 20));
+    extra.dispatchEvent(mouse(extra, MouseEvent.MOUSE_RELEASED, 80, 20));
+    assertEquals(1, extra.getGraphicList().size());
+    assertTrue(extra.getGraphicList().getFirst() instanceof LineGraphic);
+    BufferedImage page = new BufferedImage(200, 200, BufferedImage.TYPE_INT_RGB);
+    java.awt.Graphics2D g = page.createGraphics();
+    try {
+      extra.paint(g);
     } finally {
       g.dispose();
     }

@@ -9,12 +9,19 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.AWTEvent;
+import java.awt.IllegalComponentStateException;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.AWTEventListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.Point2D;
+import javax.swing.JComponent;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.gui.util.ShortcutManager;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
@@ -39,6 +46,7 @@ public class ImageViewerEventManager {
   public ImageViewerEventManager(DefaultView2d<?> view) {
     this.view = view;
     this.drawingsKeys = new DrawingsKeyListeners(view);
+    DrawStroke.arm();
   }
 
   public DefaultView2d<?> getView() {
@@ -371,6 +379,7 @@ public class ImageViewerEventManager {
     if (e.getClickCount() > 1 && current != null) {
       view.setDrawing(null);
       drawHandle = 0;
+      DrawStroke.INSTANCE.drawingView = null;
       return;
     }
     if (current == null) {
@@ -386,6 +395,7 @@ public class ImageViewerEventManager {
       }
       view.addGraphic(created);
       view.setDrawing(created);
+      DrawStroke.INSTANCE.drawingView = view;
       return;
     }
     if (current instanceof DragGraphic drag && isOpenPath(current)) {
@@ -395,6 +405,7 @@ public class ImageViewerEventManager {
       angle.setHandlePoint(2, p);
       view.setDrawing(null);
       drawHandle = 0;
+      DrawStroke.INSTANCE.drawingView = null;
     }
   }
 
@@ -420,9 +431,111 @@ public class ImageViewerEventManager {
     }
     view.setDrawing(null);
     drawHandle = 0;
+    DrawStroke.INSTANCE.drawingView = null;
   }
 
   static boolean isOpenPath(Graphic graphic) {
     return graphic instanceof PolylineGraphic || graphic instanceof PolygonGraphic;
+  }
+
+  /**
+   * Headed glass / TransferHandler can swallow {@code mouseDragged} on View2d. Toolkit events still
+   * reach here so D / {@code mouseLeftAction measure} paint a LineGraphic on the chest.
+   */
+  static final class DrawStroke implements AWTEventListener {
+    static final DrawStroke INSTANCE = new DrawStroke();
+    private boolean armed;
+    volatile DefaultView2d<?> drawingView;
+
+    static void arm() {
+      INSTANCE.armOnce();
+    }
+
+    void armOnce() {
+      if (armed) {
+        return;
+      }
+      armed = true;
+      Toolkit.getDefaultToolkit()
+          .addAWTEventListener(this, AWTEvent.MOUSE_EVENT_MASK | AWTEvent.MOUSE_MOTION_EVENT_MASK);
+    }
+
+    @Override
+    public void eventDispatched(AWTEvent event) {
+      if (event instanceof MouseEvent me) {
+        onMouse(me);
+      }
+    }
+
+    void onMouse(MouseEvent me) {
+      if (me.getID() == MouseEvent.MOUSE_PRESSED) {
+        onPress(me);
+        return;
+      }
+      DefaultView2d<?> drawing = drawingView;
+      if (drawing == null || drawing.getDrawing() == null) {
+        return;
+      }
+      if (me.getID() == MouseEvent.MOUSE_DRAGGED) {
+        drawing.getEventManager().onDrawDragged(local(me, drawing));
+      } else if (me.getID() == MouseEvent.MOUSE_RELEASED) {
+        drawing.getEventManager().onDrawReleased(local(me, drawing));
+      }
+    }
+
+    void onPress(MouseEvent me) {
+      if (!SwingUtilities.isLeftMouseButton(me)) {
+        return;
+      }
+      DefaultView2d<?> hit = viewAt(me);
+      if (hit == null || !drawingAction(hit.getMouseActions().getLeft())) {
+        return;
+      }
+      drawingView = hit;
+      if (me.getComponent() == hit) {
+        return;
+      }
+      hit.getEventManager().onDrawPressed(local(me, hit));
+    }
+
+    static DefaultView2d<?> viewAt(MouseEvent me) {
+      if (me.getComponent() instanceof DefaultView2d<?> v) {
+        return v;
+      }
+      return screenView(me);
+    }
+
+    static DefaultView2d<?> screenView(MouseEvent me) {
+      try {
+        JComponent cell = ViewTransferHandler.screenView(me.getLocationOnScreen());
+        return cell instanceof DefaultView2d<?> v ? v : null;
+      } catch (IllegalComponentStateException e) {
+        return null;
+      }
+    }
+
+    static MouseEvent local(MouseEvent me, DefaultView2d<?> view) {
+      Point p = pointOn(me, view);
+      return new MouseEvent(
+          view,
+          me.getID(),
+          me.getWhen(),
+          me.getModifiersEx(),
+          p.x,
+          p.y,
+          me.getClickCount(),
+          false,
+          me.getButton());
+    }
+
+    static Point pointOn(MouseEvent me, DefaultView2d<?> view) {
+      try {
+        Point p = new Point(me.getLocationOnScreen());
+        SwingUtilities.convertPointFromScreen(p, view);
+        return p;
+      } catch (IllegalComponentStateException e) {
+        return me.getPoint();
+      }
+    }
   }
 }

@@ -21,6 +21,7 @@ public class WtoolBar extends JToolBar implements Insertable {
     super(barName);
     this.barName = barName == null ? "toolbar" : barName;
     this.position = position;
+    setFloatable(false);
   }
 
   @Override

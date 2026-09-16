@@ -19,6 +19,7 @@ import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MouseActions;
 import org.weasis.core.ui.editor.image.SynchView;
+import org.weasis.core.ui.editor.image.ViewerToolBar;
 
 /**
  * Gogo {@code dcmview2d:*} after the 2D plugin is up. {@code move} and {@code wl} require {@code
@@ -147,7 +148,22 @@ public class DicomView2dCommands {
       return view.getMouseActions().getLeft();
     }
     view.getMouseActions().setLeft(a.getFirst());
+    ViewerToolBar.bindMeasureTool(view);
+    applyLeftToLayout(view);
     return view.getMouseActions().getLeft();
+  }
+
+  static void applyLeftToLayout(View2d view) {
+    Object host = view.getClientProperty(View2dContainer.class);
+    if (!(host instanceof View2dContainer container)) {
+      return;
+    }
+    String left = view.getMouseActions().getLeft();
+    String tool = view.getMeasureTool();
+    for (View2d cell : container.getLayoutViews()) {
+      cell.getMouseActions().setLeft(left);
+      cell.setMeasureTool(tool);
+    }
   }
 
   public String move(String... args) {

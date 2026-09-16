@@ -11,6 +11,7 @@ package org.weasis.dicom.viewer2d;
 
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.dicom.viewer2d.mpr.MprController;
@@ -28,6 +29,24 @@ public class EventManager extends ImageViewerEventManager {
 
   public View2d getView2d() {
     return view2d;
+  }
+
+  @Override
+  public void mousePressed(MouseEvent e) {
+    View2dRegistry.select(view2d);
+    selectLayoutCell();
+    super.mousePressed(e);
+  }
+
+  void selectLayoutCell() {
+    Object host = view2d.getClientProperty(View2dContainer.class);
+    if (!(host instanceof View2dContainer container)) {
+      return;
+    }
+    int index = container.getLayoutViews().indexOf(view2d);
+    if (index >= 0) {
+      container.setLayoutIndex(index);
+    }
   }
 
   @Override

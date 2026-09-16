@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import org.weasis.core.api.gui.util.ActionW;
+import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.util.WtoolBar;
 
 /**
@@ -62,8 +63,19 @@ public class ViewerToolBar extends WtoolBar {
   }
 
   public void apply(DefaultView2d<?> view) {
-    if (view != null) {
-      view.getMouseActions().setLeft(selected);
+    if (view == null) {
+      return;
+    }
+    view.getMouseActions().setLeft(selected);
+    bindMeasureTool(view);
+  }
+
+  public static void bindMeasureTool(DefaultView2d<?> view) {
+    String left = MouseActions.normalize(view.getMouseActions().getLeft());
+    if (MouseActions.MEASURE.equals(left)) {
+      view.setMeasureTool(MeasureTool.DISTANCE);
+    } else if (MouseActions.DRAW.equals(left)) {
+      view.setMeasureTool(MeasureTool.RECTANGLE);
     }
   }
 
