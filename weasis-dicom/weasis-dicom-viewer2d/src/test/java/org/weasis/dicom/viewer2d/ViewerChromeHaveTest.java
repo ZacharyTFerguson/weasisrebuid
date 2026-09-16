@@ -27,12 +27,15 @@ import java.util.List;
 import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.image.AffineTransformOp;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
+import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.dicom.viewer2d.mpr.MprAxis;
 import org.weasis.dicom.viewer2d.mpr.MprContainer;
@@ -72,6 +75,31 @@ class ViewerChromeHaveTest {
     assertTrue(view.isInverseLut());
     bar.toggleInvert();
     assertFalse(view.isInverseLut());
+  }
+
+  @Test
+  void view2dContainerWiresZoomAndRotationChrome() {
+    View2dContainer container = new View2dContainer();
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> ZoomToolBar.NAME.equals(b.getComponentName())));
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> RotationToolBar.NAME.equals(b.getComponentName())));
+    assertSame(container.getView2d(), container.getZoomToolBar().boundView());
+    assertSame(container.getView2d(), container.getRotationToolBar().boundView());
+    AbstractButton twoX = (AbstractButton) container.getZoomToolBar().getComponent(3);
+    AbstractButton ninety = (AbstractButton) container.getRotationToolBar().getComponent(1);
+    assertEquals("2x", twoX.getName());
+    assertEquals("90°", ninety.getName());
+    twoX.doClick();
+    assertEquals(2.0, container.getView2d().getZoom(), 1e-9);
+    ninety.doClick();
+    assertEquals(90.0, container.getView2d().getRotation(), 1e-9);
+    ((AbstractButton) container.getZoomToolBar().getComponent(0)).doClick();
+    assertEquals(AffineTransformOp.ZOOM_BEST_FIT, container.getView2d().getZoom(), 1e-9);
+    ((AbstractButton) container.getRotationToolBar().getComponent(0)).doClick();
+    assertEquals(0.0, container.getView2d().getRotation(), 1e-9);
   }
 
   @Test

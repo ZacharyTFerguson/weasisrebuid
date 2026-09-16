@@ -23,6 +23,7 @@ public class ZoomToolBar extends WtoolBar {
 
   public static final String NAME = "Zoom";
 
+  private DefaultView2d<?> view;
   private double selected = AffineTransformOp.ZOOM_BEST_FIT;
 
   public ZoomToolBar() {
@@ -32,6 +33,14 @@ public class ZoomToolBar extends WtoolBar {
     add(button("1x", 1.0));
     add(button("2x", 2.0));
     add(button("4x", 4.0));
+  }
+
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+  }
+
+  public DefaultView2d<?> boundView() {
+    return view;
   }
 
   public double selectedZoom() {
@@ -63,8 +72,10 @@ public class ZoomToolBar extends WtoolBar {
               @Override
               public void actionPerformed(ActionEvent e) {
                 setSelectedZoom(zoom);
+                apply(view);
               }
             });
+    button.setName(label);
     button.setToolTipText(label + " (" + zoom + ")");
     return button;
   }

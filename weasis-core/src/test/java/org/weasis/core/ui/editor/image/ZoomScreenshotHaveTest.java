@@ -10,14 +10,17 @@
 package org.weasis.core.ui.editor.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.image.BufferedImage;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.api.image.AffineTransformOp;
+import org.weasis.core.api.image.ImageOpNode;
 
 class ZoomScreenshotHaveTest {
 
@@ -83,5 +86,33 @@ class ZoomScreenshotHaveTest {
     bar.setSelectedRotation(0);
     bar.apply(view);
     assertEquals(0.0, view.getRotation());
+  }
+
+  @Test
+  void namedClicksApplyAffineParamsWithoutRasterizing() throws Exception {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    ZoomToolBar zoom = new ZoomToolBar();
+    zoom.bind(view);
+    AbstractButton twoX = (AbstractButton) zoom.getComponent(3);
+    assertEquals("2x", twoX.getName());
+    twoX.doClick();
+    assertEquals(2.0, view.getZoom(), 1e-9);
+    assertEquals(
+        2.0, view.getDisplayOpManager().getParamValue("op.affine", AffineTransformOp.P_ZOOM));
+
+    RotationToolBar rotation = new RotationToolBar();
+    rotation.bind(view);
+    AbstractButton ninety = (AbstractButton) rotation.getComponent(1);
+    assertEquals("90°", ninety.getName());
+    ninety.doClick();
+    assertEquals(90.0, view.getRotation(), 1e-9);
+    assertEquals(
+        90.0, view.getDisplayOpManager().getParamValue("op.affine", AffineTransformOp.P_ROTATION));
+
+    AffineTransformOp affine = new AffineTransformOp();
+    BufferedImage src = new BufferedImage(2, 1, BufferedImage.TYPE_INT_RGB);
+    affine.setParam(ImageOpNode.INPUT_IMG, src);
+    affine.process();
+    assertSame(src, affine.getParam(ImageOpNode.OUTPUT_IMG));
   }
 }

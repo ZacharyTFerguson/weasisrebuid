@@ -123,6 +123,8 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     viewerToolBar.bind(view2d);
     keyObjectToolBar.bind(view2d);
     lutToolBar.bind(view2d);
+    zoomToolBar.bind(view2d);
+    rotationToolBar.bind(view2d);
     resetTools.bind(view2d);
     headerToolBar.bind(view2d);
     cineToolBar.bind(view2d);
@@ -158,6 +160,14 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public LutToolBar getLutToolBar() {
     return lutToolBar;
+  }
+
+  public ZoomToolBar getZoomToolBar() {
+    return zoomToolBar;
+  }
+
+  public RotationToolBar getRotationToolBar() {
+    return rotationToolBar;
   }
 
   public KeyObjectToolBar getKeyObjectToolBar() {

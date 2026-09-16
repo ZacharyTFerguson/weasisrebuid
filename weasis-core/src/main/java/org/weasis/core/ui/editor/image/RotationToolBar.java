@@ -19,6 +19,7 @@ public class RotationToolBar extends WtoolBar {
 
   public static final String NAME = "Rotation";
 
+  private DefaultView2d<?> view;
   private double selected;
 
   public RotationToolBar() {
@@ -27,6 +28,14 @@ public class RotationToolBar extends WtoolBar {
     add(button("90°", 90));
     add(button("180°", 180));
     add(button("270°", 270));
+  }
+
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+  }
+
+  public DefaultView2d<?> boundView() {
+    return view;
   }
 
   public double selectedRotation() {
@@ -50,8 +59,10 @@ public class RotationToolBar extends WtoolBar {
               @Override
               public void actionPerformed(ActionEvent e) {
                 setSelectedRotation(rotation);
+                apply(view);
               }
             });
+    button.setName(label);
     button.setToolTipText(label);
     return button;
   }
