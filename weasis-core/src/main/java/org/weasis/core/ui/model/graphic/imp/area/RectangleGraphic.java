@@ -11,6 +11,8 @@ package org.weasis.core.ui.model.graphic.imp.area;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Optional;
+import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
@@ -18,6 +20,29 @@ public class RectangleGraphic extends AbstractDragGraphicArea {
 
   public RectangleGraphic() {
     super(2);
+  }
+
+  /**
+   * Physical area in mm² from the two-corner bbox: pixel {@link #getAreaValue()} times row spacing
+   * times column spacing (anisotropic voxels).
+   */
+  public Optional<Double> getAreaMm(ImageSpacing spacing) {
+    if (spacing == null) {
+      return Optional.empty();
+    }
+    double row = spacing.rowMm();
+    double col = spacing.colMm();
+    if (row <= 0 || col <= 0 || !Double.isFinite(row) || !Double.isFinite(col)) {
+      return Optional.empty();
+    }
+    if (getHandlePoint(0) == null || getHandlePoint(1) == null) {
+      return Optional.empty();
+    }
+    double pixelArea = getAreaValue();
+    if (pixelArea == 0) {
+      return Optional.empty();
+    }
+    return Optional.of(pixelArea * Math.abs(row * col));
   }
 
   @Override
