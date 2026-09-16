@@ -31,9 +31,9 @@ import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
  * <p><b>Why UI after {@code getCobbAngleDegrees} / {@code getEndplateLengthMm}:</b> {@link
  * MeasurementLabel#formatCobb} only formats values already proved in {@link
  * org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphicMeasureTest} and instance spacing in
- * {@link org.weasis.dicom.codec.utils.InstanceSpacingTest}. A label that recomputed Cobb degrees from
- * mm-scaled endplate vectors or guessed endplate mm from pixel hypot would disagree with the landed
- * APIs.
+ * {@link org.weasis.dicom.codec.utils.InstanceSpacingTest}. A label that recomputed Cobb degrees
+ * from mm-scaled endplate vectors or guessed endplate mm from pixel hypot would disagree with the
+ * landed APIs.
  *
  * <p><b>Why bind to {@code Resolved} + graphic measure methods only:</b> spacing comes from {@link
  * org.weasis.dicom.codec.utils.InstanceSpacing.Resolved#spacing()} on the current {@link View2d}
@@ -41,22 +41,24 @@ import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
  * — it cannot read paint or re-resolve tags when window/level changes.
  *
  * <p><b>Why degrees stay when spacing is missing but {@code mm} does not:</b> the Cobb angle is
- * dimensionless in pixel space; endplate lengths fall back to pixel segment length per endplate when
- * resolve is empty or {@link CobbToolGraphic#getEndplateLengthMm} is empty — no imager fallback on
- * CT and no dual unit string on the endplates.
+ * dimensionless in pixel space; endplate lengths fall back to pixel segment length per endplate
+ * when resolve is empty or {@link CobbToolGraphic#getEndplateLengthMm} is empty — no imager
+ * fallback on CT and no dual unit string on the endplates.
  *
  * <p><b>Why the DX warning travels with the endplate numbers:</b> {@code (detector plane)} / {@code
  * (estimate)} suffixes follow {@link org.weasis.dicom.codec.utils.InstanceSpacing.Source} on the
  * same {@code Resolved} value as line, polyline, and angle labels, not a tag-presence check that
  * clears when (0018,1164) exists.
  *
- * <p><b>Why spacing changes endplate mm but not degrees:</b> anisotropic row/column mm scaling changes
- * physical endplate segment lengths but not the angle between the same pixel endplate directions —
- * the primary discriminating assert is {@link #cobbLabelDegreesUnchangedWhenInstanceSpacingChanges}.
+ * <p><b>Why spacing changes endplate mm but not degrees:</b> anisotropic row/column mm scaling
+ * changes physical endplate segment lengths but not the angle between the same pixel endplate
+ * directions — the primary discriminating assert is {@link
+ * #cobbLabelDegreesUnchangedWhenInstanceSpacingChanges}.
  *
  * <p><b>Why not copy Weasis:</b> upstream measure tools mix Cobb drawing, calibration prefs, and
- * file-extracted spacing; this slice adds {@code formatCobb} beside the existing line/polyline/angle
- * formatters without porting {@code MeasureTool} or {@code MeasurementsAdapter}.
+ * file-extracted spacing; this slice adds {@code formatCobb} beside the existing
+ * line/polyline/angle formatters without porting {@code MeasureTool} or {@code
+ * MeasurementsAdapter}.
  */
 class View2dCobbMeasureLabelTest {
 

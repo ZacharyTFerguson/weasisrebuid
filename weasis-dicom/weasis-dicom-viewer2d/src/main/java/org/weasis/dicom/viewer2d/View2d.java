@@ -34,6 +34,7 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.DicomMediaIO;
@@ -381,6 +382,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public String formatAngleMeasureLabel(AngleToolGraphic angle) {
     return MeasurementLabel.formatAngle(angle, resolvedInstanceSpacing);
+  }
+
+  public String formatCobbMeasureLabel(CobbToolGraphic cobb) {
+    return MeasurementLabel.formatCobb(cobb, resolvedInstanceSpacing);
   }
 
   public String formatEllipseMeasureLabel(Ellipse2D roi) {
