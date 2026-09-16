@@ -99,6 +99,27 @@ public final class RoiStatistics {
     return String.format(Locale.US, "%.1f %s (n=%d)", stats.mean(), stats.unit(), stats.n());
   }
 
+  /** Full region-stats string for live ellipse labels (mean, min, max, sample stdDev, n, unit). */
+  public static String formatStatsLabel(RoiStats stats) {
+    if (stats == null) {
+      return "";
+    }
+    String label =
+        String.format(
+            Locale.US,
+            "%.1f %s  min %.1f  max %.1f  std %.1f  (n=%d)",
+            stats.mean(),
+            stats.unit(),
+            stats.min(),
+            stats.max(),
+            stats.stdDev(),
+            stats.n());
+    if (stats.excluded() > 0) {
+      label += String.format(Locale.US, "  excluded=%d", stats.excluded());
+    }
+    return label;
+  }
+
   private static String unitFrom(Attributes dcm) {
     String type = dcm.getString(Tag.RescaleType, "").trim();
     if (type.isEmpty()) {

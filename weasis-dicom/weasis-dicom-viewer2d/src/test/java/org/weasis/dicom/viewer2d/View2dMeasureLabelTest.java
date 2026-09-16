@@ -171,7 +171,7 @@ class View2dMeasureLabelTest {
     view.load(ct);
     Ellipse2D roi = MeasureLabelFixtures.ctRoiAirEllipse();
     String expected =
-        RoiStatistics.formatMeanLabel(RoiStatistics.ellipse(view.getDataset(), roi).orElseThrow());
+        RoiStatistics.formatStatsLabel(RoiStatistics.ellipse(view.getDataset(), roi).orElseThrow());
     assertEquals(expected, view.formatEllipseMeasureLabel(roi));
     assertTrue(expected.contains("-1000"));
     assertTrue(expected.contains("HU"));
