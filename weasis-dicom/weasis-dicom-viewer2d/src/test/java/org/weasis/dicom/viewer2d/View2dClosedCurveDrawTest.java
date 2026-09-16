@@ -46,8 +46,8 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
  * closed smooth loop length proved in {@link View2dClosedCurveMeasureLabelTest}.
  *
  * <p><b>Why fail-closed px:</b> when spacing is missing, the label uses sampled closed pixel path
- * length from {@link ClosedCurveGraphic#getLength} via {@link MeasurementLabel#formatClosedCurve}
- * — no silent mm guess.
+ * length from {@link ClosedCurveGraphic#getLength} via {@link MeasurementLabel#formatClosedCurve} —
+ * no silent mm guess.
  *
  * <p><b>Why not copy Weasis:</b> upstream closed-spline measure tools mix free-hand scribble,
  * closure, and paint buffers; this slice adds image-space click-to-add beside existing open curve

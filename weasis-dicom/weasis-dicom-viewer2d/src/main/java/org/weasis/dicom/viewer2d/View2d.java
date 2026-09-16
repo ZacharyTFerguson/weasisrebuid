@@ -69,6 +69,8 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private CurveGraphic draftCurveCaliper;
 
+  private ClosedCurveGraphic draftClosedCurveCaliper;
+
   private PolygonGraphic draftPolygonCaliper;
 
   private AngleToolGraphic draftAngleCaliper;
@@ -260,6 +262,26 @@ public class View2d extends DefaultView2d<MediaElement> {
     }
     applyCurveCaliperLabel(curve);
     addGraphic(curve);
+  }
+
+  /**
+   * Adds a closed curve caliper in image pixel coordinates and binds its label to {@link
+   * #formatClosedCurveMeasureLabel}.
+   */
+  public void addClosedCurveCaliper(List<? extends Point2D> imagePoints) {
+    if (imagePoints == null || imagePoints.size() < 3) {
+      return;
+    }
+    ClosedCurveGraphic closed = new ClosedCurveGraphic();
+    for (int i = 0; i < imagePoints.size(); i++) {
+      Point2D p = imagePoints.get(i);
+      if (p == null) {
+        return;
+      }
+      closed.setHandlePoint(i, copyPoint(p));
+    }
+    applyClosedCurveCaliperLabel(closed);
+    addGraphic(closed);
   }
 
   /**
@@ -457,6 +479,10 @@ public class View2d extends DefaultView2d<MediaElement> {
     return org.weasis.core.ui.editor.image.MouseActions.CURVE.equals(normalizedLeftAction);
   }
 
+  boolean isClosedCurveDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.CLOSED_CURVE.equals(normalizedLeftAction);
+  }
+
   boolean isPolygonDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.POLYGON.equals(normalizedLeftAction);
   }
@@ -566,6 +592,54 @@ public class View2d extends DefaultView2d<MediaElement> {
     }
     if (clickCount >= 2) {
       finalizeDraftCurveCaliper();
+    }
+  }
+
+  /** Test hook: closed curve vertex click when left action is {@code closedCurve}. */
+  public void simulateClosedCurveDrawClick(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2) {
+      closedCurveDrawViewPressed(viewX, viewY, 1);
+      closedCurveDrawViewReleased(viewX, viewY, 1);
+    }
+    closedCurveDrawViewPressed(viewX, viewY, clickCount);
+    closedCurveDrawViewReleased(viewX, viewY, clickCount);
+  }
+
+  void closedCurveDrawViewPressed(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2 && draftClosedCurveCaliper != null) {
+      finalizeDraftClosedCurveCaliper();
+      return;
+    }
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftClosedCurveCaliper == null) {
+      draftClosedCurveCaliper = new ClosedCurveGraphic();
+      draftClosedCurveCaliper.setHandlePoint(0, image);
+      draftClosedCurveCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+      addGraphic(draftClosedCurveCaliper);
+      repaint();
+      return;
+    }
+    int last = draftClosedCurveCaliper.getPts().size() - 1;
+    draftClosedCurveCaliper.setHandlePoint(last, image);
+    draftClosedCurveCaliper.setHandlePoint(last + 1, new Point2D.Double(image.x, image.y));
+    repaint();
+  }
+
+  void closedCurveDrawViewDragged(int viewX, int viewY) {
+    if (draftClosedCurveCaliper == null) {
+      return;
+    }
+    int last = draftClosedCurveCaliper.getPts().size() - 1;
+    draftClosedCurveCaliper.setHandlePoint(last, viewToImage(viewX, viewY));
+    repaint();
+  }
+
+  void closedCurveDrawViewReleased(int viewX, int viewY, int clickCount) {
+    if (draftClosedCurveCaliper == null) {
+      return;
+    }
+    if (clickCount >= 2) {
+      finalizeDraftClosedCurveCaliper();
     }
   }
 
@@ -729,6 +803,44 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private void applyCurveCaliperLabel(CurveGraphic curve) {
     curve.setLabel(new String[] {formatCurveMeasureLabel(curve)});
+  }
+
+  private void finalizeDraftClosedCurveCaliper() {
+    if (draftClosedCurveCaliper == null) {
+      return;
+    }
+    trimTrailingRubberBand(draftClosedCurveCaliper);
+    if (draftClosedCurveCaliper.getPts().size() < 3) {
+      getGraphicList().remove(draftClosedCurveCaliper);
+    } else {
+      applyClosedCurveCaliperLabel(draftClosedCurveCaliper);
+    }
+    draftClosedCurveCaliper = null;
+    repaint();
+  }
+
+  private static void trimTrailingRubberBand(ClosedCurveGraphic closed) {
+    List<Point2D.Double> pts = new ArrayList<>(closed.getPts());
+    while (pts.size() > 2) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) > 1e-6) {
+        break;
+      }
+      pts.removeLast();
+    }
+    if (pts.size() > 1) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) <= 1e-6) {
+        pts.removeLast();
+      }
+    }
+    closed.setPts(pts);
+  }
+
+  private void applyClosedCurveCaliperLabel(ClosedCurveGraphic closed) {
+    closed.setLabel(new String[] {formatClosedCurveMeasureLabel(closed)});
   }
 
   /** Test hook: angle handle click in view coordinates when left action is {@code angle}. */
@@ -1048,6 +1160,10 @@ public class View2d extends DefaultView2d<MediaElement> {
         view2d.curveDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
         return;
       }
+      if (closedCurveDrawActive(e)) {
+        view2d.closedCurveDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
       if (ellipseDrawActive(e)) {
         view2d.ellipseDrawViewPressed(e.getX(), e.getY());
         return;
@@ -1071,6 +1187,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (curveDrawActive(e)) {
         view2d.curveDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
+      if (closedCurveDrawActive(e)) {
+        view2d.closedCurveDrawViewDragged(e.getX(), e.getY());
         return;
       }
       if (ellipseDrawActive(e)) {
@@ -1104,6 +1224,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (curveDrawActive(e)) {
         view2d.curveDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
+      if (closedCurveDrawActive(e)) {
+        view2d.closedCurveDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
         return;
       }
       if (ellipseDrawActive(e)) {
@@ -1174,6 +1298,19 @@ public class View2d extends DefaultView2d<MediaElement> {
           org.weasis.core.ui.editor.image.MouseActions.normalize(
               view2d.getMouseActions().getLeft());
       if (!view2d.isCurveDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
+    }
+
+    private boolean closedCurveDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isClosedCurveDrawMouseAction(left)) {
         return false;
       }
       if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
