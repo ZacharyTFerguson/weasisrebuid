@@ -40,7 +40,9 @@ class AuChromeHaveTest {
     assertEquals("Stop", stop.getText());
     assertEquals("stop", stop.getName());
 
-    container.getAuView().display(AuViewTest.voiceUb(8000.0, new byte[] {128, (byte) 255, 0, 128}));
+    container
+        .getAuView()
+        .display(AuViewTest.voiceUb(8000.0, new byte[] {(byte) 128, (byte) 255, 0, (byte) 128}));
     play.doClick();
     assertTrue(container.getAuView().isPlaying());
     container.getAuView().seek(2);
