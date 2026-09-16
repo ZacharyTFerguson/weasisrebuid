@@ -183,6 +183,49 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void mouseLeftActionDrawSelectsRectNotDistance() {
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    DicomView2dCommands cmd = new DicomView2dCommands(view);
+    javax.swing.AbstractButton distance =
+        (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0);
+    javax.swing.AbstractButton rect =
+        (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(3);
+    assertTrue(distance.isSelected());
+    assertEquals(
+        org.weasis.core.ui.editor.image.MouseActions.DRAW, cmd.mouseLeftAction("draw"));
+    assertTrue(rect.isSelected());
+    assertFalse(distance.isSelected());
+    assertEquals(
+        org.weasis.core.ui.editor.image.dockable.MeasureTool.RECTANGLE, view.activeMeasureTool());
+    assertEquals(org.weasis.core.ui.editor.image.MouseActions.DRAW, view.getMouseActions().getLeft());
+    for (View2d cell : container.getLayoutViews()) {
+      assertEquals(
+          org.weasis.core.ui.editor.image.dockable.MeasureTool.RECTANGLE, cell.activeMeasureTool());
+    }
+  }
+
+  @Test
+  void mouseLeftActionMeasureKeepsAngleNotDistance() {
+    View2dContainer container = chestContainer();
+    View2d view = container.getView2d();
+    clickMeasure(container, 1);
+    assertEquals(
+        org.weasis.core.ui.editor.image.dockable.MeasureTool.ANGLE, view.activeMeasureTool());
+    DicomView2dCommands cmd = new DicomView2dCommands(view);
+    assertEquals(
+        org.weasis.core.ui.editor.image.MouseActions.MEASURE, cmd.mouseLeftAction("measure"));
+    assertEquals(
+        org.weasis.core.ui.editor.image.dockable.MeasureTool.ANGLE, view.activeMeasureTool());
+    assertTrue(
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(1))
+            .isSelected());
+    assertFalse(
+        ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0))
+            .isSelected());
+  }
+
+  @Test
   void distancePaintsYellowOnBestFitChestRaster() {
     View2dContainer container = new View2dContainer();
     View2d view = container.getView2d();

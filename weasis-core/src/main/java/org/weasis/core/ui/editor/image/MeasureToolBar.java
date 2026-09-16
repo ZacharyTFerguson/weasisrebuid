@@ -58,7 +58,8 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     super(NAME, 11);
     setRollover(false);
     setFloatable(false);
-    setLayout(new FlowLayout(FlowLayout.LEADING, 4, 2));
+    setLayout(new FlowLayout(FlowLayout.LEADING, 8, 2));
+    chromeBar();
     for (String key : BUTTONS) {
       add(button(key));
     }
@@ -71,8 +72,17 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     super.updateUI();
     setRollover(false);
     setFloatable(false);
-    setLayout(new FlowLayout(FlowLayout.LEADING, 4, 2));
+    setLayout(new FlowLayout(FlowLayout.LEADING, 8, 2));
+    chromeBar();
     rechrome();
+  }
+
+  static void chromeBar(MeasureToolBar bar) {
+    bar.setBorder(BorderFactory.createEmptyBorder(2, 4, 22, 4));
+  }
+
+  void chromeBar() {
+    chromeBar(this);
   }
 
   @Override
@@ -265,19 +275,18 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   JToggleButton exactToggle(Point screen) {
-    for (Component c : getComponents()) {
-      if (c instanceof JToggleButton toggle && containsPad(toggle, screen, 2)) {
-        return toggle;
-      }
-    }
-    return null;
+    return closest(screen, 0);
   }
 
   JToggleButton nearbyToggle(Point screen) {
+    return closest(screen, 4);
+  }
+
+  JToggleButton closest(Point screen, int pad) {
     JToggleButton best = null;
     int bestD = Integer.MAX_VALUE;
     for (Component c : getComponents()) {
-      if (c instanceof JToggleButton toggle && containsPad(toggle, screen, 12)) {
+      if (c instanceof JToggleButton toggle && containsPad(toggle, screen, pad)) {
         int d = screenDist(toggle, screen);
         if (d < bestD) {
           bestD = d;

@@ -104,7 +104,33 @@ public class WeasisWin extends JFrame {
     setJMenuBar(createMenuBar());
     addImportButton();
     add(toolbars, BorderLayout.NORTH);
+    installMeasureHit();
     installDockingHost();
+  }
+
+  void installMeasureHit() {
+    MeasureToolBar.installGlass(getGlassPane());
+    MouseAdapter hit = measureHit();
+    toolbars.addMouseListener(hit);
+  }
+
+  static MouseAdapter measureHit() {
+    return new MouseAdapter() {
+      @Override
+      public void mousePressed(MouseEvent e) {
+        MeasureToolBar.armAt(e);
+      }
+
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        MeasureToolBar.armAt(e);
+      }
+
+      @Override
+      public void mouseClicked(MouseEvent e) {
+        MeasureToolBar.armAt(e);
+      }
+    };
   }
 
   void installDockingHost() {

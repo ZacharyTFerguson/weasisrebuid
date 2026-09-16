@@ -159,7 +159,7 @@ public class DicomView2dCommands {
       return;
     }
     String left = view.getMouseActions().getLeft();
-    String tool = view.getMeasureTool();
+    String tool = view.activeMeasureTool();
     for (View2d cell : container.getLayoutViews()) {
       cell.getMouseActions().setLeft(left);
       cell.setMeasureTool(tool);

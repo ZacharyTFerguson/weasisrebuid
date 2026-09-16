@@ -461,6 +461,84 @@ class MeasureToolBarHaveTest {
     }
   }
 
+  @Test
+  void bindDrawSelectsRectAndKeepsItOnViewPress() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    view.getMouseActions().setLeft(MouseActions.DRAW);
+    ViewerToolBar.bindMeasureTool(view);
+    assertEquals(MeasureTool.RECTANGLE, view.activeMeasureTool());
+    assertTrue(findToggle(bar, "measure-rect").isSelected());
+    assertFalse(findToggle(bar, "measure-distance").isSelected());
+    drag(view, 30, 30, 90, 90);
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(
+        view.getGraphicList().getLast()
+            instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+  }
+
+  @Test
+  void bindMeasureDoesNotOverwriteAngleOrRect() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    bar.setSelected("A");
+    bar.apply(view);
+    view.getMouseActions().setLeft(MouseActions.MEASURE);
+    ViewerToolBar.bindMeasureTool(view);
+    assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+    assertTrue(findToggle(bar, "measure-angle").isSelected());
+    assertFalse(findToggle(bar, "measure-distance").isSelected());
+    bar.setSelected("G");
+    bar.apply(view);
+    view.getMouseActions().setLeft(MouseActions.MEASURE);
+    ViewerToolBar.bindMeasureTool(view);
+    assertEquals(MeasureTool.RECTANGLE, view.activeMeasureTool());
+    assertTrue(findToggle(bar, "measure-rect").isSelected());
+    assertFalse(findToggle(bar, "measure-distance").isSelected());
+  }
+
+  @Test
+  void pressBelowDistanceDoesNotReselectDWhenYSelected() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    JFrame frame = new JFrame();
+    try {
+      showWithGlass(frame, bar, view);
+      javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+      javax.swing.JToggleButton poly = findToggle(bar, "measure-polyline");
+      MeasureToolBar.pressRelease(poly);
+      assertTrue(poly.isSelected());
+      assertFalse(distance.isSelected());
+      Point screen = distance.getLocationOnScreen();
+      screen.translate(Math.max(1, distance.getWidth() / 2), distance.getHeight() + 18);
+      Point local = new Point(screen);
+      javax.swing.SwingUtilities.convertPointFromScreen(local, bar);
+      MouseEvent below =
+          new MouseEvent(
+              bar,
+              MouseEvent.MOUSE_PRESSED,
+              0L,
+              MouseEvent.BUTTON1_DOWN_MASK,
+              local.x,
+              local.y,
+              screen.x,
+              screen.y,
+              1,
+              false,
+              MouseEvent.BUTTON1);
+      assertFalse(MeasureToolBar.armAt(below));
+      assertTrue(poly.isSelected());
+      assertFalse(distance.isSelected());
+      assertEquals(MeasureTool.POLYLINE, view.activeMeasureTool());
+    } finally {
+      frame.dispose();
+    }
+  }
+
   static JComponent showWithGlass(JFrame frame, MeasureToolBar bar, DefaultView2d<?> view) {
     JPanel content = new JPanel(new BorderLayout());
     content.add(bar, BorderLayout.NORTH);

@@ -80,8 +80,7 @@ public class ViewerToolBar extends WtoolBar {
     }
     MeasureToolBar bar = view.getMeasureToolBar();
     if (bar != null) {
-      view.setMeasureTool(MeasureTool.canonical(bar.getSelected()));
-      syncLeftToTool(view);
+      bindBar(view, bar, left);
       return;
     }
     bindWithoutBar(view, left);
@@ -89,6 +88,25 @@ public class ViewerToolBar extends WtoolBar {
 
   static boolean drawingLeft(String left) {
     return MouseActions.MEASURE.equals(left) || MouseActions.DRAW.equals(left);
+  }
+
+  static void bindBar(DefaultView2d<?> view, MeasureToolBar bar, String left) {
+    if (MouseActions.DRAW.equals(left)) {
+      bindDrawBar(bar);
+      return;
+    }
+    keepBarTool(view, bar);
+  }
+
+  static void bindDrawBar(MeasureToolBar bar) {
+    if (!MeasureTool.drawFamily(bar.getSelected())) {
+      bar.setSelected(MeasureTool.RECTANGLE);
+    }
+    bar.applyAll();
+  }
+
+  static void keepBarTool(DefaultView2d<?> view, MeasureToolBar bar) {
+    view.setMeasureTool(MeasureTool.canonical(bar.getSelected()));
   }
 
   static void syncLeftToTool(DefaultView2d<?> view) {
@@ -100,15 +118,25 @@ public class ViewerToolBar extends WtoolBar {
   }
 
   static void bindWithoutBar(DefaultView2d<?> view, String left) {
-    if (MouseActions.MEASURE.equals(left)) {
-      if (!MeasureTool.measureFamily(view.getMeasureTool())) {
-        view.setMeasureTool(MeasureTool.DISTANCE);
-      }
-    } else if (MouseActions.DRAW.equals(left)) {
-      if (!MeasureTool.drawFamily(view.getMeasureTool())) {
-        view.setMeasureTool(MeasureTool.RECTANGLE);
-      }
+    if (MouseActions.DRAW.equals(left)) {
+      bindDrawWithoutBar(view);
+      return;
     }
+    keepWithoutBar(view);
+  }
+
+  static void bindDrawWithoutBar(DefaultView2d<?> view) {
+    if (!MeasureTool.drawFamily(view.getMeasureTool())) {
+      view.setMeasureTool(MeasureTool.RECTANGLE);
+    }
+  }
+
+  static void keepWithoutBar(DefaultView2d<?> view) {
+    String tool = view.getMeasureTool();
+    if (MeasureTool.measureFamily(tool) || MeasureTool.drawFamily(tool)) {
+      return;
+    }
+    view.setMeasureTool(MeasureTool.DISTANCE);
   }
 
   public DefaultView2d<?> boundView() {
