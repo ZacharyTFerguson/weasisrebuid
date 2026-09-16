@@ -236,6 +236,15 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     return null;
   }
 
+  static MeasureToolBar barAtScreen(Point screen) {
+    for (MeasureToolBar bar : LIVE) {
+      if (containsScreen(bar, screen)) {
+        return bar;
+      }
+    }
+    return null;
+  }
+
   JToggleButton toggleAt(Point screen) {
     JToggleButton exact = exactToggle(screen);
     return exact != null ? exact : nearbyToggle(screen);
@@ -243,7 +252,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
 
   JToggleButton exactToggle(Point screen) {
     for (Component c : getComponents()) {
-      if (c instanceof JToggleButton toggle && containsScreen(toggle, screen)) {
+      if (c instanceof JToggleButton toggle && containsPad(toggle, screen, 2)) {
         return toggle;
       }
     }
@@ -283,11 +292,19 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   static boolean containsScreen(JComponent c, Point screen) {
+    return containsPad(c, screen, 0);
+  }
+
+  static boolean containsPad(JComponent c, Point screen, int pad) {
     if (c == null || screen == null || !c.isShowing()) {
       return false;
     }
     try {
-      return new Rectangle(c.getLocationOnScreen(), c.getSize()).contains(screen);
+      Rectangle box = new Rectangle(c.getLocationOnScreen(), c.getSize());
+      if (pad > 0) {
+        box.grow(pad, pad);
+      }
+      return box.contains(screen);
     } catch (IllegalComponentStateException e) {
       return false;
     }

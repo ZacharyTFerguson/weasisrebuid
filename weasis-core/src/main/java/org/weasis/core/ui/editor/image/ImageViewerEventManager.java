@@ -26,6 +26,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.gui.util.ShortcutManager;
+import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.model.graphic.DragGraphic;
 import org.weasis.core.ui.model.graphic.Graphic;
@@ -421,6 +422,7 @@ public class ImageViewerEventManager {
   }
 
   void startGraphic(Point2D.Double p) {
+    ViewerToolBar.bindMeasureTool(view);
     Graphic created = MeasureTool.create(view.activeMeasureTool());
     if (!(created instanceof DragGraphic drag)) {
       return;
@@ -593,7 +595,7 @@ public class ImageViewerEventManager {
       if (!SwingUtilities.isLeftMouseButton(me)) {
         return;
       }
-      if (MeasureToolBar.armAt(me) || me.getComponent() instanceof AbstractButton) {
+      if (toolbarPress(me)) {
         return;
       }
       DefaultView2d<?> hit = viewAt(me);
@@ -602,10 +604,18 @@ public class ImageViewerEventManager {
       }
       lastView = hit;
       drawingView = hit;
+      ViewerToolBar.bindMeasureTool(hit);
       if (me.getComponent() == hit) {
         return;
       }
       hit.getEventManager().mousePressed(local(me, hit));
+    }
+
+    static boolean toolbarPress(MouseEvent me) {
+      if (MeasureToolBar.armAt(me) || me.getComponent() instanceof AbstractButton) {
+        return true;
+      }
+      return MeasureToolBar.barAtScreen(eventScreen(me)) != null;
     }
 
     public void onKey(KeyEvent ke) {
@@ -618,21 +628,83 @@ public class ImageViewerEventManager {
       if (ke.getComponent() instanceof DefaultView2d) {
         return;
       }
-      DefaultView2d<?> view = lastView != null ? lastView : drawingView;
-      if (view == null) {
-        return;
+      deletePluginGraphics(seedView());
+    }
+
+    DefaultView2d<?> seedView() {
+      return lastView != null ? lastView : drawingView;
+    }
+
+    void deletePluginGraphics(DefaultView2d<?> seed) {
+      ImageViewerPlugin<?> plugin = pluginOf(seed);
+      int n = 0;
+      for (DefaultView2d<?> v : DefaultView2d.LIVE) {
+        if (cleared(plugin, seed, v)) {
+          n++;
+        }
       }
-      if (view.getSelectedGraphics().isEmpty()) {
-        view.selectAllGraphics();
+      if (n == 0 && seed != null) {
+        clearView(seed);
       }
-      view.deleteSelectedGraphics();
+    }
+
+    static boolean cleared(ImageViewerPlugin<?> plugin, DefaultView2d<?> seed, DefaultView2d<?> v) {
+      if (!samePlugin(plugin, seed, v)) {
+        return false;
+      }
+      clearView(v);
+      return true;
+    }
+
+    static boolean samePlugin(
+        ImageViewerPlugin<?> plugin, DefaultView2d<?> seed, DefaultView2d<?> v) {
+      if (plugin == null) {
+        return v == seed;
+      }
+      return plugin == ImageViewerPlugin.pluginAbove(v) || stamped(plugin, v);
+    }
+
+    static boolean stamped(ImageViewerPlugin<?> plugin, DefaultView2d<?> v) {
+      return plugin.equals(v.getClientProperty(ImageViewerPlugin.class));
+    }
+
+    static ImageViewerPlugin<?> pluginOf(DefaultView2d<?> seed) {
+      ImageViewerPlugin<?> above = ImageViewerPlugin.pluginAbove(seed);
+      if (above != null) {
+        return above;
+      }
+      return UICore.getInstance().getFocusedImagePlugin();
+    }
+
+    static void clearView(DefaultView2d<?> v) {
+      if (v.getSelectedGraphics().isEmpty()) {
+        v.selectAllGraphics();
+      }
+      v.deleteSelectedGraphics();
     }
 
     static DefaultView2d<?> viewAt(MouseEvent me) {
-      if (me.getComponent() instanceof DefaultView2d<?> v) {
+      DefaultView2d<?> under = DefaultView2d.atScreen(eventScreen(me));
+      if (under != null) {
+        return under;
+      }
+      return componentView(me);
+    }
+
+    static DefaultView2d<?> componentView(MouseEvent me) {
+      if (me.getComponent() instanceof DefaultView2d<?> v
+          && DefaultView2d.boxContains(DefaultView2d.screenBox(v), eventScreen(me))) {
         return v;
       }
       return screenView(me);
+    }
+
+    static Point eventScreen(MouseEvent me) {
+      try {
+        return me.getLocationOnScreen();
+      } catch (IllegalComponentStateException e) {
+        return new Point(me.getXOnScreen(), me.getYOnScreen());
+      }
     }
 
     static DefaultView2d<?> screenView(MouseEvent me) {

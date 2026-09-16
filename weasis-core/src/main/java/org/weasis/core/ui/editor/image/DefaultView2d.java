@@ -13,6 +13,9 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.IllegalComponentStateException;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
@@ -28,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JPanel;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.gui.util.SliderCineListener;
@@ -62,6 +66,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   public static final double ZOOM_BEST_FIT = AffineTransformOp.ZOOM_BEST_FIT;
   public static final double ZOOM_REAL_SIZE = AffineTransformOp.ZOOM_REAL_SIZE;
+  static final List<DefaultView2d<?>> LIVE = new CopyOnWriteArrayList<>();
 
   private final SimpleOpManager displayOp = SimpleOpManager.view2dChain();
   private final MouseActions mouseActions = new MouseActions();
@@ -169,6 +174,50 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
         });
     initLayers();
     viewButtons.add(playButton);
+    LIVE.add(this);
+  }
+
+  @Override
+  public void removeNotify() {
+    LIVE.remove(this);
+    super.removeNotify();
+  }
+
+  /** Smallest showing canvas whose on-screen box contains {@code screen}. */
+  public static DefaultView2d<?> atScreen(Point screen) {
+    DefaultView2d<?> best = null;
+    long area = Long.MAX_VALUE;
+    for (DefaultView2d<?> v : LIVE) {
+      long a = areaIfHit(v, screen);
+      if (a > 0 && a < area) {
+        area = a;
+        best = v;
+      }
+    }
+    return best;
+  }
+
+  static long areaIfHit(DefaultView2d<?> v, Point screen) {
+    Rectangle box = screenBox(v);
+    if (!boxContains(box, screen)) {
+      return 0;
+    }
+    return (long) box.width * box.height;
+  }
+
+  static boolean boxContains(Rectangle box, Point screen) {
+    return box != null && screen != null && box.contains(screen);
+  }
+
+  static Rectangle screenBox(DefaultView2d<?> c) {
+    if (c == null || !c.isShowing()) {
+      return null;
+    }
+    try {
+      return new Rectangle(c.getLocationOnScreen(), c.getSize());
+    } catch (IllegalComponentStateException e) {
+      return null;
+    }
   }
 
   private void initLayers() {

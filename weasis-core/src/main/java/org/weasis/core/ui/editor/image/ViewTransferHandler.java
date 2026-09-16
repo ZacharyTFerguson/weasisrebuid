@@ -265,14 +265,12 @@ public class ViewTransferHandler extends TransferHandler {
   }
 
   static JComponent screenView(Point screen) {
-    if (screen == null) {
-      return null;
+    DefaultView2d<?> view = DefaultView2d.atScreen(screen);
+    if (view != null) {
+      return view;
     }
     JComponent hit = cellFrom(pluginAt(screen), screen);
-    if (hit != null) {
-      return hit;
-    }
-    return cellFrom(UICore.getInstance().getFocusedImagePlugin(), screen);
+    return covers(hit, screen) ? hit : null;
   }
 
   static JComponent cellFrom(ImageViewerPlugin<?> plugin, Point screen) {
