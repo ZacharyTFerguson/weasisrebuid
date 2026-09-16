@@ -3,7 +3,7 @@
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
- * License, Version 2.0 which is available at https://www.eclipse.org/licenses/LICENSE-2.0.
+ * License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
@@ -107,8 +107,7 @@ class View3DChromeHaveTest {
 
   @Test
   void containerWiresRenderingAndLutChrome() {
-    View3DContainer container =
-        new View3DContainer(OpenGLInfo.describe("NVIDIA GeForce", "4.6.0"));
+    View3DContainer container = new View3DContainer(OpenGLInfo.describe("NVIDIA GeForce", "4.6.0"));
     assertEquals(View3DContainer.NAME, container.getPluginName());
     assertTrue(
         container.getSeriesViewerUI().getToolBar().stream()
