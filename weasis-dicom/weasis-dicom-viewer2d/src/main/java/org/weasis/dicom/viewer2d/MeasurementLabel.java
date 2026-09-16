@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.Optional;
 import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.utils.InstanceSpacing;
@@ -64,6 +65,25 @@ public final class MeasurementLabel {
     double px1 = angle.getArmLengthPx(1);
     String arms = formatAngleArms(px0, px1, mm0, mm1, resolved);
     return degPart + "  " + arms;
+  }
+
+  public static String formatCobb(
+      CobbToolGraphic cobb, Optional<InstanceSpacing.Resolved> resolved) {
+    if (cobb == null) {
+      return "";
+    }
+    Optional<Double> degrees = cobb.getCobbAngleDegrees();
+    if (degrees.isEmpty()) {
+      return "";
+    }
+    String degPart = formatDegrees(degrees.get());
+    ImageSpacing spacing = resolved.map(InstanceSpacing.Resolved::spacing).orElse(null);
+    Optional<Double> mm0 = cobb.getEndplateLengthMm(0, spacing);
+    Optional<Double> mm1 = cobb.getEndplateLengthMm(1, spacing);
+    double px0 = cobb.getEndplateLengthPx(0);
+    double px1 = cobb.getEndplateLengthPx(1);
+    String endplates = formatAngleArms(px0, px1, mm0, mm1, resolved);
+    return degPart + "  " + endplates;
   }
 
   private static String formatAngleArms(
