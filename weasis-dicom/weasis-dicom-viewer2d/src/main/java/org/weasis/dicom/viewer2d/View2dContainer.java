@@ -65,7 +65,6 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     super(NAME);
     layout.add(view2d);
     bindToolBars();
-    add(toolbars, BorderLayout.NORTH);
     add(viewGrid, BorderLayout.CENTER);
     bindDrop(this);
     bindDrop(viewGrid);
