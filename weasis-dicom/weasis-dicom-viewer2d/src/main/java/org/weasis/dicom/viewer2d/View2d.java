@@ -64,6 +64,8 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private PolylineGraphic draftPolylineCaliper;
 
+  private PolygonGraphic draftPolygonCaliper;
+
   private AngleToolGraphic draftAngleCaliper;
   private int draftAngleClickStage;
 
@@ -233,6 +235,26 @@ public class View2d extends DefaultView2d<MediaElement> {
   }
 
   /**
+   * Adds a closed polygon caliper in image pixel coordinates and binds its label to {@link
+   * #formatPolygonMeasureLabel}.
+   */
+  public void addPolygonCaliper(List<? extends Point2D> imagePoints) {
+    if (imagePoints == null || imagePoints.size() < 3) {
+      return;
+    }
+    PolygonGraphic poly = new PolygonGraphic();
+    for (int i = 0; i < imagePoints.size(); i++) {
+      Point2D p = imagePoints.get(i);
+      if (p == null) {
+        return;
+      }
+      poly.setHandlePoint(i, copyPoint(p));
+    }
+    applyPolygonCaliperLabel(poly);
+    addGraphic(poly);
+  }
+
+  /**
    * Adds an angle caliper in image pixel coordinates and binds its label to {@link
    * #formatAngleMeasureLabel}. Handle order: arm end (0), vertex (1), arm end (2).
    */
@@ -331,6 +353,10 @@ public class View2d extends DefaultView2d<MediaElement> {
     return org.weasis.core.ui.editor.image.MouseActions.POLYLINE.equals(normalizedLeftAction);
   }
 
+  boolean isPolygonDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.POLYGON.equals(normalizedLeftAction);
+  }
+
   boolean isAngleDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.ANGLE.equals(normalizedLeftAction);
   }
@@ -385,6 +411,92 @@ public class View2d extends DefaultView2d<MediaElement> {
     if (clickCount >= 2) {
       finalizeDraftPolylineCaliper();
     }
+  }
+
+  /** Test hook: polygon vertex click in view coordinates when left action is {@code polygon}. */
+  public void simulatePolygonDrawClick(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2) {
+      polygonDrawViewPressed(viewX, viewY, 1);
+      polygonDrawViewReleased(viewX, viewY, 1);
+    }
+    polygonDrawViewPressed(viewX, viewY, clickCount);
+    polygonDrawViewReleased(viewX, viewY, clickCount);
+  }
+
+  void polygonDrawViewPressed(int viewX, int viewY, int clickCount) {
+    if (clickCount >= 2 && draftPolygonCaliper != null) {
+      finalizeDraftPolygonCaliper();
+      return;
+    }
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftPolygonCaliper == null) {
+      draftPolygonCaliper = new PolygonGraphic();
+      draftPolygonCaliper.setHandlePoint(0, image);
+      draftPolygonCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+      addGraphic(draftPolygonCaliper);
+      repaint();
+      return;
+    }
+    int last = draftPolygonCaliper.getPts().size() - 1;
+    draftPolygonCaliper.setHandlePoint(last, image);
+    draftPolygonCaliper.setHandlePoint(last + 1, new Point2D.Double(image.x, image.y));
+    repaint();
+  }
+
+  void polygonDrawViewDragged(int viewX, int viewY) {
+    if (draftPolygonCaliper == null) {
+      return;
+    }
+    int last = draftPolygonCaliper.getPts().size() - 1;
+    draftPolygonCaliper.setHandlePoint(last, viewToImage(viewX, viewY));
+    repaint();
+  }
+
+  void polygonDrawViewReleased(int viewX, int viewY, int clickCount) {
+    if (draftPolygonCaliper == null) {
+      return;
+    }
+    if (clickCount >= 2) {
+      finalizeDraftPolygonCaliper();
+    }
+  }
+
+  private void finalizeDraftPolygonCaliper() {
+    if (draftPolygonCaliper == null) {
+      return;
+    }
+    trimTrailingRubberBand(draftPolygonCaliper);
+    if (draftPolygonCaliper.getPts().size() < 3) {
+      getGraphicList().remove(draftPolygonCaliper);
+    } else {
+      applyPolygonCaliperLabel(draftPolygonCaliper);
+    }
+    draftPolygonCaliper = null;
+    repaint();
+  }
+
+  private static void trimTrailingRubberBand(PolygonGraphic poly) {
+    List<Point2D.Double> pts = new ArrayList<>(poly.getPts());
+    while (pts.size() > 2) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) > 1e-6) {
+        break;
+      }
+      pts.removeLast();
+    }
+    if (pts.size() > 1) {
+      Point2D.Double last = pts.getLast();
+      Point2D.Double prev = pts.get(pts.size() - 2);
+      if (last.distance(prev) <= 1e-6) {
+        pts.removeLast();
+      }
+    }
+    poly.setPts(pts);
+  }
+
+  private void applyPolygonCaliperLabel(PolygonGraphic poly) {
+    poly.setLabel(new String[] {formatPolygonMeasureLabel(poly)});
   }
 
   private void finalizeDraftPolylineCaliper() {
@@ -722,6 +834,10 @@ public class View2d extends DefaultView2d<MediaElement> {
         view2d.angleDrawViewPressed(e.getX(), e.getY());
         return;
       }
+      if (polygonDrawActive(e)) {
+        view2d.polygonDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
         return;
@@ -735,6 +851,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mouseDragged(MouseEvent e) {
+      if (polygonDrawActive(e)) {
+        view2d.polygonDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewDragged(e.getX(), e.getY());
         return;
@@ -754,6 +874,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (angleDrawActive(e)) {
         view2d.angleDrawViewReleased(e.getX(), e.getY());
+        return;
+      }
+      if (polygonDrawActive(e)) {
+        view2d.polygonDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
         return;
       }
       if (polylineDrawActive(e)) {
@@ -789,6 +913,19 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
         return false;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
+    }
+
+    private boolean polygonDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isPolygonDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
       }
       return e.getButton() == MouseEvent.BUTTON1;
     }

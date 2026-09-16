@@ -55,10 +55,7 @@ class View2dPolygonDrawTest {
     View2d view = new View2d();
     view.load(ct);
     view.addPolygonCaliper(
-        List.of(
-            new Point2D.Double(0, 0),
-            new Point2D.Double(10, 0),
-            new Point2D.Double(10, 10)));
+        List.of(new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10)));
     assertEquals(1, view.getGraphicList().size());
     Graphic g = view.getGraphicList().getFirst();
     assertInstanceOf(PolygonGraphic.class, g);
@@ -74,10 +71,7 @@ class View2dPolygonDrawTest {
     View2d view = new View2d();
     view.load(ct);
     view.addPolygonCaliper(
-        List.of(
-            new Point2D.Double(0, 0),
-            new Point2D.Double(10, 0),
-            new Point2D.Double(10, 10)));
+        List.of(new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10)));
     PolygonGraphic poly = (PolygonGraphic) view.getGraphicList().getFirst();
     assertEquals("50.0 px²", view.formatPolygonMeasureLabel(poly));
     assertEquals("50.0 px²", poly.getLabel()[0]);
