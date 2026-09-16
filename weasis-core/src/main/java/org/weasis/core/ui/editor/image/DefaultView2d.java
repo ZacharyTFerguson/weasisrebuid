@@ -9,14 +9,20 @@
  */
 package org.weasis.core.ui.editor.image;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Paint;
 import java.awt.RenderingHints;
+import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -126,6 +132,34 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     if (!freezeParameters) {
       repaint();
     }
+  }
+
+  /** Image pixel coordinates from a view (component) point using the current affine. */
+  public Point2D.Double viewToImage(double viewX, double viewY) {
+    int viewW = Math.max(1, getWidth());
+    int viewH = Math.max(1, getHeight());
+    AffineTransform toView = imageToViewTransform(viewW, viewH);
+    try {
+      AffineTransform toImage = toView.createInverse();
+      Point2D.Double p = new Point2D.Double(viewX, viewY);
+      toImage.transform(p, p);
+      return p;
+    } catch (NoninvertibleTransformException e) {
+      return new Point2D.Double(viewX, viewY);
+    }
+  }
+
+  AffineTransform imageToViewTransform(int viewW, int viewH) {
+    AffineTransform tx = new AffineTransform();
+    if (source == null) {
+      return tx;
+    }
+    double scale = resolvedScale(viewW, viewH);
+    tx.translate(viewW / 2.0 + panX, viewH / 2.0 + panY);
+    tx.rotate(Math.toRadians(rotation));
+    tx.scale(scale, scale);
+    tx.translate(-source.getWidth() / 2.0, -source.getHeight() / 2.0);
+    return tx;
   }
 
   public double resolvedScale(int viewW, int viewH) {
@@ -303,6 +337,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
   }
 
   void paintDecorations(Graphics2D g) {
+    paintGraphicOverlays(g);
     g.setColor(Color.YELLOW);
     int y = 16;
     if (!lossyLabel.isBlank()) {
@@ -312,5 +347,49 @@ public class DefaultView2d<E extends MediaElement> extends JPanel {
     if (!geometryWarning.isBlank()) {
       g.drawString(geometryWarning, 8, y);
     }
+  }
+
+  void paintGraphicOverlays(Graphics2D g) {
+    if (graphics.isEmpty() || source == null) {
+      return;
+    }
+    Graphics2D g2 = (Graphics2D) g.create();
+    try {
+      g2.transform(imageToViewTransform(Math.max(1, getWidth()), Math.max(1, getHeight())));
+      for (Graphic graphic : graphics) {
+        paintGraphic(g2, graphic);
+      }
+    } finally {
+      g2.dispose();
+    }
+  }
+
+  private void paintGraphic(Graphics2D g, Graphic graphic) {
+    Shape shape = graphic.getShape();
+    if (shape != null) {
+      Paint paint = graphic.getColorPaint();
+      g.setPaint(paint == null ? Color.YELLOW : paint);
+      float thickness = graphic.getLineThickness() == null ? 1.0f : graphic.getLineThickness();
+      Stroke stroke = new BasicStroke(thickness);
+      g.setStroke(stroke);
+      g.draw(shape);
+    }
+    if (Boolean.TRUE.equals(graphic.getLabelVisible())) {
+      String[] labels = graphic.getLabel();
+      if (labels != null && labels.length > 0 && labels[0] != null && !labels[0].isBlank()) {
+        g.setPaint(Color.YELLOW);
+        Point2D.Double anchor = graphicLabelAnchor(graphic);
+        if (anchor != null) {
+          g.drawString(labels[0], (float) anchor.getX() + 4f, (float) anchor.getY() - 4f);
+        }
+      }
+    }
+  }
+
+  private static Point2D.Double graphicLabelAnchor(Graphic graphic) {
+    if (graphic.getPtsNumber() == null || graphic.getPtsNumber() <= 0) {
+      return null;
+    }
+    return graphic.getPts().getFirst();
   }
 }

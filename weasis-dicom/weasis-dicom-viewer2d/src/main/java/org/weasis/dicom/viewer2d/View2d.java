@@ -9,7 +9,9 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
@@ -53,6 +55,9 @@ public class View2d extends DefaultView2d<MediaElement> {
   private List<File> stackFiles = List.of();
   private int pixelFrameIndex;
   private Optional<InstanceSpacing.Resolved> resolvedInstanceSpacing = Optional.empty();
+
+  private LineGraphic draftLineCaliper;
+  private boolean draftLineAwaitingSecondClick;
 
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
@@ -179,6 +184,82 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public String formatLineMeasureLabel(LineGraphic line) {
     return MeasurementLabel.formatLine(line, resolvedInstanceSpacing);
+  }
+
+  /**
+   * Adds a line caliper in image pixel coordinates and binds its label to {@link
+   * #formatLineMeasureLabel}.
+   */
+  public void addLineCaliper(Point2D startImage, Point2D endImage) {
+    if (startImage == null || endImage == null) {
+      return;
+    }
+    LineGraphic line = new LineGraphic();
+    line.setHandlePoint(0, copyPoint(startImage));
+    line.setHandlePoint(1, copyPoint(endImage));
+    applyLineCaliperLabel(line);
+    addGraphic(line);
+  }
+
+  /** Test hook: two-click line draw in view coordinates when left action is {@code draw}. */
+  public void simulateLineDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
+    lineDrawViewPressed(viewX1, viewY1);
+    lineDrawViewReleased(viewX1, viewY1);
+    lineDrawViewPressed(viewX2, viewY2);
+    lineDrawViewReleased(viewX2, viewY2);
+  }
+
+  void lineDrawViewPressed(int viewX, int viewY) {
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftLineCaliper != null && draftLineAwaitingSecondClick) {
+      draftLineCaliper.setHandlePoint(1, image);
+      finalizeDraftLineCaliper();
+      return;
+    }
+    draftLineCaliper = new LineGraphic();
+    draftLineCaliper.setHandlePoint(0, image);
+    draftLineCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+    draftLineAwaitingSecondClick = true;
+    addGraphic(draftLineCaliper);
+    repaint();
+  }
+
+  void lineDrawViewDragged(int viewX, int viewY) {
+    if (draftLineCaliper == null) {
+      return;
+    }
+    draftLineAwaitingSecondClick = false;
+    draftLineCaliper.setHandlePoint(1, viewToImage(viewX, viewY));
+    repaint();
+  }
+
+  void lineDrawViewReleased(int viewX, int viewY) {
+    if (draftLineCaliper == null) {
+      return;
+    }
+    if (!draftLineAwaitingSecondClick) {
+      draftLineCaliper.setHandlePoint(1, viewToImage(viewX, viewY));
+      finalizeDraftLineCaliper();
+    }
+  }
+
+  private void finalizeDraftLineCaliper() {
+    applyLineCaliperLabel(draftLineCaliper);
+    draftLineCaliper = null;
+    draftLineAwaitingSecondClick = false;
+    repaint();
+  }
+
+  private void applyLineCaliperLabel(LineGraphic line) {
+    line.setLabel(new String[] {formatLineMeasureLabel(line)});
+  }
+
+  private static Point2D.Double copyPoint(Point2D p) {
+    return new Point2D.Double(p.getX(), p.getY());
+  }
+
+  boolean isLineDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.DRAW.equals(normalizedLeftAction);
   }
 
   public String formatPolylineMeasureLabel(PolylineGraphic polyline) {
@@ -351,6 +432,46 @@ public class View2d extends DefaultView2d<MediaElement> {
     View2dEventManager(View2d view) {
       super(view);
       this.view2d = view;
+    }
+
+    @Override
+    public void mousePressed(MouseEvent e) {
+      if (lineDrawActive(e)) {
+        view2d.lineDrawViewPressed(e.getX(), e.getY());
+        return;
+      }
+      super.mousePressed(e);
+    }
+
+    @Override
+    public void mouseDragged(MouseEvent e) {
+      if (lineDrawActive(e)) {
+        view2d.lineDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
+      super.mouseDragged(e);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+      if (lineDrawActive(e)) {
+        view2d.lineDrawViewReleased(e.getX(), e.getY());
+        return;
+      }
+      super.mouseReleased(e);
+    }
+
+    private boolean lineDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isLineDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
     }
 
     @Override

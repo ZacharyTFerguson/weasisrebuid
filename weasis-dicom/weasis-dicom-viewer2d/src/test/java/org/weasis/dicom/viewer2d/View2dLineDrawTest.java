@@ -22,9 +22,9 @@ import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 
 /**
- * Interactive line caliper on {@link View2d}: two image-space endpoints create a {@link LineGraphic}
- * whose visible label is {@link View2d#formatLineMeasureLabel} — not a recomputed mm in the mouse
- * path.
+ * Interactive line caliper on {@link View2d}: two image-space endpoints create a {@link
+ * LineGraphic} whose visible label is {@link View2d#formatLineMeasureLabel} — not a recomputed mm
+ * in the mouse path.
  *
  * <p><b>Why (0028,0030) via landed APIs:</b> spacing comes from {@link
  * org.weasis.dicom.codec.utils.InstanceSpacing#resolve} on the loaded instance; millimetres on the
@@ -95,9 +95,8 @@ class View2dLineDrawTest {
     view.setPan(0, 0);
     view.setRotation(0);
     view.getMouseActions().setLeft(org.weasis.core.ui.editor.image.MouseActions.DRAW);
-    int cx = 32;
-    int cy = 32;
-    view.simulateLineDrawTwoClick(cx, cy, cx + 10, cy);
+    // 16×16 image, zoom 1, view 64×64 → image (0,0) at view (24,24).
+    view.simulateLineDrawTwoClick(24, 24, 34, 24);
     assertEquals(1, view.getGraphicList().size());
     LineGraphic line = (LineGraphic) view.getGraphicList().getFirst();
     assertEquals("5.0 mm", line.getLabel()[0]);
