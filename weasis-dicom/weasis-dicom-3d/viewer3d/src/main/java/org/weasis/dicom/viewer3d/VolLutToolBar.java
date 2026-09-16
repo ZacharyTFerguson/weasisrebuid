@@ -12,26 +12,21 @@ package org.weasis.dicom.viewer3d;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JToolBar;
-import org.weasis.core.api.gui.Insertable;
-import org.weasis.core.ui.util.Toolbar;
+import org.weasis.core.ui.util.WtoolBar;
 import org.weasis.dicom.viewer3d.vr.PresetRadioMenu;
 import org.weasis.dicom.viewer3d.vr.View3d;
 import org.weasis.dicom.viewer3d.vr.lut.VolumePreset;
 
 /** Volume LUT chrome. Presets apply to {@link EventManager#getSelectedView()}. */
-public class VolLutToolBar implements Toolbar {
+public class VolLutToolBar extends WtoolBar {
 
   public static final String NAME = "Volume LUT";
-  private final JToolBar bar = new JToolBar(NAME);
   private final PresetRadioMenu menu = new PresetRadioMenu();
-  private int position = 122;
-  private boolean enabled = true;
 
   public VolLutToolBar() {
+    super(NAME, 122);
     for (VolumePreset preset : menu.getPresets()) {
-      bar.add(button(preset));
+      add(button(preset));
     }
   }
 
@@ -60,42 +55,7 @@ public class VolLutToolBar implements Toolbar {
                 setSelected(preset);
               }
             });
-    button.setToolTipText(preset.getName());
+    button.setName(preset.getName());
     return button;
-  }
-
-  @Override
-  public JComponent getComponent() {
-    return bar;
-  }
-
-  @Override
-  public String getComponentName() {
-    return NAME;
-  }
-
-  @Override
-  public Insertable.Type getType() {
-    return Insertable.Type.TOOLBAR;
-  }
-
-  @Override
-  public int getComponentPosition() {
-    return position;
-  }
-
-  @Override
-  public void setComponentPosition(int position) {
-    this.position = position;
-  }
-
-  @Override
-  public boolean isComponentEnabled() {
-    return enabled;
-  }
-
-  @Override
-  public void setComponentEnabled(boolean enabled) {
-    this.enabled = enabled;
   }
 }

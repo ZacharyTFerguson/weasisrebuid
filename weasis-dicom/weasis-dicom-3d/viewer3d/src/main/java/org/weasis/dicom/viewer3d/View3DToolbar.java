@@ -12,25 +12,20 @@ package org.weasis.dicom.viewer3d;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JToolBar;
-import org.weasis.core.api.gui.Insertable;
-import org.weasis.core.ui.util.Toolbar;
+import org.weasis.core.ui.util.WtoolBar;
 import org.weasis.dicom.viewer3d.vr.RenderingType;
 import org.weasis.dicom.viewer3d.vr.View3d;
 
 /** 3D chrome: COMPOSITE/MIP/MINIP/ISO on {@link EventManager#getSelectedView()}. */
-public class View3DToolbar implements Toolbar {
+public class View3DToolbar extends WtoolBar {
 
   public static final String NAME = "3D";
-  private final JToolBar bar = new JToolBar(NAME);
-  private int position = 120;
-  private boolean enabled = true;
   private RenderingType selected = RenderingType.COMPOSITE;
 
   public View3DToolbar() {
+    super(NAME, 120);
     for (RenderingType type : RenderingType.values()) {
-      bar.add(button(type));
+      add(button(type));
     }
   }
 
@@ -62,42 +57,7 @@ public class View3DToolbar implements Toolbar {
                 select(type);
               }
             });
-    button.setToolTipText(type.name());
+    button.setName(type.name());
     return button;
-  }
-
-  @Override
-  public JComponent getComponent() {
-    return bar;
-  }
-
-  @Override
-  public String getComponentName() {
-    return NAME;
-  }
-
-  @Override
-  public Insertable.Type getType() {
-    return Insertable.Type.TOOLBAR;
-  }
-
-  @Override
-  public int getComponentPosition() {
-    return position;
-  }
-
-  @Override
-  public void setComponentPosition(int position) {
-    this.position = position;
-  }
-
-  @Override
-  public boolean isComponentEnabled() {
-    return enabled;
-  }
-
-  @Override
-  public void setComponentEnabled(boolean enabled) {
-    this.enabled = enabled;
   }
 }

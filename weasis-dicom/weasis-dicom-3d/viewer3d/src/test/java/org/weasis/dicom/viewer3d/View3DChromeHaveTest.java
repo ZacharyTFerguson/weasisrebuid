@@ -3,7 +3,7 @@
  *
  * This program and the accompanying materials are made available under the terms of the Eclipse
  * Public License 2.0 which is available at https://www.eclipse.org/legal/epl-2.0, or the Apache
- * License, Version 2.0 which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ * License, Version 2.0 which is available at https://www.eclipse.org/licenses/LICENSE-2.0.
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  */
@@ -11,12 +11,16 @@ package org.weasis.dicom.viewer3d;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Hashtable;
-import javax.swing.JToolBar;
+import java.util.List;
+import javax.swing.AbstractButton;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.viewer3d.dockable.VolumeTool;
 import org.weasis.dicom.viewer3d.vr.RenderingType;
 import org.weasis.dicom.viewer3d.vr.View3d;
@@ -27,6 +31,7 @@ class View3DChromeHaveTest {
   @AfterEach
   void clearSelectedView() {
     EventManager.getInstance().setSelectedView(null);
+    closePlugins(UICore.getInstance());
   }
 
   @Test
@@ -34,7 +39,7 @@ class View3DChromeHaveTest {
     View3d view = new View3d(OpenGLInfo.describe("NVIDIA GeForce", "4.6.0"));
     EventManager.getInstance().setSelectedView(view);
     View3DToolbar bar = new View3DToolbar();
-    assertEquals(4, ((JToolBar) bar.getComponent()).getComponentCount());
+    assertEquals(4, bar.getComponentCount());
     bar.select(RenderingType.MIP);
     assertEquals(RenderingType.MIP, view.getRenderingType());
     bar.select(RenderingType.MINIP);
@@ -67,7 +72,7 @@ class View3DChromeHaveTest {
     View3d view = new View3d(OpenGLInfo.describe("NVIDIA GeForce", "4.6.0"));
     EventManager.getInstance().setSelectedView(view);
     VolLutToolBar bar = new VolLutToolBar();
-    assertEquals(2, ((JToolBar) bar.getComponent()).getComponentCount());
+    assertEquals(2, bar.getComponentCount());
     bar.setSelected(VolumePreset.ctBone());
     assertEquals("CT Bone", view.getVolumePreset().getName());
   }
@@ -78,10 +83,15 @@ class View3DChromeHaveTest {
     Hashtable<String, Object> props = new Hashtable<>();
     props.put("opengl.renderer", "NVIDIA GeForce");
     props.put("opengl.version", "4.6.0");
-    View3DContainer opened = bar.open3d(props);
+    UICore core = new UICore();
+    View3DContainer opened = bar.open3d(props, core);
     assertTrue(opened.isVolumeRenderingAvailable());
     assertEquals(opened, bar.getLastOpened());
+    assertSame(opened, core.getSelectedViewerPlugin());
     assertEquals(ActionVol.RENDERING_TYPE, EventManager.getInstance().getAction());
+    AbstractButton open = (AbstractButton) bar.getComponent(0);
+    assertEquals("3D", open.getText());
+    assertEquals("3d", open.getName());
   }
 
   @Test
@@ -93,5 +103,43 @@ class View3DChromeHaveTest {
     VolLutToolBar bar = new VolLutToolBar();
     bar.setSelected(VolumePreset.ctBone());
     assertEquals(before, view.getVolumePreset().getName());
+  }
+
+  @Test
+  void containerWiresRenderingAndLutChrome() {
+    View3DContainer container =
+        new View3DContainer(OpenGLInfo.describe("NVIDIA GeForce", "4.6.0"));
+    assertEquals(View3DContainer.NAME, container.getPluginName());
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> View3DToolbar.NAME.equals(b.getComponentName())));
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> VolLutToolBar.NAME.equals(b.getComponentName())));
+    assertTrue(
+        container.getSeriesViewerUI().getTools().stream()
+            .anyMatch(b -> VolumeTool.NAME.equals(b.getComponentName())));
+    AbstractButton composite = (AbstractButton) container.getView3DToolbar().getComponent(0);
+    AbstractButton mip = (AbstractButton) container.getView3DToolbar().getComponent(1);
+    AbstractButton minip = (AbstractButton) container.getView3DToolbar().getComponent(2);
+    AbstractButton iso = (AbstractButton) container.getView3DToolbar().getComponent(3);
+    assertEquals(RenderingType.COMPOSITE.name(), composite.getText());
+    assertEquals(RenderingType.MIP.name(), mip.getText());
+    assertEquals(RenderingType.MINIP.name(), minip.getText());
+    assertEquals(RenderingType.ISO.name(), iso.getText());
+    assertEquals(RenderingType.COMPOSITE.name(), composite.getName());
+    assertEquals(RenderingType.MIP.name(), mip.getName());
+    mip.doClick();
+    assertEquals(RenderingType.MIP, container.getView3d().getRenderingType());
+    AbstractButton bone = (AbstractButton) container.getVolLutToolBar().getComponent(1);
+    assertEquals("CT Bone", bone.getText());
+    bone.doClick();
+    assertEquals("CT Bone", container.getView3d().getVolumePreset().getName());
+  }
+
+  static void closePlugins(UICore core) {
+    for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
+      core.closeViewerPlugin(plugin);
+    }
   }
 }

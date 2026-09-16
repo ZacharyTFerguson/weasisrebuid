@@ -22,12 +22,16 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.Hashtable;
 import java.util.List;
 import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.image.PseudoColorOp;
+import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.SeriesViewer;
+import org.weasis.core.ui.editor.SeriesViewerFactory;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.dicom.viewer2d.mpr.MprAxis;
@@ -92,8 +96,11 @@ class ViewerChromeHaveTest {
           twoD.getSeriesViewerUI().getToolBar().stream()
               .anyMatch(b -> Basic3DToolBar.NAME.equals(b.getComponentName())));
       AbstractButton mpr = (AbstractButton) twoD.getBasic3DToolBar().getComponent(0);
+      AbstractButton volume = (AbstractButton) twoD.getBasic3DToolBar().getComponent(1);
       assertEquals("MPR", mpr.getText());
       assertEquals("mpr", mpr.getName());
+      assertEquals("3D", volume.getText());
+      assertEquals("3d", volume.getName());
       mpr.doClick();
       assertInstanceOf(MprContainer.class, core.getSelectedViewerPlugin());
       assertEquals(2, core.getOpenViewerPlugins().size());
@@ -108,6 +115,37 @@ class ViewerChromeHaveTest {
       assertEquals(MprAxis.SAGITTAL, opened.getController().getSagittal().getAxis());
     } finally {
       closePlugins(core);
+    }
+  }
+
+  @Test
+  void basic3DToolBarOpensVolumeViewerWhenFactoryRegistered() {
+    UICore core = new UICore();
+    core.registerSeriesViewerFactory(volumeStub());
+    Basic3DToolBar bar = new Basic3DToolBar();
+    ViewerPlugin<?> opened = bar.open3d(core);
+    assertEquals(Basic3DToolBar.VOLUME_VIEWER, opened.getPluginName());
+    assertSame(opened, core.getSelectedViewerPlugin());
+  }
+
+  @Test
+  void view2dContainerBasic3DOpensVolumeTabWhenFactoryRegistered() {
+    UICore core = UICore.getInstance();
+    closePlugins(core);
+    SeriesViewerFactory stub = volumeStub();
+    core.registerSeriesViewerFactory(stub);
+    View2dContainer twoD = new View2dContainer();
+    try {
+      core.openViewerPlugin(twoD);
+      AbstractButton volume = (AbstractButton) twoD.getBasic3DToolBar().getComponent(1);
+      assertEquals("3D", volume.getText());
+      assertEquals("3d", volume.getName());
+      volume.doClick();
+      assertEquals(Basic3DToolBar.VOLUME_VIEWER, core.getSelectedViewerPlugin().getPluginName());
+      assertEquals(2, core.getOpenViewerPlugins().size());
+    } finally {
+      closePlugins(core);
+      core.unregisterSeriesViewerFactory(stub);
     }
   }
 
@@ -580,5 +618,65 @@ class ViewerChromeHaveTest {
     for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
       core.closeViewerPlugin(plugin);
     }
+  }
+
+  static SeriesViewerFactory volumeStub() {
+    return new SeriesViewerFactory() {
+      @Override
+      public SeriesViewer<?> createSeriesViewer(Hashtable<String, Object> properties) {
+        return new ViewerPlugin<MediaElement>(Basic3DToolBar.VOLUME_VIEWER) {};
+      }
+
+      @Override
+      public boolean canReadMimeType(String mimeType) {
+        return false;
+      }
+
+      @Override
+      public boolean isViewerCreatedByThisFactory(SeriesViewer<?> viewer) {
+        return viewer instanceof ViewerPlugin<?> plugin
+            && Basic3DToolBar.VOLUME_VIEWER.equals(plugin.getPluginName());
+      }
+
+      @Override
+      public int getLevel() {
+        return 120;
+      }
+
+      @Override
+      public boolean canAddSeries() {
+        return true;
+      }
+
+      @Override
+      public boolean canExternalizeSeries() {
+        return true;
+      }
+
+      @Override
+      public String getUIName() {
+        return Basic3DToolBar.VOLUME_VIEWER;
+      }
+
+      @Override
+      public String getDescription() {
+        return Basic3DToolBar.VOLUME_VIEWER;
+      }
+
+      @Override
+      public String getIconPath() {
+        return null;
+      }
+
+      @Override
+      public String getSeriesViewerName() {
+        return Basic3DToolBar.VOLUME_VIEWER;
+      }
+
+      @Override
+      public String getClassName() {
+        return "org.weasis.dicom.viewer3d.View3DContainer";
+      }
+    };
   }
 }

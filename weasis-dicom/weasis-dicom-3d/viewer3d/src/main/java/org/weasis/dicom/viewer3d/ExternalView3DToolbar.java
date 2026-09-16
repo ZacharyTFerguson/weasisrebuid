@@ -9,76 +9,53 @@
  */
 package org.weasis.dicom.viewer3d;
 
+import java.awt.event.ActionEvent;
 import java.util.Hashtable;
+import javax.swing.AbstractAction;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JToolBar;
-import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewer;
-import org.weasis.core.ui.util.Toolbar;
+import org.weasis.core.ui.util.WtoolBar;
 
 /** 2D-side chrome that opens the current series in the DICOM 3D viewer. */
-public class ExternalView3DToolbar implements Toolbar {
+public class ExternalView3DToolbar extends WtoolBar {
 
   public static final String NAME = "3D External";
-  private final JToolBar bar = new JToolBar(NAME);
   private final View3DFactory factory = new View3DFactory();
-  private final JButton open = new JButton("3D");
-  private int position = 121;
-  private boolean enabled = true;
   private View3DContainer lastOpened;
 
   public ExternalView3DToolbar() {
-    bar.add(open);
-    open.addActionListener(e -> open3d(new Hashtable<>()));
+    super(NAME, 121);
+    JButton open =
+        new JButton(
+            new AbstractAction("3D") {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                open3d(new Hashtable<>());
+              }
+            });
+    open.setName("3d");
+    add(open);
   }
 
   public View3DContainer open3d(Hashtable<String, Object> properties) {
+    return open3d(properties, UICore.getInstance());
+  }
+
+  public View3DContainer open3d(Hashtable<String, Object> properties, UICore core) {
     SeriesViewer<?> viewer = factory.createSeriesViewer(properties);
-    if (viewer instanceof View3DContainer container) {
-      lastOpened = container;
-      EventManager.getInstance().setAction(ActionVol.RENDERING_TYPE);
-      return container;
+    if (!(viewer instanceof View3DContainer container)) {
+      return null;
     }
-    return null;
+    lastOpened = container;
+    EventManager.getInstance().setAction(ActionVol.RENDERING_TYPE);
+    if (core != null) {
+      core.openViewerPlugin(container);
+    }
+    return container;
   }
 
   public View3DContainer getLastOpened() {
     return lastOpened;
-  }
-
-  @Override
-  public JComponent getComponent() {
-    return bar;
-  }
-
-  @Override
-  public String getComponentName() {
-    return NAME;
-  }
-
-  @Override
-  public Insertable.Type getType() {
-    return Insertable.Type.TOOLBAR;
-  }
-
-  @Override
-  public int getComponentPosition() {
-    return position;
-  }
-
-  @Override
-  public void setComponentPosition(int position) {
-    this.position = position;
-  }
-
-  @Override
-  public boolean isComponentEnabled() {
-    return enabled;
-  }
-
-  @Override
-  public void setComponentEnabled(boolean enabled) {
-    this.enabled = enabled;
   }
 }
