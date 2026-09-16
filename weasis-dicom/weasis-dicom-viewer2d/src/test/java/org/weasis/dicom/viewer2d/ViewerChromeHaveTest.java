@@ -119,7 +119,9 @@ class ViewerChromeHaveTest {
         ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(4))
             .getText());
     assertSame(container.getView2d(), container.getMeasureToolBar().boundView());
-    assertEquals("Measure", container.getSeriesViewerUI().getToolBar().get(1).getComponentName());
+    assertEquals(
+        "Key Object", container.getSeriesViewerUI().getToolBar().get(1).getComponentName());
+    assertEquals("Measure", container.getSeriesViewerUI().getToolBar().get(2).getComponentName());
   }
 
   @Test

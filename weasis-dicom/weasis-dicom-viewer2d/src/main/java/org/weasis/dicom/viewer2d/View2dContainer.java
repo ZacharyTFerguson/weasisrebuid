@@ -87,8 +87,8 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   void bindToolBars() {
     toolbars.registerToolBar(viewerToolBar);
-    toolbars.registerToolBar(measureToolBar);
     toolbars.registerToolBar(keyObjectToolBar);
+    toolbars.registerToolBar(measureToolBar);
     toolbars.registerToolBar(lutToolBar);
     toolbars.registerToolBar(zoomToolBar);
     toolbars.registerToolBar(rotationToolBar);
@@ -110,8 +110,8 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     List<Insertable> ui = getSeriesViewerUI().getToolBar();
     ui.clear();
     ui.add(viewerToolBar);
-    ui.add(measureToolBar);
     ui.add(keyObjectToolBar);
+    ui.add(measureToolBar);
     ui.add(lutToolBar);
     ui.add(zoomToolBar);
     ui.add(rotationToolBar);
