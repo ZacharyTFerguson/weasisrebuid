@@ -35,8 +35,8 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
  *
  * <p><b>Why (0028,0030) via landed APIs:</b> spacing comes from {@link
  * org.weasis.dicom.codec.utils.InstanceSpacing#resolve} on the loaded instance; millimetres on the
- * label use {@link FreehandGraphic#getLengthMm} only through {@link MeasurementLabel#formatFreehand}.
- * The draw handler must not read spacing or sum segments itself.
+ * label use {@link FreehandGraphic#getLengthMm} only through {@link
+ * MeasurementLabel#formatFreehand}. The draw handler must not read spacing or sum segments itself.
  *
  * <p><b>Why press-drag-release:</b> landed {@link FreehandGraphic#getLengthMm} and {@link
  * FreehandGraphic#getLength} require at least two image-space samples along the stroke; a single
