@@ -37,6 +37,7 @@ import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.EllipseGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.ClosedCurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
@@ -839,6 +840,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public String formatCurveMeasureLabel(CurveGraphic curve) {
     return MeasurementLabel.formatCurve(curve, resolvedInstanceSpacing);
+  }
+
+  public String formatClosedCurveMeasureLabel(ClosedCurveGraphic closedCurve) {
+    return MeasurementLabel.formatClosedCurve(closedCurve, resolvedInstanceSpacing);
   }
 
   public String formatAngleMeasureLabel(AngleToolGraphic angle) {

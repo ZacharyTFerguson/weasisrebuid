@@ -33,8 +33,8 @@ import org.weasis.dicom.codec.utils.InstanceSpacing;
  *
  * <p><b>Why UI after {@code getLengthMm}:</b> {@link MeasurementLabel#formatClosedCurve} only
  * formats values already proved in {@link
- * org.weasis.core.ui.model.graphic.imp.line.ClosedCurveGraphicMmTest} and instance spacing in {@link
- * org.weasis.dicom.codec.utils.InstanceSpacingTest}. A label that reused {@link
+ * org.weasis.core.ui.model.graphic.imp.line.ClosedCurveGraphicMmTest} and instance spacing in
+ * {@link org.weasis.dicom.codec.utils.InstanceSpacingTest}. A label that reused {@link
  * CurveGraphic#getLengthMm} or {@link PolylineGraphic#getLengthMm} on the same handles would
  * disagree with the landed closed-curve API.
  *
@@ -161,7 +161,8 @@ class View2dClosedCurveMeasureLabelTest {
     PolylineGraphic poly = polyline(p0, p1, p2);
     ClosedCurveGraphic closed = closed(p0, p1, p2);
     assertEquals("10.0 mm", view.formatPolylineMeasureLabel(poly));
-    assertNotEquals(view.formatPolylineMeasureLabel(poly), view.formatClosedCurveMeasureLabel(closed));
+    assertNotEquals(
+        view.formatPolylineMeasureLabel(poly), view.formatClosedCurveMeasureLabel(closed));
   }
 
   @Test
