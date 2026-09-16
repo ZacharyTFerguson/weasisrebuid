@@ -33,6 +33,12 @@ public final class MouseActions {
    */
   public static final String COBB = "cobb";
 
+  /**
+   * Closed polygon area measure; distinct from {@link #DRAW}, {@link #POLYLINE}, {@link #ANGLE},
+   * and {@link #COBB}.
+   */
+  public static final String POLYGON = "polygon";
+
   public static final String CROSSHAIR = "crosshair";
 
   private String left = WINLEVEL;
