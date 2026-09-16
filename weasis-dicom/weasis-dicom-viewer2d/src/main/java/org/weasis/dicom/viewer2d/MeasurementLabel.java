@@ -211,7 +211,7 @@ public final class MeasurementLabel {
   }
 
   public static String formatEllipse(RoiStatistics.RoiStats stats) {
-    return RoiStatistics.formatMeanLabel(stats);
+    return RoiStatistics.formatStatsLabel(stats);
   }
 
   private static String formatPixels(double px) {

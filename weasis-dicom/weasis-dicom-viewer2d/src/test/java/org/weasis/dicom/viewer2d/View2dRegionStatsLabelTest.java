@@ -43,8 +43,8 @@ import org.weasis.dicom.codec.utils.RoiStatistics;
  * text while the codec already holds the full record.
  *
  * <p><b>Why fail-closed:</b> {@code ModalityLUTSequence} on the instance → {@link
- * RoiStatistics#ellipse} empty → live label {@code ""}. Padding pixels are excluded from min/max/std
- * but counted in {@code excluded} when shown.
+ * RoiStatistics#ellipse} empty → live label {@code ""}. Padding pixels are excluded from
+ * min/max/std but counted in {@code excluded} when shown.
  *
  * <p><b>Why not copy Weasis:</b> upstream {@code MeasureTool} / WP-5 {@code PixelStatistics} sample
  * painted grey; this slice only formats the landed dataset stats string — no new sampler, no {@code
@@ -118,9 +118,12 @@ class View2dRegionStatsLabelTest {
     view.load(ct);
     Ellipse2D roi = new Ellipse2D.Double(0.5, 0.5, 3, 3);
     RoiStatistics.RoiStats stats = RoiStatistics.ellipse(view.getDataset(), roi).orElseThrow();
-    double expectedStd = stats.stdDev();
-    assertEquals(18.257418550496073, expectedStd, 1e-6);
-    assertTrue(view.formatEllipseMeasureLabel(roi).contains(formatOneDecimal(expectedStd)));
+    assertEquals(4, stats.n());
+    assertEquals(40.0, stats.mean(), 1e-6);
+    double sampleStd = Math.sqrt((900.0 + 100.0 + 100.0 + 900.0) / 3.0); // landed n−1 denominator
+    assertEquals(sampleStd, stats.stdDev(), 1e-6);
+    assertNotEquals(Math.sqrt(1000.0 / 4.0), stats.stdDev(), 1e-3);
+    assertTrue(view.formatEllipseMeasureLabel(roi).contains(formatOneDecimal(stats.stdDev())));
   }
 
   @Test
@@ -148,7 +151,7 @@ class View2dRegionStatsLabelTest {
   @Test
   void roiStatisticsFormatterHasNoImageEntryPoint() {
     for (Method method : RoiStatistics.class.getDeclaredMethods()) {
-      if (!Modifier.isPublic(method.getModifiers()) || Modifier.isStatic(method.getModifiers())) {
+      if (!Modifier.isPublic(method.getModifiers())) {
         continue;
       }
       for (Class<?> param : method.getParameterTypes()) {
@@ -201,20 +204,29 @@ class View2dRegionStatsLabelTest {
     Attributes dcm = new Attributes();
     dcm.setString(Tag.SOPClassUID, VR.UI, UID.CTImageStorage);
     dcm.setString(Tag.SOPInstanceUID, VR.UI, sop);
+    dcm.setString(Tag.StudyInstanceUID, VR.UI, UIDUtils.createUID("2.25"));
+    dcm.setString(Tag.SeriesInstanceUID, VR.UI, UIDUtils.createUID("2.25"));
+    dcm.setInt(Tag.InstanceNumber, VR.IS, 1);
+    dcm.setString(Tag.Modality, VR.CS, "CT");
     dcm.setString(Tag.PhotometricInterpretation, VR.CS, "MONOCHROME2");
+    dcm.setInt(Tag.SamplesPerPixel, VR.US, 1);
     dcm.setInt(Tag.Rows, VR.US, 4);
     dcm.setInt(Tag.Columns, VR.US, 4);
-    dcm.setInt(Tag.PixelRepresentation, VR.US, 0);
     dcm.setInt(Tag.BitsAllocated, VR.US, 16);
+    dcm.setInt(Tag.BitsStored, VR.US, 16);
+    dcm.setInt(Tag.HighBit, VR.US, 15);
+    dcm.setInt(Tag.PixelRepresentation, VR.US, 1);
     dcm.setInt(Tag.PixelData, VR.OW, new int[16]);
     return dcm;
   }
 
   private static void writePart10(File dest, Attributes dcm) throws Exception {
     Attributes fmi = new Attributes();
-    fmi.setString(Tag.TransferSyntaxUID, VR.UI, UID.ExplicitVRLittleEndian);
+    fmi.setBytes(Tag.FileMetaInformationVersion, VR.OB, new byte[] {0, 1});
     fmi.setString(Tag.MediaStorageSOPClassUID, VR.UI, dcm.getString(Tag.SOPClassUID));
     fmi.setString(Tag.MediaStorageSOPInstanceUID, VR.UI, dcm.getString(Tag.SOPInstanceUID));
+    fmi.setString(Tag.TransferSyntaxUID, VR.UI, UID.ExplicitVRLittleEndian);
+    fmi.setString(Tag.ImplementationClassUID, VR.UI, "2.25.1918");
     try (DicomOutputStream out =
         new DicomOutputStream(new FileOutputStream(dest), UID.ExplicitVRLittleEndian)) {
       out.writeDataset(fmi, dcm);
