@@ -408,17 +408,7 @@ class MeasureToolBarHaveTest {
   static MouseEvent mouseOn(JComponent glass, int id, Point local, Point screen, boolean down) {
     int mods = down ? MouseEvent.BUTTON1_DOWN_MASK : 0;
     return new MouseEvent(
-        glass,
-        id,
-        0L,
-        mods,
-        local.x,
-        local.y,
-        screen.x,
-        screen.y,
-        1,
-        false,
-        MouseEvent.BUTTON1);
+        glass, id, 0L, mods, local.x, local.y, screen.x, screen.y, 1, false, MouseEvent.BUTTON1);
   }
 
   static boolean lightPixel(BufferedImage img, int x, int y) {
