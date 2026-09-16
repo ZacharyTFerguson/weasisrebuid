@@ -11,6 +11,8 @@ package org.weasis.dicom.viewer2d;
 
 import java.util.Locale;
 import java.util.Optional;
+import org.weasis.core.api.image.measure.ImageSpacing;
+import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.utils.InstanceSpacing;
@@ -43,6 +45,54 @@ public final class MeasurementLabel {
         polyline.getLength(),
         polyline.getLengthMm(resolved.map(InstanceSpacing.Resolved::spacing).orElse(null)),
         resolved);
+  }
+
+  public static String formatAngle(
+      AngleToolGraphic angle, Optional<InstanceSpacing.Resolved> resolved) {
+    if (angle == null) {
+      return "";
+    }
+    Optional<Double> degrees = angle.getAngleDegrees();
+    if (degrees.isEmpty()) {
+      return "";
+    }
+    String degPart = formatDegrees(degrees.get());
+    ImageSpacing spacing = resolved.map(InstanceSpacing.Resolved::spacing).orElse(null);
+    Optional<Double> mm0 = angle.getArmLengthMm(0, spacing);
+    Optional<Double> mm1 = angle.getArmLengthMm(1, spacing);
+    double px0 = angle.getArmLengthPx(0);
+    double px1 = angle.getArmLengthPx(1);
+    String arms = formatAngleArms(px0, px1, mm0, mm1, resolved);
+    return degPart + "  " + arms;
+  }
+
+  private static String formatAngleArms(
+      double px0,
+      double px1,
+      Optional<Double> mm0,
+      Optional<Double> mm1,
+      Optional<InstanceSpacing.Resolved> resolved) {
+    if (resolved.isEmpty() || mm0.isEmpty() || mm1.isEmpty()) {
+      return formatPixels(px0) + " / " + formatPixels(px1);
+    }
+    return formatLengthMmPair(mm0.get(), mm1.get(), resolved.get());
+  }
+
+  /**
+   * Two arm lengths in mm with the same {@link InstanceSpacing.Source} suffix as a single length.
+   */
+  private static String formatLengthMmPair(
+      double mm0, double mm1, InstanceSpacing.Resolved resolved) {
+    String base = formatMm(mm0) + " / " + formatMm(mm1);
+    return switch (resolved.source()) {
+      case IMAGER_DETECTOR -> base + " (detector plane)";
+      case IMAGER_OBJECT_ESTIMATE -> base + " (estimate)";
+      default -> base;
+    };
+  }
+
+  private static String formatDegrees(double degrees) {
+    return String.format(Locale.US, "%.1f°", degrees);
   }
 
   private static String formatLengthMm(
