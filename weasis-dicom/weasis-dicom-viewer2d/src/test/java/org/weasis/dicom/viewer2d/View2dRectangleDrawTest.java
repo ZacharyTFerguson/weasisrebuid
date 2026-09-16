@@ -86,10 +86,12 @@ class View2dRectangleDrawTest {
     PolygonGraphic bboxPoly = bboxPolygon();
     assertEquals(view.formatPolygonMeasureLabel(bboxPoly), rectLabel);
     assertEquals("6.25 mm²", rectLabel);
-    EllipseGraphic ellipse = new EllipseGraphic();
-    ellipse.setHandlePoint(0, CORNER_A);
-    ellipse.setHandlePoint(1, CORNER_B);
-    String ellipseHu = view.formatEllipseMeasureLabel((Ellipse2D) ellipse.getShape());
+    File ctRoiAir = MeasureLabelFixtures.writeCtRoiAir(dir.resolve("ct_roi_air.dcm").toFile());
+    View2d huView = new View2d();
+    huView.load(ctRoiAir);
+    huView.addEllipseCaliper(CORNER_A, CORNER_B);
+    EllipseGraphic ellipse = (EllipseGraphic) huView.getGraphicList().getFirst();
+    String ellipseHu = huView.formatEllipseMeasureLabel((Ellipse2D) ellipse.getShape());
     assertTrue(ellipseHu.contains("HU"));
     assertNotEquals(rectLabel, ellipseHu);
     assertNotEquals(formatAreaMmLikeLabel(6.25 * (Math.PI / 4.0)), rectLabel);
