@@ -40,6 +40,8 @@ import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.dicom.codec.KOSpecialElement;
+import org.weasis.dicom.viewer2d.fusion.FusionColorBar;
+import org.weasis.dicom.viewer2d.fusion.FusionController;
 
 /** One tab: ImageViewerPlugin holding a {@link View2d}. MPR is {@code mpr.MprContainer}. */
 public class View2dContainer extends ImageViewerPlugin<MediaElement> {
@@ -50,6 +52,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final JPanel viewGrid = new JPanel(new GridLayout(1, 1));
   private final List<View2d> layout = new CopyOnWriteArrayList<>();
   private final DicomSynchManager synchManager = new DicomSynchManager();
+  private final FusionController fusionController = new FusionController();
   private final ToolBarContainer toolbars = new ToolBarContainer();
   private final ViewerToolBar viewerToolBar = new ViewerToolBar();
   private final LutToolBar lutToolBar = new LutToolBar();
@@ -68,6 +71,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   public View2dContainer() {
     super(NAME);
     layout.add(view2d);
+    fusionController.addTarget(view2d);
     bindToolBars();
     add(viewGrid, BorderLayout.CENTER);
     bindDrop(this);
@@ -111,6 +115,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     toolbars.registerToolBar(screenshotToolBar);
     toolbars.registerToolBar(cineToolBar);
     toolbars.registerToolBar(basic3DToolBar);
+    toolbars.registerToolBar(fusionController.getColorBar());
     viewerToolBar.bind(view2d);
     keyObjectToolBar.bind(view2d);
     lutToolBar.bind(view2d);
@@ -135,6 +140,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     ui.add(screenshotToolBar);
     ui.add(cineToolBar);
     ui.add(basic3DToolBar);
+    ui.add(fusionController.getColorBar());
   }
 
   public ToolBarContainer getToolBars() {
@@ -159,6 +165,14 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public Basic3DToolBar getBasic3DToolBar() {
     return basic3DToolBar;
+  }
+
+  public FusionController getFusionController() {
+    return fusionController;
+  }
+
+  public FusionColorBar getFusionColorBar() {
+    return fusionController.getColorBar();
   }
 
   public View2d getView2d() {
@@ -198,6 +212,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     while (layout.size() > count) {
       View2d removed = layout.remove(layout.size() - 1);
       synchManager.remove(removed);
+      fusionController.removeTarget(removed);
       View2dRegistry.unregister(removed);
     }
   }
@@ -211,6 +226,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     measureToolBar.attach(extra);
     extra.getMouseActions().setLeft(view2d.getMouseActions().getLeft());
     extra.setMeasureTool(view2d.getMeasureTool());
+    fusionController.addTarget(extra);
     return extra;
   }
 

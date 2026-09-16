@@ -19,10 +19,26 @@ import org.weasis.dicom.codec.utils.SuvFactor;
 public class FusionController {
 
   private final List<DefaultView2d<?>> targetViews = new ArrayList<>();
+  private final FusionState state = new FusionState();
+  private final FusionColorBar colorBar = new FusionColorBar();
+  private final FusionAction action = new FusionAction();
   private double overlayOpacity = 0.4;
+
+  public FusionController() {
+    colorBar.bind(this);
+    colorBar.setLut(state.getLut());
+  }
 
   public List<DefaultView2d<?>> getTargetViews() {
     return targetViews;
+  }
+
+  public FusionState getState() {
+    return state;
+  }
+
+  public FusionColorBar getColorBar() {
+    return colorBar;
   }
 
   public void addTarget(DefaultView2d<?> view) {
@@ -31,12 +47,27 @@ public class FusionController {
     }
   }
 
+  public void removeTarget(DefaultView2d<?> view) {
+    targetViews.remove(view);
+  }
+
   public double getOverlayOpacity() {
     return overlayOpacity;
   }
 
   public void setOverlayOpacity(double overlayOpacity) {
     this.overlayOpacity = Math.max(0, Math.min(1, overlayOpacity));
+    action.applyOpacity(state, this.overlayOpacity);
+  }
+
+  public void applyLut(String lut) {
+    action.applyLut(state, lut);
+    colorBar.setLut(state.getLut());
+  }
+
+  public void applyWindow(FusionWindow window) {
+    action.applyWindow(state, window);
+    colorBar.setWindow(state.getWindow());
   }
 
   /** SUVbw = stored activity × {@link SuvFactor#factor(Attributes)}. */

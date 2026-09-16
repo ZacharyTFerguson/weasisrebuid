@@ -10,13 +10,30 @@
 package org.weasis.dicom.viewer2d.fusion;
 
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+import org.weasis.core.ui.util.WtoolBar;
 
-/** Maps a windowed overlay sample through {@link FusionColorScale}. */
-public class FusionColorBar {
+/** Maps a windowed overlay sample through {@link FusionColorScale}. Hot Iron / PET chrome. */
+public class FusionColorBar extends WtoolBar {
+
+  public static final String NAME = "Fusion";
 
   private FusionWindow window = new FusionWindow();
   private final FusionColorScale scale = new FusionColorScale();
   private String lut = FusionColorScale.HOT_IRON;
+  private FusionController controller;
+
+  public FusionColorBar() {
+    super(NAME, 28);
+    add(lutButton(FusionColorScale.HOT_IRON));
+    add(lutButton(FusionColorScale.PET));
+  }
+
+  public void bind(FusionController controller) {
+    this.controller = controller;
+  }
 
   public FusionWindow getWindow() {
     return window;
@@ -40,5 +57,25 @@ public class FusionColorBar {
 
   public byte[][] rgbBar() {
     return scale.rgb(lut);
+  }
+
+  JButton lutButton(String name) {
+    JButton button =
+        new JButton(
+            new AbstractAction(name) {
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                clickLut(name);
+              }
+            });
+    button.setName(name);
+    return button;
+  }
+
+  void clickLut(String name) {
+    setLut(name);
+    if (controller != null) {
+      controller.applyLut(name);
+    }
   }
 }
