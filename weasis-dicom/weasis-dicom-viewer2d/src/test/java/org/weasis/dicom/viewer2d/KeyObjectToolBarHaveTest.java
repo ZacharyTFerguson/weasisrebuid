@@ -41,6 +41,19 @@ class KeyObjectToolBarHaveTest {
   }
 
   @Test
+  void filterToggleButtonClicksAndShowsSelected() {
+    KeyObjectToolBar bar = new KeyObjectToolBar();
+    assertEquals("Filter", bar.filterButton().getText());
+    assertFalse(bar.filterButton().isSelected());
+    bar.filterButton().doClick();
+    assertTrue(bar.isFilterKeyImages());
+    assertTrue(bar.filterButton().isSelected());
+    bar.filterButton().doClick();
+    assertFalse(bar.isFilterKeyImages());
+    assertFalse(bar.filterButton().isSelected());
+  }
+
+  @Test
   void shortcutKTogglesBoundViewSop(@TempDir Path dir) throws Exception {
     Path file = dir.resolve("ct.dcm");
     TestCt.write(file.toFile(), 8, 40, 400);

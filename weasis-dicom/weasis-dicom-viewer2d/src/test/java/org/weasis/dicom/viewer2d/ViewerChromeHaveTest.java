@@ -86,6 +86,16 @@ class ViewerChromeHaveTest {
     assertTrue(
         container.getSeriesViewerUI().getToolBar().stream()
             .anyMatch(b -> "LUT".equals(b.getComponentName())));
+    assertTrue(
+        container.getSeriesViewerUI().getToolBar().stream()
+            .anyMatch(b -> "Key Object".equals(b.getComponentName())));
+    javax.swing.AbstractButton star =
+        (javax.swing.AbstractButton) container.getKeyObjectToolBar().getComponent().getComponent(0);
+    javax.swing.AbstractButton filter =
+        (javax.swing.AbstractButton) container.getKeyObjectToolBar().getComponent().getComponent(1);
+    assertEquals("Star", star.getText());
+    assertEquals("Filter", filter.getText());
+    assertSame(container.getView2d(), container.getKeyObjectToolBar().boundView());
   }
 
   @Test
