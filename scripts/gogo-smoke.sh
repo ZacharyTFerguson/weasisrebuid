@@ -100,17 +100,31 @@ if not jaxb_ok:
 print("gogo-smoke: JAXB-OSGi Active @7 (have)")
 if not opencv_ok:
     sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
-i18n_state = bundle_state(lb, "Weasis Core i18n")
-i18n_ok = i18n_state in ("Resolved", "Installed")
-if not i18n_ok:
-    sys.exit("lb did not install weasis-core-i18n fragment @13 (Resolved): %r" % lb)
-explorer_i18n = bundle_state(lb, "Weasis Explorer i18n")
-viewer2d_i18n = bundle_state(lb, "Weasis Viewer2d i18n")
-if explorer_i18n not in ("Resolved", "Installed"):
-    sys.exit("lb did not install weasis-dicom-explorer-i18n fragment @13 (Resolved): %r" % lb)
-if viewer2d_i18n not in ("Resolved", "Installed"):
-    sys.exit("lb did not install weasis-dicom-viewer2d-i18n fragment @13 (Resolved): %r" % lb)
-print("gogo-smoke: explorer/viewer2d i18n fragments Installed @13 (have)")
+i18n_needles = (
+    "Weasis Core i18n",
+    "Weasis Explorer i18n",
+    "Weasis Viewer2d i18n",
+    "Weasis Acquireeditor i18n",
+    "Weasis Acquireexplorer i18n",
+    "Weasis Baseexplorer i18n",
+    "Weasis Base Ui i18n",
+    "Weasis Base Viewer2d i18n",
+    "Weasis Au i18n",
+    "Weasis Codec i18n",
+    "Weasis Isowriter i18n",
+    "Weasis Qr i18n",
+    "Weasis Rt i18n",
+    "Weasis Send i18n",
+    "Weasis Sr i18n",
+    "Weasis Wave i18n",
+    "Weasis Viewer3d i18n",
+    "Weasis Launcher i18n",
+)
+for needle in i18n_needles:
+    state = bundle_state(lb, needle)
+    if state not in ("Resolved", "Installed"):
+        sys.exit("lb did not install %s fragment @13 (Resolved): %r" % (needle, lb))
+print("gogo-smoke: documented host i18n fragments Installed @13 (have)")
 send_ok = bundle_state(lb, "Weasis DICOM Send") == "Active"
 qr_ok = bundle_state(lb, "Weasis DICOM Q/R") == "Active"
 iso_ok = bundle_state(lb, "Weasis DICOM ISO writer") == "Active"

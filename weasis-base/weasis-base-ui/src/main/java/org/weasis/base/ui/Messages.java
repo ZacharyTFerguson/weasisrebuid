@@ -9,20 +9,27 @@
  */
 package org.weasis.base.ui;
 
+import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import org.weasis.core.api.util.LocalUtil;
 
 public class Messages {
-  private static final String BUNDLE_NAME = "org.weasis.base.ui.messages";
+  public static final String BUNDLE_NAME = "org.weasis.base.ui.messages";
 
   private Messages() {}
 
   public static String getString(String key) {
+    return getString(key, LocalUtil.textLocale());
+  }
+
+  public static String getString(String key, Locale locale) {
     if (key == null || key.isBlank()) {
       return "";
     }
+    Locale loc = locale == null ? Locale.ROOT : locale;
     try {
-      return ResourceBundle.getBundle(BUNDLE_NAME).getString(key);
+      return ResourceBundle.getBundle(BUNDLE_NAME, loc).getString(key);
     } catch (MissingResourceException e) {
       return key;
     }

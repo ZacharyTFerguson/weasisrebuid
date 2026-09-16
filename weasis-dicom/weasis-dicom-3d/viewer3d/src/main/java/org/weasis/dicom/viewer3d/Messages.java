@@ -9,10 +9,29 @@
  */
 package org.weasis.dicom.viewer3d;
 
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import org.weasis.core.api.util.LocalUtil;
+
 public final class Messages {
+  public static final String BUNDLE_NAME = "org.weasis.dicom.viewer3d.messages";
+
   private Messages() {}
 
   public static String getString(String key) {
-    return key == null ? "" : key;
+    return getString(key, LocalUtil.textLocale());
+  }
+
+  public static String getString(String key, Locale locale) {
+    if (key == null || key.isBlank()) {
+      return "";
+    }
+    Locale loc = locale == null ? Locale.ROOT : locale;
+    try {
+      return ResourceBundle.getBundle(BUNDLE_NAME, loc).getString(key);
+    } catch (MissingResourceException e) {
+      return key;
+    }
   }
 }
