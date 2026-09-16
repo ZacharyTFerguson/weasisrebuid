@@ -161,6 +161,18 @@ public class View2d extends DefaultView2d<MediaElement> {
     applyVoi(shapedVoi(window, level));
   }
 
+  @Override
+  public void setLut(String lut) {
+    super.setLut(lut);
+    render();
+  }
+
+  @Override
+  public void setInverseLut(boolean invert) {
+    super.setInverseLut(invert);
+    render();
+  }
+
   void applyVoi(WindLevelParameters voi) {
     this.activeVoi = voi == null ? new WindLevelParameters(this.window, this.level) : voi;
     this.window = activeVoi.getWindow();

@@ -501,6 +501,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
         "op.pseudocolor",
         PseudoColorOp.P_LUT,
         lut == null || lut.isBlank() ? PseudoColorOp.GRAY : lut);
+    onLutChanged();
   }
 
   public String getLut() {
@@ -510,11 +511,19 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   public void setInverseLut(boolean invert) {
     displayOp.setParamValue("op.pseudocolor", PseudoColorOp.P_INVERT, invert);
+    onLutChanged();
   }
 
   public boolean isInverseLut() {
     Object value = displayOp.getParamValue("op.pseudocolor", PseudoColorOp.P_INVERT);
     return Boolean.TRUE.equals(value);
+  }
+
+  /** Subclasses that bake LUT into pixels (DICOM {@code View2d}) re-render here. */
+  protected void onLutChanged() {
+    if (!freezeParameters) {
+      repaint();
+    }
   }
 
   public int getFrameIndex() {

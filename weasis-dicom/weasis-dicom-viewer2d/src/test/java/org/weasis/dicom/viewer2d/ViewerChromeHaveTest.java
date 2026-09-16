@@ -22,10 +22,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.nio.file.Path;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.image.AffineTransformOp;
 import org.weasis.core.api.image.PseudoColorOp;
@@ -75,6 +77,30 @@ class ViewerChromeHaveTest {
     assertTrue(view.isInverseLut());
     bar.toggleInvert();
     assertFalse(view.isInverseLut());
+  }
+
+  @Test
+  void inverseLutClickRendersComplement(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    int before = view.getSourceImage().getRaster().getSample(4, 4, 0);
+    AbstractButton inverse = (AbstractButton) container.getLutToolBar().getComponent(3);
+    assertEquals("Inverse", inverse.getText());
+    assertEquals("inverseLut", inverse.getName());
+    inverse.doClick();
+    assertTrue(view.isInverseLut());
+    int inverted = view.getSourceImage().getRaster().getSample(4, 4, 0);
+    assertEquals(255 - before, inverted);
+    view.setSize(8, 8);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    assertEquals(inverted, paint(view).getRGB(4, 4) & 0xFF);
+    inverse.doClick();
+    assertFalse(view.isInverseLut());
+    assertEquals(before, view.getSourceImage().getRaster().getSample(4, 4, 0));
   }
 
   @Test
