@@ -26,7 +26,8 @@ import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 
 /**
  * View2d closed-polygon area labels: physical mm² from {@link PolygonGraphic#getAreaMm} when
- * instance spacing resolves, otherwise pixel shoelace area from {@link PolygonGraphic#getAreaValue}.
+ * instance spacing resolves, otherwise pixel shoelace area from {@link
+ * PolygonGraphic#getAreaValue}.
  *
  * <p><b>Why UI after {@code getAreaMm} / {@code getAreaValue}:</b> {@link
  * MeasurementLabel#formatPolygon} only formats values already proved in {@link
@@ -96,8 +97,7 @@ class View2dPolygonMeasureLabelTest {
     File dx = MeasureLabelFixtures.writeDxImager020(dir.resolve("dx_imager_020.dcm").toFile());
     View2d view = new View2d();
     view.load(dx);
-    assertEquals(
-        "2.0 mm² (detector plane)", view.formatPolygonMeasureLabel(rightTriangle()));
+    assertEquals("2.0 mm² (detector plane)", view.formatPolygonMeasureLabel(rightTriangle()));
   }
 
   @Test
@@ -145,8 +145,7 @@ class View2dPolygonMeasureLabelTest {
 
   /** Right triangle (0,0)-(10,0)-(10,10): 50 px² shoelace area. */
   private static PolygonGraphic rightTriangle() {
-    return polygon(
-        new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10));
+    return polygon(new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(10, 10));
   }
 
   private static PolygonGraphic polygon(Point2D.Double... points) {

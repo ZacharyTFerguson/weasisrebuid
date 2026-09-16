@@ -14,6 +14,7 @@ import java.util.Optional;
 import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.utils.InstanceSpacing;
@@ -65,6 +66,26 @@ public final class MeasurementLabel {
     double px1 = angle.getArmLengthPx(1);
     String arms = formatAngleArms(px0, px1, mm0, mm1, resolved);
     return degPart + "  " + arms;
+  }
+
+  public static String formatPolygon(
+      PolygonGraphic polygon, Optional<InstanceSpacing.Resolved> resolved) {
+    if (polygon == null) {
+      return "";
+    }
+    ImageSpacing spacing = resolved.map(InstanceSpacing.Resolved::spacing).orElse(null);
+    Optional<Double> mmOpt = polygon.getAreaMm(spacing);
+    double pxArea = polygon.getAreaValue();
+    if (resolved.isEmpty() || mmOpt.isEmpty()) {
+      return formatPixelsArea(pxArea);
+    }
+    String base = formatAreaMm(mmOpt.get());
+    InstanceSpacing.Resolved r = resolved.get();
+    return switch (r.source()) {
+      case IMAGER_DETECTOR -> base + " (detector plane)";
+      case IMAGER_OBJECT_ESTIMATE -> base + " (estimate)";
+      default -> base;
+    };
   }
 
   public static String formatCobb(
@@ -138,6 +159,20 @@ public final class MeasurementLabel {
 
   private static String formatPixels(double px) {
     return String.format(Locale.US, "%.1f px", px);
+  }
+
+  private static String formatPixelsArea(double pxArea) {
+    return String.format(Locale.US, "%.1f px²", pxArea);
+  }
+
+  /** Same rounding rules as {@link #formatMm} but with mm² area unit. */
+  private static String formatAreaMm(double mm2) {
+    long cents = Math.round(mm2 * 100.0);
+    double value = cents / 100.0;
+    if (cents % 10 != 0) {
+      return String.format(Locale.US, "%.2f mm²", value);
+    }
+    return String.format(Locale.US, "%.1f mm²", value);
   }
 
   /** Enough fraction digits for spacing math (e.g. 10 px × 0.15 ÷ 1.2 → 1.25 mm, not 1.3). */
