@@ -183,6 +183,42 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void cropClickCopiesCenterHalfWithoutChangingWindowOrFlip(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    int origin = view.getSourceImage().getRaster().getSample(2, 2, 0);
+    int fullW = view.getSourceImage().getWidth();
+    AbstractButton crop = container.getImageTool().cropButton();
+    assertEquals("Crop", crop.getText());
+    assertEquals(ImageTool.CROP, crop.getName());
+    assertEquals(ActionW.WINDOW.cmd(), container.getImageTool().windowButton().getName());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+    crop.doClick();
+    assertTrue(view.isCropChrome());
+    assertEquals(4, view.getSourceImage().getWidth());
+    assertEquals(4, view.getSourceImage().getHeight());
+    assertEquals(origin, view.getSourceImage().getRaster().getSample(0, 0, 0));
+    view.setSize(4, 4);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    assertEquals(origin, paint(view).getRGB(0, 0) & 0xFF);
+    assertFalse(view.isWindowChrome());
+    assertFalse(view.isFlip());
+    assertEquals(FilterOp.NONE, String.valueOf(view.getFilter()));
+    AffineTransformOp affine = new AffineTransformOp();
+    affine.setParam(ImageOpNode.INPUT_IMG, view.getSourceImage());
+    affine.process();
+    assertSame(view.getSourceImage(), affine.getParam(ImageOpNode.OUTPUT_IMG));
+    crop.doClick();
+    assertFalse(view.isCropChrome());
+    assertEquals(fullW, view.getSourceImage().getWidth());
+    assertEquals(origin, view.getSourceImage().getRaster().getSample(2, 2, 0));
+  }
+
+  @Test
   void namedFlipMirrorsEveryDxHangCellWithoutRasterizingSource() throws Exception {
     View2dContainer container = new View2dContainer();
     container.applyHanging(1, 2);

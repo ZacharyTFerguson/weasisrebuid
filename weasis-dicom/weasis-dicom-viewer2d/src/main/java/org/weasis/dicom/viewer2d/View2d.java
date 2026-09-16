@@ -10,6 +10,7 @@
 package org.weasis.dicom.viewer2d;
 
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
 import java.awt.image.WritableRaster;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.weasis.core.api.image.CropOp;
 import org.weasis.core.api.image.FilterOp;
 import org.weasis.core.api.image.ImageOpNode;
 import org.weasis.core.api.image.OverlayOp;
@@ -48,6 +50,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private double window = 400;
   private double level = 40;
   private boolean windowChrome;
+  private boolean cropChrome;
   private File file;
   private final KOManager koManager = new KOManager();
   private final List<WindLevelParameters> presets = new ArrayList<>();
@@ -187,6 +190,15 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public boolean isWindowChrome() {
     return windowChrome;
+  }
+
+  public void applyCropChrome(boolean on) {
+    cropChrome = on;
+    render();
+  }
+
+  public boolean isCropChrome() {
+    return cropChrome;
   }
 
   @Override
@@ -337,6 +349,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     painted = applyFilterAndColor(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);
+    painted = applyCrop(painted);
     setSourceImage(painted);
   }
 
@@ -363,6 +376,39 @@ public class View2d extends DefaultView2d<MediaElement> {
     this.activeVoi = from.activeVoi;
     this.window = from.window;
     this.level = from.level;
+  }
+
+  BufferedImage applyCrop(BufferedImage src) {
+    if (!cropChrome || dataset == null) {
+      return src;
+    }
+    Rectangle region = centerHalf();
+    if (region == null) {
+      return src;
+    }
+    return runCropOp(src, region);
+  }
+
+  Rectangle centerHalf() {
+    int w = dataset.getInt(Tag.Columns, 0);
+    int h = dataset.getInt(Tag.Rows, 0);
+    if (w < 2 || h < 2) {
+      return null;
+    }
+    return new Rectangle(w / 4, h / 4, Math.max(1, w / 2), Math.max(1, h / 2));
+  }
+
+  static BufferedImage runCropOp(BufferedImage src, Rectangle region) {
+    CropOp op = new CropOp();
+    op.setParam(CropOp.P_REGION, region);
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    try {
+      op.process();
+    } catch (Exception e) {
+      return src;
+    }
+    Object out = op.getParam(ImageOpNode.OUTPUT_IMG);
+    return out instanceof BufferedImage img ? img : src;
   }
 
   BufferedImage applyFilterAndColor(BufferedImage src) {

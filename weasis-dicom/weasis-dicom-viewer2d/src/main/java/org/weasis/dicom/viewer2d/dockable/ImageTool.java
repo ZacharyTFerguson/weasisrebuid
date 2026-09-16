@@ -24,9 +24,11 @@ import org.weasis.dicom.viewer2d.View2dContainer;
 public class ImageTool extends PluginTool {
 
   public static final String NAME = "Image";
+  public static final String CROP = "crop";
 
   private final JLabel summary = new JLabel(" ");
   private final JToggleButton window = new JToggleButton("Window");
+  private final JToggleButton crop = new JToggleButton("Crop");
   private final JToggleButton flip = new JToggleButton("Flip");
   private View2d view;
 
@@ -34,11 +36,14 @@ public class ImageTool extends PluginTool {
     super(NAME, 20);
     window.setName(ActionW.WINDOW.cmd());
     window.addActionListener(e -> applyWindow());
+    crop.setName(CROP);
+    crop.addActionListener(e -> applyCrop());
     flip.setName(ActionW.FLIP.cmd());
     flip.addActionListener(e -> applyFlip());
     JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
     row.add(summary);
     row.add(window);
+    row.add(crop);
     row.add(flip);
     add(row, BorderLayout.NORTH);
   }
@@ -47,6 +52,7 @@ public class ImageTool extends PluginTool {
     this.view = view;
     if (view != null) {
       window.setSelected(view.isWindowChrome());
+      crop.setSelected(view.isCropChrome());
       flip.setSelected(view.isFlip());
     }
     refresh();
@@ -54,6 +60,10 @@ public class ImageTool extends PluginTool {
 
   public JToggleButton windowButton() {
     return window;
+  }
+
+  public JToggleButton cropButton() {
+    return crop;
   }
 
   public JToggleButton flipButton() {
@@ -67,6 +77,17 @@ public class ImageTool extends PluginTool {
       host.applyWindow(on);
     } else if (view != null) {
       view.applyWindowChrome(on);
+    }
+    refresh();
+  }
+
+  void applyCrop() {
+    boolean on = crop.isSelected();
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyCrop(on);
+    } else if (view != null) {
+      view.applyCropChrome(on);
     }
     refresh();
   }
