@@ -25,8 +25,8 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 
 /**
  * Interactive Cobb on {@link View2d}: four image-space handles (upper endplate 0→1, lower endplate
- * 2→3) create a {@link CobbToolGraphic} whose visible label is {@link View2d#formatCobbMeasureLabel}
- * — not degrees or endplate mm recomputed in the mouse path.
+ * 2→3) create a {@link CobbToolGraphic} whose visible label is {@link
+ * View2d#formatCobbMeasureLabel} — not degrees or endplate mm recomputed in the mouse path.
  *
  * <p><b>Why (0028,0030) via landed APIs:</b> spacing comes from {@link
  * org.weasis.dicom.codec.utils.InstanceSpacing#resolve} on the loaded instance; Cobb degrees and

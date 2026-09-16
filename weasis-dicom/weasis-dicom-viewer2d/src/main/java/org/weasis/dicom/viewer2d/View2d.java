@@ -67,6 +67,9 @@ public class View2d extends DefaultView2d<MediaElement> {
   private AngleToolGraphic draftAngleCaliper;
   private int draftAngleClickStage;
 
+  private CobbToolGraphic draftCobbCaliper;
+  private int draftCobbClickStage;
+
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
   public View2d() {
@@ -245,6 +248,24 @@ public class View2d extends DefaultView2d<MediaElement> {
     addGraphic(angle);
   }
 
+  /**
+   * Adds a Cobb caliper in image pixel coordinates and binds its label to {@link
+   * #formatCobbMeasureLabel}. Handle order: upper endplate (0, 1), lower endplate (2, 3).
+   */
+  public void addCobbCaliper(
+      Point2D upperStart, Point2D upperEnd, Point2D lowerStart, Point2D lowerEnd) {
+    if (upperStart == null || upperEnd == null || lowerStart == null || lowerEnd == null) {
+      return;
+    }
+    CobbToolGraphic cobb = new CobbToolGraphic();
+    cobb.setHandlePoint(0, copyPoint(upperStart));
+    cobb.setHandlePoint(1, copyPoint(upperEnd));
+    cobb.setHandlePoint(2, copyPoint(lowerStart));
+    cobb.setHandlePoint(3, copyPoint(lowerEnd));
+    applyCobbCaliperLabel(cobb);
+    addGraphic(cobb);
+  }
+
   /** Test hook: two-click line draw in view coordinates when left action is {@code draw}. */
   public void simulateLineDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
     lineDrawViewPressed(viewX1, viewY1);
@@ -312,6 +333,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   boolean isAngleDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.ANGLE.equals(normalizedLeftAction);
+  }
+
+  boolean isCobbDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.COBB.equals(normalizedLeftAction);
   }
 
   /** Test hook: polyline vertex click in view coordinates when left action is {@code polyline}. */
@@ -446,6 +471,61 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private void applyAngleCaliperLabel(AngleToolGraphic angle) {
     angle.setLabel(new String[] {formatAngleMeasureLabel(angle)});
+  }
+
+  /** Test hook: Cobb handle click in view coordinates when left action is {@code cobb}. */
+  public void simulateCobbDrawClick(int viewX, int viewY) {
+    cobbDrawViewPressed(viewX, viewY);
+    cobbDrawViewReleased(viewX, viewY);
+  }
+
+  void cobbDrawViewPressed(int viewX, int viewY) {
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftCobbCaliper == null) {
+      draftCobbCaliper = new CobbToolGraphic();
+      draftCobbCaliper.setHandlePoint(0, image);
+      draftCobbCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+      draftCobbCaliper.setHandlePoint(2, new Point2D.Double(image.x, image.y));
+      draftCobbCaliper.setHandlePoint(3, new Point2D.Double(image.x, image.y));
+      draftCobbClickStage = 1;
+      addGraphic(draftCobbCaliper);
+      repaint();
+      return;
+    }
+    if (draftCobbClickStage == 1) {
+      draftCobbCaliper.setHandlePoint(1, image);
+      draftCobbClickStage = 2;
+      repaint();
+      return;
+    }
+    if (draftCobbClickStage == 2) {
+      draftCobbCaliper.setHandlePoint(2, image);
+      draftCobbClickStage = 3;
+      repaint();
+      return;
+    }
+    if (draftCobbClickStage == 3) {
+      draftCobbCaliper.setHandlePoint(3, image);
+      finalizeDraftCobbCaliper();
+    }
+  }
+
+  void cobbDrawViewReleased(int viewX, int viewY) {
+    // Four-click placement; release does not advance stage beyond press.
+  }
+
+  private void finalizeDraftCobbCaliper() {
+    if (draftCobbCaliper == null) {
+      return;
+    }
+    applyCobbCaliperLabel(draftCobbCaliper);
+    draftCobbCaliper = null;
+    draftCobbClickStage = 0;
+    repaint();
+  }
+
+  private void applyCobbCaliperLabel(CobbToolGraphic cobb) {
+    cobb.setLabel(new String[] {formatCobbMeasureLabel(cobb)});
   }
 
   public String formatPolylineMeasureLabel(PolylineGraphic polyline) {
@@ -634,6 +714,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mousePressed(MouseEvent e) {
+      if (cobbDrawActive(e)) {
+        view2d.cobbDrawViewPressed(e.getX(), e.getY());
+        return;
+      }
       if (angleDrawActive(e)) {
         view2d.angleDrawViewPressed(e.getX(), e.getY());
         return;
@@ -664,6 +748,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
     @Override
     public void mouseReleased(MouseEvent e) {
+      if (cobbDrawActive(e)) {
+        view2d.cobbDrawViewReleased(e.getX(), e.getY());
+        return;
+      }
       if (angleDrawActive(e)) {
         view2d.angleDrawViewReleased(e.getX(), e.getY());
         return;
@@ -684,6 +772,19 @@ public class View2d extends DefaultView2d<MediaElement> {
           org.weasis.core.ui.editor.image.MouseActions.normalize(
               view2d.getMouseActions().getLeft());
       if (!view2d.isAngleDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return false;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
+    }
+
+    private boolean cobbDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isCobbDrawMouseAction(left)) {
         return false;
       }
       if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
