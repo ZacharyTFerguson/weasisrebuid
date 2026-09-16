@@ -107,13 +107,10 @@ class ViewerChromeHaveTest {
   @Test
   void flipClickMirrorsPaintedPixelsWithoutRasterizingSource(@TempDir Path dir) throws Exception {
     Path file = dir.resolve("ct.dcm");
-    TestCt.write(file.toFile(), 32, 40, 400);
+    TestCt.write(file.toFile(), 8, 40, 400);
     View2dContainer container = new View2dContainer();
     View2d view = container.getView2d();
     view.load(file.toFile());
-    view.setSize(32, 32);
-    view.setZoom(1.0);
-    view.setRotation(0);
     AbstractButton flip = container.getImageTool().flipButton();
     assertEquals("Flip", flip.getText());
     assertEquals("flip", flip.getName());
@@ -121,21 +118,19 @@ class ViewerChromeHaveTest {
     assertTrue(
         container.getSeriesViewerUI().getToolBar().stream()
             .anyMatch(b -> ImageTool.NAME.equals(b.getComponentName())));
-    int srcLeft = view.getSourceImage().getRaster().getSample(4, 16, 0);
-    int left = paint(view).getRGB(4, 16) & 0xFF;
-    int right = paint(view).getRGB(27, 16) & 0xFF;
+    int srcLeft = view.getSourceImage().getRaster().getSample(1, 4, 0);
+    int left = gray(view, 1, 4);
+    int right = gray(view, 6, 4);
     assertTrue(left < right);
     flip.doClick();
     assertTrue(view.isFlip());
     assertTrue(flip.isSelected());
-    assertEquals(srcLeft, view.getSourceImage().getRaster().getSample(4, 16, 0));
-    int flippedLeft = paint(view).getRGB(4, 16) & 0xFF;
-    int flippedRight = paint(view).getRGB(27, 16) & 0xFF;
-    assertTrue(flippedLeft > flippedRight);
+    assertEquals(srcLeft, view.getSourceImage().getRaster().getSample(1, 4, 0));
+    assertTrue(gray(view, 1, 4) > gray(view, 6, 4));
     flip.doClick();
     assertFalse(view.isFlip());
-    assertEquals(left, paint(view).getRGB(4, 16) & 0xFF);
-    assertEquals(right, paint(view).getRGB(27, 16) & 0xFF);
+    assertEquals(left, gray(view, 1, 4));
+    assertEquals(right, gray(view, 6, 4));
   }
 
   @Test
@@ -563,6 +558,13 @@ class ViewerChromeHaveTest {
       g.dispose();
     }
     return page;
+  }
+
+  static int gray(View2d view, int x, int y) {
+    view.setSize(8, 8);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    return paint(view).getRGB(x, y) & 0xFF;
   }
 
   @Test
