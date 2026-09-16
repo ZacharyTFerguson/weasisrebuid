@@ -18,5 +18,7 @@
 
   <modules>
     <module>weasis-core-i18n</module>
+    <module>weasis-dicom-explorer-i18n</module>
+    <module>weasis-dicom-viewer2d-i18n</module>
   </modules>
 </project>

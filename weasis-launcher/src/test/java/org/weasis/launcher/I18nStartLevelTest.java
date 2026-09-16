@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 class I18nStartLevelTest {
 
   @Test
-  void shippingCatalogInstallsCoreI18nFragmentAt13() throws Exception {
+  void shippingCatalogInstallsHostI18nFragmentsAt13() throws Exception {
     Path launcherJson = Mx03ShippingPrefsTest.moduleRoot().resolve("conf/base.json");
     Path distJson =
         Mx03ShippingPrefsTest.moduleRoot().resolve("../weasis-distributions/etc/config/base.json");
@@ -30,13 +30,15 @@ class I18nStartLevelTest {
     String install13 = dist.value("felix.auto.install.13");
     assertTrue(install13.contains("weasis-core-i18n-4.7.3.jar"));
     assertTrue(install13.contains("/org/weasis/core/weasis-core-i18n/"));
+    assertTrue(install13.contains("weasis-dicom-explorer-i18n-4.7.3.jar"));
+    assertTrue(install13.contains("weasis-dicom-viewer2d-i18n-4.7.3.jar"));
     assertEquals(install13, launcher.value("felix.auto.install.13"));
     boolean found = false;
     for (ConfigData.AutoBundle auto : dist.autoBundles()) {
       if (auto.startLevel() == 13) {
         found = true;
         assertFalse(auto.start());
-        assertEquals(1, auto.files().size());
+        assertEquals(3, auto.files().size());
       }
     }
     assertTrue(found);

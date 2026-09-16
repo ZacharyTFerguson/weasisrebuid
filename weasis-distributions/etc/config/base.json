@@ -109,8 +109,8 @@
     },
     {
       "code": "felix.auto.install.13",
-      "value": "file:${maven.localRepository}/org/weasis/core/weasis-core-i18n/${app.version}/weasis-core-i18n-${app.version}.jar",
-      "description": "weasis-core i18n fragment",
+      "value": "file:${maven.localRepository}/org/weasis/core/weasis-core-i18n/${app.version}/weasis-core-i18n-${app.version}.jar file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-explorer-i18n/${app.version}/weasis-dicom-explorer-i18n-${app.version}.jar file:${maven.localRepository}/org/weasis/dicom/weasis-dicom-viewer2d-i18n/${app.version}/weasis-dicom-viewer2d-i18n-${app.version}.jar",
+      "description": "i18n fragments",
       "type": "A",
       "category": "FELIX_INSTALL"
     },

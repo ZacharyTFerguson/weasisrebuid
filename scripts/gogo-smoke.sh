@@ -104,6 +104,13 @@ i18n_state = bundle_state(lb, "Weasis Core i18n")
 i18n_ok = i18n_state in ("Resolved", "Installed")
 if not i18n_ok:
     sys.exit("lb did not install weasis-core-i18n fragment @13 (Resolved): %r" % lb)
+explorer_i18n = bundle_state(lb, "Weasis Explorer i18n")
+viewer2d_i18n = bundle_state(lb, "Weasis Viewer2d i18n")
+if explorer_i18n not in ("Resolved", "Installed"):
+    sys.exit("lb did not install weasis-dicom-explorer-i18n fragment @13 (Resolved): %r" % lb)
+if viewer2d_i18n not in ("Resolved", "Installed"):
+    sys.exit("lb did not install weasis-dicom-viewer2d-i18n fragment @13 (Resolved): %r" % lb)
+print("gogo-smoke: explorer/viewer2d i18n fragments Installed @13 (have)")
 send_ok = bundle_state(lb, "Weasis DICOM Send") == "Active"
 qr_ok = bundle_state(lb, "Weasis DICOM Q/R") == "Active"
 iso_ok = bundle_state(lb, "Weasis DICOM ISO writer") == "Active"

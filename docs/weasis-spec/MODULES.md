@@ -10,7 +10,7 @@ Same modules as upstream `pom.xml`:
 
 `weasis-distributions` is **not** in the root reactor. Package native zip from that aggregator with `-P compressXZ`.
 
-`weasis-i18n` **is** in the root reactor (WP-14). Upstream keeps translations in the sister repo `nroduit/weasis-i18n`; this clone vendors a `weasis-core-i18n` fragment so File &gt; Preferences can attach locales with ≥ 30 % coverage.
+`weasis-i18n` **is** in the root reactor (WP-14). Upstream keeps translations in the sister repo `nroduit/weasis-i18n`; this clone vendors `weasis-core-i18n`, `weasis-dicom-explorer-i18n`, and `weasis-dicom-viewer2d-i18n` fragments so File &gt; Preferences can attach locales with ≥ 30 % coverage.
 
 `weasis-pacs-connector` **is** in the root reactor (WP-15). It is the ViewerHub / dcm4chee IID Have sibling (`nroduit/viewer-hub`), **not** a Felix auto-start bundle and **not** in the Weasis 4.7.3 main POM fixture.
 
