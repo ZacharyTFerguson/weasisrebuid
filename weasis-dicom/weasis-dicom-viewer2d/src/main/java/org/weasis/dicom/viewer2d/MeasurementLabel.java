@@ -15,6 +15,7 @@ import org.weasis.core.api.image.measure.ImageSpacing;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.ClosedCurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.FreehandGraphic;
@@ -112,6 +113,26 @@ public final class MeasurementLabel {
     ImageSpacing spacing = resolved.map(InstanceSpacing.Resolved::spacing).orElse(null);
     Optional<Double> mmOpt = polygon.getAreaMm(spacing);
     double pxArea = polygon.getAreaValue();
+    if (resolved.isEmpty() || mmOpt.isEmpty()) {
+      return formatPixelsArea(pxArea);
+    }
+    String base = formatAreaMm(mmOpt.get());
+    InstanceSpacing.Resolved r = resolved.get();
+    return switch (r.source()) {
+      case IMAGER_DETECTOR -> base + " (detector plane)";
+      case IMAGER_OBJECT_ESTIMATE -> base + " (estimate)";
+      default -> base;
+    };
+  }
+
+  public static String formatRectangle(
+      RectangleGraphic rectangle, Optional<InstanceSpacing.Resolved> resolved) {
+    if (rectangle == null) {
+      return "";
+    }
+    ImageSpacing spacing = resolved.map(InstanceSpacing.Resolved::spacing).orElse(null);
+    Optional<Double> mmOpt = rectangle.getAreaMm(spacing);
+    double pxArea = rectangle.getAreaValue();
     if (resolved.isEmpty() || mmOpt.isEmpty()) {
       return formatPixelsArea(pxArea);
     }

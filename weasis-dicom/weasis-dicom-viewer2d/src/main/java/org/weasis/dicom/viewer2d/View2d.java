@@ -37,6 +37,7 @@ import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.EllipseGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.ClosedCurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.FreehandGraphic;
@@ -1053,6 +1054,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   public String formatPolygonMeasureLabel(PolygonGraphic polygon) {
     return MeasurementLabel.formatPolygon(polygon, resolvedInstanceSpacing);
+  }
+
+  public String formatRectangleMeasureLabel(RectangleGraphic rectangle) {
+    return MeasurementLabel.formatRectangle(rectangle, resolvedInstanceSpacing);
   }
 
   public String formatEllipseMeasureLabel(Ellipse2D roi) {
