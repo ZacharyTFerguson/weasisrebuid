@@ -345,7 +345,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     if (screen == null) {
       return null;
     }
-    View2d hit = firstView(viewOnScreen(screen), localView(screen), gridView(screen));
+    View2d hit = firstView(viewOnScreen(screen), gridView(screen), localView(screen));
     if (hit == null) {
       dumpCells(screen);
     }

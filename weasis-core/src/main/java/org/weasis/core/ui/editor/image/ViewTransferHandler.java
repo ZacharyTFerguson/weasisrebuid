@@ -269,8 +269,7 @@ public class ViewTransferHandler extends TransferHandler {
     if (view != null) {
       return view;
     }
-    JComponent hit = cellFrom(pluginAt(screen), screen);
-    return covers(hit, screen) ? hit : null;
+    return cellFrom(pluginAt(screen), screen);
   }
 
   static JComponent cellFrom(ImageViewerPlugin<?> plugin, Point screen) {
