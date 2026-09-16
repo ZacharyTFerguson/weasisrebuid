@@ -293,6 +293,28 @@ public class View2d extends DefaultView2d<MediaElement> {
     setSourceImage(painted);
   }
 
+  /** Copy already-painted pixels and VOI chrome; do not re-run {@link #render()}. */
+  public void copyDisplay(View2d from) {
+    if (from == null || from == this) {
+      return;
+    }
+    copyMetadata(from);
+    BufferedImage image = from.getSourceImage();
+    if (image != null) {
+      setSourceImage(image);
+    }
+  }
+
+  void copyMetadata(View2d from) {
+    this.dataset = from.dataset;
+    this.file = from.file;
+    this.fileWl = from.fileWl;
+    this.dataRangeWl = from.dataRangeWl;
+    this.activeVoi = from.activeVoi;
+    this.window = from.window;
+    this.level = from.level;
+  }
+
   BufferedImage applyFilterAndColor(BufferedImage src) {
     Object filter = getDisplayOpManager().getParamValue("op.filter", FilterOp.P_FILTER);
     Object invert = getDisplayOpManager().getParamValue("op.pseudocolor", PseudoColorOp.P_INVERT);

@@ -15,7 +15,6 @@ import java.awt.GridLayout;
 import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
@@ -289,8 +288,17 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   View2d emptyHang(JComponent onto) {
-    if (onto instanceof View2d cell && isEmptyHang(cell)) {
+    if (onto instanceof View2d cell && canFill(cell)) {
       return cell;
+    }
+    return firstUnpaintedExtra();
+  }
+
+  View2d firstUnpaintedExtra() {
+    for (int i = 1; i < layout.size(); i++) {
+      if (needsPaint(layout.get(i))) {
+        return layout.get(i);
+      }
     }
     return firstEmptyExtra();
   }
@@ -304,11 +312,16 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     return null;
   }
 
+  boolean canFill(View2d cell) {
+    return cell != null && cell != view2d && layout.contains(cell) && needsPaint(cell);
+  }
+
+  boolean needsPaint(View2d cell) {
+    return cell.getSourceImage() == null || isCloneSlot(cell, view2d.getSeries());
+  }
+
   boolean isEmptyHang(View2d cell) {
-    return cell != null
-        && cell != view2d
-        && layout.contains(cell)
-        && isCloneSlot(cell, view2d.getSeries());
+    return canFill(cell);
   }
 
   @Override
@@ -569,8 +582,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     }
     View2d from = paintedView(sequence);
     cell.setSeries(seriesToHang(sequence, from));
-    copyPaint(cell, from);
     loadInto(cell, cell.getSeries());
+    if (cell.getSourceImage() == null) {
+      copyPaint(cell, from != null ? from : paintedView(sequence));
+    }
   }
 
   MediaSeries<MediaElement> seriesToHang(MediaSeries<MediaElement> sequence, View2d from) {
@@ -582,21 +597,35 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   View2d paintedView(MediaSeries<MediaElement> sequence) {
     for (View2d v : layout) {
-      if (sameSeries(v.getSeries(), sequence) && v.getSourceImage() != null) {
+      if (v.getSourceImage() != null && samePaintSource(v.getSeries(), sequence)) {
         return v;
       }
     }
     return null;
   }
 
+  static boolean samePaintSource(MediaSeries<?> hung, MediaSeries<?> drop) {
+    return sameSeries(hung, drop) || sameMediaUri(hung, drop);
+  }
+
+  static boolean sameMediaUri(MediaSeries<?> a, MediaSeries<?> b) {
+    String uri = firstUri(a);
+    return !uri.isEmpty() && uri.equals(firstUri(b));
+  }
+
+  static String firstUri(MediaSeries<?> series) {
+    if (series == null || series.getMedias().isEmpty()) {
+      return "";
+    }
+    URI uri = series.getMedias().getFirst().getMediaURI();
+    return uri == null ? "" : uri.toString();
+  }
+
   static void copyPaint(View2d cell, View2d from) {
     if (from == null || cell == from) {
       return;
     }
-    BufferedImage image = from.getSourceImage();
-    if (image != null) {
-      cell.setSourceImage(image);
-    }
+    cell.copyDisplay(from);
   }
 
   MediaSeries<MediaElement> loadable(MediaSeries<MediaElement> sequence) {
@@ -641,10 +670,25 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   void tryLoad(View2d cell, URI uri) {
+    File file = fileOf(uri);
+    if (file == null || !file.isFile()) {
+      return;
+    }
     try {
-      cell.load(new File(uri));
+      cell.load(file);
     } catch (Exception e) {
       cell.setGeometryWarning("Unable to open DICOM");
+    }
+  }
+
+  static File fileOf(URI uri) {
+    if (uri == null) {
+      return null;
+    }
+    try {
+      return new File(uri);
+    } catch (Exception e) {
+      return uri.getPath() == null ? null : new File(uri.getPath());
     }
   }
 

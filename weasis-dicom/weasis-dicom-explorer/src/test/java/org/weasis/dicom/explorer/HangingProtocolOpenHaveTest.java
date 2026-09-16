@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -172,6 +173,8 @@ class HangingProtocolOpenHaveTest {
       container.doLayout();
       assertEquals(4, container.getLayoutCount());
       View2d bottomLeft = container.getLayoutViews().get(2);
+      BufferedImage img = new BufferedImage(8, 8, BufferedImage.TYPE_BYTE_GRAY);
+      container.getLayoutViews().get(0).setSourceImage(img);
       JComponent grid = (JComponent) bottomLeft.getParent();
       Point screen = grid.getLocationOnScreen();
       screen.translate(Math.max(1, grid.getWidth() / 4), Math.max(1, (grid.getHeight() * 3) / 4));
@@ -179,6 +182,7 @@ class HangingProtocolOpenHaveTest {
       ViewTransferHandler.overAt(screen);
       assertTrue(ViewTransferHandler.hangAtPointer());
       assertEquals("2.25.chest", seriesUid(bottomLeft.getSeries()));
+      assertSame(img, bottomLeft.getSourceImage());
       assertEquals("2.25.knee", seriesUid(container.getLayoutViews().get(1).getSeries()));
       assertEquals(1, core.getOpenViewerPlugins().size());
     } finally {

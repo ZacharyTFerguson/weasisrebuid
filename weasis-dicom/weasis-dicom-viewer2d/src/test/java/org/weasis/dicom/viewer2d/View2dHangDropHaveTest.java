@@ -31,13 +31,9 @@ class View2dHangDropHaveTest {
 
   @Test
   void hangCellCopiesPaintedImageWhenExplorerSeriesHasNoUri() {
-    View2dContainer container = new View2dContainer();
-    container.setLayoutCount(4);
-    View2d primary = container.getLayoutViews().get(0);
-    Series<MediaElement> hung = new Series<>("2.25.paint");
-    primary.setSeries(hung);
-    BufferedImage img = new BufferedImage(4, 4, BufferedImage.TYPE_BYTE_GRAY);
-    primary.setSourceImage(img);
+    View2dContainer container = twoByTwoChest();
+    BufferedImage img = gray();
+    container.getLayoutViews().get(0).setSourceImage(img);
     Series<MediaElement> explorer = new Series<>("2.25.paint");
     explorer.addMedia(new MediaElement());
     View2d bottomLeft = container.getLayoutViews().get(2);
@@ -45,5 +41,52 @@ class View2dHangDropHaveTest {
     assertSame(img, bottomLeft.getSourceImage());
     Object uid = bottomLeft.getSeries().getTagValue(TagW.SeriesInstanceUID);
     assertEquals("2.25.paint", String.valueOf(uid));
+  }
+
+  @Test
+  void hangCellCopiesPaintWhenExplorerUriMatchesHungFile() {
+    View2dContainer container = new View2dContainer();
+    container.setLayoutCount(4);
+    BufferedImage img = gray();
+    Series<MediaElement> hung = new Series<>("2.25.paint");
+    MediaElement hungMedia = new MediaElement();
+    hungMedia.setMediaURI(java.net.URI.create("file:///tmp/chest-hang.dcm"));
+    hung.addMedia(hungMedia);
+    View2d primary = container.getLayoutViews().get(0);
+    primary.setSeries(hung);
+    primary.setSourceImage(img);
+    Series<MediaElement> explorer = new Series<>("2.25.other-uid");
+    MediaElement drop = new MediaElement();
+    drop.setMediaURI(java.net.URI.create("file:///tmp/chest-hang.dcm"));
+    explorer.addMedia(drop);
+    View2d bottomLeft = container.getLayoutViews().get(2);
+    container.hangCell(bottomLeft, explorer);
+    assertSame(img, bottomLeft.getSourceImage());
+  }
+
+  @Test
+  void dropOntoUnpaintedBottomLeftCopiesPixelsNotOnlySeries() {
+    View2dContainer container = twoByTwoChest();
+    BufferedImage img = gray();
+    container.getLayoutViews().get(0).setSourceImage(img);
+    View2d bottomLeft = container.getLayoutViews().get(2);
+    Series<MediaElement> explorer = new Series<>("2.25.paint");
+    explorer.addMedia(new MediaElement());
+    container.dropSeries(explorer, bottomLeft);
+    assertSame(img, bottomLeft.getSourceImage());
+    Object uid = bottomLeft.getSeries().getTagValue(TagW.SeriesInstanceUID);
+    assertEquals("2.25.paint", String.valueOf(uid));
+  }
+
+  static View2dContainer twoByTwoChest() {
+    View2dContainer container = new View2dContainer();
+    container.setLayoutCount(4);
+    Series<MediaElement> hung = new Series<>("2.25.paint");
+    container.getLayoutViews().get(0).setSeries(hung);
+    return container;
+  }
+
+  static BufferedImage gray() {
+    return new BufferedImage(4, 4, BufferedImage.TYPE_BYTE_GRAY);
   }
 }
