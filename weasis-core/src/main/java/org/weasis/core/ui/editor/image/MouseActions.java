@@ -28,6 +28,11 @@ public final class MouseActions {
   /** Three-point angle measure; distinct from {@link #DRAW} line and {@link #POLYLINE}. */
   public static final String ANGLE = "angle";
 
+  /**
+   * Four-point Cobb measure; distinct from {@link #DRAW}, {@link #POLYLINE}, and {@link #ANGLE}.
+   */
+  public static final String COBB = "cobb";
+
   public static final String CROSSHAIR = "crosshair";
 
   private String left = WINLEVEL;
