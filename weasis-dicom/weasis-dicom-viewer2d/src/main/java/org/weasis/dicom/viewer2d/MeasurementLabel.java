@@ -17,6 +17,7 @@ import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.ClosedCurveGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.CurveGraphic;
+import org.weasis.core.ui.model.graphic.imp.line.FreehandGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
 import org.weasis.dicom.codec.utils.InstanceSpacing;
@@ -70,6 +71,17 @@ public final class MeasurementLabel {
     return formatLengthMm(
         closedCurve.getLength(),
         closedCurve.getLengthMm(resolved.map(InstanceSpacing.Resolved::spacing).orElse(null)),
+        resolved);
+  }
+
+  public static String formatFreehand(
+      FreehandGraphic freehand, Optional<InstanceSpacing.Resolved> resolved) {
+    if (freehand == null) {
+      return "";
+    }
+    return formatLengthMm(
+        freehand.getLength(),
+        freehand.getLengthMm(resolved.map(InstanceSpacing.Resolved::spacing).orElse(null)),
         resolved);
   }
 
