@@ -61,6 +61,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final CineToolBar cineToolBar = new CineToolBar();
   private final MeasureToolBar measureToolBar = new MeasureToolBar();
   private final KeyObjectToolBar keyObjectToolBar = new KeyObjectToolBar();
+  private final Basic3DToolBar basic3DToolBar = new Basic3DToolBar();
   private final ViewTransferHandler seriesDrop = new ViewTransferHandler();
   private int layoutIndex;
 
@@ -109,6 +110,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     toolbars.registerToolBar(headerToolBar);
     toolbars.registerToolBar(screenshotToolBar);
     toolbars.registerToolBar(cineToolBar);
+    toolbars.registerToolBar(basic3DToolBar);
     viewerToolBar.bind(view2d);
     keyObjectToolBar.bind(view2d);
     lutToolBar.bind(view2d);
@@ -132,6 +134,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     ui.add(headerToolBar);
     ui.add(screenshotToolBar);
     ui.add(cineToolBar);
+    ui.add(basic3DToolBar);
   }
 
   public ToolBarContainer getToolBars() {
@@ -152,6 +155,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public MeasureToolBar getMeasureToolBar() {
     return measureToolBar;
+  }
+
+  public Basic3DToolBar getBasic3DToolBar() {
+    return basic3DToolBar;
   }
 
   public View2d getView2d() {

@@ -22,11 +22,15 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.util.List;
+import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
+import org.weasis.dicom.viewer2d.mpr.MprAxis;
 import org.weasis.dicom.viewer2d.mpr.MprContainer;
 
 class ViewerChromeHaveTest {
@@ -75,6 +79,36 @@ class ViewerChromeHaveTest {
     MprContainer opened = bar.openMpr(core);
     assertInstanceOf(MprContainer.class, opened);
     assertSame(opened, core.getSelectedViewerPlugin());
+  }
+
+  @Test
+  void view2dContainerBasic3DOpensMprTabWithThreePlanes() {
+    UICore core = UICore.getInstance();
+    closePlugins(core);
+    View2dContainer twoD = new View2dContainer();
+    try {
+      core.openViewerPlugin(twoD);
+      assertTrue(
+          twoD.getSeriesViewerUI().getToolBar().stream()
+              .anyMatch(b -> Basic3DToolBar.NAME.equals(b.getComponentName())));
+      AbstractButton mpr = (AbstractButton) twoD.getBasic3DToolBar().getComponent(0);
+      assertEquals("MPR", mpr.getText());
+      assertEquals("mpr", mpr.getName());
+      mpr.doClick();
+      assertInstanceOf(MprContainer.class, core.getSelectedViewerPlugin());
+      assertEquals(2, core.getOpenViewerPlugins().size());
+      MprContainer opened = (MprContainer) core.getSelectedViewerPlugin();
+      assertEquals(MprContainer.NAME, opened.getPluginName());
+      assertEquals(3, opened.getPlaneGrid().getComponentCount());
+      assertSame(opened.getController().getAxial(), opened.getPlaneGrid().getComponent(0));
+      assertSame(opened.getController().getCoronal(), opened.getPlaneGrid().getComponent(1));
+      assertSame(opened.getController().getSagittal(), opened.getPlaneGrid().getComponent(2));
+      assertEquals(MprAxis.AXIAL, opened.getController().getAxial().getAxis());
+      assertEquals(MprAxis.CORONAL, opened.getController().getCoronal().getAxis());
+      assertEquals(MprAxis.SAGITTAL, opened.getController().getSagittal().getAxis());
+    } finally {
+      closePlugins(core);
+    }
   }
 
   @Test
@@ -540,5 +574,11 @@ class ViewerChromeHaveTest {
       }
     }
     return false;
+  }
+
+  static void closePlugins(UICore core) {
+    for (ViewerPlugin<?> plugin : List.copyOf(core.getOpenViewerPlugins())) {
+      core.closeViewerPlugin(plugin);
+    }
   }
 }

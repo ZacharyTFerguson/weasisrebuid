@@ -9,6 +9,9 @@
  */
 package org.weasis.dicom.viewer2d.mpr;
 
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import javax.swing.JPanel;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 
@@ -17,15 +20,21 @@ public class MprContainer extends ImageViewerPlugin<MediaElement> {
 
   public static final String NAME = "MPR";
   private final MprController controller = new MprController();
+  private final JPanel planeGrid = new JPanel(new GridLayout(1, 3));
 
   public MprContainer() {
     super(NAME);
-    add(controller.getAxial());
-    add(controller.getCoronal());
-    add(controller.getSagittal());
+    planeGrid.add(controller.getAxial());
+    planeGrid.add(controller.getCoronal());
+    planeGrid.add(controller.getSagittal());
+    add(planeGrid, BorderLayout.CENTER);
   }
 
   public MprController getController() {
     return controller;
+  }
+
+  public JPanel getPlaneGrid() {
+    return planeGrid;
   }
 }
