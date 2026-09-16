@@ -39,6 +39,12 @@ public final class MouseActions {
    */
   public static final String POLYGON = "polygon";
 
+  /**
+   * Two-handle bbox ellipse ROI; distinct from {@link #DRAW}, {@link #POLYLINE}, {@link #ANGLE},
+   * {@link #COBB}, and {@link #POLYGON}.
+   */
+  public static final String ELLIPSE = "ellipse";
+
   public static final String CROSSHAIR = "crosshair";
 
   private String left = WINLEVEL;
