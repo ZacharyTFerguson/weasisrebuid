@@ -9,6 +9,7 @@
  */
 package org.weasis.core.ui.model.graphic.imp.angle;
 
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.Optional;
 import org.weasis.core.api.image.measure.ImageSpacing;
@@ -93,7 +94,20 @@ public class CobbToolGraphic extends AbstractDragGraphic {
 
   @Override
   public void buildShape() {
-    setShape(null);
+    Point2D.Double h0 = getHandlePoint(0);
+    Point2D.Double h1 = getHandlePoint(1);
+    Point2D.Double h2 = getHandlePoint(2);
+    Point2D.Double h3 = getHandlePoint(3);
+    if (h0 == null || h1 == null || h2 == null || h3 == null) {
+      setShape(null);
+      return;
+    }
+    Path2D path = new Path2D.Double();
+    path.moveTo(h0.x, h0.y);
+    path.lineTo(h1.x, h1.y);
+    path.moveTo(h2.x, h2.y);
+    path.lineTo(h3.x, h3.y);
+    setShape(path);
   }
 
   @Override

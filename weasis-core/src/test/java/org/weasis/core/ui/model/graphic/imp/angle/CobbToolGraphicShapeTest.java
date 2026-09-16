@@ -33,8 +33,8 @@ import org.junit.jupiter.api.Test;
  *
  * <p>Why fail-closed null shape: if any of the four handle positions is unavailable, painting a
  * partial or inferred endplate would misrepresent where the Cobb was taken. Clearing the shape
- * matches {@link org.weasis.core.ui.model.graphic.imp.line.LineGraphic#buildShape()} when
- * endpoints are missing.
+ * matches {@link org.weasis.core.ui.model.graphic.imp.line.LineGraphic#buildShape()} when endpoints
+ * are missing.
  *
  * <p>Why not copy upstream {@code MeasureTool}: that stack mixes calibration, arc decoration, and
  * tool chrome. This rebuild keeps Cobb as four image-space handles on {@link CobbToolGraphic} with
@@ -60,10 +60,7 @@ class CobbToolGraphicShapeTest {
   void missingFourthHandleClearsShape() {
     CobbToolGraphic cobb = new CobbToolGraphic();
     cobb.setPts(
-        List.of(
-            new Point2D.Double(0, 0),
-            new Point2D.Double(10, 0),
-            new Point2D.Double(0, 20)));
+        List.of(new Point2D.Double(0, 0), new Point2D.Double(10, 0), new Point2D.Double(0, 20)));
     assertNull(cobb.getShape());
   }
 
