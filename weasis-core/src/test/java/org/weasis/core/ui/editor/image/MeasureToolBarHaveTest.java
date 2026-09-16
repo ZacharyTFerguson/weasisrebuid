@@ -500,6 +500,40 @@ class MeasureToolBarHaveTest {
   }
 
   @Test
+  void windowGridClickOnASelectsAngleNotDistanceThenDrawsDegrees() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    JFrame frame = new JFrame();
+    try {
+      JComponent glass = showWithGlass(frame, bar, view);
+      javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+      javax.swing.JToggleButton angle = findToggle(bar, "measure-angle");
+      assertTrue(distance.isSelected());
+      Point origin = frame.getLocationOnScreen();
+      Point screen =
+          new Point(
+              origin.x + MeasureToolBar.GRID_X + MeasureToolBar.GRID_STEP,
+              origin.y + MeasureToolBar.GRID_Y);
+      Point onGlass = new Point(screen);
+      javax.swing.SwingUtilities.convertPointFromScreen(onGlass, glass);
+      pressOn(glass, onGlass);
+      assertTrue(angle.isSelected());
+      assertFalse(distance.isSelected());
+      assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+      drag(view, 20, 20, 20, 80);
+      assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+      assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
+      AngleToolGraphic drawn = (AngleToolGraphic) view.getGraphicList().getLast();
+      assertTrue(drawn.getAngleDegrees() > 1.0);
+      assertTrue(drawn.getLabel()[0].contains("°"));
+    } finally {
+      frame.dispose();
+    }
+  }
+
+  @Test
   void pressBelowDistanceDoesNotReselectDWhenYSelected() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     DefaultView2d<?> view = sizedGrayView();

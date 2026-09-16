@@ -19,6 +19,7 @@ import java.awt.IllegalComponentStateException;
 import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
@@ -46,6 +47,13 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   static final Dimension HIT = new Dimension(40, 32);
   static final Color BOX = Color.LIGHT_GRAY;
   static final String GLASS_MARK = "measure.glass";
+
+  /** Headed robot grid: window origin + (528 + i×44, 112) for D/A/Y/G/B. */
+  static final int GRID_X = 528;
+
+  static final int GRID_Y = 112;
+  static final int GRID_STEP = 44;
+  static final int GRID_PAD = 20;
   static final List<MeasureToolBar> LIVE = new CopyOnWriteArrayList<>();
   static final MouseAdapter GLASS = glassMouse();
 
@@ -271,7 +279,14 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
 
   JToggleButton toggleAt(Point screen) {
     JToggleButton exact = exactToggle(screen);
-    return exact != null ? exact : nearbyToggle(screen);
+    if (exact != null) {
+      return exact;
+    }
+    JToggleButton grid = gridToggle(screen);
+    if (grid != null) {
+      return grid;
+    }
+    return nearbyToggle(screen);
   }
 
   JToggleButton exactToggle(Point screen) {
@@ -279,7 +294,76 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   JToggleButton nearbyToggle(Point screen) {
-    return closest(screen, 4);
+    JToggleButton near = closest(screen, 4);
+    return distanceToggle(near) ? null : near;
+  }
+
+  static boolean distanceToggle(JToggleButton toggle) {
+    return toggle != null && "measure-distance".equals(toggle.getName());
+  }
+
+  JToggleButton gridToggle(Point screen) {
+    int i = gridIndex(screen);
+    if (i < 0 || i >= BUTTONS.length) {
+      return null;
+    }
+    return toggle(BUTTONS[i]);
+  }
+
+  int gridIndex(Point screen) {
+    Window w = windowOf();
+    Point origin = originOf(w);
+    if (origin == null || screen == null) {
+      return -1;
+    }
+    int relX = screen.x - origin.x;
+    int relY = screen.y - origin.y;
+    int i = indexAt(relX, relY);
+    if (i >= 0) {
+      return i;
+    }
+    return insetIndex(w, relX, relY);
+  }
+
+  int insetIndex(Window w, int relX, int relY) {
+    if (w == null) {
+      return -1;
+    }
+    Insets in = w.getInsets();
+    if (in == null) {
+      return -1;
+    }
+    return indexAt(relX + in.left, relY + in.top);
+  }
+
+  static int indexAt(int relX, int relY) {
+    if (Math.abs(relY - GRID_Y) > GRID_PAD) {
+      return -1;
+    }
+    int i = Math.floorDiv(relX - GRID_X + GRID_STEP / 2, GRID_STEP);
+    if (i < 0 || i >= BUTTONS.length) {
+      return -1;
+    }
+    return i;
+  }
+
+  Point windowOrigin() {
+    return originOf(windowOf());
+  }
+
+  Window windowOf() {
+    return SwingUtilities.getWindowAncestor(this);
+  }
+
+  static Point originOf(Window w) {
+    if (w == null || !w.isShowing()) {
+      return null;
+    }
+    try {
+      return w.getLocationOnScreen();
+    } catch (IllegalComponentStateException e) {
+      return null;
+    }
   }
 
   JToggleButton closest(Point screen, int pad) {
