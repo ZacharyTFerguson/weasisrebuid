@@ -30,20 +30,20 @@ import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
  * <p><b>Why (0028,0030) via landed APIs:</b> spacing comes from {@link
  * org.weasis.dicom.codec.utils.InstanceSpacing#resolve} on the loaded instance; degrees and arm
  * lengths reach the label only through {@link AngleToolGraphic#getAngleDegrees}, {@link
- * AngleToolGraphic#getArmLengthMm}, and {@link MeasurementLabel#formatAngle}. The draw handler
- * must not apply spacing in view coordinates or format its own unit string.
+ * AngleToolGraphic#getArmLengthMm}, and {@link MeasurementLabel#formatAngle}. The draw handler must
+ * not apply spacing in view coordinates or format its own unit string.
  *
- * <p><b>Why three handles in fixed order:</b> landed {@link AngleToolGraphic} uses index 0 and 2
- * as arm endpoints and 1 as the vertex; click order must match that contract so labels agree with
+ * <p><b>Why three handles in fixed order:</b> landed {@link AngleToolGraphic} uses index 0 and 2 as
+ * arm endpoints and 1 as the vertex; click order must match that contract so labels agree with
  * {@link View2dAngleMeasureLabelTest} on the same geometry.
  *
- * <p><b>Why fail-closed px:</b> when spacing is missing, handles still store in image space but
- * the label uses pixel arm lengths from the graphic API — same as headless angle label tests, no
- * silent mm guess.
+ * <p><b>Why fail-closed px:</b> when spacing is missing, handles still store in image space but the
+ * label uses pixel arm lengths from the graphic API — same as headless angle label tests, no silent
+ * mm guess.
  *
- * <p><b>Why not copy Weasis:</b> upstream {@code MeasureTool} bundles angle paint, prefs, and
- * GSPS; this slice adds image-space handles + {@link View2d#formatAngleMeasureLabel} beside line
- * and polyline calipers — no measure-tool port, Cobb, polygon draw, or spline.
+ * <p><b>Why not copy Weasis:</b> upstream {@code MeasureTool} bundles angle paint, prefs, and GSPS;
+ * this slice adds image-space handles + {@link View2d#formatAngleMeasureLabel} beside line and
+ * polyline calipers — no measure-tool port, Cobb, polygon draw, or spline.
  */
 class View2dAngleDrawTest {
 
