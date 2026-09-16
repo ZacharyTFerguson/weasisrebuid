@@ -423,7 +423,9 @@ public class View2d extends DefaultView2d<MediaElement> {
     ellipseDrawViewReleased(viewX2, viewY2);
   }
 
-  /** Test hook: two-click rectangle draw in view coordinates when left action is {@code rectangle}. */
+  /**
+   * Test hook: two-click rectangle draw in view coordinates when left action is {@code rectangle}.
+   */
   public void simulateRectangleDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
     rectangleDrawViewPressed(viewX1, viewY1);
     rectangleDrawViewReleased(viewX1, viewY1);

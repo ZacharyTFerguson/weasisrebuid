@@ -38,19 +38,20 @@ import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
  * MeasurementLabel#formatRectangle} and instance spacing resolved on the loaded dataset. The draw
  * handler must not apply row/column pitch in view coordinates or format its own unit string.
  *
- * <p><b>Why two-handle bbox, not polygon or ellipse:</b> {@link RectangleGraphic#buildShape} already
- * turns two corner handles into a bbox {@link java.awt.geom.Rectangle2D}; caliper finalize must
- * reuse that graphic type so interactive draw matches headless {@link View2dRectangleMeasureLabelTest}
- * expectations and cannot alias a 2-vertex polygon or ellipse HU mean.
+ * <p><b>Why two-handle bbox, not polygon or ellipse:</b> {@link RectangleGraphic#buildShape}
+ * already turns two corner handles into a bbox {@link java.awt.geom.Rectangle2D}; caliper finalize
+ * must reuse that graphic type so interactive draw matches headless {@link
+ * View2dRectangleMeasureLabelTest} expectations and cannot alias a 2-vertex polygon or ellipse HU
+ * mean.
  *
  * <p><b>Why fail-closed px²:</b> when spacing is missing, handles still store in image space but
  * the label is pixel bbox area from {@link RectangleGraphic#getAreaValue}, same as rectangle label
  * tests — no silent mm² guess in the mouse path.
  *
- * <p><b>Why not copy Weasis:</b> upstream measure tools bundle rectangle drawing, calibration prefs,
- * and GSPS; this slice adds image-space bbox handles + {@link View2d#formatRectangleMeasureLabel}
- * beside line, polyline, polygon, and ellipse calipers — no measure-tool port, rectangle ROI HU, or
- * scribble.
+ * <p><b>Why not copy Weasis:</b> upstream measure tools bundle rectangle drawing, calibration
+ * prefs, and GSPS; this slice adds image-space bbox handles + {@link
+ * View2d#formatRectangleMeasureLabel} beside line, polyline, polygon, and ellipse calipers — no
+ * measure-tool port, rectangle ROI HU, or scribble.
  */
 class View2dRectangleDrawTest {
 
