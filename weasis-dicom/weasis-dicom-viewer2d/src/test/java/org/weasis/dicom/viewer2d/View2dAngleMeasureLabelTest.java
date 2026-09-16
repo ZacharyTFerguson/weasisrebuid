@@ -97,7 +97,8 @@ class View2dAngleMeasureLabelTest {
     View2d view = new View2d();
     view.load(dx);
     assertEquals(
-        "90.0°  2.0 mm / 2.0 mm (detector plane)", view.formatAngleMeasureLabel(rightAngleAtOrigin()));
+        "90.0°  2.0 mm / 2.0 mm (detector plane)",
+        view.formatAngleMeasureLabel(rightAngleAtOrigin()));
   }
 
   @Test
