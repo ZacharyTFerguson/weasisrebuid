@@ -23,12 +23,12 @@ import org.junit.jupiter.api.Test;
 /**
  * Why paint needs a shape: the 2D viewer stroke path uses {@link
  * org.weasis.core.ui.model.graphic.Graphic#getShape()} for landed graphics; angle measurement
- * labels can render from handle geometry while {@link AngleToolGraphic#buildShape()} still left
- * the arm path null, so nothing was stroked between handles.
+ * labels can render from handle geometry while {@link AngleToolGraphic#buildShape()} still left the
+ * arm path null, so nothing was stroked between handles.
  *
- * <p>Why two segments through the vertex: handle 1 is the included-angle vertex; arms are the
- * pixel segments from handle 0 into that vertex and from the vertex to handle 2 — same handle
- * order as draw and {@link AngleToolGraphicMeasureTest}, not a closed polygon or arc decoration.
+ * <p>Why two segments through the vertex: handle 1 is the included-angle vertex; arms are the pixel
+ * segments from handle 0 into that vertex and from the vertex to handle 2 — same handle order as
+ * draw and {@link AngleToolGraphicMeasureTest}, not a closed polygon or arc decoration.
  *
  * <p>Why fail-closed on missing handles: partial drafts (fewer than three stored points) must not
  * draw a misleading arm; null shape matches {@link
