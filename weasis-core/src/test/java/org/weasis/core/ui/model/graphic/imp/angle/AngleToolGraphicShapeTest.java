@@ -21,13 +21,14 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 /**
- * Why a stored shape: the 2D overlay paints {@link org.weasis.core.ui.model.graphic.Graphic#getShape()}
- * for landed graphics. Angle labels already come from {@link AngleToolGraphic#getAngleDegrees()} and
- * arm helpers; without a path, viewers show numbers but no caliper arms.
+ * Why a stored shape: the 2D overlay paints {@link
+ * org.weasis.core.ui.model.graphic.Graphic#getShape()} for landed graphics. Angle labels already
+ * come from {@link AngleToolGraphic#getAngleDegrees()} and arm helpers; without a path, viewers
+ * show numbers but no caliper arms.
  *
- * <p>Why three handles in fixed order: handle 1 is the vertex; handles 0 and 2 are the arm endpoints
- * the user drags. {@code buildShape()} connects 0 → vertex → 2 in image pixel space so paint matches
- * the same geometry used for measurement.
+ * <p>Why three handles in fixed order: handle 1 is the vertex; handles 0 and 2 are the arm
+ * endpoints the user drags. {@code buildShape()} connects 0 → vertex → 2 in image pixel space so
+ * paint matches the same geometry used for measurement.
  *
  * <p>Why fail-closed null shape: if any of those three handle positions is unavailable, painting a
  * partial or guessed path would lie about where the angle was taken. Clearing the shape matches how
@@ -46,18 +47,14 @@ class AngleToolGraphicShapeTest {
     Shape shape = angle.getShape();
     assertNotNull(shape);
     assertEquals(
-        List.of(
-            new Point2D.Double(10, 0),
-            new Point2D.Double(0, 0),
-            new Point2D.Double(0, 10)),
+        List.of(new Point2D.Double(10, 0), new Point2D.Double(0, 0), new Point2D.Double(0, 10)),
         pathVertices(shape));
   }
 
   @Test
   void missingVertexHandleClearsShape() {
     AngleToolGraphic angle = new AngleToolGraphic();
-    angle.setPts(
-        List.of(new Point2D.Double(10, 0), new Point2D.Double(5, 5)));
+    angle.setPts(List.of(new Point2D.Double(10, 0), new Point2D.Double(5, 5)));
     assertNull(angle.getShape());
   }
 
