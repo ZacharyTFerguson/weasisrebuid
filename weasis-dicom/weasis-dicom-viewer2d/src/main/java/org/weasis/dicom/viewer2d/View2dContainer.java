@@ -342,13 +342,59 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   public void applyFlip(boolean on) {
+    View2d painted = paintedCell();
     for (View2d cell : layout) {
       cell.setFlip(on);
     }
+    if (painted != null) {
+      painted.setFlip(on);
+      imageTool.bind(painted);
+    }
+    flushFlipPaint();
+  }
+
+  View2d paintedCell() {
+    View2d showing = showingRasterCell();
+    if (showing != null) {
+      return showing;
+    }
+    for (View2d v : layout) {
+      if (v.getSourceImage() != null) {
+        return v;
+      }
+    }
+    return focusedLayoutView();
+  }
+
+  View2d showingRasterCell() {
+    View2d best = null;
+    int area = 0;
+    for (View2d v : layout) {
+      if (!v.isShowing() || v.getSourceImage() == null) {
+        continue;
+      }
+      int a = Math.max(1, v.getWidth()) * Math.max(1, v.getHeight());
+      if (a > area) {
+        area = a;
+        best = v;
+      }
+    }
+    return best;
+  }
+
+  void flushFlipPaint() {
+    viewGrid.revalidate();
+    revalidate();
+    if (isShowing()) {
+      paintImmediately(0, 0, Math.max(1, getWidth()), Math.max(1, getHeight()));
+      return;
+    }
+    viewGrid.repaint();
+    repaint();
   }
 
   void refreshImageTool() {
-    imageTool.bind(focusedLayoutView());
+    imageTool.bind(paintedCell());
   }
 
   public void cycleLayout(int delta) {

@@ -10,6 +10,7 @@
 package org.weasis.dicom.viewer2d.dockable;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -52,13 +53,34 @@ public class ImageTool extends PluginTool {
 
   void applyFlip() {
     boolean on = flip.isSelected();
-    Object host = view == null ? null : view.getClientProperty(View2dContainer.class);
-    if (host instanceof View2dContainer container) {
-      container.applyFlip(on);
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyFlip(on);
     } else if (view != null) {
       view.setFlip(on);
     }
     refresh();
+  }
+
+  static View2dContainer hostOf(View2d view) {
+    if (view == null) {
+      return null;
+    }
+    Object property = view.getClientProperty(View2dContainer.class);
+    if (property instanceof View2dContainer container) {
+      return container;
+    }
+    return hostFromParent(view);
+  }
+
+  static View2dContainer hostFromParent(Component c) {
+    while (c != null) {
+      if (c instanceof View2dContainer container) {
+        return container;
+      }
+      c = c.getParent();
+    }
+    return null;
   }
 
   public View2d boundView() {

@@ -480,7 +480,14 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
 
   public void setFlip(boolean flip) {
     this.flip = flip;
-    repaint();
+    int w = Math.max(1, getWidth());
+    int h = Math.max(1, getHeight());
+    revalidate();
+    if (isShowing()) {
+      paintImmediately(0, 0, w, h);
+      return;
+    }
+    repaint(0, 0, w, h);
   }
 
   public void toggleFlip() {

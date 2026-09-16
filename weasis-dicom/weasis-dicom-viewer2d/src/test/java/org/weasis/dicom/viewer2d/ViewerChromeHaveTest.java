@@ -153,6 +153,37 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void namedFlipMirrorsImportedChestOnSingleView() throws Exception {
+    View2dContainer container = new View2dContainer();
+    assertEquals(1, container.getLayoutCount());
+    BufferedImage src = splitGray(1929, 2207);
+    View2d view = container.getView2d();
+    view.setSourceImage(src);
+    view.setZoom(AffineTransformOp.ZOOM_BEST_FIT);
+    view.setRotation(0);
+    container.getImageTool().bind(view);
+    AbstractButton flip = container.getImageTool().flipButton();
+    assertSame(view, container.getImageTool().boundView());
+    int left = band(paintAt(view, 340, 500), 16, 80);
+    int right = band(paintAt(view, 340, 500), 260, 324);
+    assertTrue(left < right);
+    int srcLeft = src.getRaster().getSample(20, 1100, 0);
+    flip.doClick();
+    assertTrue(view.isFlip());
+    assertEquals(srcLeft, src.getRaster().getSample(20, 1100, 0));
+    assertSame(src, view.getSourceImage());
+    assertTrue(band(paintAt(view, 340, 500), 16, 80) > band(paintAt(view, 340, 500), 260, 324));
+    AffineTransformOp affine = new AffineTransformOp();
+    affine.setParam(org.weasis.core.api.image.ImageOpNode.INPUT_IMG, src);
+    affine.process();
+    assertSame(src, affine.getParam(org.weasis.core.api.image.ImageOpNode.OUTPUT_IMG));
+    flip.doClick();
+    assertFalse(view.isFlip());
+    assertEquals(left, band(paintAt(view, 340, 500), 16, 80));
+    assertEquals(right, band(paintAt(view, 340, 500), 260, 324));
+  }
+
+  @Test
   void view2dContainerWiresZoomAndRotationChrome() {
     View2dContainer container = new View2dContainer();
     assertTrue(
