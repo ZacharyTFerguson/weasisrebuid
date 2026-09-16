@@ -66,6 +66,8 @@ public class View2d extends DefaultView2d<MediaElement> {
   private LineGraphic draftLineCaliper;
   private boolean draftLineAwaitingSecondClick;
 
+  private FreehandGraphic draftFreehandCaliper;
+
   private PolylineGraphic draftPolylineCaliper;
 
   private CurveGraphic draftCurveCaliper;
@@ -229,6 +231,27 @@ public class View2d extends DefaultView2d<MediaElement> {
    * Adds a polyline caliper in image pixel coordinates and binds its label to {@link
    * #formatPolylineMeasureLabel}.
    */
+  /**
+   * Adds a free-hand scribble in image pixel coordinates and binds its label to {@link
+   * #formatFreehandMeasureLabel}.
+   */
+  public void addFreehandCaliper(List<? extends Point2D> imageSamples) {
+    if (imageSamples == null || imageSamples.size() < 2) {
+      return;
+    }
+    List<Point2D.Double> copies = new ArrayList<>();
+    for (Point2D p : imageSamples) {
+      if (p == null) {
+        return;
+      }
+      copies.add(copyPoint(p));
+    }
+    FreehandGraphic freehand = new FreehandGraphic();
+    freehand.setSamples(copies);
+    applyFreehandCaliperLabel(freehand);
+    addGraphic(freehand);
+  }
+
   public void addPolylineCaliper(List<? extends Point2D> imagePoints) {
     if (imagePoints == null || imagePoints.size() < 2) {
       return;
@@ -354,6 +377,17 @@ public class View2d extends DefaultView2d<MediaElement> {
     addGraphic(ellipse);
   }
 
+  /** Test hook: press-drag-release free-hand stroke when left action is {@code freehand}. */
+  public void simulateFreehandDrawStroke(int startViewX, int startViewY, int... dragViewXY) {
+    freehandDrawViewPressed(startViewX, startViewY);
+    for (int i = 0; i + 1 < dragViewXY.length; i += 2) {
+      freehandDrawViewDragged(dragViewXY[i], dragViewXY[i + 1]);
+    }
+    int releaseX = dragViewXY.length >= 2 ? dragViewXY[dragViewXY.length - 2] : startViewX;
+    int releaseY = dragViewXY.length >= 2 ? dragViewXY[dragViewXY.length - 1] : startViewY;
+    freehandDrawViewReleased(releaseX, releaseY);
+  }
+
   /** Test hook: two-click line draw in view coordinates when left action is {@code draw}. */
   public void simulateLineDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
     lineDrawViewPressed(viewX1, viewY1);
@@ -415,6 +449,48 @@ public class View2d extends DefaultView2d<MediaElement> {
     line.setLabel(new String[] {formatLineMeasureLabel(line)});
   }
 
+  void freehandDrawViewPressed(int viewX, int viewY) {
+    if (draftFreehandCaliper != null) {
+      return;
+    }
+    Point2D.Double image = viewToImage(viewX, viewY);
+    draftFreehandCaliper = new FreehandGraphic();
+    draftFreehandCaliper.setSamples(List.of(image));
+    addGraphic(draftFreehandCaliper);
+    repaint();
+  }
+
+  void freehandDrawViewDragged(int viewX, int viewY) {
+    if (draftFreehandCaliper == null) {
+      return;
+    }
+    Point2D.Double image = viewToImage(viewX, viewY);
+    List<Point2D.Double> next = new ArrayList<>(draftFreehandCaliper.getPts());
+    if (next.getLast().distance(image) > 1e-6) {
+      next.add(image);
+      draftFreehandCaliper.setSamples(next);
+      repaint();
+    }
+  }
+
+  void freehandDrawViewReleased(int viewX, int viewY) {
+    if (draftFreehandCaliper == null) {
+      return;
+    }
+    freehandDrawViewDragged(viewX, viewY);
+    if (draftFreehandCaliper.getPts().size() < 2) {
+      getGraphicList().remove(draftFreehandCaliper);
+    } else {
+      applyFreehandCaliperLabel(draftFreehandCaliper);
+    }
+    draftFreehandCaliper = null;
+    repaint();
+  }
+
+  private void applyFreehandCaliperLabel(FreehandGraphic freehand) {
+    freehand.setLabel(new String[] {formatFreehandMeasureLabel(freehand)});
+  }
+
   void ellipseDrawViewPressed(int viewX, int viewY) {
     Point2D.Double image = viewToImage(viewX, viewY);
     if (draftEllipseCaliper != null && draftEllipseAwaitingSecondClick) {
@@ -470,6 +546,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   boolean isLineDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.DRAW.equals(normalizedLeftAction);
+  }
+
+  boolean isFreehandDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.FREEHAND.equals(normalizedLeftAction);
   }
 
   boolean isPolylineDrawMouseAction(String normalizedLeftAction) {
@@ -1173,6 +1253,10 @@ public class View2d extends DefaultView2d<MediaElement> {
         view2d.ellipseDrawViewPressed(e.getX(), e.getY());
         return;
       }
+      if (freehandDrawActive(e)) {
+        view2d.freehandDrawViewPressed(e.getX(), e.getY());
+        return;
+      }
       if (lineDrawActive(e)) {
         view2d.lineDrawViewPressed(e.getX(), e.getY());
         return;
@@ -1200,6 +1284,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (ellipseDrawActive(e)) {
         view2d.ellipseDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
+      if (freehandDrawActive(e)) {
+        view2d.freehandDrawViewDragged(e.getX(), e.getY());
         return;
       }
       if (lineDrawActive(e)) {
@@ -1237,6 +1325,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (ellipseDrawActive(e)) {
         view2d.ellipseDrawViewReleased(e.getX(), e.getY());
+        return;
+      }
+      if (freehandDrawActive(e)) {
+        view2d.freehandDrawViewReleased(e.getX(), e.getY());
         return;
       }
       if (lineDrawActive(e)) {
@@ -1329,6 +1421,19 @@ public class View2d extends DefaultView2d<MediaElement> {
           org.weasis.core.ui.editor.image.MouseActions.normalize(
               view2d.getMouseActions().getLeft());
       if (!view2d.isLineDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
+    }
+
+    private boolean freehandDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isFreehandDrawMouseAction(left)) {
         return false;
       }
       if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
