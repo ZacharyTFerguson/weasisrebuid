@@ -98,7 +98,7 @@ class FreehandGraphicMmTest {
   @Test
   void usesAnisotropicRowColScaling() {
     FreehandGraphic scribble =
-        freehand(new Point2D.Double(0, 0), new Point2D.Double(0, 10), new Point2D.Double(10, 10));
+        freehand(new Point2D.Double(0, 0), new Point2D.Double(5, 10), new Point2D.Double(10, 0));
     Optional<Double> mm = scribble.getLengthMm(ANISO);
     Optional<Double> isoWrong = scribble.getLengthMm(new ImageSpacing(0.375, 0.375));
     assertTrue(mm.isPresent());
