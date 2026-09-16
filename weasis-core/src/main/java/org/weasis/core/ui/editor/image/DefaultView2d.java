@@ -1400,8 +1400,7 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     int w = src.getWidth();
     int h = src.getHeight();
     int type = src.getType();
-    BufferedImage dst =
-        new BufferedImage(w, h, type == 0 ? BufferedImage.TYPE_INT_ARGB : type);
+    BufferedImage dst = new BufferedImage(w, h, type == 0 ? BufferedImage.TYPE_INT_ARGB : type);
     int bands = src.getRaster().getNumBands();
     int[] pixel = new int[bands];
     for (int y = 0; y < h; y++) {

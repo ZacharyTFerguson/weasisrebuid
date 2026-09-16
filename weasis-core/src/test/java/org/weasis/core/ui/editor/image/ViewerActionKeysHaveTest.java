@@ -139,8 +139,7 @@ class ViewerActionKeysHaveTest {
     BufferedImage blit = view.blitSource();
     assertNotSame(view.getSourceImage(), blit);
     assertEquals(
-        view.getSourceImage().getRaster().getSample(0, 5, 0),
-        blit.getRaster().getSample(9, 5, 0));
+        view.getSourceImage().getRaster().getSample(0, 5, 0), blit.getRaster().getSample(9, 5, 0));
     view.getEventManager().keyPressed(key(view, KeyEvent.VK_F, InputEvent.ALT_DOWN_MASK));
     assertFalse(view.isFlip());
     assertSame(view.getSourceImage(), view.blitSource());

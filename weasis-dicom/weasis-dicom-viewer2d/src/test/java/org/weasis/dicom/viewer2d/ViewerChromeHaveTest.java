@@ -136,7 +136,8 @@ class ViewerChromeHaveTest {
     assertEquals(srcLeft, src.getRaster().getSample(16, 128, 0));
     assertSame(src, primary.getSourceImage());
     assertSame(src, extra.getSourceImage());
-    assertTrue(band(paintAt(primary, 400, 300), 24, 80) > band(paintAt(primary, 400, 300), 320, 376));
+    assertTrue(
+        band(paintAt(primary, 400, 300), 24, 80) > band(paintAt(primary, 400, 300), 320, 376));
     assertTrue(band(paintAt(extra, 400, 300), 24, 80) > band(paintAt(extra, 400, 300), 320, 376));
     AffineTransformOp affine = new AffineTransformOp();
     affine.setParam(org.weasis.core.api.image.ImageOpNode.INPUT_IMG, src);
