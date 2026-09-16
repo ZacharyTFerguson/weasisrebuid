@@ -26,26 +26,25 @@ import org.weasis.dicom.codec.utils.RoiStatistics;
 
 /**
  * Interactive ellipse ROI on {@link View2d}: two image-space bbox handles on {@link EllipseGraphic}
- * bind the visible label to {@link View2d#formatEllipseMeasureLabel} — not HU or spacing
- * recomputed in the mouse path.
+ * bind the visible label to {@link View2d#formatEllipseMeasureLabel} — not HU or spacing recomputed
+ * in the mouse path.
  *
  * <p><b>Why landed {@link RoiStatistics#ellipse}:</b> the label string comes only from {@link
  * View2d#formatEllipseMeasureLabel} on the graphic's bbox {@link Ellipse2D}, which delegates to
- * {@link org.weasis.dicom.codec.utils.RoiStatistics#ellipse} on the loaded instance's stored
- * pixels and rescale tags. The draw handler must not sample the painted buffer or duplicate mean
- * HU math.
+ * {@link org.weasis.dicom.codec.utils.RoiStatistics#ellipse} on the loaded instance's stored pixels
+ * and rescale tags. The draw handler must not sample the painted buffer or duplicate mean HU math.
  *
- * <p><b>Why bbox handles, not a separate formula path:</b> {@link EllipseGraphic#buildShape} already
- * turns two corner handles into an {@link Ellipse2D}; caliper finalize must reuse that shape for
- * the formatter so interactive draw matches headless {@link View2dMeasureLabelTest} ellipse
- * expectations.
+ * <p><b>Why bbox handles, not a separate formula path:</b> {@link EllipseGraphic#buildShape}
+ * already turns two corner handles into an {@link Ellipse2D}; caliper finalize must reuse that
+ * shape for the formatter so interactive draw matches headless {@link View2dMeasureLabelTest}
+ * ellipse expectations.
  *
  * <p><b>Why fail-closed empty label:</b> when the instance or shape is unusable, {@link
  * View2d#formatEllipseMeasureLabel} returns {@code ""} via the existing oracle — the mouse path
  * must not invent a placeholder HU or px area string.
  *
- * <p><b>Why not copy Weasis:</b> upstream ellipse tools bundle measure prefs, GSPS, and painted
- * ROI adapters; this slice adds image-space bbox handles + {@link View2d#formatEllipseMeasureLabel}
+ * <p><b>Why not copy Weasis:</b> upstream ellipse tools bundle measure prefs, GSPS, and painted ROI
+ * adapters; this slice adds image-space bbox handles + {@link View2d#formatEllipseMeasureLabel}
  * beside line, polyline, angle, Cobb, and polygon calipers — no measure-tool port, rectangle ROI,
  * spline, or scribble.
  */

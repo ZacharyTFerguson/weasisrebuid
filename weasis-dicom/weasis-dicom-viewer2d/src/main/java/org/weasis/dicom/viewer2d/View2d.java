@@ -35,6 +35,7 @@ import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.core.ui.model.graphic.imp.angle.AngleToolGraphic;
 import org.weasis.core.ui.model.graphic.imp.angle.CobbToolGraphic;
+import org.weasis.core.ui.model.graphic.imp.area.EllipseGraphic;
 import org.weasis.core.ui.model.graphic.imp.area.PolygonGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.PolylineGraphic;
@@ -71,6 +72,9 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   private CobbToolGraphic draftCobbCaliper;
   private int draftCobbClickStage;
+
+  private EllipseGraphic draftEllipseCaliper;
+  private boolean draftEllipseAwaitingSecondClick;
 
   static final String MULTI_FRAME_REFUSED = "multi-frame instance refused";
 
@@ -288,12 +292,35 @@ public class View2d extends DefaultView2d<MediaElement> {
     addGraphic(cobb);
   }
 
+  /**
+   * Adds an ellipse ROI caliper in image pixel coordinates and binds its label to {@link
+   * #formatEllipseMeasureLabel} on the graphic bbox {@link Ellipse2D}.
+   */
+  public void addEllipseCaliper(Point2D cornerA, Point2D cornerB) {
+    if (cornerA == null || cornerB == null) {
+      return;
+    }
+    EllipseGraphic ellipse = new EllipseGraphic();
+    ellipse.setHandlePoint(0, copyPoint(cornerA));
+    ellipse.setHandlePoint(1, copyPoint(cornerB));
+    applyEllipseCaliperLabel(ellipse);
+    addGraphic(ellipse);
+  }
+
   /** Test hook: two-click line draw in view coordinates when left action is {@code draw}. */
   public void simulateLineDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
     lineDrawViewPressed(viewX1, viewY1);
     lineDrawViewReleased(viewX1, viewY1);
     lineDrawViewPressed(viewX2, viewY2);
     lineDrawViewReleased(viewX2, viewY2);
+  }
+
+  /** Test hook: two-click ellipse draw in view coordinates when left action is {@code ellipse}. */
+  public void simulateEllipseDrawTwoClick(int viewX1, int viewY1, int viewX2, int viewY2) {
+    ellipseDrawViewPressed(viewX1, viewY1);
+    ellipseDrawViewReleased(viewX1, viewY1);
+    ellipseDrawViewPressed(viewX2, viewY2);
+    ellipseDrawViewReleased(viewX2, viewY2);
   }
 
   void lineDrawViewPressed(int viewX, int viewY) {
@@ -341,6 +368,55 @@ public class View2d extends DefaultView2d<MediaElement> {
     line.setLabel(new String[] {formatLineMeasureLabel(line)});
   }
 
+  void ellipseDrawViewPressed(int viewX, int viewY) {
+    Point2D.Double image = viewToImage(viewX, viewY);
+    if (draftEllipseCaliper != null && draftEllipseAwaitingSecondClick) {
+      draftEllipseCaliper.setHandlePoint(1, image);
+      finalizeDraftEllipseCaliper();
+      return;
+    }
+    draftEllipseCaliper = new EllipseGraphic();
+    draftEllipseCaliper.setHandlePoint(0, image);
+    draftEllipseCaliper.setHandlePoint(1, new Point2D.Double(image.x, image.y));
+    draftEllipseAwaitingSecondClick = true;
+    addGraphic(draftEllipseCaliper);
+    repaint();
+  }
+
+  void ellipseDrawViewDragged(int viewX, int viewY) {
+    if (draftEllipseCaliper == null) {
+      return;
+    }
+    draftEllipseAwaitingSecondClick = false;
+    draftEllipseCaliper.setHandlePoint(1, viewToImage(viewX, viewY));
+    repaint();
+  }
+
+  void ellipseDrawViewReleased(int viewX, int viewY) {
+    if (draftEllipseCaliper == null) {
+      return;
+    }
+    if (!draftEllipseAwaitingSecondClick) {
+      draftEllipseCaliper.setHandlePoint(1, viewToImage(viewX, viewY));
+      finalizeDraftEllipseCaliper();
+    }
+  }
+
+  private void finalizeDraftEllipseCaliper() {
+    applyEllipseCaliperLabel(draftEllipseCaliper);
+    draftEllipseCaliper = null;
+    draftEllipseAwaitingSecondClick = false;
+    repaint();
+  }
+
+  private void applyEllipseCaliperLabel(EllipseGraphic ellipse) {
+    if (ellipse.getShape() instanceof Ellipse2D roi) {
+      ellipse.setLabel(new String[] {formatEllipseMeasureLabel(roi)});
+    } else {
+      ellipse.setLabel(new String[] {""});
+    }
+  }
+
   private static Point2D.Double copyPoint(Point2D p) {
     return new Point2D.Double(p.getX(), p.getY());
   }
@@ -363,6 +439,10 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   boolean isCobbDrawMouseAction(String normalizedLeftAction) {
     return org.weasis.core.ui.editor.image.MouseActions.COBB.equals(normalizedLeftAction);
+  }
+
+  boolean isEllipseDrawMouseAction(String normalizedLeftAction) {
+    return org.weasis.core.ui.editor.image.MouseActions.ELLIPSE.equals(normalizedLeftAction);
   }
 
   /** Test hook: polyline vertex click in view coordinates when left action is {@code polyline}. */
@@ -842,6 +922,10 @@ public class View2d extends DefaultView2d<MediaElement> {
         view2d.polylineDrawViewPressed(e.getX(), e.getY(), e.getClickCount());
         return;
       }
+      if (ellipseDrawActive(e)) {
+        view2d.ellipseDrawViewPressed(e.getX(), e.getY());
+        return;
+      }
       if (lineDrawActive(e)) {
         view2d.lineDrawViewPressed(e.getX(), e.getY());
         return;
@@ -857,6 +941,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewDragged(e.getX(), e.getY());
+        return;
+      }
+      if (ellipseDrawActive(e)) {
+        view2d.ellipseDrawViewDragged(e.getX(), e.getY());
         return;
       }
       if (lineDrawActive(e)) {
@@ -882,6 +970,10 @@ public class View2d extends DefaultView2d<MediaElement> {
       }
       if (polylineDrawActive(e)) {
         view2d.polylineDrawViewReleased(e.getX(), e.getY(), e.getClickCount());
+        return;
+      }
+      if (ellipseDrawActive(e)) {
+        view2d.ellipseDrawViewReleased(e.getX(), e.getY());
         return;
       }
       if (lineDrawActive(e)) {
@@ -948,6 +1040,19 @@ public class View2d extends DefaultView2d<MediaElement> {
           org.weasis.core.ui.editor.image.MouseActions.normalize(
               view2d.getMouseActions().getLeft());
       if (!view2d.isLineDrawMouseAction(left)) {
+        return false;
+      }
+      if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
+        return (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0;
+      }
+      return e.getButton() == MouseEvent.BUTTON1;
+    }
+
+    private boolean ellipseDrawActive(MouseEvent e) {
+      String left =
+          org.weasis.core.ui.editor.image.MouseActions.normalize(
+              view2d.getMouseActions().getLeft());
+      if (!view2d.isEllipseDrawMouseAction(left)) {
         return false;
       }
       if (e.getID() == MouseEvent.MOUSE_DRAGGED) {
