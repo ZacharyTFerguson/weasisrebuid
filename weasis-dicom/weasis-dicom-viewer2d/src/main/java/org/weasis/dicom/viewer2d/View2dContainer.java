@@ -15,6 +15,8 @@ import java.awt.GridLayout;
 import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.net.URI;
 import java.util.List;
@@ -26,6 +28,7 @@ import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.TagW;
+import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.GridMouseHandler;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MeasureToolBar;
@@ -73,7 +76,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     synchManager.add(view2d);
     View2dRegistry.register(view2d);
     View2dRegistry.select(view2d);
+    armLayoutBounds();
     relayoutViews();
+  }
+
+  void armLayoutBounds() {
+    addComponentListener(
+        new ComponentAdapter() {
+          @Override
+          public void componentResized(ComponentEvent e) {
+            DefaultView2d.dropBoundsCache();
+          }
+        });
   }
 
   void bindDrop(JComponent c) {
@@ -203,6 +217,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     bindDrop(viewGrid);
     viewGrid.revalidate();
     viewGrid.repaint();
+    DefaultView2d.dropBoundsCache();
   }
 
   static GridLayout gridForCount(int n) {
@@ -241,6 +256,25 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   @Override
   public void deselectAllGraphics() {
     focusedLayoutView().deselectAllGraphics();
+  }
+
+  @Override
+  public void deleteAllGraphics() {
+    for (View2d v : layout) {
+      wipeGraphics(v);
+    }
+  }
+
+  static void wipeGraphics(View2d v) {
+    v.abandonDrawing();
+    v.selectAllGraphics();
+    v.deleteSelectedGraphics();
+  }
+
+  @Override
+  public DefaultView2d<?> canvasAt(Point screen) {
+    DefaultView2d<?> cell = DefaultView2d.atScreen(screen, layout);
+    return cell != null ? cell : super.canvasAt(screen);
   }
 
   public int getLayoutIndex() {
@@ -397,14 +431,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   static Rectangle showingBox(JComponent c) {
-    if (c == null || !c.isShowing()) {
-      return null;
-    }
-    try {
-      return new Rectangle(c.getLocationOnScreen(), c.getSize());
-    } catch (IllegalComponentStateException e) {
-      return null;
-    }
+    return DefaultView2d.liveScreenBox(c);
   }
 
   static Point fromScreen(JComponent c, Point screen) {
@@ -429,20 +456,8 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   View2d viewOnScreen(Point screen) {
-    View2d hit = null;
-    long area = Long.MAX_VALUE;
-    for (View2d v : layout) {
-      Rectangle box = showingBox(v);
-      if (!boxContains(box, screen)) {
-        continue;
-      }
-      long a = (long) box.width * box.height;
-      if (a > 0 && a < area) {
-        area = a;
-        hit = v;
-      }
-    }
-    return hit;
+    DefaultView2d<?> hit = DefaultView2d.atScreen(screen, layout);
+    return hit instanceof View2d v ? v : null;
   }
 
   static boolean boxContains(Rectangle box, Point screen) {

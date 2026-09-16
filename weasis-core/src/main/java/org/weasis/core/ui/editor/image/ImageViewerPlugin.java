@@ -127,4 +127,12 @@ public abstract class ImageViewerPlugin<E extends MediaElement> extends ViewerPl
 
   /** Edit > Deselect All (graphics). */
   public void deselectAllGraphics() {}
+
+  /** Explorer Delete: every canvas in this plugin, including empty hang cells. */
+  public void deleteAllGraphics() {}
+
+  /** Live canvas under {@code screen}. Default is every showing {@link DefaultView2d}. */
+  public DefaultView2d<?> canvasAt(Point screen) {
+    return DefaultView2d.atScreen(screen);
+  }
 }

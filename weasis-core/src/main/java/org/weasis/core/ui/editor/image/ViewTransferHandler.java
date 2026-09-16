@@ -11,7 +11,6 @@ package org.weasis.core.ui.editor.image;
 
 import java.awt.AWTEvent;
 import java.awt.Component;
-import java.awt.IllegalComponentStateException;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
@@ -299,14 +298,7 @@ public class ViewTransferHandler extends TransferHandler {
   }
 
   static Rectangle screenBox(JComponent c) {
-    if (c == null || !c.isShowing()) {
-      return null;
-    }
-    try {
-      return new Rectangle(c.getLocationOnScreen(), c.getSize());
-    } catch (IllegalComponentStateException e) {
-      return null;
-    }
+    return DefaultView2d.liveScreenBox(c);
   }
 
   public Transferable seriesTransferable(MediaSeries<?> series) {

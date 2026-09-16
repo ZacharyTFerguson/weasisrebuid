@@ -19,6 +19,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -28,6 +29,7 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.ImageViewerEventManager;
 import org.weasis.core.ui.editor.image.MeasureToolBar;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
@@ -85,6 +87,64 @@ class View2dGridMeasureHaveTest {
       core.setSelectedViewerPlugin(previous);
       frame.dispose();
     }
+  }
+
+  @Test
+  void distanceThenExplorerReflowThenLiveAngleOnBlNotEmptyBrThenDelete() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    View2dContainer container = new View2dContainer();
+    container.setLayoutCount(4);
+    View2d bl = container.getLayoutViews().get(2);
+    View2d br = container.getLayoutViews().get(3);
+    chest(bl);
+    JFrame frame = new JFrame();
+    UICore core = UICore.getInstance();
+    var previous = core.getSelectedViewerPlugin();
+    core.setSelectedViewerPlugin(container);
+    try {
+      JComponent glass = showGrid(frame, container);
+      MeasureToolBar bar = container.getMeasureToolBar();
+      JToggleButton distance = bar.toggle("D");
+      JToggleButton angle = bar.toggle("A");
+      clickGlass(glass, distance);
+      dragGlass(glass, bl, 20, 20, 80, 20);
+      assertEquals(1, bl.getGraphicList().size());
+      assertTrue(bl.getGraphicList().getLast() instanceof LineGraphic);
+      assertTrue(br.getGraphicList().isEmpty());
+      reflowExplorerHide(frame, container);
+      clickGlass(glass, angle);
+      assertTrue(angle.isSelected());
+      assertFalse(distance.isSelected());
+      assertEquals(MeasureTool.ANGLE, bl.activeMeasureTool());
+      dragGlass(glass, bl, 20, 20, 20, 80);
+      assertEquals(2, bl.getGraphicList().size());
+      assertFalse(bl.getGraphicList().getLast() instanceof LineGraphic);
+      assertTrue(bl.getGraphicList().getLast() instanceof AngleToolGraphic);
+      assertTrue(br.getGraphicList().isEmpty());
+      LineGraphic stray = new LineGraphic();
+      stray.setHandlePoint(0, new Point2D.Double(0, 0));
+      stray.setHandlePoint(1, new Point2D.Double(4, 0));
+      br.addGraphic(stray);
+      ImageViewerEventManager.DrawStroke.rememberView(bl);
+      ImageViewerEventManager.DrawStroke.deleteOutside(
+          new KeyEvent(new JPanel(), KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_DELETE, '\0'));
+      for (View2d cell : container.getLayoutViews()) {
+        assertTrue(cell.getGraphicList().isEmpty());
+      }
+    } finally {
+      core.setSelectedViewerPlugin(previous);
+      frame.dispose();
+    }
+  }
+
+  static void reflowExplorerHide(JFrame frame, View2dContainer container) {
+    frame.setSize(900, 720);
+    container.setSize(880, 640);
+    frame.validate();
+    container.revalidate();
+    container.doLayout();
+    container.getViewGrid().doLayout();
+    DefaultView2d.dropBoundsCache();
   }
 
   static void chest(View2d view) {

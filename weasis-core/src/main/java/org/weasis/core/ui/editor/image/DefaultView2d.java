@@ -11,6 +11,8 @@ package org.weasis.core.ui.editor.image;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.IllegalComponentStateException;
@@ -19,6 +21,11 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
+import java.awt.event.HierarchyBoundsAdapter;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -33,6 +40,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.gui.util.SliderCineListener;
 import org.weasis.core.api.image.AffineTransformOp;
@@ -67,6 +75,32 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   public static final double ZOOM_BEST_FIT = AffineTransformOp.ZOOM_BEST_FIT;
   public static final double ZOOM_REAL_SIZE = AffineTransformOp.ZOOM_REAL_SIZE;
   static final List<DefaultView2d<?>> LIVE = new CopyOnWriteArrayList<>();
+  static volatile int boundsGen;
+  static final ComponentAdapter BOUNDS =
+      new ComponentAdapter() {
+        @Override
+        public void componentResized(ComponentEvent e) {
+          dropBoundsCache();
+        }
+
+        @Override
+        public void componentMoved(ComponentEvent e) {
+          dropBoundsCache();
+        }
+      };
+  static final HierarchyBoundsAdapter ANCESTOR =
+      new HierarchyBoundsAdapter() {
+        @Override
+        public void ancestorResized(HierarchyEvent e) {
+          dropBoundsCache();
+        }
+
+        @Override
+        public void ancestorMoved(HierarchyEvent e) {
+          dropBoundsCache();
+        }
+      };
+  static final HierarchyListener TREE = e -> dropBoundsCache();
 
   private final SimpleOpManager displayOp = SimpleOpManager.view2dChain();
   private final MouseActions mouseActions = new MouseActions();
@@ -178,31 +212,84 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   }
 
   @Override
+  public void addNotify() {
+    super.addNotify();
+    if (!LIVE.contains(this)) {
+      LIVE.add(this);
+    }
+    armBounds();
+    dropBoundsCache();
+  }
+
+  @Override
   public void removeNotify() {
     LIVE.remove(this);
+    dropBoundsCache();
     super.removeNotify();
   }
 
-  /** Smallest showing canvas whose on-screen box contains {@code screen}. */
-  public static DefaultView2d<?> atScreen(Point screen) {
-    DefaultView2d<?> best = null;
-    long area = Long.MAX_VALUE;
-    for (DefaultView2d<?> v : LIVE) {
-      long a = areaIfHit(v, screen);
-      if (a > 0 && a < area) {
-        area = a;
-        best = v;
-      }
+  void armBounds() {
+    if (Boolean.TRUE.equals(getClientProperty("measure.bounds"))) {
+      return;
     }
-    return best;
+    putClientProperty("measure.bounds", Boolean.TRUE);
+    addComponentListener(BOUNDS);
+    addHierarchyBoundsListener(ANCESTOR);
+    addHierarchyListener(TREE);
   }
 
-  static long areaIfHit(DefaultView2d<?> v, Point screen) {
-    Rectangle box = screenBox(v);
+  /** Dock / resize invalidates any prior screen boxes. Hit-tests always reread live bounds. */
+  public static void dropBoundsCache() {
+    boundsGen++;
+  }
+
+  /** Smallest showing canvas under {@code screen}. Image raster wins over an empty sibling. */
+  public static DefaultView2d<?> atScreen(Point screen) {
+    return atScreen(screen, LIVE);
+  }
+
+  public static DefaultView2d<?> atScreen(
+      Point screen, Iterable<? extends DefaultView2d<?>> views) {
+    DefaultView2d<?> raster = best(views, screen, true);
+    return raster != null ? raster : best(views, screen, false);
+  }
+
+  static DefaultView2d<?> best(
+      Iterable<? extends DefaultView2d<?>> views, Point screen, boolean raster) {
+    DefaultView2d<?> hit = null;
+    long area = Long.MAX_VALUE;
+    for (DefaultView2d<?> v : views) {
+      long a = score(v, screen, raster);
+      if (a > 0 && a < area) {
+        area = a;
+        hit = v;
+      }
+    }
+    return hit;
+  }
+
+  static long score(DefaultView2d<?> v, Point screen, boolean raster) {
+    Rectangle box = liveScreenBox(v);
     if (!boxContains(box, screen)) {
       return 0;
     }
+    if (raster != rasterHit(v, box, screen)) {
+      return 0;
+    }
     return (long) box.width * box.height;
+  }
+
+  static boolean rasterHit(DefaultView2d<?> v, Rectangle box, Point screen) {
+    BufferedImage src = v.getSourceImage();
+    if (src == null || box == null) {
+      return false;
+    }
+    Point2D.Double img = v.viewToImage(screen.x - box.x, screen.y - box.y);
+    return inRaster(img, src);
+  }
+
+  static boolean inRaster(Point2D.Double img, BufferedImage src) {
+    return img.x >= 0 && img.y >= 0 && img.x < src.getWidth() && img.y < src.getHeight();
   }
 
   static boolean boxContains(Rectangle box, Point screen) {
@@ -210,13 +297,25 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
   }
 
   static Rectangle screenBox(DefaultView2d<?> c) {
+    return liveScreenBox(c);
+  }
+
+  public static Rectangle liveScreenBox(Component c) {
     if (c == null || !c.isShowing()) {
       return null;
     }
+    syncLayout(c);
     try {
       return new Rectangle(c.getLocationOnScreen(), c.getSize());
     } catch (IllegalComponentStateException e) {
       return null;
+    }
+  }
+
+  static void syncLayout(Component c) {
+    Component root = SwingUtilities.getRoot(c);
+    if (root instanceof Container box && !box.isValid()) {
+      box.validate();
     }
   }
 

@@ -637,6 +637,13 @@ public class ImageViewerEventManager {
 
     void deletePluginGraphics(DefaultView2d<?> seed) {
       ImageViewerPlugin<?> plugin = pluginOf(seed);
+      if (plugin != null) {
+        plugin.deleteAllGraphics();
+      }
+      sweepLive(plugin, seed);
+    }
+
+    void sweepLive(ImageViewerPlugin<?> plugin, DefaultView2d<?> seed) {
       int n = 0;
       for (DefaultView2d<?> v : DefaultView2d.LIVE) {
         if (cleared(plugin, seed, v)) {
@@ -677,18 +684,31 @@ public class ImageViewerEventManager {
     }
 
     static void clearView(DefaultView2d<?> v) {
-      if (v.getSelectedGraphics().isEmpty()) {
-        v.selectAllGraphics();
-      }
+      v.abandonDrawing();
+      v.selectAllGraphics();
       v.deleteSelectedGraphics();
     }
 
     static DefaultView2d<?> viewAt(MouseEvent me) {
-      DefaultView2d<?> under = DefaultView2d.atScreen(eventScreen(me));
-      if (under != null) {
-        return under;
-      }
-      return componentView(me);
+      Point screen = eventScreen(me);
+      DefaultView2d.dropBoundsCache();
+      DefaultView2d<?> cell = pluginCanvas(me, screen);
+      return cell != null ? cell : liveOrComponent(me, screen);
+    }
+
+    static DefaultView2d<?> pluginCanvas(MouseEvent me, Point screen) {
+      ImageViewerPlugin<?> plugin = pluginNear(me);
+      return plugin == null ? null : plugin.canvasAt(screen);
+    }
+
+    static ImageViewerPlugin<?> pluginNear(MouseEvent me) {
+      ImageViewerPlugin<?> above = ImageViewerPlugin.pluginAbove(me.getComponent());
+      return above != null ? above : pluginOf(INSTANCE.lastView);
+    }
+
+    static DefaultView2d<?> liveOrComponent(MouseEvent me, Point screen) {
+      DefaultView2d<?> under = DefaultView2d.atScreen(screen);
+      return under != null ? under : componentView(me);
     }
 
     static DefaultView2d<?> componentView(MouseEvent me) {

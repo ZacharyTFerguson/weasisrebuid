@@ -420,6 +420,26 @@ class ViewerChromeHaveTest {
     assertTrue(container.getView2d().getSelectedGraphics().isEmpty());
   }
 
+  @Test
+  void deleteAllGraphicsClearsEveryLayoutCellIncludingEmptyBr() {
+    View2dContainer container = new View2dContainer();
+    container.setLayoutCount(4);
+    View2d bl = container.getLayoutViews().get(2);
+    View2d br = container.getLayoutViews().get(3);
+    LineGraphic onBl = new LineGraphic();
+    onBl.setHandlePoint(0, new Point2D.Double(0, 0));
+    onBl.setHandlePoint(1, new Point2D.Double(4, 0));
+    bl.addGraphic(onBl);
+    LineGraphic onBr = new LineGraphic();
+    onBr.setHandlePoint(0, new Point2D.Double(0, 0));
+    onBr.setHandlePoint(1, new Point2D.Double(4, 0));
+    br.addGraphic(onBr);
+    container.deleteAllGraphics();
+    for (View2d cell : container.getLayoutViews()) {
+      assertTrue(cell.getGraphicList().isEmpty());
+    }
+  }
+
   static KeyEvent tab(View2d view, int mods) {
     return new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, mods, KeyEvent.VK_TAB, '\t');
   }

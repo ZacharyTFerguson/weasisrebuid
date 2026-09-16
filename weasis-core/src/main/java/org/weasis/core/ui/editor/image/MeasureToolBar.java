@@ -278,17 +278,13 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   static int screenDist(JComponent c, Point screen) {
-    if (c == null || screen == null || !c.isShowing()) {
+    Rectangle box = DefaultView2d.liveScreenBox(c);
+    if (box == null || screen == null) {
       return Integer.MAX_VALUE;
     }
-    try {
-      Point p = c.getLocationOnScreen();
-      int dx = screen.x - (p.x + c.getWidth() / 2);
-      int dy = screen.y - (p.y + c.getHeight() / 2);
-      return dx * dx + dy * dy;
-    } catch (IllegalComponentStateException e) {
-      return Integer.MAX_VALUE;
-    }
+    int dx = screen.x - (box.x + box.width / 2);
+    int dy = screen.y - (box.y + box.height / 2);
+    return dx * dx + dy * dy;
   }
 
   static boolean containsScreen(JComponent c, Point screen) {
@@ -296,18 +292,14 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   static boolean containsPad(JComponent c, Point screen, int pad) {
-    if (c == null || screen == null || !c.isShowing()) {
+    Rectangle box = DefaultView2d.liveScreenBox(c);
+    if (box == null || screen == null) {
       return false;
     }
-    try {
-      Rectangle box = new Rectangle(c.getLocationOnScreen(), c.getSize());
-      if (pad > 0) {
-        box.grow(pad, pad);
-      }
-      return box.contains(screen);
-    } catch (IllegalComponentStateException e) {
-      return false;
+    if (pad > 0) {
+      box.grow(pad, pad);
     }
+    return box.contains(screen);
   }
 
   /**
