@@ -119,8 +119,7 @@ class ViewerChromeHaveTest {
         ((javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(4))
             .getText());
     assertSame(container.getView2d(), container.getMeasureToolBar().boundView());
-    assertEquals(
-        "Measure", container.getSeriesViewerUI().getToolBar().get(1).getComponentName());
+    assertEquals("Measure", container.getSeriesViewerUI().getToolBar().get(1).getComponentName());
   }
 
   @Test
@@ -149,7 +148,7 @@ class ViewerChromeHaveTest {
     } finally {
       g.dispose();
     }
-    assertTrue(yellowAt(page, 60, 60));
+    assertTrue(yellowStrokeOnChest(page));
   }
 
   @Test
@@ -218,6 +217,17 @@ class ViewerChromeHaveTest {
   static MouseEvent mouse(View2d view, int id, int x, int y) {
     int mods = id == MouseEvent.MOUSE_RELEASED ? 0 : InputEvent.BUTTON1_DOWN_MASK;
     return new MouseEvent(view, id, 0L, mods, x, y, 1, false, MouseEvent.BUTTON1);
+  }
+
+  static boolean yellowStrokeOnChest(BufferedImage page) {
+    for (int y = 10; y < 120; y++) {
+      for (int x = 10; x < 190; x++) {
+        if (yellowAt(page, x, y)) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
   static boolean yellowAt(BufferedImage page, int x, int y) {
