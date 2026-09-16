@@ -44,6 +44,7 @@ import javax.swing.SwingUtilities;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.gui.util.SliderCineListener;
 import org.weasis.core.api.image.AffineTransformOp;
+import org.weasis.core.api.image.FilterOp;
 import org.weasis.core.api.image.OpManager;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.image.SimpleOpManager;
@@ -530,8 +531,25 @@ public class DefaultView2d<E extends MediaElement> extends JPanel implements Vie
     return Boolean.TRUE.equals(value);
   }
 
+  public void setFilter(Object filter) {
+    displayOp.setParamValue(
+        "op.filter", FilterOp.P_FILTER, filter == null ? FilterOp.NONE : filter);
+    onFilterChanged();
+  }
+
+  public Object getFilter() {
+    Object value = displayOp.getParamValue("op.filter", FilterOp.P_FILTER);
+    return value == null ? FilterOp.NONE : value;
+  }
+
   /** Subclasses that bake LUT into pixels (DICOM {@code View2d}) re-render here. */
   protected void onLutChanged() {
+    if (!freezeParameters) {
+      repaint();
+    }
+  }
+
+  protected void onFilterChanged() {
     if (!freezeParameters) {
       repaint();
     }

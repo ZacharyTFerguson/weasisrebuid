@@ -20,6 +20,7 @@ import java.util.Objects;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.weasis.core.api.image.FilterOp;
+import org.weasis.core.api.image.ImageOpNode;
 import org.weasis.core.api.image.OverlayOp;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.image.ShutterOp;
@@ -170,6 +171,12 @@ public class View2d extends DefaultView2d<MediaElement> {
   @Override
   public void setInverseLut(boolean invert) {
     super.setInverseLut(invert);
+    render();
+  }
+
+  @Override
+  public void setFilter(Object filter) {
+    super.setFilter(filter);
     render();
   }
 
@@ -331,17 +338,37 @@ public class View2d extends DefaultView2d<MediaElement> {
   }
 
   BufferedImage applyFilterAndColor(BufferedImage src) {
-    Object filter = getDisplayOpManager().getParamValue("op.filter", FilterOp.P_FILTER);
-    Object invert = getDisplayOpManager().getParamValue("op.pseudocolor", PseudoColorOp.P_INVERT);
-    if (!Boolean.TRUE.equals(invert) && (filter == null || FilterOp.NONE.equals(filter))) {
+    return applyInvert(applyKernel(src));
+  }
+
+  BufferedImage applyKernel(BufferedImage src) {
+    return runFilterOp(src, getDisplayOpManager().getParamValue("op.filter", FilterOp.P_FILTER));
+  }
+
+  static BufferedImage runFilterOp(BufferedImage src, Object filter) {
+    FilterOp op = new FilterOp();
+    if (filter != null) {
+      op.setParam(FilterOp.P_FILTER, filter);
+    }
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    try {
+      op.process();
+    } catch (Exception e) {
       return src;
     }
-    if (Boolean.TRUE.equals(invert)) {
-      WritableRaster raster = src.getRaster();
-      byte[] data = ((DataBufferByte) raster.getDataBuffer()).getData();
-      for (int i = 0; i < data.length; i++) {
-        data[i] = (byte) (255 - (data[i] & 0xff));
-      }
+    Object out = op.getParam(ImageOpNode.OUTPUT_IMG);
+    return out instanceof BufferedImage img ? img : src;
+  }
+
+  BufferedImage applyInvert(BufferedImage src) {
+    Object invert = getDisplayOpManager().getParamValue("op.pseudocolor", PseudoColorOp.P_INVERT);
+    if (!Boolean.TRUE.equals(invert)) {
+      return src;
+    }
+    WritableRaster raster = src.getRaster();
+    byte[] data = ((DataBufferByte) raster.getDataBuffer()).getData();
+    for (int i = 0; i < data.length; i++) {
+      data[i] = (byte) (255 - (data[i] & 0xff));
     }
     return src;
   }

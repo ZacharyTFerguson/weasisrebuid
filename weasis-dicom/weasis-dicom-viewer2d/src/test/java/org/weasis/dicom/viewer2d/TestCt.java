@@ -11,6 +11,7 @@ package org.weasis.dicom.viewer2d;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
 import org.dcm4che3.data.UID;
@@ -24,6 +25,23 @@ final class TestCt {
   private TestCt() {}
 
   static void write(File dest, int size, double level, double window) throws IOException {
+    int[] px = new int[size * size];
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        px[y * size + x] = (int) Math.round((x / (double) (size - 1)) * 200 - 80);
+      }
+    }
+    write(dest, size, level, window, px);
+  }
+
+  static void writePeak(File dest) throws IOException {
+    int[] px = new int[64];
+    Arrays.fill(px, 10);
+    px[4 * 8 + 4] = 200;
+    write(dest, 8, 40, 400, px);
+  }
+
+  static void write(File dest, int size, double level, double window, int[] px) throws IOException {
     String sop = UIDUtils.createUID("2.25");
     Attributes fmi = new Attributes();
     fmi.setBytes(Tag.FileMetaInformationVersion, VR.OB, new byte[] {0, 1});
@@ -51,12 +69,6 @@ final class TestCt {
     dcm.setDouble(Tag.RescaleIntercept, VR.DS, 0.0);
     dcm.setString(Tag.PatientName, VR.PN, "SYNTHETIC^CT");
     dcm.setString(Tag.PatientID, VR.LO, "SYN-CT-0001");
-    int[] px = new int[size * size];
-    for (int y = 0; y < size; y++) {
-      for (int x = 0; x < size; x++) {
-        px[y * size + x] = (int) Math.round((x / (double) (size - 1)) * 200 - 80);
-      }
-    }
     dcm.setInt(Tag.PixelData, VR.OW, px);
     try (DicomOutputStream out = new DicomOutputStream(dest)) {
       out.writeDataset(fmi, dcm);

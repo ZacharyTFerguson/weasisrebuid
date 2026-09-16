@@ -29,7 +29,10 @@ import javax.swing.AbstractButton;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.weasis.core.api.gui.Insertable;
+import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.image.AffineTransformOp;
+import org.weasis.core.api.image.FilterOp;
+import org.weasis.core.api.image.ImageOpNode;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
@@ -102,6 +105,39 @@ class ViewerChromeHaveTest {
     inverse.doClick();
     assertFalse(view.isInverseLut());
     assertEquals(before, view.getSourceImage().getRaster().getSample(4, 4, 0));
+  }
+
+  @Test
+  void sharpenClickRendersKernelWithoutChangingInverse(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("peak.dcm");
+    TestCt.writePeak(file.toFile());
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    int before = view.getSourceImage().getRaster().getSample(4, 4, 0);
+    AbstractButton inverse = (AbstractButton) container.getLutToolBar().getComponent(3);
+    AbstractButton sharpen = (AbstractButton) container.getLutToolBar().getComponent(4);
+    assertEquals("Inverse", inverse.getText());
+    assertEquals("inverseLut", inverse.getName());
+    assertEquals("Sharpen", sharpen.getText());
+    assertEquals(ActionW.FILTER.cmd(), sharpen.getName());
+    sharpen.doClick();
+    assertTrue(LutToolBar.sharpened(view.getFilter()));
+    int sharp = view.getSourceImage().getRaster().getSample(4, 4, 0);
+    assertTrue(sharp > before);
+    view.setSize(8, 8);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    assertEquals(sharp, paint(view).getRGB(4, 4) & 0xFF);
+    assertFalse(view.isInverseLut());
+    AffineTransformOp affine = new AffineTransformOp();
+    affine.setParam(ImageOpNode.INPUT_IMG, view.getSourceImage());
+    affine.process();
+    assertSame(view.getSourceImage(), affine.getParam(ImageOpNode.OUTPUT_IMG));
+    sharpen.doClick();
+    assertEquals(FilterOp.NONE, String.valueOf(view.getFilter()));
+    assertEquals(before, view.getSourceImage().getRaster().getSample(4, 4, 0));
+    assertEquals(before, paint(view).getRGB(4, 4) & 0xFF);
   }
 
   @Test

@@ -353,6 +353,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     flushFlipPaint();
   }
 
+  public void applyFilter(Object filter) {
+    View2d painted = paintedCell();
+    for (View2d cell : layout) {
+      cell.setFilter(filter);
+    }
+    if (painted != null) {
+      painted.setFilter(filter);
+      lutToolBar.bind(painted);
+    }
+    flushFlipPaint();
+  }
+
   View2d paintedCell() {
     View2d showing = showingRasterCell();
     if (showing != null) {

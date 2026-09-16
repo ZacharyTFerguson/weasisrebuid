@@ -9,12 +9,16 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JToggleButton;
+import org.weasis.core.api.gui.util.ActionW;
+import org.weasis.core.api.image.FilterOp;
 import org.weasis.core.api.image.PseudoColorOp;
+import org.weasis.core.api.image.util.KernelData;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.util.WtoolBar;
 
@@ -26,6 +30,7 @@ public class LutToolBar extends WtoolBar {
 
   private DefaultView2d<?> view;
   private final JToggleButton invert = new JToggleButton("Inverse");
+  private final JToggleButton sharpen = new JToggleButton("Sharpen");
 
   public LutToolBar() {
     super(NAME, 15);
@@ -35,12 +40,16 @@ public class LutToolBar extends WtoolBar {
     invert.setName("inverseLut");
     invert.addActionListener(e -> setInverted(invert.isSelected()));
     add(invert);
+    sharpen.setName(ActionW.FILTER.cmd());
+    sharpen.addActionListener(e -> applySharpen());
+    add(sharpen);
   }
 
   public void bind(DefaultView2d<?> view) {
     this.view = view;
     if (view != null) {
       invert.setSelected(view.isInverseLut());
+      sharpen.setSelected(sharpened(view.getFilter()));
     }
   }
 
@@ -71,6 +80,48 @@ public class LutToolBar extends WtoolBar {
 
   public void toggleInvert() {
     setInverted(!isInverted());
+  }
+
+  void applySharpen() {
+    setFilter(sharpen.isSelected() ? KernelData.SHARPEN : FilterOp.NONE);
+  }
+
+  public void setFilter(Object filter) {
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyFilter(filter);
+    } else if (view != null) {
+      view.setFilter(filter);
+    }
+    sharpen.setSelected(sharpened(view == null ? filter : view.getFilter()));
+  }
+
+  static View2dContainer hostOf(DefaultView2d<?> view) {
+    if (view == null) {
+      return null;
+    }
+    Object property = view.getClientProperty(View2dContainer.class);
+    if (property instanceof View2dContainer container) {
+      return container;
+    }
+    return hostFromParent(view);
+  }
+
+  static View2dContainer hostFromParent(Component c) {
+    while (c != null) {
+      if (c instanceof View2dContainer container) {
+        return container;
+      }
+      c = c.getParent();
+    }
+    return null;
+  }
+
+  static boolean sharpened(Object filter) {
+    if (filter instanceof KernelData k) {
+      return KernelData.SHARPEN.getName().equals(k.getName());
+    }
+    return KernelData.SHARPEN.getName().equalsIgnoreCase(String.valueOf(filter));
   }
 
   private JButton lutButton(String lut) {
