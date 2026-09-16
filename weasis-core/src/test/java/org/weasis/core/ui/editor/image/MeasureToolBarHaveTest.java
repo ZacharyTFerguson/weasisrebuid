@@ -40,6 +40,13 @@ class MeasureToolBarHaveTest {
     assertEquals("Y", ((AbstractButton) bar.getComponent().getComponent(2)).getText());
     assertEquals("G", ((AbstractButton) bar.getComponent().getComponent(3)).getText());
     assertEquals("B", ((AbstractButton) bar.getComponent().getComponent(4)).getText());
+    assertEquals("measure-distance", bar.getComponent().getComponent(0).getName());
+    assertEquals("measure-angle", bar.getComponent().getComponent(1).getName());
+    assertEquals("measure-polyline", bar.getComponent().getComponent(2).getName());
+    assertEquals("measure-rect", bar.getComponent().getComponent(3).getName());
+    assertEquals("measure-textbox", bar.getComponent().getComponent(4).getName());
+    assertTrue(bar.getComponent().getComponent(0) instanceof javax.swing.JToggleButton);
+    assertTrue(bar.getComponent().getComponent(1) instanceof javax.swing.JToggleButton);
     assertTrue(bar.newGraphic() instanceof LineGraphic);
     assertTrue(((AbstractButton) bar.getComponent().getComponent(0)).isSelected());
     bar.setSelected("A");
@@ -173,7 +180,7 @@ class MeasureToolBarHaveTest {
     assertTrue(view.getGraphicList().getFirst() instanceof LineGraphic);
 
     javax.swing.AbstractButton angle = toggle(bar, 1);
-    angle.doClick();
+    MeasureToolBar.pressRelease(angle);
     assertTrue(angle.isSelected());
     assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
     ViewerToolBar.bindMeasureTool(view);
@@ -188,7 +195,7 @@ class MeasureToolBarHaveTest {
     assertTrue(angle.isSelected());
 
     javax.swing.AbstractButton roi = toggle(bar, 3);
-    roi.doClick();
+    MeasureToolBar.pressRelease(roi);
     assertTrue(roi.isSelected());
     ViewerToolBar.bindMeasureTool(view);
     assertEquals(MeasureTool.RECTANGLE, view.activeMeasureTool());
@@ -207,10 +214,10 @@ class MeasureToolBarHaveTest {
     DefaultView2d<?> view = sizedGrayView();
     MeasureToolBar bar = new MeasureToolBar();
     bar.bind(view);
-    toggle(bar, 2).doClick();
+    MeasureToolBar.pressRelease(toggle(bar, 2));
     drag(view, 20, 20, 80, 20);
     assertTrue(view.getDrawing() instanceof PolylineGraphic);
-    toggle(bar, 1).doClick();
+    MeasureToolBar.pressRelease(toggle(bar, 1));
     assertTrue(toggle(bar, 1).isSelected());
     drag(view, 20, 40, 20, 90);
     assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
@@ -272,6 +279,68 @@ class MeasureToolBarHaveTest {
             java.awt.event.KeyEvent.VK_DELETE,
             '\0'));
     assertTrue(view.getGraphicList().isEmpty());
+  }
+
+  @Test
+  void mousePressOnAngleCenterSelectsANotDThenDrawsAngle() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+    javax.swing.JToggleButton angle = findToggle(bar, "measure-angle");
+    assertTrue(distance.isSelected());
+    assertFalse(angle.isSelected());
+    MeasureToolBar.pressRelease(angle);
+    assertTrue(angle.isSelected());
+    assertFalse(distance.isSelected());
+    assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+    drag(view, 20, 20, 20, 80);
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
+    AngleToolGraphic drawn = (AngleToolGraphic) view.getGraphicList().getLast();
+    assertTrue(drawn.getAngleDegrees() > 1.0);
+    assertTrue(drawn.getLabel()[0].contains("°"));
+  }
+
+  @Test
+  void mousePressOnRectCenterSelectsGNotDThenDrawsRectangle() {
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+    javax.swing.JToggleButton rect = findToggle(bar, "measure-rect");
+    MeasureToolBar.pressRelease(rect);
+    assertTrue(rect.isSelected());
+    assertFalse(distance.isSelected());
+    assertEquals(MeasureTool.RECTANGLE, view.activeMeasureTool());
+    drag(view, 30, 30, 90, 90);
+    assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+    assertTrue(
+        view.getGraphicList().getLast()
+            instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+  }
+
+  static javax.swing.JToggleButton findToggle(java.awt.Container root, String name) {
+    javax.swing.JToggleButton found = lookupToggle(root, name);
+    if (found == null) {
+      throw new AssertionError("missing toggle " + name);
+    }
+    return found;
+  }
+
+  static javax.swing.JToggleButton lookupToggle(java.awt.Container root, String name) {
+    for (java.awt.Component c : root.getComponents()) {
+      if (c instanceof javax.swing.JToggleButton toggle && name.equals(toggle.getName())) {
+        return toggle;
+      }
+      if (c instanceof java.awt.Container nested && !(c instanceof javax.swing.AbstractButton)) {
+        javax.swing.JToggleButton hit = lookupToggle(nested, name);
+        if (hit != null) {
+          return hit;
+        }
+      }
+    }
+    return null;
   }
 
   static DefaultView2d<?> sizedGrayView() {

@@ -587,7 +587,7 @@ public class ImageViewerEventManager {
       if (!SwingUtilities.isLeftMouseButton(me)) {
         return;
       }
-      if (me.getComponent() instanceof AbstractButton) {
+      if (MeasureToolBar.armAt(me) || me.getComponent() instanceof AbstractButton) {
         return;
       }
       DefaultView2d<?> hit = viewAt(me);

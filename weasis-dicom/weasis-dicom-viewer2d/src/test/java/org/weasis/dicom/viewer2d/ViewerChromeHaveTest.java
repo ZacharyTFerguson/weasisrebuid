@@ -134,7 +134,7 @@ class ViewerChromeHaveTest {
     view.setZoom(2.0);
     javax.swing.AbstractButton d =
         (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0);
-    d.doClick();
+    org.weasis.core.ui.editor.image.MeasureToolBar.pressRelease(d);
     assertEquals("D", container.getMeasureToolBar().getSelected());
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 80, 20));
@@ -190,7 +190,7 @@ class ViewerChromeHaveTest {
     view.setSourceImage(new BufferedImage(2000, 2000, BufferedImage.TYPE_BYTE_GRAY));
     javax.swing.AbstractButton d =
         (javax.swing.AbstractButton) container.getMeasureToolBar().getComponent().getComponent(0);
-    d.doClick();
+    org.weasis.core.ui.editor.image.MeasureToolBar.pressRelease(d);
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 40, 40));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 240, 40));
     view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 240, 40));
@@ -347,7 +347,7 @@ class ViewerChromeHaveTest {
     javax.swing.AbstractButton button =
         (javax.swing.AbstractButton)
             container.getMeasureToolBar().getComponent().getComponent(index);
-    button.doClick();
+    org.weasis.core.ui.editor.image.MeasureToolBar.pressRelease(button);
   }
 
   static BufferedImage paint(View2d view) {
