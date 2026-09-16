@@ -11,6 +11,7 @@ package org.weasis.core.ui.editor.image;
 
 import java.awt.AWTEvent;
 import java.awt.IllegalComponentStateException;
+import java.awt.KeyboardFocusManager;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.AWTEventListener;
@@ -422,7 +423,6 @@ public class ImageViewerEventManager {
   }
 
   void startGraphic(Point2D.Double p) {
-    ViewerToolBar.bindMeasureTool(view);
     Graphic created = MeasureTool.create(view.activeMeasureTool());
     if (!(created instanceof DragGraphic drag)) {
       return;
@@ -552,12 +552,22 @@ public class ImageViewerEventManager {
         return;
       }
       armed = true;
+      listenPointer();
+      listenDeletes();
+    }
+
+    void listenPointer() {
       Toolkit.getDefaultToolkit()
           .addAWTEventListener(
               this,
               AWTEvent.MOUSE_EVENT_MASK
                   | AWTEvent.MOUSE_MOTION_EVENT_MASK
                   | AWTEvent.KEY_EVENT_MASK);
+    }
+
+    void listenDeletes() {
+      KeyboardFocusManager.getCurrentKeyboardFocusManager()
+          .addKeyEventDispatcher(this::dispatchDelete);
     }
 
     @Override
@@ -604,7 +614,6 @@ public class ImageViewerEventManager {
       }
       lastView = hit;
       drawingView = hit;
-      ViewerToolBar.bindMeasureTool(hit);
       if (me.getComponent() == hit) {
         return;
       }
@@ -619,16 +628,33 @@ public class ImageViewerEventManager {
     }
 
     public void onKey(KeyEvent ke) {
-      if (ke.getID() != KeyEvent.KEY_PRESSED) {
+      if (ke.getID() != KeyEvent.KEY_PRESSED || typing(ke) || !deleteKey(ke)) {
         return;
       }
-      if (ke.getKeyCode() != KeyEvent.VK_DELETE && ke.getKeyCode() != KeyEvent.VK_BACK_SPACE) {
-        return;
+      deletePluginGraphics(seedFrom(ke));
+    }
+
+    boolean dispatchDelete(KeyEvent ke) {
+      if (ke.getID() != KeyEvent.KEY_PRESSED || typing(ke) || !deleteKey(ke)) {
+        return false;
       }
-      if (ke.getComponent() instanceof DefaultView2d) {
-        return;
+      deletePluginGraphics(seedFrom(ke));
+      return false;
+    }
+
+    static boolean deleteKey(KeyEvent ke) {
+      return ke.getKeyCode() == KeyEvent.VK_DELETE || ke.getKeyCode() == KeyEvent.VK_BACK_SPACE;
+    }
+
+    static boolean typing(KeyEvent ke) {
+      return ke.getComponent() instanceof javax.swing.text.JTextComponent;
+    }
+
+    DefaultView2d<?> seedFrom(KeyEvent ke) {
+      if (ke.getComponent() instanceof DefaultView2d<?> v) {
+        return v;
       }
-      deletePluginGraphics(seedView());
+      return seedView();
     }
 
     DefaultView2d<?> seedView() {

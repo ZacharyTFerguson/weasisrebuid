@@ -32,7 +32,7 @@ public class DrawingsKeyListeners {
     boolean ctrl = (e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0;
     int code = e.getKeyCode();
     if (code == KeyEvent.VK_DELETE || code == KeyEvent.VK_BACK_SPACE) {
-      view.deleteSelectedGraphics();
+      removeGraphics();
       return true;
     }
     if (ctrl && code == KeyEvent.VK_A) {
@@ -65,6 +65,20 @@ public class DrawingsKeyListeners {
       case KeyEvent.VK_B -> tool(MeasureTool.TEXTBOX);
       default -> false;
     };
+  }
+
+  void removeGraphics() {
+    if (!view.getSelectedGraphics().isEmpty()) {
+      view.deleteSelectedGraphics();
+      return;
+    }
+    ImageViewerPlugin<?> plugin = ImageViewerPlugin.pluginAbove(view);
+    if (plugin != null) {
+      plugin.deleteAllGraphics();
+      return;
+    }
+    view.selectAllGraphics();
+    view.deleteSelectedGraphics();
   }
 
   private boolean tool(String name) {

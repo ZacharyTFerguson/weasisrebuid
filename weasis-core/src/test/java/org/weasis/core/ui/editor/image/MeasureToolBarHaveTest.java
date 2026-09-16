@@ -17,10 +17,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.AbstractButton;
@@ -241,6 +243,98 @@ class MeasureToolBarHaveTest {
     view.getEventManager().mouseReleased(mouse(view, MouseEvent.MOUSE_RELEASED, 20, 20, 1));
     assertTrue(view.getGraphicList().isEmpty());
     assertFalse(labelsContain(view, "0.0 px"));
+  }
+
+  @Test
+  void viewPressAfterAKeepsASelectedAndDrawsAngleNotLine() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    JFrame frame = new JFrame();
+    try {
+      showWithGlass(frame, bar, view);
+      javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+      javax.swing.JToggleButton angle = findToggle(bar, "measure-angle");
+      angle.setSelected(true);
+      assertTrue(angle.isSelected());
+      assertFalse(distance.isSelected());
+      view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 20, 20, 1));
+      assertTrue(angle.isSelected());
+      assertFalse(distance.isSelected());
+      view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 20, 80, 1));
+      view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 20, 80, 1));
+      assertTrue(angle.isSelected());
+      assertFalse(distance.isSelected());
+      assertEquals(MeasureTool.ANGLE, view.activeMeasureTool());
+      assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+      assertTrue(view.getGraphicList().getLast() instanceof AngleToolGraphic);
+      AngleToolGraphic drawn = (AngleToolGraphic) view.getGraphicList().getLast();
+      assertTrue(drawn.getAngleDegrees() > 1.0);
+      assertTrue(drawn.getLabel()[0].contains("°"));
+    } finally {
+      frame.dispose();
+    }
+  }
+
+  @Test
+  void viewPressAfterGKeepsGSelectedAndDrawsRectangleNotLine() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    JFrame frame = new JFrame();
+    try {
+      showWithGlass(frame, bar, view);
+      javax.swing.JToggleButton distance = findToggle(bar, "measure-distance");
+      javax.swing.JToggleButton rect = findToggle(bar, "measure-rect");
+      rect.setSelected(true);
+      assertTrue(rect.isSelected());
+      assertFalse(distance.isSelected());
+      view.dispatchEvent(mouse(view, MouseEvent.MOUSE_PRESSED, 30, 30, 1));
+      assertTrue(rect.isSelected());
+      assertFalse(distance.isSelected());
+      view.dispatchEvent(mouse(view, MouseEvent.MOUSE_DRAGGED, 90, 90, 1));
+      view.dispatchEvent(mouse(view, MouseEvent.MOUSE_RELEASED, 90, 90, 1));
+      assertTrue(rect.isSelected());
+      assertFalse(distance.isSelected());
+      assertFalse(view.getGraphicList().getLast() instanceof LineGraphic);
+      assertTrue(
+          view.getGraphicList().getLast()
+              instanceof org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic);
+    } finally {
+      frame.dispose();
+    }
+  }
+
+  @Test
+  void deleteOnViewClearsGraphicsWhenExplorerHidden() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    DefaultView2d<?> view = sizedGrayView();
+    MeasureToolBar bar = new MeasureToolBar();
+    bar.bind(view);
+    JFrame frame = new JFrame();
+    JPanel explorer = new JPanel();
+    try {
+      JPanel content = new JPanel(new BorderLayout());
+      explorer.setName("Explorer");
+      explorer.setPreferredSize(new Dimension(120, 200));
+      content.add(bar, BorderLayout.NORTH);
+      content.add(explorer, BorderLayout.WEST);
+      content.add(view, BorderLayout.CENTER);
+      frame.setContentPane(content);
+      frame.pack();
+      frame.setVisible(true);
+      drag(view, 20, 20, 80, 20);
+      assertEquals(1, view.getGraphicList().size());
+      explorer.setVisible(false);
+      frame.validate();
+      ImageViewerEventManager.DrawStroke.deleteOutside(
+          new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_DELETE, '\0'));
+      assertTrue(view.getGraphicList().isEmpty());
+    } finally {
+      frame.dispose();
+    }
   }
 
   static void drag(DefaultView2d<?> view, int x0, int y0, int x1, int y1) {

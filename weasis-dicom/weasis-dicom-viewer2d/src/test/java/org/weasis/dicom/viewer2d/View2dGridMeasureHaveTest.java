@@ -137,6 +137,79 @@ class View2dGridMeasureHaveTest {
     }
   }
 
+  @Test
+  void selectAThenViewPressKeepsAAndAngleThenHiddenExplorerDeleteClears() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    View2dContainer container = new View2dContainer();
+    container.setLayoutCount(4);
+    View2d bl = container.getLayoutViews().get(2);
+    View2d br = container.getLayoutViews().get(3);
+    chest(bl);
+    JFrame frame = new JFrame();
+    JPanel explorer = new JPanel();
+    explorer.setName("Explorer");
+    explorer.setPreferredSize(new Dimension(160, 400));
+    UICore core = UICore.getInstance();
+    var previous = core.getSelectedViewerPlugin();
+    core.setSelectedViewerPlugin(container);
+    try {
+      showGridWithExplorer(frame, container, explorer);
+      MeasureToolBar bar = container.getMeasureToolBar();
+      JToggleButton distance = bar.toggle("D");
+      JToggleButton angle = bar.toggle("A");
+      JToggleButton rect = bar.toggle("G");
+      angle.setSelected(true);
+      bl.dispatchEvent(mouseOn(bl, MouseEvent.MOUSE_PRESSED, new Point(20, 20), true));
+      assertTrue(angle.isSelected());
+      assertFalse(distance.isSelected());
+      bl.dispatchEvent(mouseOn(bl, MouseEvent.MOUSE_DRAGGED, new Point(20, 80), true));
+      bl.dispatchEvent(mouseOn(bl, MouseEvent.MOUSE_RELEASED, new Point(20, 80), false));
+      assertTrue(bl.getGraphicList().getLast() instanceof AngleToolGraphic);
+      assertTrue(br.getGraphicList().isEmpty());
+      rect.setSelected(true);
+      bl.dispatchEvent(mouseOn(bl, MouseEvent.MOUSE_PRESSED, new Point(30, 30), true));
+      assertTrue(rect.isSelected());
+      assertFalse(distance.isSelected());
+      bl.dispatchEvent(mouseOn(bl, MouseEvent.MOUSE_DRAGGED, new Point(90, 90), true));
+      bl.dispatchEvent(mouseOn(bl, MouseEvent.MOUSE_RELEASED, new Point(90, 90), false));
+      assertTrue(bl.getGraphicList().getLast() instanceof RectangleGraphic);
+      explorer.setVisible(false);
+      frame.validate();
+      ImageViewerEventManager.DrawStroke.rememberView(bl);
+      ImageViewerEventManager.DrawStroke.deleteOutside(
+          new KeyEvent(bl, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_DELETE, '\0'));
+      for (View2d cell : container.getLayoutViews()) {
+        assertTrue(cell.getGraphicList().isEmpty());
+      }
+    } finally {
+      core.setSelectedViewerPlugin(previous);
+      frame.dispose();
+    }
+  }
+
+  static JComponent showGridWithExplorer(
+      JFrame frame, View2dContainer container, JPanel explorer) {
+    container.setPreferredSize(new Dimension(400, 400));
+    JPanel content = new JPanel(new BorderLayout());
+    content.add(container.getMeasureToolBar(), BorderLayout.NORTH);
+    content.add(explorer, BorderLayout.WEST);
+    content.add(container, BorderLayout.CENTER);
+    frame.setContentPane(content);
+    JPanel glass = new JPanel(null);
+    glass.setOpaque(false);
+    glass.setName("measure-glass");
+    frame.setGlassPane(glass);
+    MeasureToolBar.installGlass(glass);
+    frame.pack();
+    frame.setSize(640, 520);
+    frame.setVisible(true);
+    glass.setVisible(true);
+    glass.setSize(frame.getRootPane().getSize());
+    container.doLayout();
+    container.getViewGrid().doLayout();
+    return glass;
+  }
+
   static void reflowExplorerHide(JFrame frame, View2dContainer container) {
     frame.setSize(900, 720);
     container.setSize(880, 640);

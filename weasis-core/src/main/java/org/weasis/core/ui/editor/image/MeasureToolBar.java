@@ -123,7 +123,25 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   public String getSelected() {
-    return selected;
+    return groupKey();
+  }
+
+  String groupKey() {
+    JToggleButton toggle = selectedToggle();
+    if (toggle == null) {
+      return selected;
+    }
+    Object key = toggle.getClientProperty("measure.key");
+    return key == null ? toggle.getText() : key.toString();
+  }
+
+  JToggleButton selectedToggle() {
+    for (Component c : getComponents()) {
+      if (c instanceof JToggleButton toggle && toggle.isSelected()) {
+        return toggle;
+      }
+    }
+    return null;
   }
 
   public JToggleButton toggle(String key) {
@@ -145,7 +163,7 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     if (view == null) {
       return;
     }
-    String tool = MeasureTool.canonical(selected);
+    String tool = MeasureTool.canonical(getSelected());
     view.setMeasureToolBar(this);
     view.setMeasureTool(tool);
     view.abandonDrawing();
@@ -237,12 +255,8 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   static MeasureToolBar barAtScreen(Point screen) {
-    for (MeasureToolBar bar : LIVE) {
-      if (containsScreen(bar, screen)) {
-        return bar;
-      }
-    }
-    return null;
+    JToggleButton toggle = toggleAtScreen(screen);
+    return toggle == null ? null : barOf(toggle);
   }
 
   JToggleButton toggleAt(Point screen) {
@@ -260,13 +274,10 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
   }
 
   JToggleButton nearbyToggle(Point screen) {
-    if (!containsScreen(this, screen)) {
-      return null;
-    }
     JToggleButton best = null;
     int bestD = Integer.MAX_VALUE;
     for (Component c : getComponents()) {
-      if (c instanceof JToggleButton toggle) {
+      if (c instanceof JToggleButton toggle && containsPad(toggle, screen, 12)) {
         int d = screenDist(toggle, screen);
         if (d < bestD) {
           bestD = d;
@@ -285,10 +296,6 @@ public class MeasureToolBar extends WtoolBar implements Toolbar {
     int dx = screen.x - (box.x + box.width / 2);
     int dy = screen.y - (box.y + box.height / 2);
     return dx * dx + dy * dy;
-  }
-
-  static boolean containsScreen(JComponent c, Point screen) {
-    return containsPad(c, screen, 0);
   }
 
   static boolean containsPad(JComponent c, Point screen, int pad) {
