@@ -61,8 +61,7 @@ class RectangleGraphicAreaMmTest {
             new Point2D.Double(10, 0),
             new Point2D.Double(10, 5),
             new Point2D.Double(0, 5));
-    assertEquals(
-        poly.getAreaMm(ANISO).orElseThrow(), rect.getAreaMm(ANISO).orElseThrow(), 1e-9);
+    assertEquals(poly.getAreaMm(ANISO).orElseThrow(), rect.getAreaMm(ANISO).orElseThrow(), 1e-9);
   }
 
   @Test
