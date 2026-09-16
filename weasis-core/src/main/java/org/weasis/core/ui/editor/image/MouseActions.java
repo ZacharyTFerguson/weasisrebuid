@@ -25,6 +25,9 @@ public final class MouseActions {
   /** Multi-vertex path measure; distinct from two-point {@link #DRAW} line caliper. */
   public static final String POLYLINE = "polyline";
 
+  /** Three-point angle measure; distinct from {@link #DRAW} line and {@link #POLYLINE}. */
+  public static final String ANGLE = "angle";
+
   public static final String CROSSHAIR = "crosshair";
 
   private String left = WINLEVEL;
