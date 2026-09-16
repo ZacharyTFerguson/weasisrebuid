@@ -12,6 +12,7 @@ package org.weasis.dicom.viewer2d;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -138,6 +139,47 @@ class ViewerChromeHaveTest {
     assertEquals(FilterOp.NONE, String.valueOf(view.getFilter()));
     assertEquals(before, view.getSourceImage().getRaster().getSample(4, 4, 0));
     assertEquals(before, paint(view).getRGB(4, 4) & 0xFF);
+  }
+
+  @Test
+  void windowClickNarrowsFileWlOnPaintedViewWithoutChangingFlip(@TempDir Path dir)
+      throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    int left = view.getSourceImage().getRaster().getSample(0, 4, 0);
+    int right = view.getSourceImage().getRaster().getSample(7, 4, 0);
+    AbstractButton window = container.getImageTool().windowButton();
+    assertEquals("Window", window.getText());
+    assertEquals(ActionW.WINDOW.cmd(), window.getName());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+    window.doClick();
+    assertTrue(view.isWindowChrome());
+    assertEquals(100.0, view.getWindow(), 1e-9);
+    assertEquals(40.0, view.getLevel(), 1e-9);
+    int leftNarrow = view.getSourceImage().getRaster().getSample(0, 4, 0);
+    int rightNarrow = view.getSourceImage().getRaster().getSample(7, 4, 0);
+    assertTrue(leftNarrow < left);
+    assertTrue(rightNarrow > right);
+    view.setSize(8, 8);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    assertEquals(leftNarrow, paint(view).getRGB(0, 4) & 0xFF);
+    assertEquals(rightNarrow, paint(view).getRGB(7, 4) & 0xFF);
+    assertFalse(view.isFlip());
+    assertEquals(FilterOp.NONE, String.valueOf(view.getFilter()));
+    AffineTransformOp affine = new AffineTransformOp();
+    affine.setParam(ImageOpNode.INPUT_IMG, view.getSourceImage());
+    affine.process();
+    assertSame(view.getSourceImage(), affine.getParam(ImageOpNode.OUTPUT_IMG));
+    window.doClick();
+    assertFalse(view.isWindowChrome());
+    assertEquals(400.0, view.getWindow(), 1e-9);
+    assertEquals(left, view.getSourceImage().getRaster().getSample(0, 4, 0));
+    assertEquals(right, view.getSourceImage().getRaster().getSample(7, 4, 0));
+    assertNotEquals(leftNarrow, left);
   }
 
   @Test

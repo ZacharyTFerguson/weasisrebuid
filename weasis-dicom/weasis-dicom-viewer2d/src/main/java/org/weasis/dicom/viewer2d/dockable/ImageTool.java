@@ -26,15 +26,19 @@ public class ImageTool extends PluginTool {
   public static final String NAME = "Image";
 
   private final JLabel summary = new JLabel(" ");
+  private final JToggleButton window = new JToggleButton("Window");
   private final JToggleButton flip = new JToggleButton("Flip");
   private View2d view;
 
   public ImageTool() {
     super(NAME, 20);
+    window.setName(ActionW.WINDOW.cmd());
+    window.addActionListener(e -> applyWindow());
     flip.setName(ActionW.FLIP.cmd());
     flip.addActionListener(e -> applyFlip());
     JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
     row.add(summary);
+    row.add(window);
     row.add(flip);
     add(row, BorderLayout.NORTH);
   }
@@ -42,13 +46,29 @@ public class ImageTool extends PluginTool {
   public void bind(View2d view) {
     this.view = view;
     if (view != null) {
+      window.setSelected(view.isWindowChrome());
       flip.setSelected(view.isFlip());
     }
     refresh();
   }
 
+  public JToggleButton windowButton() {
+    return window;
+  }
+
   public JToggleButton flipButton() {
     return flip;
+  }
+
+  void applyWindow() {
+    boolean on = window.isSelected();
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyWindow(on);
+    } else if (view != null) {
+      view.applyWindowChrome(on);
+    }
+    refresh();
   }
 
   void applyFlip() {

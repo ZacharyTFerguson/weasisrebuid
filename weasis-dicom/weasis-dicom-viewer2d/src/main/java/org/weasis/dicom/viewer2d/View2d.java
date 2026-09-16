@@ -47,6 +47,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private WindLevelParameters activeVoi = new WindLevelParameters(400, 40);
   private double window = 400;
   private double level = 40;
+  private boolean windowChrome;
   private File file;
   private final KOManager koManager = new KOManager();
   private final List<WindLevelParameters> presets = new ArrayList<>();
@@ -162,6 +163,32 @@ public class View2d extends DefaultView2d<MediaElement> {
     applyVoi(shapedVoi(window, level));
   }
 
+  public void applyWindowChrome(boolean on) {
+    if (on) {
+      applyNarrowFileWindow();
+    } else {
+      resetWinLevelDefaults();
+    }
+  }
+
+  void applyNarrowFileWindow() {
+    windowChrome = true;
+    WindLevelParameters src = fileWindowOrActive();
+    setWindowLevel(narrowWindow(src.getWindow()), src.getLevel());
+  }
+
+  WindLevelParameters fileWindowOrActive() {
+    return fileWl != null ? fileWl : activeVoi;
+  }
+
+  static double narrowWindow(double window) {
+    return Math.max(1.0, window / 4.0);
+  }
+
+  public boolean isWindowChrome() {
+    return windowChrome;
+  }
+
   @Override
   public void setLut(String lut) {
     super.setLut(lut);
@@ -215,6 +242,7 @@ public class View2d extends DefaultView2d<MediaElement> {
 
   @Override
   public void resetWinLevelDefaults() {
+    windowChrome = false;
     if (fileWl != null) {
       applyVoi(fileWl);
     }
