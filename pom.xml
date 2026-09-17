@@ -19,12 +19,14 @@
   <modules>
     <module>weasis-parent</module>
     <module>weasis-launcher</module>
+    <module>weasis-pacs-connector</module>
     <module>weasis-opencv</module>
     <module>weasis-core</module>
     <module>weasis-imageio</module>
     <module>weasis-base</module>
     <module>weasis-dicom</module>
     <module>weasis-acquire</module>
+    <module>weasis-i18n</module>
     <module>tests</module>
   </modules>
 </project>

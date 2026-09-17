@@ -73,6 +73,7 @@ final class LauncherGogo {
         Weasis %s
         OSGi Apache Felix %s
         Java %s (%s)
+        weasis.profile %s
         gosh.port %s
         """
         .formatted(
@@ -80,6 +81,7 @@ final class LauncherGogo {
             System.getProperty("felix.framework.version", "7.0.5"),
             System.getProperty("java.version"),
             System.getProperty("java.vendor"),
+            System.getProperty("weasis.profile", "default"),
             System.getProperty("gosh.port", "17179"))
         .trim();
   }

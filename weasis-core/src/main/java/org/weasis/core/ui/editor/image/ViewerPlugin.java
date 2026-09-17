@@ -18,16 +18,25 @@ import javax.swing.JPanel;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.editor.SeriesViewer;
+import org.weasis.core.ui.editor.SeriesViewerUI;
 
 /** Central-panel viewer. Factories create instances on demand. */
 public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
     implements SeriesViewer<E> {
+
+  public enum DockingState {
+    NORMAL,
+    MAXIMIZED,
+    EXTERNALIZED
+  }
 
   private final String dockableUID;
   private final String pluginName;
   private final List<MediaSeries<E>> openSeries = new ArrayList<>();
   private MediaSeries<E> selectedSeries;
   private boolean selected;
+  private DockingState dockingState = DockingState.NORMAL;
+  private final SeriesViewerUI seriesViewerUI = new SeriesViewerUI();
 
   protected ViewerPlugin(String pluginName) {
     super(new BorderLayout());
@@ -65,6 +74,7 @@ public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
   public void close() {
     openSeries.clear();
     selectedSeries = null;
+    firePropertyChange("closed", false, true);
   }
 
   @Override
@@ -85,5 +95,36 @@ public abstract class ViewerPlugin<E extends MediaElement> extends JPanel
   @Override
   public boolean isSelected() {
     return selected;
+  }
+
+  @Override
+  public SeriesViewerUI getSeriesViewerUI() {
+    return seriesViewerUI;
+  }
+
+  public DockingState getDockingState() {
+    return dockingState;
+  }
+
+  /** Ctrl+M maximize; a second Ctrl+M restores. */
+  public void maximize() {
+    DockingState old = dockingState;
+    dockingState =
+        dockingState == DockingState.MAXIMIZED ? DockingState.NORMAL : DockingState.MAXIMIZED;
+    firePropertyChange("dockingState", old, dockingState);
+  }
+
+  /** Ctrl+E externalize (when multiple screens). */
+  public void externalize() {
+    DockingState old = dockingState;
+    dockingState = DockingState.EXTERNALIZED;
+    firePropertyChange("dockingState", old, dockingState);
+  }
+
+  /** Ctrl+N normalize. */
+  public void normalize() {
+    DockingState old = dockingState;
+    dockingState = DockingState.NORMAL;
+    firePropertyChange("dockingState", old, dockingState);
   }
 }

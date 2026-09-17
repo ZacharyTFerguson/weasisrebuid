@@ -34,11 +34,41 @@ class PreferenceDialogTest {
                 new ScreenPrefFactory(),
                 new LoggingPrefFactory()));
     assertEquals("General", pages.getFirst().getTitle());
+    assertTrue(
+        pages.getFirst().getSubPages().stream().anyMatch(p -> "Language".equals(p.getTitle())));
+    LanguageSetting language =
+        (LanguageSetting)
+            pages.getFirst().getSubPages().stream()
+                .filter(p -> "Language".equals(p.getTitle()))
+                .findFirst()
+                .orElseThrow();
+    assertTrue(language.getLanguageCombo().getItemCount() >= 2);
     assertTrue(pages.stream().anyMatch(p -> "Proxy Server".equals(p.getTitle())));
     assertTrue(pages.stream().anyMatch(p -> "Viewer".equals(p.getTitle())));
     AbstractItemDialogPage viewer =
         pages.stream().filter(p -> "Viewer".equals(p.getTitle())).findFirst().orElseThrow();
     assertTrue(viewer.getSubPages().stream().anyMatch(p -> "2D".equals(p.getTitle())));
     assertTrue(viewer.getSubPages().stream().anyMatch(p -> "MPR".equals(p.getTitle())));
+  }
+
+  @Test
+  void dialogNamesTreeOkCancelAndRestoreChrome() {
+    PreferenceDialog dialog =
+        new PreferenceDialog(
+            null,
+            PreferenceDialog.instantiatePages(
+                List.of(new GeneralPrefFactory(), new ViewerPrefFactory())));
+    try {
+      assertEquals("Preferences", dialog.getTitle());
+      assertEquals("preferences", dialog.getName());
+      assertEquals("pref-tree", dialog.tree().getName());
+      assertEquals("pref-ok", dialog.okButton().getName());
+      assertEquals("pref-cancel", dialog.cancelButton().getName());
+      assertEquals("pref-reset", dialog.resetButton().getName());
+      assertEquals("General", dialog.pageTitles().getFirst());
+      assertEquals("General", dialog.getCurrentPage().getTitle());
+    } finally {
+      dialog.dispose();
+    }
   }
 }

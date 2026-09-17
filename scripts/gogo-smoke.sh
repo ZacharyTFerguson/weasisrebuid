@@ -72,6 +72,7 @@ imageio_ok = bundle_state(lb, "Weasis ImageIO Codec") == "Active"
 codec_ok = bundle_state(lb, "Weasis DICOM Codec") == "Active"
 explorer_ok = bundle_state(lb, "Weasis DICOM Explorer") == "Active"
 viewer2d_ok = bundle_state(lb, "Weasis DICOM 2D Viewer") == "Active"
+docking_ok = bundle_state(lb, "Docking Frames") == "Active"
 opencv_state = bundle_state(lb, "OpenCV native")
 if not opencv_state:
     opencv_state = bundle_state(lb, "linux-x86-64")
@@ -86,8 +87,73 @@ if not explorer_ok:
     sys.exit("lb did not list weasis-dicom-explorer ACTIVE: %r" % lb)
 if not viewer2d_ok:
     sys.exit("lb did not list weasis-dicom-viewer2d ACTIVE: %r" % lb)
+if not docking_ok:
+    sys.exit("lb did not list docking-frames ACTIVE: %r" % lb)
+mig_core = bundle_state(lb, "MiGLayout Core") == "Active"
+mig_swing = bundle_state(lb, "MiGLayout Swing") == "Active"
+if not mig_core or not mig_swing:
+    sys.exit("lb did not list MigLayout Core+Swing ACTIVE @7: %r" % lb)
+print("gogo-smoke: MigLayout Active @7 (have)")
+jaxb_ok = bundle_state(lb, "jaxb package for weasis") == "Active" or bundle_state(lb, "jaxb-osgi") == "Active"
+if not jaxb_ok:
+    sys.exit("lb did not list JAXB-OSGi ACTIVE @7: %r" % lb)
+print("gogo-smoke: JAXB-OSGi Active @7 (have)")
 if not opencv_ok:
     sys.exit("lb did not install OpenCV native fragment @23 (Resolved): %r" % lb)
+i18n_needles = (
+    "Weasis Core i18n",
+    "Weasis Explorer i18n",
+    "Weasis Viewer2d i18n",
+    "Weasis Acquireeditor i18n",
+    "Weasis Acquireexplorer i18n",
+    "Weasis Baseexplorer i18n",
+    "Weasis Base Ui i18n",
+    "Weasis Base Viewer2d i18n",
+    "Weasis Au i18n",
+    "Weasis Codec i18n",
+    "Weasis Isowriter i18n",
+    "Weasis Qr i18n",
+    "Weasis Rt i18n",
+    "Weasis Send i18n",
+    "Weasis Sr i18n",
+    "Weasis Wave i18n",
+    "Weasis Viewer3d i18n",
+    "Weasis Launcher i18n",
+)
+for needle in i18n_needles:
+    state = bundle_state(lb, needle)
+    if state not in ("Resolved", "Installed"):
+        sys.exit("lb did not install %s fragment @13 (Resolved): %r" % (needle, lb))
+print("gogo-smoke: documented host i18n fragments Installed @13 (have)")
+send_ok = bundle_state(lb, "Weasis DICOM Send") == "Active"
+qr_ok = bundle_state(lb, "Weasis DICOM Q/R") == "Active"
+iso_ok = bundle_state(lb, "Weasis DICOM ISO writer") == "Active"
+if not send_ok:
+    sys.exit("lb did not list weasis-dicom-send ACTIVE @110: %r" % lb)
+if not qr_ok:
+    sys.exit("lb did not list weasis-dicom-qr ACTIVE @110: %r" % lb)
+if not iso_ok:
+    sys.exit("lb did not list weasis-dicom-isowriter ACTIVE @110: %r" % lb)
+jogamp_ok = bundle_state(lb, "JOGL") == "Active" or bundle_state(lb, "jogamp") == "Active"
+viewer3d_ok = bundle_state(lb, "Weasis DICOM 3D Viewer") == "Active"
+jogamp_native = bundle_state(lb, "jogamp-linux-x86-64") or bundle_state(lb, "JOGL - Linux")
+jogamp_native_ok = jogamp_native in ("Resolved", "Installed")
+if not jogamp_ok:
+    sys.exit("lb did not list jogamp ACTIVE @120: %r" % lb)
+if not viewer3d_ok:
+    sys.exit("lb did not list weasis-dicom-viewer3d ACTIVE @120: %r" % lb)
+if not jogamp_native_ok:
+    sys.exit("lb did not install JOGL native fragment @121 (Resolved): %r" % lb)
+base_viewer_ok = bundle_state(lb, "Weasis Base 2D Viewer") == "Active"
+if not base_viewer_ok:
+    sys.exit("lb did not list weasis-base-viewer2d ACTIVE @100: %r" % lb)
+img_get = send("image:get")
+if "image:get" not in img_get or "-f" not in img_get:
+    sys.exit("image:get Gogo command missing: %r" % img_get)
+img_url = send("image:get -u https://example.invalid/stills.jpg")
+if "example.invalid" not in img_url:
+    sys.exit("image:get -u did not parse a remote URI without fetch: %r" % img_url)
+print("gogo-smoke: image:get Have")
 send("weasis:ui -q")
 print("SMOKE_OK")
 PY

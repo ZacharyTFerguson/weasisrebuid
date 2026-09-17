@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis</groupId>
+    <artifactId>weasis-parent</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../weasis-parent/pom.xml</relativePath>
+  </parent>
+
+  <artifactId>weasis-i18n</artifactId>
+  <packaging>pom</packaging>
+  <name>Weasis i18n</name>
+  <description>WP-14 translation fragments (sister-repo layout of nroduit/weasis-i18n). Not in the Weasis 4.7.3 main POM fixture.</description>
+
+  <modules>
+    <module>weasis-core-i18n</module>
+    <module>weasis-dicom-explorer-i18n</module>
+    <module>weasis-dicom-viewer2d-i18n</module>
+    <module>weasis-acquire-editor-i18n</module>
+    <module>weasis-acquire-explorer-i18n</module>
+    <module>weasis-base-explorer-i18n</module>
+    <module>weasis-base-ui-i18n</module>
+    <module>weasis-base-viewer2d-i18n</module>
+    <module>weasis-dicom-au-i18n</module>
+    <module>weasis-dicom-codec-i18n</module>
+    <module>weasis-dicom-isowriter-i18n</module>
+    <module>weasis-dicom-qr-i18n</module>
+    <module>weasis-dicom-rt-i18n</module>
+    <module>weasis-dicom-send-i18n</module>
+    <module>weasis-dicom-sr-i18n</module>
+    <module>weasis-dicom-wave-i18n</module>
+    <module>weasis-dicom-viewer3d-i18n</module>
+    <module>weasis-launcher-i18n</module>
+  </modules>
+</project>

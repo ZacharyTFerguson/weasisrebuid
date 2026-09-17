@@ -10,6 +10,7 @@
 package org.weasis.dicom.codec.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
@@ -36,5 +37,37 @@ class LutPipelineTest {
     WindLevelParameters wl = LutPipeline.autoWindowExcludingPadding(px, -2048);
     assertEquals(30.0, wl.getWindow(), 1e-9);
     assertEquals(15.0, wl.getLevel(), 1e-9);
+  }
+
+  @Test
+  void sigmoidAtCenterIsMidGreyUnlikeLinearEdges() {
+    int center = LutPipeline.applyVoiSigmoid(40, 400, 40);
+    int linearEdge = LutPipeline.applyVoiLinear(40 - 200, 400, 40);
+    int sigmoidEdge = LutPipeline.applyVoiSigmoid(40 - 200, 400, 40);
+    assertEquals(128, center, 2);
+    assertEquals(0, linearEdge);
+    assertTrue(sigmoidEdge > 20);
+    assertTrue(sigmoidEdge < 80);
+  }
+
+  @Test
+  void voiLutTableMapsFirstStoredToLutZero() {
+    int[] lut = new int[] {255, 128, 0};
+    assertEquals(255, LutPipeline.applyVoiLut(10, 10, lut));
+    assertEquals(128, LutPipeline.applyVoiLut(11, 10, lut));
+    assertEquals(0, LutPipeline.applyVoiLut(12, 10, lut));
+    assertEquals(255, LutPipeline.applyVoiLut(0, 10, lut));
+    assertEquals(0, LutPipeline.applyVoiLut(99, 10, lut));
+  }
+
+  @Test
+  void applyVoiPrefersSequenceTableOverLinear() {
+    WindLevelParameters p = new WindLevelParameters(400, 40);
+    p.setVoiLut(new int[] {10, 20, 30}, 0);
+    assertEquals(10, LutPipeline.applyVoi(0, p));
+    assertEquals(30, LutPipeline.applyVoi(2, p));
+    WindLevelParameters sigmoid = new WindLevelParameters(400, 40);
+    sigmoid.setLutShape(LutPipeline.SHAPE_SIGMOID);
+    assertEquals(128, LutPipeline.applyVoi(40, sigmoid), 2);
   }
 }

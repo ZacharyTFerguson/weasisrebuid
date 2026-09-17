@@ -1,0 +1,9 @@
+#!/bin/sh
+# Windows/Linux Dicomizer shortcut; macOS ships as
+# /Applications/Weasis.app/Contents/MacOS/Dicomizer
+# MX-16: Gogo 17181 so Dicomizer can run beside desktop 17179. Not a JSON pref.
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+exec java -Dgosh.port=17181 \
+  -Dfelix.extended.config.properties=file:conf/dicomizer.json \
+  -Dweasis.base.json="$ROOT/etc/config/base.json" \
+  -jar "$ROOT/weasis-launcher.jar" "$@"

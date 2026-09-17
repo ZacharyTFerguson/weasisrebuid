@@ -9,11 +9,16 @@
  */
 package org.weasis.core.ui.model.graphic.imp.seg;
 
-/** SEG region stub (full overlay is WP-10). */
+import java.awt.Color;
+
+/** SEG overlay region (label, number, color, fill opacity). */
 public class SegRegion {
 
   private String label = "";
+  private int number = 1;
   private boolean visible = true;
+  private Color color = Color.RED;
+  private float opacity = 0.5f;
 
   public String getLabel() {
     return label;
@@ -23,11 +28,35 @@ public class SegRegion {
     this.label = label == null ? "" : label;
   }
 
+  public int getNumber() {
+    return number;
+  }
+
+  public void setNumber(int number) {
+    this.number = number;
+  }
+
   public boolean isVisible() {
     return visible;
   }
 
   public void setVisible(boolean visible) {
     this.visible = visible;
+  }
+
+  public Color getColor() {
+    return color;
+  }
+
+  public void setColor(Color color) {
+    this.color = color == null ? Color.RED : color;
+  }
+
+  public float getOpacity() {
+    return opacity;
+  }
+
+  public void setOpacity(float opacity) {
+    this.opacity = Math.max(0f, Math.min(1f, opacity));
   }
 }

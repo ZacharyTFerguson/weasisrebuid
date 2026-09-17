@@ -9,6 +9,11 @@
  */
 package org.weasis.core.ui.model.graphic;
 
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlTransient;
 import java.awt.Color;
 import java.awt.Paint;
 import java.awt.Shape;
@@ -17,11 +22,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
+import org.weasis.core.ui.model.utils.imp.DefaultUUID;
 
-public abstract class AbstractGraphic implements Graphic {
+@XmlAccessorType(XmlAccessType.NONE)
+public abstract class AbstractGraphic extends DefaultUUID implements Graphic {
 
-  private String uuid = UUID.randomUUID().toString();
   private final List<Point2D.Double> pts = new ArrayList<>();
+  private final List<XmlPt> xmlPts = new ArrayList<>();
   private Boolean filled = Boolean.FALSE;
   private Paint colorPaint = Color.YELLOW;
   private Float lineThickness = 1.0f;
@@ -36,14 +43,15 @@ public abstract class AbstractGraphic implements Graphic {
     }
   }
 
+  @XmlAttribute
   @Override
   public String getUuid() {
-    return uuid;
+    return super.getUuid();
   }
 
   @Override
   public void setUuid(String uuid) {
-    this.uuid = uuid == null ? this.uuid : uuid;
+    super.setUuid(uuid);
   }
 
   @Override
@@ -51,6 +59,20 @@ public abstract class AbstractGraphic implements Graphic {
     return pts.size();
   }
 
+  @XmlElement(name = "pt")
+  public List<XmlPt> getXmlPts() {
+    return xmlPts;
+  }
+
+  public void afterUnmarshal(jakarta.xml.bind.Unmarshaller unmarshaller, Object parent) {
+    pts.clear();
+    for (XmlPt pt : xmlPts) {
+      pts.add(new Point2D.Double(pt.x, pt.y));
+    }
+    buildShape();
+  }
+
+  @XmlTransient
   @Override
   public List<Point2D.Double> getPts() {
     return Collections.unmodifiableList(pts);
@@ -59,9 +81,13 @@ public abstract class AbstractGraphic implements Graphic {
   @Override
   public void setPts(List<Point2D.Double> newPts) {
     pts.clear();
+    xmlPts.clear();
     if (newPts != null) {
       for (Point2D.Double p : newPts) {
-        pts.add(p == null ? new Point2D.Double() : new Point2D.Double(p.getX(), p.getY()));
+        Point2D.Double copy =
+            p == null ? new Point2D.Double() : new Point2D.Double(p.getX(), p.getY());
+        pts.add(copy);
+        xmlPts.add(new XmlPt(copy.getX(), copy.getY()));
       }
     }
     buildShape();
@@ -71,6 +97,7 @@ public abstract class AbstractGraphic implements Graphic {
     return pts;
   }
 
+  @XmlAttribute
   @Override
   public Boolean getFilled() {
     return filled;
@@ -91,6 +118,7 @@ public abstract class AbstractGraphic implements Graphic {
     this.colorPaint = paint == null ? Color.YELLOW : paint;
   }
 
+  @XmlAttribute
   @Override
   public Float getLineThickness() {
     return lineThickness;
@@ -111,6 +139,7 @@ public abstract class AbstractGraphic implements Graphic {
     this.selected = selected != null && selected;
   }
 
+  @XmlAttribute
   @Override
   public Boolean getLabelVisible() {
     return labelVisible;
@@ -157,4 +186,17 @@ public abstract class AbstractGraphic implements Graphic {
   }
 
   protected abstract AbstractGraphic newInstance();
+
+  @XmlAccessorType(XmlAccessType.FIELD)
+  public static final class XmlPt {
+    @XmlAttribute public double x;
+    @XmlAttribute public double y;
+
+    public XmlPt() {}
+
+    public XmlPt(double x, double y) {
+      this.x = x;
+      this.y = y;
+    }
+  }
 }

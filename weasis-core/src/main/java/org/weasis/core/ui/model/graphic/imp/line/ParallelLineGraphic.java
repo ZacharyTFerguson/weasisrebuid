@@ -9,9 +9,13 @@
  */
 package org.weasis.core.ui.model.graphic.imp.line;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
+import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphic;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
+@XmlRootElement(name = "ParallelLineGraphic")
 public class ParallelLineGraphic extends AbstractDragGraphic {
 
   public ParallelLineGraphic() {
@@ -20,8 +24,20 @@ public class ParallelLineGraphic extends AbstractDragGraphic {
 
   @Override
   public void buildShape() {
-    // two segments; full geometry is WP-5
-    setShape(null);
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double b = getHandlePoint(1);
+    Point2D.Double c = getHandlePoint(2);
+    Point2D.Double d = getHandlePoint(3);
+    if (a == null || b == null || c == null || d == null) {
+      setShape(null);
+      return;
+    }
+    Path2D path = new Path2D.Double();
+    path.moveTo(a.x, a.y);
+    path.lineTo(b.x, b.y);
+    path.moveTo(c.x, c.y);
+    path.lineTo(d.x, d.y);
+    setShape(path);
   }
 
   @Override

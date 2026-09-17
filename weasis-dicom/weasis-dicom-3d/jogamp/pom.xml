@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.weasis.dicom.3d</groupId>
+    <artifactId>weasis-dicom-3d</artifactId>
+    <version>${revision}${changelist}</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+
+  <groupId>org.weasis.thirdparty.org.jogamp</groupId>
+  <artifactId>jogamp</artifactId>
+  <version>${sha1}</version>
+  <packaging>jar</packaging>
+  <name>JOGL - Java Bindings for OpenGL</name>
+  <description>OSGi wrap of gluegen-rt + jogl-all + jocl. Host for jogamp native fragments.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.weasis.core</groupId>
+      <artifactId>weasis-core</artifactId>
+      <version>${revision}${changelist}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.gluegen</groupId>
+      <artifactId>gluegen-rt</artifactId>
+      <version>${jogamp.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.jogl</groupId>
+      <artifactId>jogl-all</artifactId>
+      <version>${jogamp.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.jocl</groupId>
+      <artifactId>jocl</artifactId>
+      <version>${jogamp.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>copy-jogamp</id>
+            <phase>generate-resources</phase>
+            <goals>
+              <goal>copy-dependencies</goal>
+            </goals>
+            <configuration>
+              <includeArtifactIds>gluegen-rt,jogl-all,jocl</includeArtifactIds>
+              <excludeTransitive>true</excludeTransitive>
+              <outputDirectory>${project.build.directory}/dependency</outputDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>biz.aQute.bnd</groupId>
+        <artifactId>bnd-maven-plugin</artifactId>
+        <configuration>
+          <bnd><![CDATA[
+Bundle-SymbolicName: jogamp
+Bundle-Name: JOGL - Java Bindings for OpenGL
+Bundle-Version: ${jogamp.version}
+-includeresource.all: lib/=target/dependency/;lib:=true
+Import-Package: !com.jogamp.openal.*,!org.eclipse.*,!com.jogamp.plugin.applet,!org.jdesktop.applet.*,!java.applet,javafx.*;resolution:=optional,com.jogamp.plugin.ui;resolution:=optional,com.sun.javafx.tk;resolution:=optional,jdk.internal.module;resolution:=optional,sun.*;resolution:=optional,com.sun.*;resolution:=optional,*
+-exportcontents: com.jogamp.*,gluegen.*,jogamp.*
+]]></bnd>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>

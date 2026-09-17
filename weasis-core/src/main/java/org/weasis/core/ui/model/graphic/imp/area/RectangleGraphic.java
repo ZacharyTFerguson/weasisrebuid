@@ -9,11 +9,14 @@
  */
 package org.weasis.core.ui.model.graphic.imp.area;
 
+import jakarta.xml.bind.annotation.XmlRootElement;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import org.weasis.core.ui.model.graphic.AbstractDragGraphicArea;
 import org.weasis.core.ui.model.graphic.AbstractGraphic;
 
+@XmlRootElement(name = "RectangleGraphic")
 public class RectangleGraphic extends AbstractDragGraphicArea {
 
   public RectangleGraphic() {
@@ -31,6 +34,28 @@ public class RectangleGraphic extends AbstractDragGraphicArea {
     setShape(
         new Rectangle2D.Double(
             Math.min(a.x, b.x), Math.min(a.y, b.y), Math.abs(b.x - a.x), Math.abs(b.y - a.y)));
+    setLabel(new String[] {"ROI"});
+  }
+
+  /** Keep a headed-visible box on the image after a degenerate click-drag. */
+  public void ensureArea(double min, BufferedImage image) {
+    Point2D.Double a = getHandlePoint(0);
+    Point2D.Double b = getHandlePoint(1);
+    if (a == null || b == null) {
+      return;
+    }
+    double w = image == null ? 256 : image.getWidth();
+    double h = image == null ? 256 : image.getHeight();
+    double need = Math.max(min, Math.min(w, h) * 0.08);
+    if (Math.abs(b.x - a.x) < need) {
+      b = new Point2D.Double(Math.min(w - 1, a.x + need), b.y);
+    }
+    if (Math.abs(b.y - a.y) < need) {
+      b = new Point2D.Double(b.x, Math.min(h - 1, a.y + need));
+    }
+    b.x = Math.max(0, Math.min(w - 1, b.x));
+    b.y = Math.max(0, Math.min(h - 1, b.y));
+    setHandlePoint(1, b);
   }
 
   @Override

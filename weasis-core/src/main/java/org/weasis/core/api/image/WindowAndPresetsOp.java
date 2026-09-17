@@ -9,7 +9,7 @@
  */
 package org.weasis.core.api.image;
 
-/** Passthrough op stub; WP-2/WP-4 bind pixels via weasis-core-img. */
+/** View2d VOI node: same linear/SIGMOID window as {@link WindowOp}. */
 public class WindowAndPresetsOp extends AbstractOp {
 
   public static final String P_WINDOW = "window";
@@ -20,5 +20,16 @@ public class WindowAndPresetsOp extends AbstractOp {
 
   public WindowAndPresetsOp() {
     super("op.window.presets");
+  }
+
+  @Override
+  protected void processEnabled() {
+    WindowOp window = new WindowOp();
+    window.setParam(WindowOp.P_WINDOW, getParam(P_WINDOW));
+    window.setParam(WindowOp.P_LEVEL, getParam(P_LEVEL));
+    window.setParam(WindowOp.P_VOI_LUT_SHAPE, getParam(P_VOI_LUT_SHAPE));
+    window.setParam(INPUT_IMG, getParam(INPUT_IMG));
+    window.processEnabled();
+    setParam(OUTPUT_IMG, window.getParam(OUTPUT_IMG));
   }
 }

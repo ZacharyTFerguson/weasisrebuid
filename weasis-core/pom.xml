@@ -37,6 +37,18 @@
       <artifactId>slf4j-api</artifactId>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>4.0.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>4.0.3</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -51,7 +63,7 @@ Bundle-Name: Weasis Core
 Bundle-Activator: org.weasis.core.internal.Activator
 -dsannotations: *
 Export-Package: !org.weasis.core.internal.*, org.weasis.core.*
-Import-Package: org.osgi.framework,org.osgi.service.component,org.slf4j;version=!,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,javax.swing.text,*
+Import-Package: org.osgi.framework,org.osgi.service.component,org.slf4j;version=!,javax.swing,javax.swing.border,javax.swing.event,javax.swing.tree,javax.swing.text,jakarta.xml.bind,jakarta.xml.bind.annotation,jakarta.xml.bind.annotation.adapters,*
 ]]></bnd>
         </configuration>
       </plugin>

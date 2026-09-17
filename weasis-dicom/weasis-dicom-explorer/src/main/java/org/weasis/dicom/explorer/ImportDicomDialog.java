@@ -10,12 +10,14 @@
 package org.weasis.dicom.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.File;
 import java.util.Hashtable;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JTabbedPane;
+import javax.swing.WindowConstants;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.service.UICore;
 
@@ -24,12 +26,15 @@ public class ImportDicomDialog extends JDialog {
 
   private final DicomModel model;
   private final boolean cd;
+  private final JTabbedPane tabs = new JTabbedPane();
 
   public ImportDicomDialog(Frame owner, DicomModel model, boolean cd) {
-    super(owner, cd ? "Import DICOM CD" : "Import DICOM", true);
+    super(owner, cd ? "Import DICOM CD" : "Import DICOM", Dialog.ModalityType.DOCUMENT_MODAL);
     this.model = model == null ? new DicomModel() : model;
     this.cd = cd;
-    JTabbedPane tabs = new JTabbedPane();
+    setName("import-dicom-dialog");
+    setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    tabs.setName("import-tabs");
     Hashtable<String, Object> props = new Hashtable<>();
     props.put("model", this.model);
     if (cd) {
@@ -48,6 +53,19 @@ public class ImportDicomDialog extends JDialog {
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add(tabs, BorderLayout.CENTER);
     setSize(480, 320);
+  }
+
+  public JTabbedPane tabs() {
+    return tabs;
+  }
+
+  public ImportDicomPage page(String title) {
+    for (int i = 0; i < tabs.getTabCount(); i++) {
+      if (title.equals(tabs.getTitleAt(i)) && tabs.getComponentAt(i) instanceof ImportDicomPage p) {
+        return p;
+      }
+    }
+    return null;
   }
 
   static ImportDicomPage page(Hashtable<String, Object> props) {
@@ -74,10 +92,12 @@ public class ImportDicomDialog extends JDialog {
   }
 
   public static ImportDicomDialog openFromFactories(Frame owner, boolean cd) {
-    DicomModel model = new DicomModel();
+    DicomModel model = LocalPersistence.getDicomModel();
     if (UICore.getInstance().getDicomImportFactories().isEmpty()) {
       new LocalImportFactory().activate();
     }
-    return new ImportDicomDialog(owner, model, cd);
+    ImportDicomDialog dialog = new ImportDicomDialog(owner, model, cd);
+    dialog.setLocationRelativeTo(owner);
+    return dialog;
   }
 }

@@ -24,8 +24,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.gui.util.AbstractItemDialogPage;
+import org.weasis.dicom.explorer.main.DicomTaskManager;
 
 public class ImportDicomPage extends AbstractItemDialogPage implements ImportDicom {
 
@@ -35,8 +37,11 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
   private final boolean copyToTemp;
   private final JTextField pathField = new JTextField();
   private final JPasswordField passwordField = new JPasswordField();
+  private final JButton browse = new JButton("Browse…");
+  private final JButton importBtn = new JButton("Import");
   private final JLabel status = new JLabel(" ");
   private final JCheckBox dontShow = new JCheckBox("Don't show again");
+  private JButton detect;
 
   public ImportDicomPage(
       String title, int position, DicomModel model, SkipUnsupportedSopNotifier skip) {
@@ -51,14 +56,13 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
       boolean copyToTemp) {
     super(title, position);
     this.title = title;
-    this.model = model == null ? new DicomModel() : model;
+    this.model = model == null ? LocalPersistence.getDicomModel() : model;
     this.skip = skip == null ? new SkipUnsupportedSopNotifier() : skip;
     this.copyToTemp = copyToTemp;
     JPanel form = new JPanel(new GridLayout(0, 1, 4, 4));
     form.add(new JLabel(title + " — files, folder, ZIP, or DICOMDIR"));
     JPanel pathRow = new JPanel(new BorderLayout(4, 0));
     pathRow.add(pathField, BorderLayout.CENTER);
-    JButton browse = new JButton("Browse…");
     browse.addActionListener(e -> browse());
     pathRow.add(browse, BorderLayout.EAST);
     form.add(pathRow);
@@ -66,17 +70,57 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     form.add(passwordField);
     if (copyToTemp) {
       form.add(new JLabel("DICOM CD: copy-to-temp before parse"));
-      JButton detect = new JButton("Detect CD-ROM");
+      detect = new JButton("Detect CD-ROM");
       detect.addActionListener(e -> detectCdrom(CdromDetector.defaultSearchRoots()));
       form.add(detect);
     }
-    JButton importBtn = new JButton("Import");
     importBtn.addActionListener(e -> runImport());
     form.add(importBtn);
     dontShow.addActionListener(e -> skip.setDontShowAgain(dontShow.isSelected()));
     form.add(dontShow);
     form.add(status);
+    nameChrome();
     add(form, BorderLayout.NORTH);
+  }
+
+  void nameChrome() {
+    pathField.setName("import-path");
+    passwordField.setName("import-zip-password");
+    browse.setName("import-browse");
+    importBtn.setName("import-run");
+    status.setName("import-status");
+    dontShow.setName("import-dont-show");
+    if (detect != null) {
+      detect.setName("import-detect-cd");
+    }
+  }
+
+  public JTextField pathField() {
+    return pathField;
+  }
+
+  public JButton importButton() {
+    return importBtn;
+  }
+
+  public JButton browseButton() {
+    return browse;
+  }
+
+  public JButton detectButton() {
+    return detect;
+  }
+
+  public JLabel statusLabel() {
+    return status;
+  }
+
+  public String statusText() {
+    return status.getText();
+  }
+
+  public void setPath(String path) {
+    pathField.setText(path == null ? "" : path);
   }
 
   void detectCdrom(List<File> roots) {
@@ -90,9 +134,7 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
   }
 
   void browse() {
-    JFileChooser chooser = new JFileChooser();
-    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
-    chooser.setDialogTitle(title);
+    JFileChooser chooser = newFileChooser();
     if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
       File selected = chooser.getSelectedFile();
       if (selected != null) {
@@ -101,7 +143,15 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     }
   }
 
-  void runImport() {
+  JFileChooser newFileChooser() {
+    UIManager.put("FileChooser.useShellFolder", Boolean.FALSE);
+    JFileChooser chooser = new JFileChooser();
+    chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+    chooser.setDialogTitle(title);
+    return chooser;
+  }
+
+  public void runImport() {
     String path = pathField.getText();
     if (path == null || path.isBlank()) {
       status.setText("Choose a file, folder, ZIP, or DICOMDIR");
@@ -118,28 +168,7 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
   }
 
   void openViewerIfPresent() {
-    if (java.awt.GraphicsEnvironment.isHeadless() || model.getInstances().isEmpty()) {
-      return;
-    }
-    org.weasis.core.api.media.data.Series<org.weasis.core.api.media.data.MediaElement> series =
-        new org.weasis.core.api.media.data.Series<>();
-    series.setMimeType(org.weasis.dicom.codec.DicomMime.IMAGE_DICOM);
-    for (ImportedInstance inst : model.getInstances()) {
-      if (inst.file() == null) {
-        continue;
-      }
-      org.weasis.core.api.media.data.MediaElement el =
-          new org.weasis.core.api.media.data.MediaElement();
-      el.setMediaURI(inst.file().toURI());
-      el.setMimeType(org.weasis.dicom.codec.DicomMime.IMAGE_DICOM);
-      series.addMedia(el);
-    }
-    org.weasis.core.api.service.UICore.getInstance()
-        .getViewerFactory(org.weasis.dicom.codec.DicomMime.IMAGE_DICOM)
-        .ifPresent(
-            factory ->
-                org.weasis.core.ui.editor.ViewerPluginBuilder.openSequenceInPlugin(
-                    factory, series, new java.util.Hashtable<>(), true, true));
+    LocalPersistence.openingStrategy().openIfWindow(model);
   }
 
   @Override
@@ -155,7 +184,9 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     for (File file : files) {
       try {
         File src = copyToTemp ? copyLocal(file) : file;
-        LoadLocalDicom.importPath(src, zipPassword, model, skip);
+        LoadDicom loader = new LoadDicom(model, List.of(src), zipPassword, skip);
+        DicomTaskManager.getInstance().addTask(loader);
+        loader.load();
       } catch (Exception e) {
         status.setText("Error (corrupt) " + file.getName());
       }

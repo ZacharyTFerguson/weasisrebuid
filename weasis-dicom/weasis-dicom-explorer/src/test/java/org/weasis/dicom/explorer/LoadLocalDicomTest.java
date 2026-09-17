@@ -95,6 +95,11 @@ class LoadLocalDicomTest {
     DicomModel model = new DicomModel();
     var result = LoadLocalDicom.importDicomDir(dicomdir, model, new SkipUnsupportedSopNotifier());
     assertTrue(result.imported().size() >= 1, "DICOMDIR should resolve CT");
+    DicomModel viaType = new DicomModel();
+    var again =
+        org.weasis.dicom.explorer.imp.DicomDirImport.read(
+            dicomdir, viaType, new SkipUnsupportedSopNotifier());
+    assertTrue(again.imported().size() >= 1);
   }
 
   @Test

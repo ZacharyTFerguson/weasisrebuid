@@ -197,7 +197,10 @@ public final class LoadLocalDicom {
           dcm.getInt(Tag.SeriesNumber, 0),
           dcm.getInt(Tag.InstanceNumber, 0),
           file,
-          io.mimeType());
+          io.mimeType(),
+          dcm.getString(Tag.EchoNumbers, ""),
+          dcm.getString(Tag.TemporalPositionIdentifier, ""),
+          dcm.getString(Tag.ContrastBolusAgent, ""));
     } catch (Exception e) {
       return null;
     }
