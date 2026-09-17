@@ -9,9 +9,12 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.VR;
 import org.dcm4che3.util.TagUtils;
@@ -23,22 +26,27 @@ import org.weasis.dicom.codec.TagD;
 public class DcmHeaderToolBar extends WtoolBar {
 
   public static final String NAME = "DICOM Header";
+  public static final String DUMP = "dumpHeader";
+  public static final String DUMP_TEXT = "headerDump";
 
+  private final JButton dump = new JButton(new DumpAction());
+  private final JTextArea dumpArea = new JTextArea(6, 36);
   private View2d view;
   private String lastDump = "";
 
   public DcmHeaderToolBar() {
     super(NAME, 25);
-    JButton dump =
-        new JButton(
-            new AbstractAction("Dump") {
-              @Override
-              public void actionPerformed(ActionEvent e) {
-                dumpSelected();
-              }
-            });
-    dump.setName("dumpHeader");
+    dump.setName(DUMP);
+    dump.setText("Dump");
+    dumpArea.setName(DUMP_TEXT);
+    dumpArea.setEditable(false);
+    dumpArea.setLineWrap(true);
+    dumpArea.setWrapStyleWord(true);
+    JScrollPane scroll = new JScrollPane(dumpArea);
+    scroll.setName(DUMP_TEXT + "Scroll");
+    scroll.setPreferredSize(new Dimension(280, 96));
     add(dump);
+    add(scroll);
   }
 
   public void bind(View2d view) {
@@ -49,15 +57,46 @@ public class DcmHeaderToolBar extends WtoolBar {
     return view;
   }
 
+  public JButton dumpButton() {
+    return dump;
+  }
+
+  public JTextArea dumpArea() {
+    return dumpArea;
+  }
+
   public String lastDump() {
     return lastDump;
   }
 
   public String dumpSelected() {
-    if (view != null && view.getDataset() != null) {
-      return dump(view.getDataset());
+    bindPainted();
+    String text = dump(view == null ? null : view.getDataset());
+    flushHost();
+    return text;
+  }
+
+  void bindPainted() {
+    if (view == null) {
+      return;
     }
-    return dump((Attributes) null);
+    Object host = view.getClientProperty(View2dContainer.class);
+    if (host instanceof View2dContainer container) {
+      View2d painted = container.paintedCell();
+      if (painted != null) {
+        this.view = painted;
+      }
+    }
+  }
+
+  void flushHost() {
+    if (view == null) {
+      return;
+    }
+    Object host = view.getClientProperty(View2dContainer.class);
+    if (host instanceof View2dContainer container) {
+      container.flushFlipPaint();
+    }
   }
 
   public String dump(DicomElement element) {
@@ -67,6 +106,7 @@ public class DcmHeaderToolBar extends WtoolBar {
   public String dump(Attributes dataset) {
     if (dataset == null) {
       lastDump = "";
+      dumpArea.setText("");
       return lastDump;
     }
     StringBuilder builder = new StringBuilder();
@@ -77,6 +117,8 @@ public class DcmHeaderToolBar extends WtoolBar {
       builder.append(formatTag(dataset, tag));
     }
     lastDump = builder.toString();
+    dumpArea.setText(lastDump);
+    dumpArea.setCaretPosition(0);
     return lastDump;
   }
 
@@ -96,6 +138,17 @@ public class DcmHeaderToolBar extends WtoolBar {
       return keyword + " " + hex + ": " + (value == null ? "" : value);
     } catch (RuntimeException e) {
       return keyword + " " + hex + ": [" + vr + "]";
+    }
+  }
+
+  final class DumpAction extends AbstractAction {
+    DumpAction() {
+      super("Dump");
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+      dumpSelected();
     }
   }
 }

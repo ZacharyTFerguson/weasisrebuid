@@ -204,6 +204,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     return imageTool;
   }
 
+  public DcmHeaderToolBar getHeaderToolBar() {
+    return headerToolBar;
+  }
+
   public View2d getView2d() {
     return view2d;
   }
@@ -478,7 +482,9 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   }
 
   void refreshImageTool() {
-    imageTool.bind(paintedCell());
+    View2d painted = paintedCell();
+    imageTool.bind(painted);
+    headerToolBar.bind(painted);
   }
 
   public void cycleLayout(int delta) {

@@ -49,5 +49,9 @@ class DcmHeaderToolBarHaveTest {
     String selected = bar.dumpSelected();
     assertTrue(selected.contains("1.2.3.4.5"));
     assertEquals(selected, bar.lastDump());
+    assertEquals(selected, bar.dumpArea().getText());
+    assertEquals(DcmHeaderToolBar.DUMP, bar.dumpButton().getName());
+    assertEquals(DcmHeaderToolBar.DUMP_TEXT, bar.dumpArea().getName());
+    assertTrue(selected.contains("[OW]"));
   }
 }

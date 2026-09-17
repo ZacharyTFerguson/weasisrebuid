@@ -389,6 +389,35 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void dumpHeaderShowsSelectedTagsWithoutChangingImageTool(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    DcmHeaderToolBar header = container.getHeaderToolBar();
+    AbstractButton dump = header.dumpButton();
+    assertEquals("Dump", dump.getText());
+    assertEquals(DcmHeaderToolBar.DUMP, dump.getName());
+    assertEquals(DcmHeaderToolBar.DUMP_TEXT, header.dumpArea().getName());
+    assertSame(view, header.boundView());
+    int origin = view.getSourceImage().getRaster().getSample(4, 4, 0);
+    dump.doClick();
+    assertSame(view, header.boundView());
+    String text = header.dumpArea().getText();
+    assertTrue(text.contains("SYN-CT-0001"));
+    assertTrue(text.contains("PatientID"));
+    assertTrue(text.contains("[OW]"));
+    assertTrue(text.contains("(0010,0020)") || text.contains("0010,0020"));
+    assertEquals(text, header.lastDump());
+    assertEquals(origin, view.getSourceImage().getRaster().getSample(4, 4, 0));
+    assertFalse(view.isShutterChrome());
+    assertFalse(view.isMaskChrome());
+    assertFalse(view.isFlip());
+    assertEquals(FilterOp.NONE, String.valueOf(view.getFilter()));
+  }
+
+  @Test
   void namedFlipMirrorsEveryDxHangCellWithoutRasterizingSource() throws Exception {
     View2dContainer container = new View2dContainer();
     container.applyHanging(1, 2);
