@@ -55,6 +55,7 @@ import org.weasis.core.ui.editor.image.MouseActions;
 import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.pref.PreferenceDialog;
 import org.weasis.core.ui.pref.ShortcutPrefView;
 import org.weasis.core.ui.util.ToolBarContainer;
@@ -347,6 +348,43 @@ class WeasisWinChromeHaveTest {
       assertEquals("winLevel", win.leftStateText());
       assertEquals(
           MouseActions.WINLEVEL, win.calibrationView().getView().getMouseActions().getLeft());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
+  void leftSZMapSetsNamedStateOnBoundView() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      ViewerToolBar bar = win.viewerToolBar();
+      assertEquals("left-s", win.leftSButton().getName());
+      assertEquals("left-z", win.leftZButton().getName());
+      assertEquals("sz-state", win.szStateLabel().getName());
+      assertEquals("none", win.szStateText());
+      assertEquals("none", win.leftStateText());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+      win.leftSButton().doClick();
+      assertEquals("sequence", win.szStateText());
+      assertEquals(MouseActions.SEQUENCE, bar.boundView().getMouseActions().getLeft());
+      win.leftZButton().doClick();
+      assertEquals("zoom", win.szStateText());
+      assertEquals(MouseActions.ZOOM, bar.boundView().getMouseActions().getLeft());
+      assertEquals("none", win.leftStateText());
       assertEquals("none", win.imgPrintStateText());
       assertEquals("none", win.printStateText());
       assertEquals("none", win.freezeStateText());

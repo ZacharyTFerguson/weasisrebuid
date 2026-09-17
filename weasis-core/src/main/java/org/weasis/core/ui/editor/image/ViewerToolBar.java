@@ -51,6 +51,9 @@ public class ViewerToolBar extends WtoolBar {
   private final JButton leftT = new JButton("pan");
   private final JButton leftW = new JButton("winLevel");
   private final JLabel leftState = new JLabel("none");
+  private final JButton leftS = new JButton("sequence");
+  private final JButton leftZ = new JButton("zoom");
+  private final JLabel szState = new JLabel("none");
 
   public ViewerToolBar() {
     super(NAME, 10);
@@ -67,6 +70,7 @@ public class ViewerToolBar extends WtoolBar {
     add(synchManual);
     add(synchKind);
     addLeftKeyChrome();
+    addSzKeyChrome();
   }
 
   void nameSynchChrome() {
@@ -302,6 +306,45 @@ public class ViewerToolBar extends WtoolBar {
 
   public String leftStateText() {
     return leftState.getText();
+  }
+
+  void addSzKeyChrome() {
+    leftS.setName("left-s");
+    leftZ.setName("left-z");
+    szState.setName("sz-state");
+    leftS.addActionListener(e -> applyLeftS());
+    leftZ.addActionListener(e -> applyLeftZ());
+    add(leftS);
+    add(leftZ);
+    add(szState);
+  }
+
+  void applyLeftS() {
+    setSelected(ActionW.SCROLL_SERIES.cmd());
+    apply(view);
+    szState.setText("sequence");
+  }
+
+  void applyLeftZ() {
+    setSelected(ActionW.ZOOM.cmd());
+    apply(view);
+    szState.setText("zoom");
+  }
+
+  public JButton leftSButton() {
+    return leftS;
+  }
+
+  public JButton leftZButton() {
+    return leftZ;
+  }
+
+  public JLabel szStateLabel() {
+    return szState;
+  }
+
+  public String szStateText() {
+    return szState.getText();
   }
 
   private JButton button(String action) {

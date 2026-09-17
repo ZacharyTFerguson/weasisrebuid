@@ -11,6 +11,7 @@ package org.weasis.core.ui.editor.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.image.BufferedImage;
@@ -60,6 +61,29 @@ class ViewerCineHaveTest {
     bar.leftWButton().doClick();
     assertEquals("winLevel", bar.leftStateText());
     assertEquals(MouseActions.WINLEVEL, view.getMouseActions().getLeft());
+  }
+
+  @Test
+  void leftSZMapSetsNamedStateOnBoundView() {
+    ViewerToolBar bar = new ViewerToolBar();
+    DefaultView2d<?> view = new DefaultView2d<>();
+    DefaultView2d<?> cal = new DefaultView2d<>();
+    bar.bind(view);
+    assertEquals("left-s", bar.leftSButton().getName());
+    assertEquals("left-z", bar.leftZButton().getName());
+    assertEquals("sz-state", bar.szStateLabel().getName());
+    assertEquals("none", bar.szStateText());
+    assertEquals("none", bar.leftStateText());
+    bar.leftSButton().doClick();
+    assertEquals("sequence", bar.szStateText());
+    assertEquals(MouseActions.SEQUENCE, view.getMouseActions().getLeft());
+    assertEquals(MouseActions.WINLEVEL, cal.getMouseActions().getLeft());
+    assertSame(view, bar.boundView());
+    bar.leftZButton().doClick();
+    assertEquals("zoom", bar.szStateText());
+    assertEquals(MouseActions.ZOOM, view.getMouseActions().getLeft());
+    assertEquals(MouseActions.WINLEVEL, cal.getMouseActions().getLeft());
+    assertEquals("none", bar.leftStateText());
   }
 
   @Test

@@ -575,6 +575,22 @@ public class WeasisWin extends JFrame {
     return viewerToolBar().leftStateText();
   }
 
+  public JButton leftSButton() {
+    return viewerToolBar().leftSButton();
+  }
+
+  public JButton leftZButton() {
+    return viewerToolBar().leftZButton();
+  }
+
+  public JLabel szStateLabel() {
+    return viewerToolBar().szStateLabel();
+  }
+
+  public String szStateText() {
+    return viewerToolBar().szStateText();
+  }
+
   void addDockingChrome() {
     dockingState.setName("docking-state");
     toolbars.add(dockingState);
