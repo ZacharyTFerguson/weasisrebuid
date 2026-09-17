@@ -369,7 +369,12 @@ class ViewerChromeHaveTest {
     GraphicsPane pane = container.getGraphicsPane();
     assertEquals("graphics-pane", pane.getName());
     assertEquals("graphics-count", pane.countLabel().getName());
+    assertEquals("sel-sample", pane.sampleButton().getName());
+    assertEquals("select-graphic", pane.selectButton().getName());
+    assertEquals("delete-graphic", pane.deleteButton().getName());
+    assertEquals("sel-state", pane.stateLabel().getName());
     assertEquals("0", pane.countText());
+    assertEquals("none", pane.stateText());
     View2d view = container.getView2d();
     RectangleGraphic roi = new RectangleGraphic();
     roi.setHandlePoint(0, new Point2D.Double(0, 0));
@@ -384,6 +389,24 @@ class ViewerChromeHaveTest {
     assertEquals("lens", container.getZoomWin().getName());
     assertEquals("mini-tool", container.getMiniTool().getName());
     assertEquals("histogram", container.getHistogramView().getName());
+  }
+
+  @Test
+  void graphicsPaneSelectDeleteMapSetsNamedStateChrome() {
+    View2dContainer container = new View2dContainer();
+    GraphicsPane pane = container.getGraphicsPane();
+    assertEquals("none", pane.stateText());
+    pane.sampleButton().doClick();
+    assertEquals("1", pane.countText());
+    assertEquals("none", pane.stateText());
+    pane.selectButton().doClick();
+    assertEquals("selected", pane.stateText());
+    pane.deleteButton().doClick();
+    assertEquals("deleted", pane.stateText());
+    assertEquals("0", pane.countText());
+    assertEquals("none", container.getResetTools().stateText());
+    assertEquals("none", container.getLutToolBar().stateText());
+    assertEquals("region-stats", container.getViewerToolBar().regionStatsLabel().getName());
   }
 
   @Test

@@ -98,8 +98,39 @@ class ViewerNavigationHaveTest {
     assertSame(view, pane.boundView());
     assertEquals("graphics-pane", pane.getName());
     assertEquals("graphics-count", pane.countLabel().getName());
+    assertEquals("sel-sample", pane.sampleButton().getName());
+    assertEquals("select-graphic", pane.selectButton().getName());
+    assertEquals("delete-graphic", pane.deleteButton().getName());
+    assertEquals("sel-state", pane.stateLabel().getName());
     assertEquals("1", pane.countText());
+    assertEquals("none", pane.stateText());
     assertEquals(1, pane.getGraphicList().size());
+  }
+
+  @Test
+  void graphicsPaneSelectDeleteMapSetsNamedState() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    GraphicsPane pane = new GraphicsPane();
+    pane.bind(view);
+    assertEquals("none", pane.stateText());
+    assertEquals("0", pane.countText());
+    pane.sampleButton().doClick();
+    assertEquals("1", pane.countText());
+    assertEquals("none", pane.stateText());
+    pane.selectButton().doClick();
+    assertEquals("selected", pane.stateText());
+    assertEquals(1, view.getSelectedGraphics().size());
+    pane.deleteButton().doClick();
+    assertEquals("deleted", pane.stateText());
+    assertEquals("0", pane.countText());
+    assertTrue(view.getGraphicList().isEmpty());
+    pane.deleteButton().doClick();
+    assertEquals("none", pane.stateText());
+    GraphicsPane unbound = new GraphicsPane();
+    unbound.sampleButton().doClick();
+    unbound.selectButton().doClick();
+    unbound.deleteButton().doClick();
+    assertEquals("none", unbound.stateText());
   }
 
   static Series<ImageElement> frames(int n) {
