@@ -30,6 +30,7 @@ import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.GridMouseHandler;
+import org.weasis.core.ui.editor.image.GraphicsPane;
 import org.weasis.core.ui.editor.image.HistogramView;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MeasureToolBar;
@@ -234,6 +235,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public HistogramView getHistogramView() {
     return histogramView;
+  }
+
+  public GraphicsPane getGraphicsPane() {
+    return viewerToolBar.graphicsPane();
   }
 
   public MiniTool getMiniTool() {
@@ -535,6 +540,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     zoomWin.bind(painted);
     displayTool.bind(painted);
     viewerToolBar.refreshRegionStats();
+    viewerToolBar.graphicsPane().bind(painted);
     wireCrosshair(painted);
   }
 

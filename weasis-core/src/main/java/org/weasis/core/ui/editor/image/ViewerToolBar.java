@@ -44,6 +44,7 @@ public class ViewerToolBar extends WtoolBar {
   private DefaultView2d<?> statsView;
   private final JLabel pixelInfo = new JLabel(" ");
   private final JLabel regionStats = new JLabel(" ");
+  private final GraphicsPane graphicsPane = new GraphicsPane();
   private final SynchViewButton synchFor = new SynchViewButton();
   private final ManualSynchViewButton synchManual = new ManualSynchViewButton();
   private final JLabel synchKind = new JLabel("FoR");
@@ -57,6 +58,7 @@ public class ViewerToolBar extends WtoolBar {
     add(pixelInfo);
     regionStats.setName("region-stats");
     add(regionStats);
+    add(graphicsPane);
     nameSynchChrome();
     add(synchFor);
     add(synchManual);
@@ -81,6 +83,7 @@ public class ViewerToolBar extends WtoolBar {
       refreshSynchKind();
       wireRegionStats(view);
       refreshRegionStats();
+      graphicsPane.bind(view);
     }
   }
 
@@ -204,6 +207,10 @@ public class ViewerToolBar extends WtoolBar {
 
   public String regionStatsText() {
     return regionStats.getText();
+  }
+
+  public GraphicsPane graphicsPane() {
+    return graphicsPane;
   }
 
   public void refreshPixelInfo(PixelInfo info) {

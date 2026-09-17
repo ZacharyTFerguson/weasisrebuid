@@ -40,6 +40,7 @@ import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
 import org.weasis.core.ui.editor.image.HistogramData.ColorModel;
+import org.weasis.core.ui.editor.image.GraphicsPane;
 import org.weasis.core.ui.editor.image.HistogramView;
 import org.weasis.core.ui.editor.image.MouseActions;
 import org.weasis.core.ui.editor.image.RotationToolBar;
@@ -297,6 +298,29 @@ class ViewerChromeHaveTest {
     assertEquals(
         "IMAGE,CROSSLINES,ANNOTATION,DRAW,MEASURE", container.getDisplayTool().layersValueText());
     assertEquals("pixel-info", bar.pixelInfoLabel().getName());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
+  }
+
+  @Test
+  void graphicsPaneSetsNamedCountChrome() {
+    View2dContainer container = new View2dContainer();
+    GraphicsPane pane = container.getGraphicsPane();
+    assertEquals("graphics-pane", pane.getName());
+    assertEquals("graphics-count", pane.countLabel().getName());
+    assertEquals("0", pane.countText());
+    View2d view = container.getView2d();
+    RectangleGraphic roi = new RectangleGraphic();
+    roi.setHandlePoint(0, new Point2D.Double(0, 0));
+    roi.setHandlePoint(1, new Point2D.Double(1, 2));
+    view.addGraphic(roi);
+    assertEquals("1", pane.countText());
+    assertEquals("region-stats", container.getViewerToolBar().regionStatsLabel().getName());
+    assertEquals("FULL", container.getDisplayTool().visibilityValueText());
+    assertEquals(
+        "IMAGE,CROSSLINES,ANNOTATION,DRAW,MEASURE", container.getDisplayTool().layersValueText());
+    assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
     assertEquals("lens", container.getZoomWin().getName());
     assertEquals("mini-tool", container.getMiniTool().getName());
     assertEquals("histogram", container.getHistogramView().getName());

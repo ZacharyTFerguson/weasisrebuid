@@ -96,6 +96,9 @@ class ViewerNavigationHaveTest {
     GraphicsPane pane = new GraphicsPane();
     pane.bind(view);
     assertSame(view, pane.boundView());
+    assertEquals("graphics-pane", pane.getName());
+    assertEquals("graphics-count", pane.countLabel().getName());
+    assertEquals("1", pane.countText());
     assertEquals(1, pane.getGraphicList().size());
   }
 
