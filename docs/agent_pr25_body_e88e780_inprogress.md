@@ -5,7 +5,8 @@ Draft on `cursor/weasis-spec-rebuild-26c5`. **Do not merge.** **Do not tick Pass
 
 Staffing until 2026-09-17T23:26Z: Grok writer + Composer verifier only.
 
-**HEAD:** `e88e780` (`Format Help shortcut map license header and Help menu wrap.`; Help product `dd74bf4` `Show Help Keyboard Shortcuts live map and System resources diagnostic.`). **Flip** `004f59d`, **Sharpen** `3844bd4`, **Window** `3091f5e`, **Crop** `f88ec68`, **Brightness** `e9ef165`, **AutoLevels** `18f9802`, **Mask** `3355cda`, **Shutter** `b00cd4d`, **DcmHeader Dump** `0d2f39f`, and **DicomFieldsView** `eefe975` headed PASS (prior chrome not re-scored). **Export DICOM** `363f172` — Composer headed proof **in progress** (bc-8bf553b7; do not revert). **Help → Keyboard Shortcuts / System resources** / `name=help-keyboard-shortcuts` — Composer headed proof **in progress**. Full TUTORIALS.md walkthrough still **not** Pass. Full TUTORIALS.md walkthrough is still **not** Pass.
+**HEAD:** `e88e780` (`Format Help shortcut map license header and Help menu wrap.`; Help product `dd74bf4` `Show Help Keyboard Shortcuts live map and System resources diagnostic.`). **Flip** `004f59d`, **Sharpen** `3844bd4`, **Window** `3091f5e`, **Crop** `f88ec68`, **Brightness** `e9ef165`, **AutoLevels** `18f9802`, **Mask** `3355cda`, **Shutter** `b00cd4d`, **DcmHeader Dump** `0d2f39f`, **DicomFieldsView** `eefe975`, and **Export DICOM** `363f172` headed PASS (prior chrome not re-scored). **Help → Keyboard Shortcuts / System resources** / `name=help-keyboard-shortcuts` — Composer headed proof **in progress**. Full TUTORIALS.md walkthrough is still **not** Pass.
+
 
 
 
@@ -23,25 +24,28 @@ Staffing until 2026-09-17T23:26Z: Grok writer + Composer verifier only.
 | `shortcut-rows` list | **pending** — same rows as table |
 | Help `help-system-resources` / `System resources` | **pending** — dialog title `System resources`; `name=system-resources` |
 | Status `system-resources-status` | **pending** — `getText` starts `Heap `, contains `Native `, `%`, and `decoded` |
-| Export / ImageTool / Dump / Fields untouched | **pending** — do not click those chrome |
+| Export / ImageTool / Dump / Fields untouched | **pending** — raster **1929×2207**; do not click those chrome |
 
 **Route:** Composer headed verify **in progress** on `e88e780`. **Next:** remaining TUTORIALS after Help — **not** Pass.
 
 ## Headed `363f172` — File/toolbar Export DICOM / `name=export-dicom` (Composer)
 
-**Jar:** `/tmp/weasis-headed-363f172.jar` · **SHA:** `363f17231017b86f132dfc4a55ce536d457de7d6` · **Jar file:** `49d71b00b53fe43dafb3402da37dad2f4f47f782acf1d3f2a00779536d9ffc11` · **Gogo:** `17279` · OSGi cache `/tmp/weasis-headed-cache-363f172-fresh`; prior headed JVMs killed; **did not reuse** Fields/Dump/ImageTool jars.
+**Jar:** `/tmp/weasis-headed-363f172.jar` · **SHA:** `363f17231017b86f132dfc4a55ce536d457de7d6` · **Jar file:** `49d71b00b53fe43dafb3402da37dad2f4f47f782acf1d3f2a00779536d9ffc11` · **Gogo:** `17179` · OSGi cache `/tmp/weasis-headed-cache-363f172-fresh4`; prior headed JVMs killed; **did not reuse** Fields/Dump/ImageTool jars.
 
 **Flow:** `dicom:get` Reed chest (`/opt/cursor/artifacts/chest_pa.dcm`) on **DICOM 2D** → jattach toolbar **`export-dicom`** (next to `import-dicom`) or File **`file-export-dicom`** → dialog **`export-dicom-dialog`** with **`export-tree`** / **`export-tabs`** (DICOM / ZIP / DICOMDIR). Type dest in **`export-path`**, click **`export-run`**. Do **not** click ImageTool / `dumpHeader` / uncheck Fields limited.
 
 | Check | Stills-based result |
 |---|---|
-| Toolbar `export-dicom` / File `file-export-dicom` | **pending** — jattach `name=export-dicom` |
-| Dialog `export-dicom-dialog` tree Reed | **pending** — `export-tree` PatientName `Reed^Alice` PatientID `XR-CHEST-001` |
-| Tabs DICOM / ZIP / DICOMDIR | **pending** — `export-tabs` |
-| `export-run` writes dest; `export-status` Exported | **pending** — local files/ZIP/DICOMDIR |
-| ImageTool / Dump / Fields untouched | **pending** — raster **1929×2207**; Fields still Limited |
+| Toolbar `export-dicom` / File `file-export-dicom` | **OK** — jattach `name=export-dicom` opens `export-dicom-dialog` |
+| Dialog `export-dicom-dialog` tree Reed | **OK** — `export-tree` line `Reed^Alice XR-CHEST-001` |
+| Tabs DICOM / ZIP / DICOMDIR | **OK** — `export-tabs` titles **DICOM** / **ZIP** / **DICOMDIR** |
+| `export-run` writes dest; `export-status` Exported | **OK** — `Exported /tmp/weasis-export-reed-1789609389`; **1** `.dcm` SOP in dest |
+| ImageTool / Dump / Fields untouched | **OK** — raster **1929×2207**; `fields_limited=true`; `dumpHeader_selected=false` |
 
-**Route:** Composer headed verify running on `363f172`. **Next:** remaining TUTORIALS after Export DICOM — **not** Pass.
+**Route:** Export DICOM **headed OK** on `363f172`. **Next:** remaining TUTORIALS — **not** Pass.
+
+<img src="/opt/cursor/artifacts/headed_363f172_dialog.png" width="720" />
+<img src="/opt/cursor/artifacts/headed_363f172_exported.png" width="720" />
 
 ## Headed `eefe975` — explorer DicomFieldsView / `name=DICOM Fields` (Composer)
 
@@ -478,4 +482,3 @@ Edge-detect **(604, 391)** / **(699, 391)** were verifier **Y/B mis-clicks**, no
 
 <sub>To show artifacts inline, <a href="https://cursor.com/dashboard/cloud-agents#my-pull-requests">enable</a> in settings.</sub>
 <!-- CURSOR_AGENT_PR_BODY_END -->
-
