@@ -65,6 +65,13 @@ class HistogramHaveTest {
     view.setSourceImage(gray(new int[][] {{40, 40}, {200, 200}}));
     HistogramView dock = new HistogramView();
     assertEquals("Histogram", dock.getComponentName());
+    assertEquals("histogram", dock.getName());
+    assertEquals("histogram-panel", dock.getPanel().getName());
+    assertEquals("histogram-stats", dock.statsLabel().getName());
+    assertEquals("histogram-gray", dock.grayButton().getName());
+    assertEquals("histogram-rgb", dock.rgbButton().getName());
+    assertEquals("histogram-hsv", dock.hsvButton().getName());
+    assertEquals("histogram-hls", dock.hlsButton().getName());
     assertEquals(Insertable.Type.TOOL, dock.getType());
     dock.bind(view);
     assertSame(view, dock.boundView());
@@ -103,6 +110,8 @@ class HistogramHaveTest {
     dock.bind(view);
     dock.setHistogramColorModel(ColorModel.RGB);
     assertEquals(Channel.RED, dock.getChannels().getRed().getData().getChannel());
+    assertEquals("histogram-channels", dock.getChannels().getName());
+    assertTrue(dock.getChannels().isVisible());
     assertEquals(255, dock.getChannels().getRed().getData().getMaxValue());
     assertEquals(0, dock.getChannels().getGreen().getData().getMaxValue());
   }

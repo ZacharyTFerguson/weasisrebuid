@@ -10,9 +10,12 @@
 package org.weasis.core.ui.editor.image;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.Shape;
 import java.awt.image.BufferedImage;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.core.ui.editor.image.HistogramData.ColorModel;
 import org.weasis.core.ui.model.graphic.Graphic;
@@ -29,16 +32,50 @@ public class HistogramView extends PluginTool {
   private final HistogramPanel panel = new HistogramPanel();
   private final ChannelHistogramPanel channels = new ChannelHistogramPanel();
   private final JLabel stats = new JLabel(" ");
+  private JButton grayButton;
+  private JButton rgbButton;
+  private JButton hsvButton;
+  private JButton hlsButton;
   private DefaultView2d<?> view;
   private ColorModel histogramColorModel = ColorModel.GRAYSCALE;
   private boolean statisticsVisible = true;
 
   public HistogramView() {
     super(NAME, 80);
+    setName("histogram");
+    namePlots();
+    add(chromeBar(), BorderLayout.NORTH);
     add(panel, BorderLayout.CENTER);
     add(channels, BorderLayout.SOUTH);
-    add(stats, BorderLayout.NORTH);
     channels.setVisible(false);
+  }
+
+  void namePlots() {
+    panel.setName("histogram-panel");
+    channels.setName("histogram-channels");
+    stats.setName("histogram-stats");
+  }
+
+  JPanel chromeBar() {
+    JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+    bar.setName("histogram-chrome");
+    bar.add(stats);
+    grayButton = modelButton("Gray", "histogram-gray", ColorModel.GRAYSCALE);
+    rgbButton = modelButton("RGB", "histogram-rgb", ColorModel.RGB);
+    hsvButton = modelButton("HSV", "histogram-hsv", ColorModel.HSV);
+    hlsButton = modelButton("HLS", "histogram-hls", ColorModel.HLS);
+    bar.add(grayButton);
+    bar.add(rgbButton);
+    bar.add(hsvButton);
+    bar.add(hlsButton);
+    return bar;
+  }
+
+  JButton modelButton(String title, String name, ColorModel model) {
+    JButton button = new JButton(title);
+    button.setName(name);
+    button.addActionListener(e -> setHistogramColorModel(model));
+    return button;
   }
 
   public HistogramPanel getPanel() {
@@ -47,6 +84,30 @@ public class HistogramView extends PluginTool {
 
   public ChannelHistogramPanel getChannels() {
     return channels;
+  }
+
+  public JLabel statsLabel() {
+    return stats;
+  }
+
+  public String statsText() {
+    return stats.getText();
+  }
+
+  public JButton grayButton() {
+    return grayButton;
+  }
+
+  public JButton rgbButton() {
+    return rgbButton;
+  }
+
+  public JButton hsvButton() {
+    return hsvButton;
+  }
+
+  public JButton hlsButton() {
+    return hlsButton;
   }
 
   public void bind(DefaultView2d<?> view) {

@@ -30,6 +30,7 @@ import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.api.media.data.TagW;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.editor.image.GridMouseHandler;
+import org.weasis.core.ui.editor.image.HistogramView;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MeasureToolBar;
 import org.weasis.core.ui.editor.image.RotationToolBar;
@@ -69,6 +70,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final Basic3DToolBar basic3DToolBar = new Basic3DToolBar();
   private final SegmentationTool segmentationTool = new SegmentationTool();
   private final ImageTool imageTool = new ImageTool();
+  private final HistogramView histogramView = new HistogramView();
   private final ViewTransferHandler seriesDrop = new ViewTransferHandler();
   private int layoutIndex;
 
@@ -78,8 +80,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     fusionController.addTarget(view2d);
     segmentationTool.bind(view2d);
     imageTool.bind(view2d);
+    histogramView.bind(view2d);
     bindToolBars();
     add(viewGrid, BorderLayout.CENTER);
+    add(histogramView, BorderLayout.SOUTH);
     bindDrop(this);
     bindDrop(viewGrid);
     bindDrop(view2d);
@@ -155,6 +159,9 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     ui.add(fusionController.getColorBar());
     ui.add(segmentationTool);
     ui.add(imageTool);
+    List<Insertable> tools = getSeriesViewerUI().getTools();
+    tools.clear();
+    tools.add(histogramView);
   }
 
   public ToolBarContainer getToolBars() {
@@ -203,6 +210,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public ImageTool getImageTool() {
     return imageTool;
+  }
+
+  public HistogramView getHistogramView() {
+    return histogramView;
   }
 
   public DcmHeaderToolBar getHeaderToolBar() {
@@ -491,6 +502,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     imageTool.bind(painted);
     headerToolBar.bind(painted);
     screenshotToolBar.bind(painted);
+    histogramView.bind(painted);
   }
 
   public void cycleLayout(int delta) {

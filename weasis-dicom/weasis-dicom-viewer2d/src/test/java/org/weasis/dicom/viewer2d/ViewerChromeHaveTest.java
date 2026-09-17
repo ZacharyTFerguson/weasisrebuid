@@ -39,6 +39,8 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
+import org.weasis.core.ui.editor.image.HistogramData.ColorModel;
+import org.weasis.core.ui.editor.image.HistogramView;
 import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
@@ -67,6 +69,32 @@ class ViewerChromeHaveTest {
     assertEquals(0.0, view.getPanX(), 1e-9);
     assertEquals(0.0, view.getRotation(), 1e-9);
     assertFalse(view.isFlip());
+  }
+
+  @Test
+  void histogramDockBindsNamedRgbChrome() {
+    View2dContainer container = new View2dContainer();
+    HistogramView dock = container.getHistogramView();
+    assertEquals("histogram", dock.getName());
+    assertEquals("histogram-panel", dock.getPanel().getName());
+    assertEquals("histogram-stats", dock.statsLabel().getName());
+    assertEquals("histogram-gray", dock.grayButton().getName());
+    assertEquals("histogram-rgb", dock.rgbButton().getName());
+    assertEquals("histogram-hsv", dock.hsvButton().getName());
+    assertEquals("histogram-hls", dock.hlsButton().getName());
+    assertTrue(
+        container.getSeriesViewerUI().getTools().stream()
+            .anyMatch(b -> HistogramView.NAME.equals(b.getComponentName())));
+    View2d view = container.getView2d();
+    view.setSourceImage(new BufferedImage(4, 4, BufferedImage.TYPE_BYTE_GRAY));
+    dock.bind(view);
+    assertSame(view, dock.boundView());
+    assertTrue(dock.statsText().startsWith("n="));
+    assertTrue(dock.statsText().contains("n=16"));
+    dock.rgbButton().doClick();
+    assertEquals(ColorModel.RGB, dock.getHistogramColorModel());
+    assertTrue(dock.getChannels().isVisible());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
   }
 
   @Test

@@ -25,6 +25,10 @@ public class ChannelHistogramPanel extends JPanel {
 
   public ChannelHistogramPanel() {
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    setName("histogram-channels");
+    red.setName("histogram-red");
+    green.setName("histogram-green");
+    blue.setName("histogram-blue");
     add(red);
     add(green);
     add(blue);
