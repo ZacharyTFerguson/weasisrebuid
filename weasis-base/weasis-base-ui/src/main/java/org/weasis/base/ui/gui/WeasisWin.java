@@ -883,7 +883,8 @@ public class WeasisWin extends JFrame {
   JMenu createHelpMenu() {
     JMenu help = new JMenu("Help");
     help.setName("help");
-    help.add(helpItem("Keyboard Shortcuts", "help-keyboard-shortcuts", this::showKeyboardShortcuts));
+    help.add(
+        helpItem("Keyboard Shortcuts", "help-keyboard-shortcuts", this::showKeyboardShortcuts));
     help.add(helpItem("About", "help-about", this::showAbout));
     help.add(helpItem("Licenses", "help-licenses", this::showLicenses));
     help.add(helpItem("System resources", "help-system-resources", this::showResourceMonitor));
