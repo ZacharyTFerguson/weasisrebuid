@@ -95,6 +95,9 @@ public class WeasisWin extends JFrame {
   private final JButton printFilm = new JButton("Film Session");
   private final JButton printAction = new JButton("Print");
   private final JLabel printState = new JLabel("none");
+  private final JButton isoWrite = new JButton("ISO");
+  private final JButton isoDicomdir = new JButton("DICOMDIR");
+  private final JLabel isoState = new JLabel("none");
 
   public WeasisWin() {
     super(windowTitle());
@@ -277,6 +280,7 @@ public class WeasisWin extends JFrame {
     toolbars.add(exportBtn);
     addSendChrome();
     addPrintChrome();
+    addIsoChrome();
   }
 
   void addSendChrome() {
@@ -347,6 +351,41 @@ public class WeasisWin extends JFrame {
 
   public String printStateText() {
     return printState.getText();
+  }
+
+  void addIsoChrome() {
+    isoWrite.setName("iso-write");
+    isoDicomdir.setName("iso-dicomdir");
+    isoState.setName("iso-state");
+    isoWrite.addActionListener(e -> applyIsoWrite());
+    isoDicomdir.addActionListener(e -> applyIsoDicomDir());
+    toolbars.add(isoWrite);
+    toolbars.add(isoDicomdir);
+    toolbars.add(isoState);
+  }
+
+  void applyIsoWrite() {
+    isoState.setText("manifest");
+  }
+
+  void applyIsoDicomDir() {
+    isoState.setText("DICOMDIR");
+  }
+
+  public JButton isoWriteButton() {
+    return isoWrite;
+  }
+
+  public JButton isoDicomdirButton() {
+    return isoDicomdir;
+  }
+
+  public JLabel isoStateLabel() {
+    return isoState;
+  }
+
+  public String isoStateText() {
+    return isoState.getText();
   }
 
   void addDockingChrome() {

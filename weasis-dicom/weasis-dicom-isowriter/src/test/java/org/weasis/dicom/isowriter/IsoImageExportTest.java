@@ -9,6 +9,7 @@
  */
 package org.weasis.dicom.isowriter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
@@ -31,5 +32,25 @@ class IsoImageExportTest {
     assertTrue(export.isAvailable());
     assertTrue(text.contains("DICOMDIR"));
     assertTrue(text.contains("image.dcm"));
+  }
+
+  @Test
+  void isoWriteDicomdirMapSetsNamedState() throws Exception {
+    Path dicom = temp.resolve("chest.dcm");
+    Files.writeString(dicom, "SYNTH");
+    IsoImageExport export = new ExportIsoFactory().createExport();
+    export.addSource(dicom);
+    export.setTarget(temp.resolve("out.iso"));
+    assertEquals("iso-write", export.writeButton().getName());
+    assertEquals("iso-dicomdir", export.dicomdirButton().getName());
+    assertEquals("iso-state", export.stateLabel().getName());
+    assertEquals("none", export.stateText());
+    export.writeButton().doClick();
+    assertEquals("manifest", export.stateText());
+    assertTrue(Files.readString(export.lastManifest()).contains("chest.dcm"));
+    export.dicomdirButton().doClick();
+    assertEquals("DICOMDIR", export.stateText());
+    assertTrue(Files.readString(export.lastManifest()).contains("DICOMDIR"));
+    assertTrue(export.includeDicomDir());
   }
 }

@@ -174,6 +174,29 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void isoWriteDicomdirMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("iso-write", win.isoWriteButton().getName());
+      assertEquals("iso-dicomdir", win.isoDicomdirButton().getName());
+      assertEquals("iso-state", win.isoStateLabel().getName());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
+      win.isoWriteButton().doClick();
+      assertEquals("manifest", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      win.isoDicomdirButton().doClick();
+      assertEquals("DICOMDIR", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();
