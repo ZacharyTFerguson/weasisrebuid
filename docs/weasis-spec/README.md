@@ -17,6 +17,9 @@ The specification in this directory is built from **public Weasis 4.7.3 document
 | [REIMPLEMENTATION.md](REIMPLEMENTATION.md) | Clean-room rules, honesty, MX-ids |
 | [SOURCE-SURFACE.md](SOURCE-SURFACE.md) | Path/class oracle vs `nroduit/Weasis` `v4.7.3` |
 | [SRS.md](SRS.md) | Functional requirements extracted from the docs |
+| [TUTORIALS-SPRINT-INVENTORY.md](TUTORIALS-SPRINT-INVENTORY.md) | PR #25 tutorial-order backlog vs headed PASS |
+| [SPEC-STARTER-PLAN.md](SPEC-STARTER-PLAN.md) | WP entry-point map |
+| [starters/](starters/) | One starter doc per WP (main Java path) |
 
 **Pin:** Weasis **4.7.3**. Docs site version **4.7**. License of this clone: EPL-2.0 OR Apache-2.0.
 
