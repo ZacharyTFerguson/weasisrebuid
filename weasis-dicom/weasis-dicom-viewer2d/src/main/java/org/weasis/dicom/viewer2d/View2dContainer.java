@@ -131,6 +131,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     rotationToolBar.bind(view2d);
     resetTools.bind(view2d);
     headerToolBar.bind(view2d);
+    screenshotToolBar.bind(view2d);
     cineToolBar.bind(view2d);
     measureToolBar.bind(view2d);
     imageTool.bind(view2d);
@@ -206,6 +207,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public DcmHeaderToolBar getHeaderToolBar() {
     return headerToolBar;
+  }
+
+  public ScreenshotToolBar getScreenshotToolBar() {
+    return screenshotToolBar;
   }
 
   public View2d getView2d() {
@@ -485,6 +490,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     View2d painted = paintedCell();
     imageTool.bind(painted);
     headerToolBar.bind(painted);
+    screenshotToolBar.bind(painted);
   }
 
   public void cycleLayout(int delta) {

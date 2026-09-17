@@ -418,6 +418,28 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void screenshotToolbarBindsPaintedViewAndNamesSaveChrome(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    org.weasis.core.ui.editor.image.ScreenshotToolBar bar = container.getScreenshotToolBar();
+    assertEquals("screenshot", bar.button().getName());
+    assertSame(view, bar.boundView());
+    bar.dialog().ensureWindow();
+    assertEquals("screenshot-dialog", bar.dialog().ensureWindow().getName());
+    bar.dialog().setScope(org.weasis.core.ui.editor.image.ScreenshotDialog.Scope.NATIVE_PIXELS);
+    Path dest = dir.resolve("shot.png");
+    bar.dialog().setPath(dest.toString());
+    bar.dialog().save();
+    assertTrue(bar.dialog().statusText().startsWith("Saved "));
+    assertTrue(java.nio.file.Files.size(dest) > 0);
+    assertFalse(view.isShutterChrome());
+    assertFalse(view.isFlip());
+  }
+
+  @Test
   void namedFlipMirrorsEveryDxHangCellWithoutRasterizingSource() throws Exception {
     View2dContainer container = new View2dContainer();
     container.applyHanging(1, 2);

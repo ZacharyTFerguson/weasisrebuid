@@ -73,6 +73,15 @@ class ZoomScreenshotHaveTest {
     dialog.setVisible(true);
     ScreenshotToolBar bar = new ScreenshotToolBar();
     assertEquals("Screenshot", bar.getComponentName());
+    assertEquals("screenshot", bar.button().getName());
+    bar.bind(view);
+    assertSame(view, bar.boundView());
+    bar.dialog().ensureWindow();
+    assertEquals("screenshot-dialog", bar.dialog().ensureWindow().getName());
+    bar.dialog().setPath(dir.resolve("chrome.png").toString());
+    bar.dialog().save();
+    assertTrue(bar.dialog().statusText().startsWith("Saved "));
+    assertTrue(Files.size(dir.resolve("chrome.png")) > 0);
   }
 
   @Test

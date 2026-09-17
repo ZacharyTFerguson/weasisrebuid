@@ -18,15 +18,35 @@ public class ScreenshotToolBar extends WtoolBar {
   public static final String NAME = "Screenshot";
 
   private final ScreenshotDialog dialog = new ScreenshotDialog();
+  private final JButton button = new JButton("Screenshot");
+  private DefaultView2d<?> view;
 
   public ScreenshotToolBar() {
     super(NAME, 25);
-    JButton button = new JButton("Screenshot");
-    button.addActionListener(e -> dialog.setVisible(true));
+    button.setName("screenshot");
+    button.addActionListener(e -> showDialog());
     add(button);
+  }
+
+  public void bind(DefaultView2d<?> view) {
+    this.view = view;
+    dialog.bind(view);
+  }
+
+  public DefaultView2d<?> boundView() {
+    return view;
   }
 
   public ScreenshotDialog dialog() {
     return dialog;
+  }
+
+  public JButton button() {
+    return button;
+  }
+
+  public void showDialog() {
+    dialog.bind(view);
+    dialog.setVisible(true);
   }
 }
