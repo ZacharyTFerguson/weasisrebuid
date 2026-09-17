@@ -882,11 +882,18 @@ public class WeasisWin extends JFrame {
 
   JMenu createHelpMenu() {
     JMenu help = new JMenu("Help");
-    help.add(namedItem("Keyboard Shortcuts", this::showKeyboardShortcuts));
-    help.add(namedItem("About", this::showAbout));
-    help.add(namedItem("Licenses", this::showLicenses));
-    help.add(namedItem("System resources", this::showResourceMonitor));
+    help.setName("help");
+    help.add(helpItem("Keyboard Shortcuts", "help-keyboard-shortcuts", this::showKeyboardShortcuts));
+    help.add(helpItem("About", "help-about", this::showAbout));
+    help.add(helpItem("Licenses", "help-licenses", this::showLicenses));
+    help.add(helpItem("System resources", "help-system-resources", this::showResourceMonitor));
     return help;
+  }
+
+  JMenuItem helpItem(String text, String name, Runnable action) {
+    JMenuItem item = namedItem(text, action);
+    item.setName(name);
+    return item;
   }
 
   void showKeyboardShortcuts() {
@@ -907,6 +914,7 @@ public class WeasisWin extends JFrame {
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     dialog.add(liveShortcutMap(), BorderLayout.CENTER);
     JButton close = new JButton("Close");
+    close.setName("help-shortcuts-close");
     close.addActionListener(e -> dialog.dispose());
     dialog.add(close, BorderLayout.SOUTH);
     dialog.pack();

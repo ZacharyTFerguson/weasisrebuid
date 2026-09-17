@@ -28,14 +28,28 @@ public final class ShortcutManager {
     bind(KeyEvent.VK_H, ActionW.CROSSHAIR);
     bind(KeyEvent.VK_C, ActionW.CINE);
     bind(KeyEvent.VK_M, ActionW.MEASURE);
+    bind(KeyEvent.VK_D, ActionW.MEASURE);
+    bind(KeyEvent.VK_A, ActionW.MEASURE);
+    bind(KeyEvent.VK_Y, ActionW.MEASURE);
     bind(KeyEvent.VK_G, ActionW.DRAW);
+    bind(KeyEvent.VK_B, ActionW.DRAW);
     bind(KeyEvent.VK_N, ActionW.NONE);
     bind(KeyEvent.VK_Q, ActionW.CONTEXTMENU);
     bind(KeyEvent.VK_K, ActionW.KO);
     bind(KeyEvent.VK_P, ActionW.PRINT);
+    bind(KeyEvent.VK_ESCAPE, ActionW.RESET);
     bind(KeyEvent.VK_SPACE, ActionW.ANNOTATIONS);
     bind(KeyEvent.VK_I, ActionW.ANNOTATIONS);
+    bindPresets();
     map.put(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_DOWN_MASK), ActionW.PRINT);
+    map.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.ALT_DOWN_MASK), ActionW.FILTER);
+    map.put(KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0), ActionW.LAYOUT);
+  }
+
+  void bindPresets() {
+    for (int digit = 0; digit <= 9; digit++) {
+      bind(KeyEvent.VK_0 + digit, ActionW.PRESET);
+    }
   }
 
   public void bind(int keyCode, ActionW action) {

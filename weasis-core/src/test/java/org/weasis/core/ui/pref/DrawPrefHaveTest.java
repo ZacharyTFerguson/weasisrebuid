@@ -15,8 +15,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Component;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.gui.Insertable;
@@ -73,12 +75,45 @@ class DrawPrefHaveTest {
     ShortcutPrefView page = new ShortcutPrefView();
     assertSame(ActionW.CINE, page.actionFor(KeyEvent.VK_C));
     assertSame(ActionW.MEASURE, page.actionFor(KeyEvent.VK_M));
+    assertSame(ActionW.MEASURE, page.actionFor(KeyEvent.VK_D));
+    assertSame(ActionW.DRAW, page.actionFor(KeyEvent.VK_B));
+    assertSame(ActionW.RESET, page.actionFor(KeyEvent.VK_ESCAPE));
+    assertSame(ActionW.PRESET, page.actionFor(KeyEvent.VK_0));
     assertSame(ActionW.PAN, page.actionFor(KeyEvent.VK_T));
     assertSame(ActionW.WINLEVEL, page.actionFor(KeyEvent.VK_W));
     assertSame(ActionW.ANNOTATIONS, page.actionFor(KeyEvent.VK_SPACE));
     assertSame(ActionW.ANNOTATIONS, page.actionFor(KeyEvent.VK_I));
     assertNull(page.actionFor(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_DOWN_MASK)));
+    assertEquals("shortcut-rows", named(page, "shortcut-rows").getName());
+    assertEquals("shortcut-table", named(page, "shortcut-table").getName());
+    assertInstanceOf(JTextArea.class, named(page, "shortcut-table"));
     assertTrue(page.listedRows().stream().anyMatch(r -> r.contains(ActionW.CINE.cmd())));
     assertTrue(page.listedRows().stream().anyMatch(r -> r.contains(ActionW.MEASURE.cmd())));
+    assertTrue(page.listedRows().stream().anyMatch(r -> r.contains("distance")));
+    assertTrue(page.listedRows().stream().anyMatch(r -> r.startsWith("Esc reset")));
+    assertTrue(page.tableText().contains("T " + ActionW.PAN.cmd()));
+    assertTrue(page.tableText().contains("W " + ActionW.WINLEVEL.cmd()));
+    assertTrue(page.tableText().contains("C " + ActionW.CINE.cmd()));
+    assertTrue(page.tableText().contains("Esc reset"));
+    assertTrue(page.tableText().contains("fullscreen"));
+    assertTrue(page.tableText().contains("segmentations"));
+  }
+
+  static Component named(Component root, String name) {
+    if (root == null || name == null) {
+      return null;
+    }
+    if (name.equals(root.getName())) {
+      return root;
+    }
+    if (root instanceof java.awt.Container container) {
+      for (Component child : container.getComponents()) {
+        Component found = named(child, name);
+        if (found != null) {
+          return found;
+        }
+      }
+    }
+    return null;
   }
 }

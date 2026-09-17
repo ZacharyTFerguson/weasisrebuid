@@ -111,9 +111,13 @@ class WeasisWinChromeHaveTest {
       assertTrue(exportBtn);
       assertEquals("Resource Monitor", win.menuNamed("Tools").getItem(0).getText());
       assertEquals("Keyboard Shortcuts", win.menuNamed("Help").getItem(0).getText());
+      assertEquals("help-keyboard-shortcuts", win.menuNamed("Help").getItem(0).getName());
       assertEquals("About", win.menuNamed("Help").getItem(1).getText());
+      assertEquals("help-about", win.menuNamed("Help").getItem(1).getName());
       assertEquals("Licenses", win.menuNamed("Help").getItem(2).getText());
+      assertEquals("help-licenses", win.menuNamed("Help").getItem(2).getName());
       assertEquals("System resources", win.menuNamed("Help").getItem(3).getText());
+      assertEquals("help-system-resources", win.menuNamed("Help").getItem(3).getName());
     } finally {
       win.dispose();
     }
@@ -131,12 +135,25 @@ class WeasisWinChromeHaveTest {
       ShortcutPrefView map = shortcutMapIn(dialog);
       assertNotNull(map);
       assertEquals("keyboard-shortcuts-map", map.getName());
+      assertEquals("shortcut-rows", namedIn(dialog, "shortcut-rows").getName());
+      assertEquals("shortcut-table", namedIn(dialog, "shortcut-table").getName());
+      assertEquals("help-shortcuts-close", namedIn(dialog, "help-shortcuts-close").getName());
       assertSame(ActionW.PAN, map.actionFor(KeyEvent.VK_T));
       assertSame(ActionW.WINLEVEL, map.actionFor(KeyEvent.VK_W));
       assertSame(ActionW.CINE, map.actionFor(KeyEvent.VK_C));
       assertSame(ActionW.MEASURE, map.actionFor(KeyEvent.VK_M));
+      assertSame(ActionW.MEASURE, map.actionFor(KeyEvent.VK_D));
+      assertSame(ActionW.RESET, map.actionFor(KeyEvent.VK_ESCAPE));
       assertTrue(map.listedRows().stream().anyMatch(row -> row.contains(ActionW.PAN.cmd())));
       assertTrue(map.listedRows().stream().anyMatch(row -> row.contains(ActionW.CINE.cmd())));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.startsWith("T ")));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.contains("winLevel")));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.startsWith("Esc reset")));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.contains("distance")));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.contains("fullscreen")));
+      assertTrue(map.listedRows().stream().anyMatch(row -> row.contains("segmentations")));
+      assertTrue(map.tableText().contains("T " + ActionW.PAN.cmd()));
+      assertTrue(map.tableText().contains("Esc reset"));
     } finally {
       if (dialog != null) {
         dialog.dispose();
@@ -152,12 +169,16 @@ class WeasisWinChromeHaveTest {
     ResourceMonitorDialog dialog = null;
     try {
       assertEquals("System resources", win.menuNamed("Help").getItem(3).getText());
+      assertEquals("help-system-resources", win.menuNamed("Help").getItem(3).getName());
       dialog = win.systemResourcesDialog();
       assertEquals("System resources", dialog.getTitle());
       assertEquals("system-resources", dialog.getName());
+      assertEquals("help-resources-close", namedIn(dialog, "help-resources-close").getName());
       assertTrue(dialog.statusText().startsWith("Heap "));
       assertTrue(dialog.statusText().contains("Native "));
       assertTrue(dialog.statusText().contains("%"));
+      assertTrue(dialog.statusText().contains("decoded"));
+      assertEquals("system-resources-status", namedIn(dialog, "system-resources-status").getName());
     } finally {
       if (dialog != null) {
         dialog.dispose();
@@ -170,6 +191,24 @@ class WeasisWinChromeHaveTest {
     for (Component child : dialog.getContentPane().getComponents()) {
       if (child instanceof ShortcutPrefView map) {
         return map;
+      }
+    }
+    return null;
+  }
+
+  static Component namedIn(Component root, String name) {
+    if (root == null || name == null) {
+      return null;
+    }
+    if (name.equals(root.getName())) {
+      return root;
+    }
+    if (root instanceof java.awt.Container container) {
+      for (Component child : container.getComponents()) {
+        Component found = namedIn(child, name);
+        if (found != null) {
+          return found;
+        }
       }
     }
     return null;

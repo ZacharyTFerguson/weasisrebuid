@@ -22,4 +22,12 @@ public final class ResourceMonitor {
     }
     return prefs.getIntProperty(NATIVE_MEMORY_PERCENT, 50);
   }
+
+  public static long nativeBudgetBytes(org.weasis.core.api.service.WProperties prefs) {
+    return MemoryManager.getMaxMemory() * nativeMemoryPercent(prefs) / 100;
+  }
+
+  public static long nativeUsedBytes() {
+    return 0L;
+  }
 }

@@ -32,6 +32,7 @@ public class ResourceMonitorDialog extends JDialog {
     status.setName("system-resources-status");
     add(status, BorderLayout.CENTER);
     JButton close = new JButton("Close");
+    close.setName("help-resources-close");
     close.addActionListener(e -> dispose());
     add(close, BorderLayout.SOUTH);
     pack();
@@ -43,7 +44,14 @@ public class ResourceMonitorDialog extends JDialog {
   }
 
   static String diagnosticText() {
-    return heapText() + "  Native " + nativeBudgetPercent() + "%";
+    return heapText()
+        + "  Native "
+        + nativeBudgetPercent()
+        + "%  (decoded "
+        + ResourceMonitor.nativeUsedBytes()
+        + " / "
+        + ResourceMonitor.nativeBudgetBytes(AppProperties.getSystemPreferences())
+        + ")";
   }
 
   static String heapText() {
