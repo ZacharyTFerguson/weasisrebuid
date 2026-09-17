@@ -16,10 +16,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JToggleButton;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
+import org.weasis.core.ui.model.layer.LayerAnnotation;
 import org.weasis.core.ui.model.layer.LayerItem;
 import org.weasis.core.ui.model.layer.LayerType;
 
@@ -28,11 +30,24 @@ public class DisplayTool extends PluginTool {
 
   public static final String NAME = "Display";
 
+  private static final String[] ANN_KEYS = {
+    LayerAnnotation.PATIENT,
+    LayerAnnotation.STUDY,
+    LayerAnnotation.SERIES,
+    LayerAnnotation.WINDOW_LEVEL,
+    LayerAnnotation.ORIENTATION
+  };
+
   private final JComboBox<Visibility> visibility = new JComboBox<>(Visibility.values());
   private final JLabel value = new JLabel(Visibility.FULL.name());
+  private final JLabel layersValue = new JLabel(" ");
+  private final JLabel annValue = new JLabel(" ");
   private JButton fullButton;
   private JButton minimalButton;
   private JButton hiddenButton;
+  private JToggleButton crosslinesButton;
+  private JToggleButton measureButton;
+  private JToggleButton patientButton;
   private AbstractInfoLayer layer;
   private DefaultView2d<?> view;
 
@@ -41,11 +56,14 @@ public class DisplayTool extends PluginTool {
     setName("display");
     nameChrome();
     add(chromeBar(), BorderLayout.NORTH);
+    add(layerBar(), BorderLayout.SOUTH);
   }
 
   void nameChrome() {
     visibility.setName("display-visibility");
     value.setName("display-visibility-value");
+    layersValue.setName("display-layers-value");
+    annValue.setName("display-ann-value");
     visibility.addActionListener(e -> apply());
   }
 
@@ -70,12 +88,55 @@ public class DisplayTool extends PluginTool {
     return button;
   }
 
+  JPanel layerBar() {
+    JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+    bar.setName("display-layers");
+    bar.add(layersValue);
+    crosslinesButton = layerToggle(LayerType.CROSSLINES, "display-layer-crosslines");
+    measureButton = layerToggle(LayerType.MEASURE, "display-layer-measure");
+    bar.add(crosslinesButton);
+    bar.add(measureButton);
+    bar.add(annValue);
+    patientButton = annToggle(LayerAnnotation.PATIENT, "display-ann-patient");
+    bar.add(patientButton);
+    return bar;
+  }
+
+  JToggleButton layerToggle(LayerType type, String name) {
+    JToggleButton button = new JToggleButton(type.name());
+    button.setName(name);
+    button.setSelected(true);
+    button.addActionListener(e -> applyLayer(type, button.isSelected()));
+    return button;
+  }
+
+  JToggleButton annToggle(String key, String name) {
+    JToggleButton button = new JToggleButton(key);
+    button.setName(name);
+    button.setSelected(true);
+    button.addActionListener(e -> applyAnn(key, button.isSelected()));
+    return button;
+  }
+
+  void applyLayer(LayerType type, boolean on) {
+    setLayerVisible(type, on);
+    refreshLayers();
+  }
+
+  void applyAnn(String key, boolean on) {
+    if (layer != null) {
+      layer.getLayerAnnotation().setItemVisible(key, on);
+    }
+    refreshAnn();
+  }
+
   public void bind(AbstractInfoLayer layer) {
     this.layer = layer;
     if (layer != null) {
       visibility.setSelectedItem(layer.getVisibility());
     }
     refreshValue();
+    refreshAnn();
   }
 
   public void bind(DefaultView2d<?> view) {
@@ -83,6 +144,7 @@ public class DisplayTool extends PluginTool {
     if (view != null) {
       bind(view.getInfoLayer());
     }
+    refreshLayers();
   }
 
   public DefaultView2d<?> boundView() {
@@ -103,6 +165,42 @@ public class DisplayTool extends PluginTool {
   public void setLayerVisible(LayerType type, boolean visible) {
     if (view != null) {
       view.setLayerVisible(type, visible);
+    }
+    refreshLayers();
+  }
+
+  void refreshLayers() {
+    StringBuilder text = new StringBuilder();
+    for (LayerItem item : layerItems()) {
+      if (item.isSelected()) {
+        if (text.length() > 0) {
+          text.append(',');
+        }
+        text.append(item.getName());
+      }
+    }
+    layersValue.setText(text.toString());
+  }
+
+  void refreshAnn() {
+    StringBuilder text = new StringBuilder();
+    if (layer != null) {
+      appendVisibleAnn(text, layer.getLayerAnnotation());
+    }
+    annValue.setText(text.toString());
+  }
+
+  static void appendVisibleAnn(StringBuilder text, LayerAnnotation annotation) {
+    if (annotation == null) {
+      return;
+    }
+    for (String key : ANN_KEYS) {
+      if (annotation.isItemVisible(key)) {
+        if (text.length() > 0) {
+          text.append(',');
+        }
+        text.append(key);
+      }
     }
   }
 
@@ -159,5 +257,33 @@ public class DisplayTool extends PluginTool {
 
   public JButton hiddenButton() {
     return hiddenButton;
+  }
+
+  public JLabel layersValueLabel() {
+    return layersValue;
+  }
+
+  public String layersValueText() {
+    return layersValue.getText();
+  }
+
+  public JLabel annValueLabel() {
+    return annValue;
+  }
+
+  public String annValueText() {
+    return annValue.getText();
+  }
+
+  public JToggleButton crosslinesButton() {
+    return crosslinesButton;
+  }
+
+  public JToggleButton measureButton() {
+    return measureButton;
+  }
+
+  public JToggleButton patientButton() {
+    return patientButton;
   }
 }

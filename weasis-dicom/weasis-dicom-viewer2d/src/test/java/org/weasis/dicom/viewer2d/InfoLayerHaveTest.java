@@ -73,5 +73,7 @@ class InfoLayerHaveTest {
     assertEquals(5, display.layerItems().size());
     display.setLayerVisible(LayerType.CROSSLINES, false);
     assertFalse(view.isLayerVisible(LayerType.CROSSLINES));
+    assertEquals("display-layer-crosslines", display.crosslinesButton().getName());
+    assertEquals("display-ann-patient", display.patientButton().getName());
   }
 }

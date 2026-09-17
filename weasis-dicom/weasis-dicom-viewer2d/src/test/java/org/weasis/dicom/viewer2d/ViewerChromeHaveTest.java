@@ -50,6 +50,8 @@ import org.weasis.core.ui.editor.image.ZoomWin;
 import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
+import org.weasis.core.ui.model.layer.LayerAnnotation;
+import org.weasis.core.ui.model.layer.LayerType;
 import org.weasis.dicom.viewer2d.dockable.DisplayTool;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
 import org.weasis.dicom.viewer2d.mpr.MprAxis;
@@ -236,6 +238,37 @@ class ViewerChromeHaveTest {
     assertEquals("histogram", container.getHistogramView().getName());
     assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
     assertEquals("flip", container.getImageTool().flipButton().getName());
+  }
+
+  @Test
+  void displayDockSetsNamedLayerAndAnnotationChrome() {
+    View2dContainer container = new View2dContainer();
+    DisplayTool display = container.getDisplayTool();
+    View2d view = container.getView2d();
+    assertEquals("display-layers-value", display.layersValueLabel().getName());
+    assertEquals("display-ann-value", display.annValueLabel().getName());
+    assertEquals("display-layer-crosslines", display.crosslinesButton().getName());
+    assertEquals("display-layer-measure", display.measureButton().getName());
+    assertEquals("display-ann-patient", display.patientButton().getName());
+    assertEquals("IMAGE,CROSSLINES,ANNOTATION,DRAW,MEASURE", display.layersValueText());
+    assertEquals("patient,study,series,windowLevel,orientation", display.annValueText());
+    display.crosslinesButton().doClick();
+    assertFalse(view.isLayerVisible(LayerType.CROSSLINES));
+    assertEquals("IMAGE,ANNOTATION,DRAW,MEASURE", display.layersValueText());
+    display.crosslinesButton().doClick();
+    assertTrue(view.isLayerVisible(LayerType.CROSSLINES));
+    assertEquals("IMAGE,CROSSLINES,ANNOTATION,DRAW,MEASURE", display.layersValueText());
+    display.patientButton().doClick();
+    assertFalse(view.getInfoLayer().getLayerAnnotation().isItemVisible(LayerAnnotation.PATIENT));
+    assertEquals("study,series,windowLevel,orientation", display.annValueText());
+    display.patientButton().doClick();
+    assertTrue(view.getInfoLayer().getLayerAnnotation().isItemVisible(LayerAnnotation.PATIENT));
+    assertEquals("patient,study,series,windowLevel,orientation", display.annValueText());
+    assertEquals("FULL", display.visibilityValueText());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
+    assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
   }
 
   @Test
