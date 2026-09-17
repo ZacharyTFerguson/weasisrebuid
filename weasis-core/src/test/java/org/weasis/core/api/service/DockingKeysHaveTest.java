@@ -14,8 +14,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
 import org.junit.jupiter.api.Test;
 import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
@@ -51,6 +56,10 @@ class DockingKeysHaveTest {
             key(c, KeyEvent.VK_E, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK)));
     assertTrue(core.isDockingListVisible());
     assertEquals(3, core.dockingList().size());
+    JDialog list = core.dockingListWindow();
+    assertEquals("docking-list", list.getName());
+    assertEquals("Docking List", list.getTitle());
+    list.dispose();
     assertTrue(core.handleDockingKey(key(c, KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK)));
     assertEquals(2, core.getOpenViewerPlugins().size());
     assertSame(b, core.getSelectedViewerPlugin());
@@ -63,6 +72,35 @@ class DockingKeysHaveTest {
     core.openViewerPlugin(a);
     assertFalse(core.handleDockingKey(key(a, KeyEvent.VK_M, 0)));
     assertEquals(ViewerPlugin.DockingState.NORMAL, a.getDockingState());
+  }
+
+  @Test
+  void dockingListDialogExposesNamedItems() {
+    UICore core = new UICore();
+    core.openViewerPlugin(plugin("DICOM 2D"));
+    JDialog dialog = core.dockingListDialog();
+    assertEquals("docking-list", dialog.getName());
+    assertEquals("Docking List", dialog.getTitle());
+    JLabel items = (JLabel) named(dialog.getContentPane(), "docking-list-items");
+    assertEquals("DICOM 2D", items.getText());
+    JButton close = (JButton) named(dialog.getContentPane(), "docking-list-close");
+    assertEquals("Close", close.getText());
+    dialog.dispose();
+  }
+
+  static Component named(Container root, String name) {
+    for (Component c : root.getComponents()) {
+      if (name.equals(c.getName())) {
+        return c;
+      }
+      if (c instanceof Container nested) {
+        Component hit = named(nested, name);
+        if (hit != null) {
+          return hit;
+        }
+      }
+    }
+    return null;
   }
 
   static ViewerPlugin<?> plugin(String name) {

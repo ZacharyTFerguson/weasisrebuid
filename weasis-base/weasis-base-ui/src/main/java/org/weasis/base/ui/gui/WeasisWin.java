@@ -45,6 +45,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -87,6 +88,7 @@ public class WeasisWin extends JFrame {
   private CWorkingArea viewerWork;
   private DataExplorerView explorerView;
   private final Map<String, DefaultSingleCDockable> seriesDocks = new LinkedHashMap<>();
+  private final JLabel dockingState = new JLabel("NORMAL");
 
   public WeasisWin() {
     super(windowTitle());
@@ -103,6 +105,7 @@ public class WeasisWin extends JFrame {
   void installChrome() {
     setJMenuBar(createMenuBar());
     addImportButton();
+    addDockingChrome();
     add(toolbars, BorderLayout.NORTH);
     installMeasureHit();
     installDockingHost();
@@ -268,6 +271,39 @@ public class WeasisWin extends JFrame {
     toolbars.add(exportBtn);
   }
 
+  void addDockingChrome() {
+    dockingState.setName("docking-state");
+    toolbars.add(dockingState);
+    UICore core = UICore.getInstance();
+    addDockingButton("Maximize", "window-maximize", core::toggleMaximizeSelectedPlugin);
+    addDockingButton("Normalize", "window-normalize", core::normalizeSelectedPlugin);
+    addDockingButton("Externalize", "window-externalize", core::externalizeSelectedPlugin);
+    addDockingButton("Docking List", "window-docking-list", core::showDockingList);
+  }
+
+  void addDockingButton(String text, String name, Runnable action) {
+    JButton button = new JButton(text);
+    button.setName(name);
+    button.addActionListener(e -> runDocking(action));
+    toolbars.add(button);
+  }
+
+  void runDocking(Runnable action) {
+    if (action != null) {
+      action.run();
+    }
+    refreshDockingState();
+  }
+
+  void refreshDockingState() {
+    ViewerPlugin<?> plugin = UICore.getInstance().getSelectedViewerPlugin();
+    dockingState.setText(plugin == null ? "NORMAL" : plugin.getDockingState().name());
+  }
+
+  public JLabel dockingStateLabel() {
+    return dockingState;
+  }
+
   void openExportDialog() {
     DataExplorerView explorer = explorerView;
     if (explorer != null) {
@@ -312,6 +348,7 @@ public class WeasisWin extends JFrame {
   }
 
   void rebindToolBars(ViewerPlugin<?> plugin) {
+    refreshDockingState();
     if (plugin.getSeriesViewerUI() == null) {
       return;
     }
@@ -346,6 +383,7 @@ public class WeasisWin extends JFrame {
   }
 
   void applyDockingState(ViewerPlugin<?> plugin) {
+    refreshDockingState();
     if (plugin.getDockingState() == ViewerPlugin.DockingState.EXTERNALIZED) {
       floatPlugin(plugin);
       return;
@@ -797,11 +835,18 @@ public class WeasisWin extends JFrame {
 
   void addWindowCommands(JMenu menu) {
     UICore core = UICore.getInstance();
-    menu.add(namedItem("Maximize", core::toggleMaximizeSelectedPlugin));
-    menu.add(namedItem("Close", core::closeSelectedPlugin));
-    menu.add(namedItem("Externalize", core::externalizeSelectedPlugin));
-    menu.add(namedItem("Normalize", core::normalizeSelectedPlugin));
-    menu.add(namedItem("Docking List", core::showDockingList));
+    menu.add(windowItem("Maximize", "window-maximize", core::toggleMaximizeSelectedPlugin));
+    menu.add(windowItem("Close", "window-close", core::closeSelectedPlugin));
+    menu.add(windowItem("Externalize", "window-externalize", core::externalizeSelectedPlugin));
+    menu.add(windowItem("Normalize", "window-normalize", core::normalizeSelectedPlugin));
+    menu.add(windowItem("Docking List", "window-docking-list", core::showDockingList));
+  }
+
+  JMenuItem windowItem(String text, String name, Runnable action) {
+    JMenuItem item = namedItem(text, action);
+    item.setName(name);
+    item.addActionListener(e -> refreshDockingState());
+    return item;
   }
 
   void addOpenPluginItems(JMenu menu) {

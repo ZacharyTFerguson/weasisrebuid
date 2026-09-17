@@ -29,8 +29,10 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import java.util.Hashtable;
 import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
@@ -384,14 +386,63 @@ class WeasisWinChromeHaveTest {
       assertTrue(window instanceof DynamicMenu);
       ((DynamicMenu) window).popupMenuWillBecomeVisible();
       assertEquals("Maximize", window.getItem(0).getText());
+      assertEquals("window-maximize", window.getItem(0).getName());
+      assertEquals("window-close", window.getItem(1).getName());
+      assertEquals("window-externalize", window.getItem(2).getName());
+      assertEquals("window-normalize", window.getItem(3).getName());
+      assertEquals("window-docking-list", window.getItem(4).getName());
       window.getItem(0).doClick();
       assertEquals(ViewerPlugin.DockingState.MAXIMIZED, image.getDockingState());
+      assertEquals("MAXIMIZED", win.dockingStateLabel().getText());
       assertTrue(window.getItemCount() >= 7);
     } finally {
       closeOpen(core);
       core.setApplicationWindow(null);
       win.dispose();
     }
+  }
+
+  @Test
+  void dockingChromeSetsNamedStateAndList() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    UICore core = UICore.getInstance();
+    closeOpen(core);
+    core.setApplicationWindow(win);
+    ViewerPlugin<?> image = plugin("DICOM 2D");
+    JDialog list = null;
+    try {
+      core.openViewerPlugin(image);
+      win.focusSeries(image);
+      assertEquals("docking-state", win.dockingStateLabel().getName());
+      assertEquals("NORMAL", win.dockingStateLabel().getText());
+      clickNamed(win, "window-maximize");
+      assertEquals("MAXIMIZED", win.dockingStateLabel().getText());
+      clickNamed(win, "window-normalize");
+      assertEquals("NORMAL", win.dockingStateLabel().getText());
+      clickNamed(win, "window-externalize");
+      assertEquals("EXTERNALIZED", win.dockingStateLabel().getText());
+      clickNamed(win, "window-normalize");
+      assertEquals("NORMAL", win.dockingStateLabel().getText());
+      clickNamed(win, "window-docking-list");
+      list = core.dockingListWindow();
+      assertEquals("docking-list", list.getName());
+      JLabel items = (JLabel) namedIn(list.getContentPane(), "docking-list-items");
+      assertEquals("DICOM 2D", items.getText());
+      Component close = namedIn(list.getContentPane(), "docking-list-close");
+      assertEquals("docking-list-close", close.getName());
+    } finally {
+      if (list != null) {
+        list.dispose();
+      }
+      closeOpen(core);
+      core.setApplicationWindow(null);
+      win.dispose();
+    }
+  }
+
+  static void clickNamed(WeasisWin win, String name) {
+    ((JButton) namedIn(win.getToolBarContainer(), name)).doClick();
   }
 
   @Test

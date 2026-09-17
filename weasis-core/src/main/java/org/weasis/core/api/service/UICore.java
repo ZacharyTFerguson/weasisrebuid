@@ -12,6 +12,8 @@ package org.weasis.core.api.service;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.GraphicsEnvironment;
 import java.awt.KeyboardFocusManager;
 import java.awt.LayoutManager;
 import java.awt.event.InputEvent;
@@ -24,8 +26,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JTabbedPane;
+import javax.swing.WindowConstants;
 import javax.swing.text.JTextComponent;
 import org.osgi.framework.BundleContext;
 import org.weasis.core.api.explorer.DataExplorerViewFactory;
@@ -59,6 +65,7 @@ public class UICore {
   private volatile BundleContext bundleContext;
   private int selectedPluginIndex = -1;
   private boolean dockingListVisible;
+  private JDialog dockingListWindow;
 
   public static UICore getInstance() {
     return INSTANCE;
@@ -347,6 +354,50 @@ public class UICore {
 
   public void showDockingList() {
     dockingListVisible = true;
+    disposeDockingList();
+    dockingListWindow = dockingListDialog();
+    showDockingListIfHeaded();
+  }
+
+  void showDockingListIfHeaded() {
+    if (dockingListWindow != null && !GraphicsEnvironment.isHeadless()) {
+      dockingListWindow.setVisible(true);
+    }
+  }
+
+  void disposeDockingList() {
+    if (dockingListWindow != null) {
+      dockingListWindow.dispose();
+      dockingListWindow = null;
+    }
+  }
+
+  public JDialog dockingListWindow() {
+    return dockingListWindow;
+  }
+
+  JDialog dockingListDialog() {
+    JDialog dialog = new JDialog(applicationWindow, "Docking List", Dialog.ModalityType.MODELESS);
+    dialog.setName("docking-list");
+    dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    dialog.add(dockingListItems(), BorderLayout.CENTER);
+    dialog.add(dockingListClose(dialog), BorderLayout.SOUTH);
+    dialog.pack();
+    dialog.setLocationRelativeTo(applicationWindow);
+    return dialog;
+  }
+
+  JLabel dockingListItems() {
+    JLabel items = new JLabel(String.join("\n", dockingList()));
+    items.setName("docking-list-items");
+    return items;
+  }
+
+  static JButton dockingListClose(JDialog dialog) {
+    JButton close = new JButton("Close");
+    close.setName("docking-list-close");
+    close.addActionListener(e -> dialog.dispose());
+    return close;
   }
 
   public boolean isDockingListVisible() {
