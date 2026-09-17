@@ -193,6 +193,32 @@ class WeasisWinChromeHaveTest {
     }
   }
 
+  @Test
+  void helpAboutShowsWeasisVersion() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    WeasisAboutBox dialog = null;
+    try {
+      assertEquals("About", win.menuNamed("Help").getItem(1).getText());
+      assertEquals("help-about", win.menuNamed("Help").getItem(1).getName());
+      dialog = win.aboutDialog();
+      assertEquals("About " + AppProperties.WEASIS_NAME, dialog.getTitle());
+      assertEquals("about", dialog.getName());
+      assertEquals("help-about-close", namedIn(dialog, "help-about-close").getName());
+      assertEquals("about-version", namedIn(dialog, "about-version").getName());
+      assertEquals("about-note", namedIn(dialog, "about-note").getName());
+      assertTrue(dialog.versionText().contains(AppProperties.WEASIS_NAME));
+      assertTrue(dialog.versionText().contains(AppProperties.WEASIS_VERSION));
+      assertEquals(
+          AppProperties.WEASIS_NAME + " " + AppProperties.WEASIS_VERSION, dialog.versionText());
+    } finally {
+      if (dialog != null) {
+        dialog.dispose();
+      }
+      win.dispose();
+    }
+  }
+
   static ShortcutPrefView shortcutMapIn(JDialog dialog) {
     for (Component child : dialog.getContentPane().getComponents()) {
       if (child instanceof ShortcutPrefView map) {

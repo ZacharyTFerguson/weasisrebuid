@@ -905,7 +905,11 @@ public class WeasisWin extends JFrame {
   }
 
   void showAbout() {
-    new WeasisAboutBox(this).setVisible(true);
+    aboutDialog().setVisible(true);
+  }
+
+  WeasisAboutBox aboutDialog() {
+    return new WeasisAboutBox(this);
   }
 
   void showLicenses() {
