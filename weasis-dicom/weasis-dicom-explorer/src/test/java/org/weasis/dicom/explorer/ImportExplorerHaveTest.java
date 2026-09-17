@@ -349,6 +349,25 @@ class ImportExplorerHaveTest {
     assertEquals(0, model.getInstances().size());
     assertEquals("none", explorer.prMappedText());
     assertEquals("none", explorer.interpShapeText());
+    assertEquals("none", explorer.rsStateText());
+  }
+
+  @Test
+  void dicomRsQidoThenWadoUpdatesRsState() {
+    DicomExplorer explorer = new DicomExplorer(new DicomModel());
+    assertEquals("rs-qido", explorer.rsQidoButton().getName());
+    assertEquals("rs-wado", explorer.rsWadoButton().getName());
+    assertEquals("rs-state", explorer.rsStateLabel().getName());
+    assertEquals("none", explorer.rsStateText());
+    assertEquals("none", explorer.closeStateText());
+    explorer.rsQidoButton().doClick();
+    assertEquals("qido", explorer.rsStateText());
+    assertEquals("none", explorer.closeStateText());
+    explorer.rsWadoButton().doClick();
+    assertEquals("wado-rs", explorer.rsStateText());
+    assertEquals("none", explorer.closeStateText());
+    assertEquals("none", explorer.prMappedText());
+    assertEquals("none", explorer.interpShapeText());
   }
 
   static ImportedInstance closeInst(String patientId, String studyUid, String seriesUid) {

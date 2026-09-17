@@ -88,6 +88,10 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final JButton closeSeries = new JButton("series");
   private final JButton closeAll = new JButton("all");
   private final JLabel closeState = new JLabel("none");
+  private final JButton rsQido = new JButton("qido");
+  private final JButton rsWado = new JButton("wado-rs");
+  private final JLabel rsState = new JLabel("none");
+  static final String RS_DEMO_URL = "https://example.invalid/dicom-web";
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
@@ -155,6 +159,7 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     box.add(interpShape);
     box.add(interpThrough);
     addCloseChrome(box);
+    addRsChrome(box);
     return box;
   }
 
@@ -196,6 +201,52 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
 
   public String closeStateText() {
     return closeState.getText();
+  }
+
+  void addRsChrome(JPanel box) {
+    rsQido.setName("rs-qido");
+    rsWado.setName("rs-wado");
+    rsState.setName("rs-state");
+    rsQido.addActionListener(e -> applyRsQido());
+    rsWado.addActionListener(e -> applyRsWado());
+    box.add(rsQido);
+    box.add(rsWado);
+    box.add(rsState);
+  }
+
+  void applyRsQido() {
+    new DicomCommands().rs("-u", RS_DEMO_URL, "-r", "PatientID=SYN-1");
+    rsState.setText("qido");
+  }
+
+  void applyRsWado() {
+    new DicomCommands()
+        .rs(
+            "-u",
+            RS_DEMO_URL,
+            "-r",
+            "studyUID=2.25.1",
+            "-r",
+            "seriesUID=2.25.2",
+            "-r",
+            "objectUID=2.25.3");
+    rsState.setText("wado-rs");
+  }
+
+  public JButton rsQidoButton() {
+    return rsQido;
+  }
+
+  public JButton rsWadoButton() {
+    return rsWado;
+  }
+
+  public JLabel rsStateLabel() {
+    return rsState;
+  }
+
+  public String rsStateText() {
+    return rsState.getText();
   }
 
   public JButton applyPrButton() {
