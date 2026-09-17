@@ -57,6 +57,10 @@ public class ViewerToolBar extends WtoolBar {
   private final JButton leftR = new JButton("rotation");
   private final JButton leftQ = new JButton("contextMenu");
   private final JLabel rqState = new JLabel("none");
+  private final JButton altR = new JButton("90");
+  private final JButton altL = new JButton("0");
+  private final JButton altF = new JButton("flip");
+  private final JLabel altState = new JLabel("none");
 
   public ViewerToolBar() {
     super(NAME, 10);
@@ -75,6 +79,7 @@ public class ViewerToolBar extends WtoolBar {
     addLeftKeyChrome();
     addSzKeyChrome();
     addRqKeyChrome();
+    addAltKeyChrome();
   }
 
   void nameSynchChrome() {
@@ -388,6 +393,61 @@ public class ViewerToolBar extends WtoolBar {
 
   public String rqStateText() {
     return rqState.getText();
+  }
+
+  void addAltKeyChrome() {
+    altR.setName("alt-r");
+    altL.setName("alt-l");
+    altF.setName("alt-f");
+    altState.setName("alt-state");
+    altR.addActionListener(e -> applyAltR());
+    altL.addActionListener(e -> applyAltL());
+    altF.addActionListener(e -> applyAltF());
+    add(altR);
+    add(altL);
+    add(altF);
+    add(altState);
+  }
+
+  void applyAltR() {
+    if (view != null) {
+      view.setRotation(view.getRotation() + 90);
+    }
+    altState.setText("90");
+  }
+
+  void applyAltL() {
+    if (view != null) {
+      view.setRotation(view.getRotation() - 90);
+    }
+    altState.setText("0");
+  }
+
+  void applyAltF() {
+    if (view != null) {
+      view.toggleFlip();
+    }
+    altState.setText("flip");
+  }
+
+  public JButton altRButton() {
+    return altR;
+  }
+
+  public JButton altLButton() {
+    return altL;
+  }
+
+  public JButton altFButton() {
+    return altF;
+  }
+
+  public JLabel altStateLabel() {
+    return altState;
+  }
+
+  public String altStateText() {
+    return altState.getText();
   }
 
   private JButton button(String action) {

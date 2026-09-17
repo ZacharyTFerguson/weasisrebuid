@@ -437,6 +437,51 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void altRLFRotateFlipOnBoundView() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      ViewerToolBar bar = win.viewerToolBar();
+      assertEquals("alt-r", win.altRButton().getName());
+      assertEquals("alt-l", win.altLButton().getName());
+      assertEquals("alt-f", win.altFButton().getName());
+      assertEquals("alt-state", win.altStateLabel().getName());
+      assertEquals("none", win.altStateText());
+      assertEquals("none", win.rqStateText());
+      assertEquals("none", win.leftStateText());
+      assertEquals("none", win.szStateText());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+      win.altRButton().doClick();
+      assertEquals("90", win.altStateText());
+      assertEquals(90.0, bar.boundView().getRotation(), 1e-9);
+      win.altLButton().doClick();
+      assertEquals("0", win.altStateText());
+      assertEquals(0.0, bar.boundView().getRotation(), 1e-9);
+      win.altFButton().doClick();
+      assertEquals("flip", win.altStateText());
+      assertTrue(bar.boundView().isFlip());
+      assertEquals("none", win.rqStateText());
+      assertEquals("none", win.leftStateText());
+      assertEquals("none", win.szStateText());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();

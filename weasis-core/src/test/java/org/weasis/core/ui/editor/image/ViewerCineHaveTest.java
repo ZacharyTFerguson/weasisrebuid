@@ -10,6 +10,7 @@
 package org.weasis.core.ui.editor.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -107,6 +108,37 @@ class ViewerCineHaveTest {
     assertEquals("contextMenu", bar.rqStateText());
     assertEquals(MouseActions.CONTEXT_MENU, view.getMouseActions().getLeft());
     assertEquals(MouseActions.WINLEVEL, cal.getMouseActions().getLeft());
+    assertEquals("none", bar.leftStateText());
+    assertEquals("none", bar.szStateText());
+  }
+
+  @Test
+  void altRLFRotateFlipOnBoundView() {
+    ViewerToolBar bar = new ViewerToolBar();
+    DefaultView2d<?> view = new DefaultView2d<>();
+    DefaultView2d<?> cal = new DefaultView2d<>();
+    bar.bind(view);
+    assertEquals("alt-r", bar.altRButton().getName());
+    assertEquals("alt-l", bar.altLButton().getName());
+    assertEquals("alt-f", bar.altFButton().getName());
+    assertEquals("alt-state", bar.altStateLabel().getName());
+    assertEquals("none", bar.altStateText());
+    assertEquals("none", bar.rqStateText());
+    bar.altRButton().doClick();
+    assertEquals("90", bar.altStateText());
+    assertEquals(90.0, view.getRotation(), 1e-9);
+    assertEquals(0.0, cal.getRotation(), 1e-9);
+    assertFalse(view.isFlip());
+    assertSame(view, bar.boundView());
+    bar.altLButton().doClick();
+    assertEquals("0", bar.altStateText());
+    assertEquals(0.0, view.getRotation(), 1e-9);
+    assertEquals(0.0, cal.getRotation(), 1e-9);
+    bar.altFButton().doClick();
+    assertEquals("flip", bar.altStateText());
+    assertTrue(view.isFlip());
+    assertFalse(cal.isFlip());
+    assertEquals("none", bar.rqStateText());
     assertEquals("none", bar.leftStateText());
     assertEquals("none", bar.szStateText());
   }
