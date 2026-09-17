@@ -51,6 +51,7 @@ import org.weasis.core.api.media.data.MediaElement;
 import org.weasis.core.api.media.data.Series;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
+import org.weasis.core.ui.editor.image.MouseActions;
 import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
@@ -312,6 +313,41 @@ class WeasisWinChromeHaveTest {
       assertEquals("printable", win.imgPrintStateText());
       assertTrue(
           win.calibrationView().getView().getLastPrint().getOptions().isShowingAnnotations());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
+  void leftTWMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("left-t", win.leftTButton().getName());
+      assertEquals("left-w", win.leftWButton().getName());
+      assertEquals("left-state", win.leftStateLabel().getName());
+      assertEquals("none", win.leftStateText());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+      win.leftTButton().doClick();
+      assertEquals("pan", win.leftStateText());
+      assertEquals(MouseActions.PAN, win.calibrationView().getView().getMouseActions().getLeft());
+      win.leftWButton().doClick();
+      assertEquals("winLevel", win.leftStateText());
+      assertEquals(
+          MouseActions.WINLEVEL, win.calibrationView().getView().getMouseActions().getLeft());
+      assertEquals("none", win.imgPrintStateText());
       assertEquals("none", win.printStateText());
       assertEquals("none", win.freezeStateText());
       assertEquals("none", win.calStateText());

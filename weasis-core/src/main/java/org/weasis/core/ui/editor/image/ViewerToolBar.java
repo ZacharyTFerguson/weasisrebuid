@@ -48,6 +48,9 @@ public class ViewerToolBar extends WtoolBar {
   private final SynchViewButton synchFor = new SynchViewButton();
   private final ManualSynchViewButton synchManual = new ManualSynchViewButton();
   private final JLabel synchKind = new JLabel("FoR");
+  private final JButton leftT = new JButton("pan");
+  private final JButton leftW = new JButton("winLevel");
+  private final JLabel leftState = new JLabel("none");
 
   public ViewerToolBar() {
     super(NAME, 10);
@@ -63,6 +66,7 @@ public class ViewerToolBar extends WtoolBar {
     add(synchFor);
     add(synchManual);
     add(synchKind);
+    addLeftKeyChrome();
   }
 
   void nameSynchChrome() {
@@ -259,6 +263,45 @@ public class ViewerToolBar extends WtoolBar {
     }
     synchFor.setSelected(true);
     synchKind.setText("FoR");
+  }
+
+  void addLeftKeyChrome() {
+    leftT.setName("left-t");
+    leftW.setName("left-w");
+    leftState.setName("left-state");
+    leftT.addActionListener(e -> applyLeftT());
+    leftW.addActionListener(e -> applyLeftW());
+    add(leftT);
+    add(leftW);
+    add(leftState);
+  }
+
+  void applyLeftT() {
+    setSelected(ActionW.PAN.cmd());
+    apply(view);
+    leftState.setText("pan");
+  }
+
+  void applyLeftW() {
+    setSelected(ActionW.WINLEVEL.cmd());
+    apply(view);
+    leftState.setText("winLevel");
+  }
+
+  public JButton leftTButton() {
+    return leftT;
+  }
+
+  public JButton leftWButton() {
+    return leftW;
+  }
+
+  public JLabel leftStateLabel() {
+    return leftState;
+  }
+
+  public String leftStateText() {
+    return leftState.getText();
   }
 
   private JButton button(String action) {

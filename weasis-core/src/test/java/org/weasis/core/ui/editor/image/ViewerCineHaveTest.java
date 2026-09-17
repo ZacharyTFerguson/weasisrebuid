@@ -46,6 +46,23 @@ class ViewerCineHaveTest {
   }
 
   @Test
+  void leftTWMapSetsNamedState() {
+    ViewerToolBar bar = new ViewerToolBar();
+    DefaultView2d<?> view = new DefaultView2d<>();
+    bar.bind(view);
+    assertEquals("left-t", bar.leftTButton().getName());
+    assertEquals("left-w", bar.leftWButton().getName());
+    assertEquals("left-state", bar.leftStateLabel().getName());
+    assertEquals("none", bar.leftStateText());
+    bar.leftTButton().doClick();
+    assertEquals("pan", bar.leftStateText());
+    assertEquals(MouseActions.PAN, view.getMouseActions().getLeft());
+    bar.leftWButton().doClick();
+    assertEquals("winLevel", bar.leftStateText());
+    assertEquals(MouseActions.WINLEVEL, view.getMouseActions().getLeft());
+  }
+
+  @Test
   void sequenceDragScrollsAndRotationDragTurns() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setFrameIndex(2);

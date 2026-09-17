@@ -297,6 +297,7 @@ public class WeasisWin extends JFrame {
     addCalChrome();
     addFreezeChrome();
     addImgPrintChrome();
+    bindDefaultViewerBar();
   }
 
   void addSendChrome() {
@@ -540,6 +541,38 @@ public class WeasisWin extends JFrame {
 
   public String imgPrintStateText() {
     return imgPrintState.getText();
+  }
+
+  void bindDefaultViewerBar() {
+    ViewerToolBar bar = viewerToolBar();
+    if (bar != null) {
+      bar.bind(calibration.getView());
+    }
+  }
+
+  public ViewerToolBar viewerToolBar() {
+    for (Component c : toolbars.getComponents()) {
+      if (c instanceof ViewerToolBar bar) {
+        return bar;
+      }
+    }
+    return null;
+  }
+
+  public JButton leftTButton() {
+    return viewerToolBar().leftTButton();
+  }
+
+  public JButton leftWButton() {
+    return viewerToolBar().leftWButton();
+  }
+
+  public JLabel leftStateLabel() {
+    return viewerToolBar().leftStateLabel();
+  }
+
+  public String leftStateText() {
+    return viewerToolBar().leftStateText();
   }
 
   void addDockingChrome() {
