@@ -12,6 +12,7 @@ package org.weasis.core.ui.pref;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.text.ParseException;
@@ -39,17 +40,25 @@ public class PreferenceDialog extends JDialog {
 
   private final List<AbstractItemDialogPage> pages;
   private AbstractItemDialogPage current;
+  private JTree tree;
   private JButton okButton;
+  private JButton cancelButton;
+  private JButton resetButton;
 
   public PreferenceDialog(Window parent) {
-    this(parent, instantiatePages(UICore.getInstance().getPreferencesPageFactories()));
+    this(parent, catalogPages());
+  }
+
+  static List<AbstractItemDialogPage> catalogPages() {
+    DefaultPrefBootstrap.ensureRegistered(UICore.getInstance());
+    return instantiatePages(UICore.getInstance().getPreferencesPageFactories());
   }
 
   public PreferenceDialog(Window parent, List<AbstractItemDialogPage> pages) {
-    super(parent, "Preferences");
+    super(parent, "Preferences", Dialog.ModalityType.MODELESS);
     this.pages = pages == null ? List.of() : List.copyOf(pages);
+    setName("preferences");
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    setModal(true);
     build();
   }
 
@@ -89,8 +98,28 @@ public class PreferenceDialog extends JDialog {
     dispose();
   }
 
-  JButton okButton() {
+  public JButton okButton() {
     return okButton;
+  }
+
+  public JButton cancelButton() {
+    return cancelButton;
+  }
+
+  public JButton resetButton() {
+    return resetButton;
+  }
+
+  public JTree tree() {
+    return tree;
+  }
+
+  public List<String> pageTitles() {
+    List<String> titles = new ArrayList<>();
+    for (AbstractItemDialogPage page : pages) {
+      titles.add(page.getTitle());
+    }
+    return titles;
   }
 
   static void commitOpenEdits(Component root) {
@@ -151,44 +180,72 @@ public class PreferenceDialog extends JDialog {
   }
 
   private void build() {
-    DefaultMutableTreeNode root = new DefaultMutableTreeNode("Preferences");
-    for (AbstractItemDialogPage page : pages) {
-      root.add(toNode(page));
-    }
-    JTree tree = new JTree(new DefaultTreeModel(root));
+    JPanel right = pageHost();
+    tree = new JTree(new DefaultTreeModel(rootNode()));
+    tree.setName("pref-tree");
     tree.setRootVisible(false);
-    JPanel right = new JPanel(new BorderLayout());
-    tree.addTreeSelectionListener(
-        e -> {
-          Object last = tree.getLastSelectedPathComponent();
-          if (last instanceof DefaultMutableTreeNode node
-              && node.getUserObject() instanceof AbstractItemDialogPage page) {
-            right.removeAll();
-            right.add(page, BorderLayout.CENTER);
-            current = page;
-            right.revalidate();
-            right.repaint();
-          }
-        });
+    bindTree(right);
     if (!pages.isEmpty()) {
       current = pages.getFirst();
       right.add(current, BorderLayout.CENTER);
     }
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(tree), right);
+    split.setName("pref-split");
     split.setDividerLocation(220);
-    JPanel buttons = new JPanel();
-    okButton = new JButton("OK");
-    okButton.addActionListener(e -> applyAndClose());
-    JButton cancel = new JButton("Cancel");
-    cancel.addActionListener(e -> dispose());
-    JButton reset = new JButton("Restore defaults");
-    reset.addActionListener(e -> resetCurrent());
-    buttons.add(okButton);
-    buttons.add(cancel);
-    buttons.add(reset);
     add(split, BorderLayout.CENTER);
-    add(buttons, BorderLayout.SOUTH);
+    add(buttonBar(), BorderLayout.SOUTH);
     setSize(new Dimension(720, 480));
+  }
+
+  JPanel pageHost() {
+    JPanel right = new JPanel(new BorderLayout());
+    right.setName("pref-page");
+    return right;
+  }
+
+  DefaultMutableTreeNode rootNode() {
+    DefaultMutableTreeNode root = new DefaultMutableTreeNode("Preferences");
+    for (AbstractItemDialogPage page : pages) {
+      root.add(toNode(page));
+    }
+    return root;
+  }
+
+  void bindTree(JPanel right) {
+    tree.addTreeSelectionListener(
+        e -> {
+          Object last = tree.getLastSelectedPathComponent();
+          if (last instanceof DefaultMutableTreeNode node
+              && node.getUserObject() instanceof AbstractItemDialogPage page) {
+            showPage(right, page);
+          }
+        });
+  }
+
+  void showPage(JPanel right, AbstractItemDialogPage page) {
+    right.removeAll();
+    right.add(page, BorderLayout.CENTER);
+    current = page;
+    right.revalidate();
+    right.repaint();
+  }
+
+  JPanel buttonBar() {
+    okButton = new JButton("OK");
+    okButton.setName("pref-ok");
+    okButton.addActionListener(e -> applyAndClose());
+    cancelButton = new JButton("Cancel");
+    cancelButton.setName("pref-cancel");
+    cancelButton.addActionListener(e -> dispose());
+    resetButton = new JButton("Restore defaults");
+    resetButton.setName("pref-reset");
+    resetButton.addActionListener(e -> resetCurrent());
+    JPanel buttons = new JPanel();
+    buttons.setName("pref-buttons");
+    buttons.add(okButton);
+    buttons.add(cancelButton);
+    buttons.add(resetButton);
+    return buttons;
   }
 
   private static DefaultMutableTreeNode toNode(AbstractItemDialogPage page) {

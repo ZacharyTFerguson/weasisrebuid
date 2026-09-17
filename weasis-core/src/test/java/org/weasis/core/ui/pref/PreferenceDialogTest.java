@@ -50,4 +50,25 @@ class PreferenceDialogTest {
     assertTrue(viewer.getSubPages().stream().anyMatch(p -> "2D".equals(p.getTitle())));
     assertTrue(viewer.getSubPages().stream().anyMatch(p -> "MPR".equals(p.getTitle())));
   }
+
+  @Test
+  void dialogNamesTreeOkCancelAndRestoreChrome() {
+    PreferenceDialog dialog =
+        new PreferenceDialog(
+            null,
+            PreferenceDialog.instantiatePages(
+                List.of(new GeneralPrefFactory(), new ViewerPrefFactory())));
+    try {
+      assertEquals("Preferences", dialog.getTitle());
+      assertEquals("preferences", dialog.getName());
+      assertEquals("pref-tree", dialog.tree().getName());
+      assertEquals("pref-ok", dialog.okButton().getName());
+      assertEquals("pref-cancel", dialog.cancelButton().getName());
+      assertEquals("pref-reset", dialog.resetButton().getName());
+      assertEquals("General", dialog.pageTitles().getFirst());
+      assertEquals("General", dialog.getCurrentPage().getTitle());
+    } finally {
+      dialog.dispose();
+    }
+  }
 }

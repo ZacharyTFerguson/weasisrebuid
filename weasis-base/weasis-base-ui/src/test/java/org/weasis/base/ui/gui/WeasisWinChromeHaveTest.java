@@ -52,6 +52,7 @@ import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.TabPlacement;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.core.ui.pref.PreferenceDialog;
 import org.weasis.core.ui.pref.ShortcutPrefView;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.core.ui.util.WtoolBar;
@@ -108,6 +109,8 @@ class WeasisWinChromeHaveTest {
       assertEquals("file-import-dicom-cd", importMenu.getItem(1).getName());
       assertEquals("Export DICOM", file.getItem(1).getText());
       assertEquals("file-export-dicom", file.getItem(1).getName());
+      assertEquals("Preferences", file.getItem(2).getText());
+      assertEquals("file-preferences", file.getItem(2).getName());
       boolean exportBtn = false;
       for (Component c : win.getToolBarContainer().getComponents()) {
         if ("export-dicom".equals(c.getName())) {
@@ -211,6 +214,29 @@ class WeasisWinChromeHaveTest {
       assertTrue(dialog.versionText().contains(AppProperties.WEASIS_VERSION));
       assertEquals(
           AppProperties.WEASIS_NAME + " " + AppProperties.WEASIS_VERSION, dialog.versionText());
+    } finally {
+      if (dialog != null) {
+        dialog.dispose();
+      }
+      win.dispose();
+    }
+  }
+
+  @Test
+  void filePreferencesShowsNamedCatalogDialog() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    PreferenceDialog dialog = null;
+    try {
+      assertEquals("file-preferences", win.menuNamed("File").getItem(2).getName());
+      dialog = win.preferencesDialog();
+      assertEquals("Preferences", dialog.getTitle());
+      assertEquals("preferences", dialog.getName());
+      assertEquals("pref-tree", namedIn(dialog, "pref-tree").getName());
+      assertEquals("pref-ok", namedIn(dialog, "pref-ok").getName());
+      assertEquals("pref-cancel", namedIn(dialog, "pref-cancel").getName());
+      assertEquals("pref-reset", namedIn(dialog, "pref-reset").getName());
+      assertTrue(dialog.pageTitles().contains("General"));
     } finally {
       if (dialog != null) {
         dialog.dispose();

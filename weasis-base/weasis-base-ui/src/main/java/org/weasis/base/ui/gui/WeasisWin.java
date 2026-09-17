@@ -722,15 +722,21 @@ public class WeasisWin extends JFrame {
     exportDicom.addActionListener(e -> openExportDialog());
     file.add(exportDicom);
     JMenuItem prefs = new JMenuItem("Preferences");
+    prefs.setName("file-preferences");
     prefs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_DOWN_MASK));
-    prefs.addActionListener(
-        e -> {
-          PreferenceDialog dialog = new PreferenceDialog(this);
-          dialog.setLocationRelativeTo(this);
-          dialog.setVisible(true);
-        });
+    prefs.addActionListener(e -> showPreferences());
     file.add(prefs);
     return file;
+  }
+
+  void showPreferences() {
+    PreferenceDialog dialog = preferencesDialog();
+    dialog.setLocationRelativeTo(this);
+    dialog.setVisible(true);
+  }
+
+  PreferenceDialog preferencesDialog() {
+    return new PreferenceDialog(this);
   }
 
   JMenu createEditMenu() {
