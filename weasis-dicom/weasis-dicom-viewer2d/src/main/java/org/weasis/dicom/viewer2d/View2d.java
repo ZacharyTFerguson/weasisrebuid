@@ -9,6 +9,7 @@
  */
 package org.weasis.dicom.viewer2d;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
@@ -25,6 +26,7 @@ import org.weasis.core.api.image.BrightnessOp;
 import org.weasis.core.api.image.CropOp;
 import org.weasis.core.api.image.FilterOp;
 import org.weasis.core.api.image.ImageOpNode;
+import org.weasis.core.api.image.MaskOp;
 import org.weasis.core.api.image.OverlayOp;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.image.ShutterOp;
@@ -55,6 +57,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private boolean cropChrome;
   private boolean brightnessChrome;
   private boolean autoLevelsChrome;
+  private boolean maskChrome;
   private File file;
   private final KOManager koManager = new KOManager();
   private final List<WindLevelParameters> presets = new ArrayList<>();
@@ -223,6 +226,15 @@ public class View2d extends DefaultView2d<MediaElement> {
     return autoLevelsChrome;
   }
 
+  public void applyMaskChrome(boolean on) {
+    maskChrome = on;
+    render();
+  }
+
+  public boolean isMaskChrome() {
+    return maskChrome;
+  }
+
   @Override
   public void setLut(String lut) {
     super.setLut(lut);
@@ -371,6 +383,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     painted = applyFilterAndColor(painted);
     painted = applyBrightness(painted);
     painted = applyAutoLevels(painted);
+    painted = applyMask(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);
     painted = applyCrop(painted);
@@ -439,6 +452,35 @@ public class View2d extends DefaultView2d<MediaElement> {
     }
     Object out = op.getParam(ImageOpNode.OUTPUT_IMG);
     return out instanceof BufferedImage img ? img : src;
+  }
+
+  BufferedImage applyMask(BufferedImage src) {
+    if (!maskChrome) {
+      return src;
+    }
+    return runMaskOp(src);
+  }
+
+  static BufferedImage runMaskOp(BufferedImage src) {
+    MaskOp op = new MaskOp();
+    op.setParam(MaskOp.P_MASK, keepCenterMask(src.getWidth(), src.getHeight()));
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    try {
+      op.process();
+    } catch (Exception e) {
+      return src;
+    }
+    Object out = op.getParam(ImageOpNode.OUTPUT_IMG);
+    return out instanceof BufferedImage img ? img : src;
+  }
+
+  static BufferedImage keepCenterMask(int w, int h) {
+    BufferedImage mask = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+    Graphics2D g = mask.createGraphics();
+    g.setColor(Color.WHITE);
+    g.fillRect(w / 4, h / 4, Math.max(1, w / 2), Math.max(1, h / 2));
+    g.dispose();
+    return mask;
   }
 
   BufferedImage applyCrop(BufferedImage src) {

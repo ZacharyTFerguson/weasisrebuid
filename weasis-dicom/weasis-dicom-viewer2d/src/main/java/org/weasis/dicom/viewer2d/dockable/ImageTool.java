@@ -27,12 +27,14 @@ public class ImageTool extends PluginTool {
   public static final String CROP = "crop";
   public static final String BRIGHTNESS = "brightness";
   public static final String AUTO_LEVELS = "autolevels";
+  public static final String MASK = "mask";
 
   private final JLabel summary = new JLabel(" ");
   private final JToggleButton window = new JToggleButton("Window");
   private final JToggleButton crop = new JToggleButton("Crop");
   private final JToggleButton brightness = new JToggleButton("Brightness");
   private final JToggleButton autoLevels = new JToggleButton("AutoLevels");
+  private final JToggleButton mask = new JToggleButton("Mask");
   private final JToggleButton flip = new JToggleButton("Flip");
   private View2d view;
 
@@ -46,6 +48,8 @@ public class ImageTool extends PluginTool {
     brightness.addActionListener(e -> applyBrightness());
     autoLevels.setName(AUTO_LEVELS);
     autoLevels.addActionListener(e -> applyAutoLevels());
+    mask.setName(MASK);
+    mask.addActionListener(e -> applyMask());
     flip.setName(ActionW.FLIP.cmd());
     flip.addActionListener(e -> applyFlip());
     JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
@@ -54,6 +58,7 @@ public class ImageTool extends PluginTool {
     row.add(crop);
     row.add(brightness);
     row.add(autoLevels);
+    row.add(mask);
     row.add(flip);
     add(row, BorderLayout.NORTH);
   }
@@ -65,6 +70,7 @@ public class ImageTool extends PluginTool {
       crop.setSelected(view.isCropChrome());
       brightness.setSelected(view.isBrightnessChrome());
       autoLevels.setSelected(view.isAutoLevelsChrome());
+      mask.setSelected(view.isMaskChrome());
       flip.setSelected(view.isFlip());
     }
     refresh();
@@ -84,6 +90,10 @@ public class ImageTool extends PluginTool {
 
   public JToggleButton autoLevelsButton() {
     return autoLevels;
+  }
+
+  public JToggleButton maskButton() {
+    return mask;
   }
 
   public JToggleButton flipButton() {
@@ -130,6 +140,17 @@ public class ImageTool extends PluginTool {
       host.applyAutoLevels(on);
     } else if (view != null) {
       view.applyAutoLevelsChrome(on);
+    }
+    refresh();
+  }
+
+  void applyMask() {
+    boolean on = mask.isSelected();
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyMask(on);
+    } else if (view != null) {
+      view.applyMaskChrome(on);
     }
     refresh();
   }
