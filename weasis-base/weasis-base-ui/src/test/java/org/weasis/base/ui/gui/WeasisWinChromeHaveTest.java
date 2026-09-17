@@ -287,6 +287,43 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void imgPagePrintableMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("img-page", win.imgPageButton().getName());
+      assertEquals("img-print", win.imgPrintButton().getName());
+      assertEquals("img-print-state", win.imgPrintStateLabel().getName());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+      win.imgPageButton().doClick();
+      assertEquals("page", win.imgPrintStateText());
+      assertNotNull(win.calibrationView().getView().getLastPrint());
+      assertNotNull(win.calibrationView().getView().getLastPrint().getImage());
+      assertFalse(
+          win.calibrationView().getView().getLastPrint().getOptions().isShowingAnnotations());
+      assertEquals("none", win.printStateText());
+      win.imgPrintButton().doClick();
+      assertEquals("printable", win.imgPrintStateText());
+      assertTrue(
+          win.calibrationView().getView().getLastPrint().getOptions().isShowingAnnotations());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();

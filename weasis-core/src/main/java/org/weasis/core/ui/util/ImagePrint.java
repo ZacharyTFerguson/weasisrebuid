@@ -28,6 +28,10 @@ public class ImagePrint implements Printable {
     return options;
   }
 
+  public BufferedImage getImage() {
+    return image;
+  }
+
   @Override
   public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) {
     if (pageIndex > 0 || image == null) {

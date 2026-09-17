@@ -74,6 +74,7 @@ import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.pref.PreferenceDialog;
 import org.weasis.core.ui.pref.ShortcutPrefView;
+import org.weasis.core.ui.util.PrintOptions;
 import org.weasis.core.ui.util.TitleMenuItem;
 import org.weasis.core.ui.util.ToolBarContainer;
 
@@ -106,6 +107,9 @@ public class WeasisWin extends JFrame {
   private final JButton freezeParams = new JButton("parameters");
   private final JButton freezeImage = new JButton("image");
   private final JLabel freezeState = new JLabel("none");
+  private final JButton imgPage = new JButton("page");
+  private final JButton imgPrint = new JButton("printable");
+  private final JLabel imgPrintState = new JLabel("none");
 
   public WeasisWin() {
     super(windowTitle());
@@ -292,6 +296,7 @@ public class WeasisWin extends JFrame {
     addQrChrome();
     addCalChrome();
     addFreezeChrome();
+    addImgPrintChrome();
   }
 
   void addSendChrome() {
@@ -494,6 +499,47 @@ public class WeasisWin extends JFrame {
 
   public String freezeStateText() {
     return freezeState.getText();
+  }
+
+  void addImgPrintChrome() {
+    imgPage.setName("img-page");
+    imgPrint.setName("img-print");
+    imgPrintState.setName("img-print-state");
+    imgPage.addActionListener(e -> applyImgPage());
+    imgPrint.addActionListener(e -> applyImgPrint());
+    toolbars.add(imgPage);
+    toolbars.add(imgPrint);
+    toolbars.add(imgPrintState);
+  }
+
+  void applyImgPage() {
+    PrintOptions opts = new PrintOptions();
+    opts.setShowingAnnotations(false);
+    calibration.getView().requestPrint(opts);
+    imgPrintState.setText("page");
+  }
+
+  void applyImgPrint() {
+    PrintOptions opts = new PrintOptions();
+    opts.setShowingAnnotations(true);
+    calibration.getView().requestPrint(opts);
+    imgPrintState.setText("printable");
+  }
+
+  public JButton imgPageButton() {
+    return imgPage;
+  }
+
+  public JButton imgPrintButton() {
+    return imgPrint;
+  }
+
+  public JLabel imgPrintStateLabel() {
+    return imgPrintState;
+  }
+
+  public String imgPrintStateText() {
+    return imgPrintState.getText();
   }
 
   void addDockingChrome() {
