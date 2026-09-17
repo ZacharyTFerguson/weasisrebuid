@@ -31,7 +31,7 @@ class KeyObjectToolBarHaveTest {
     KeyObjectToolBar bar = new KeyObjectToolBar();
     assertEquals("Key Object", bar.getComponentName());
     assertEquals(Insertable.Type.TOOLBAR, bar.getType());
-    assertEquals(3, bar.getComponent().getComponentCount());
+    assertEquals(7, bar.getComponent().getComponentCount());
     assertTrue(bar.toggle("1.2.3"));
     assertTrue(bar.getManager().isKeyImage("1.2.3"));
     assertTrue(bar.filter());
@@ -79,6 +79,27 @@ class KeyObjectToolBarHaveTest {
         .keyPressed(new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_K, 'k'));
     assertFalse(view.getKoManager().isKeyImage(sop));
     assertEquals(ActionW.KO, ActionW.getAction("ko"));
+  }
+
+  @Test
+  void saveKoAndPrShowRootUid225(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2d view = new View2d();
+    view.load(file.toFile());
+    KeyObjectToolBar bar = new KeyObjectToolBar();
+    bar.bind(view);
+    assertEquals("save-ko", bar.saveKoButton().getName());
+    assertEquals("save-pr", bar.savePrButton().getName());
+    assertEquals("ko-uid", bar.koUidLabel().getName());
+    assertEquals("pr-uid", bar.prUidLabel().getName());
+    assertEquals("none", bar.koUidText());
+    assertEquals("none", bar.prUidText());
+    bar.saveKoButton().doClick();
+    assertTrue(bar.koUidText().startsWith("2.25"));
+    bar.savePrButton().doClick();
+    assertTrue(bar.prUidText().startsWith("2.25"));
+    assertEquals("none", bar.stateText());
   }
 
   @Test

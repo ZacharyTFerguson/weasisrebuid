@@ -10,30 +10,42 @@
 package org.weasis.dicom.viewer2d;
 
 import java.awt.event.ActionEvent;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JToggleButton;
+import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.util.Toolbar;
 import org.weasis.core.ui.util.WtoolBar;
 
 /**
  * Key Object chrome. Star toggles the current SOP as a key image (shortcut K); Filter shows only
- * key images (WP-5 star/filter chrome).
+ * key images; Save KO/PR emit objects with root UID 2.25 (WP-5).
  */
 public class KeyObjectToolBar extends WtoolBar implements Toolbar {
 
   public static final String NAME = "Key Object";
   public static final String STAR = "star";
   public static final String FILTER = "ko-filter";
+  public static final String SAVE_KO = "save-ko";
+  public static final String SAVE_PR = "save-pr";
+  public static final String KO_UID = "ko-uid";
+  public static final String PR_UID = "pr-uid";
 
   private KOManager manager;
   private View2d view;
+  private final PRManager prManager = new PRManager();
   private final JButton star = actionButton(STAR, "Star");
   private final JToggleButton filter = new JToggleButton("Filter");
   private final JLabel state = new JLabel("none");
+  private final JButton saveKo = actionButton(SAVE_KO, "Save KO");
+  private final JLabel koUid = new JLabel("none");
+  private final JButton savePr = actionButton(SAVE_PR, "Save PR");
+  private final JLabel prUid = new JLabel("none");
 
   public KeyObjectToolBar() {
     this(new KOManager());
@@ -50,6 +62,12 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
     add(filter);
     state.setName("ko-state");
     add(state);
+    add(saveKo);
+    koUid.setName(KO_UID);
+    add(koUid);
+    add(savePr);
+    prUid.setName(PR_UID);
+    add(prUid);
   }
 
   public void bind(View2d view) {
@@ -110,6 +128,58 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
     return state.getText();
   }
 
+  public JButton saveKoButton() {
+    return saveKo;
+  }
+
+  public JButton savePrButton() {
+    return savePr;
+  }
+
+  public JLabel koUidLabel() {
+    return koUid;
+  }
+
+  public JLabel prUidLabel() {
+    return prUid;
+  }
+
+  public String koUidText() {
+    return koUid.getText();
+  }
+
+  public String prUidText() {
+    return prUid.getText();
+  }
+
+  public String saveKo() {
+    String uid = sopOf(getManager().buildKoDocument(source()));
+    koUid.setText(uid);
+    return uid;
+  }
+
+  public String savePr() {
+    String uid = sopOf(prManager.buildPresentationState(source(), drawings()));
+    prUid.setText(uid);
+    return uid;
+  }
+
+  Attributes source() {
+    return view == null ? null : view.getDataset();
+  }
+
+  List<Graphic> drawings() {
+    return view == null ? List.of() : view.getSelectedGraphics();
+  }
+
+  static String sopOf(Attributes dcm) {
+    if (dcm == null) {
+      return "none";
+    }
+    String uid = dcm.getString(Tag.SOPInstanceUID);
+    return uid == null || uid.isBlank() ? "none" : uid;
+  }
+
   public void syncFilter() {
     filter.setSelected(isFilterKeyImages());
   }
@@ -139,14 +209,26 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
             new AbstractAction(label) {
               @Override
               public void actionPerformed(ActionEvent e) {
-                if (STAR.equals(name)) {
-                  star();
-                }
+                clickNamed(name);
               }
             });
     button.setName(name);
     button.setToolTipText(label);
     return button;
+  }
+
+  void clickNamed(String name) {
+    if (STAR.equals(name)) {
+      star();
+      return;
+    }
+    if (SAVE_KO.equals(name)) {
+      saveKo();
+      return;
+    }
+    if (SAVE_PR.equals(name)) {
+      savePr();
+    }
   }
 
   @Override

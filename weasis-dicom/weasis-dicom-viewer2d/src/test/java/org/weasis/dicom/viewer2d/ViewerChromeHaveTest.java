@@ -359,6 +359,35 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void keyObjectToolbarSetsNamedKoPrRootUidChrome(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    KeyObjectToolBar bar = container.getKeyObjectToolBar();
+    assertEquals("save-ko", bar.saveKoButton().getName());
+    assertEquals("save-pr", bar.savePrButton().getName());
+    assertEquals("ko-uid", bar.koUidLabel().getName());
+    assertEquals("pr-uid", bar.prUidLabel().getName());
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    bar.bind(view);
+    assertEquals("none", bar.koUidText());
+    assertEquals("none", bar.prUidText());
+    bar.saveKoButton().doClick();
+    assertTrue(bar.koUidText().startsWith("2.25"));
+    bar.savePrButton().doClick();
+    assertTrue(bar.prUidText().startsWith("2.25"));
+    assertEquals("none", bar.stateText());
+    assertEquals("0", container.getGraphicsPane().countText());
+    assertEquals("region-stats", container.getViewerToolBar().regionStatsLabel().getName());
+    assertEquals("FULL", container.getDisplayTool().visibilityValueText());
+    assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
+  }
+
+  @Test
   void lutToolBarSetsPseudoColorAndInvert() {
     View2d view = new View2d();
     LutToolBar bar = new LutToolBar();
