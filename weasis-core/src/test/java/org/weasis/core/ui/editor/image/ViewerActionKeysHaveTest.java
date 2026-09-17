@@ -219,6 +219,28 @@ class ViewerActionKeysHaveTest {
   }
 
   @Test
+  void calLineApplyMapSetsNamedState() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    view.setMonitorCalibrationMmPerPixel(0.2);
+    CalibrationView cal = new CalibrationView(view);
+    assertEquals("cal-view", cal.getName());
+    assertEquals("cal-line", cal.lineButton().getName());
+    assertEquals("cal-apply", cal.applyButton().getName());
+    assertEquals("cal-state", cal.stateLabel().getName());
+    assertEquals("none", cal.stateText());
+    cal.lineButton().doClick();
+    assertEquals("line", cal.stateText());
+    assertEquals(0.0, view.getSessionManualCalibrationMmPerPixel(), 1e-9);
+    cal.applyButton().doClick();
+    assertEquals("session", cal.stateText());
+    assertEquals(2.0, view.getSessionManualCalibrationMmPerPixel(), 1e-9);
+    assertEquals(0.2, view.getMonitorCalibrationMmPerPixel(), 1e-9);
+    assertNotEquals(
+        view.getMonitorCalibrationMmPerPixel(), view.getSessionManualCalibrationMmPerPixel());
+    assertTrue(view.getGraphicList().isEmpty());
+  }
+
+  @Test
   void regionStatisticsFollowSelectedClosedGraphic() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setSourceImage(gray(new int[][] {{10, 200}, {10, 200}}));

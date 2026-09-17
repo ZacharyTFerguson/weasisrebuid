@@ -9,7 +9,8 @@
  */
 package org.weasis.core.ui.editor.image;
 
-import java.awt.BorderLayout;
+import java.awt.geom.Point2D;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.weasis.core.api.image.util.Unit;
@@ -22,15 +23,38 @@ import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
  */
 public class CalibrationView extends JPanel {
 
+  public static final String STATE = "cal-state";
+  public static final String NONE = "none";
+  public static final String LINE = "line";
+  public static final String SESSION = "session";
+
   private final DefaultView2d<?> view;
+  private final JButton sample = new JButton(LINE);
+  private final JButton applyBtn = new JButton(SESSION);
+  private final JLabel state = new JLabel(NONE);
   private LineGraphic line;
   private double knownLength = 10.0;
   private Unit unit = Unit.MILLIMETER;
 
+  public CalibrationView() {
+    this(new DefaultView2d<>());
+  }
+
   public CalibrationView(DefaultView2d<?> view) {
-    super(new BorderLayout());
     this.view = view;
-    add(new JLabel("Manual Calibration"), BorderLayout.NORTH);
+    setName("cal-view");
+    bindCalChrome();
+    add(sample);
+    add(applyBtn);
+    add(state);
+  }
+
+  void bindCalChrome() {
+    sample.setName("cal-line");
+    applyBtn.setName("cal-apply");
+    state.setName(STATE);
+    sample.addActionListener(e -> applyLine());
+    applyBtn.addActionListener(e -> applySession());
   }
 
   public DefaultView2d<?> getView() {
@@ -56,6 +80,41 @@ public class CalibrationView extends JPanel {
 
   public Unit getUnit() {
     return unit;
+  }
+
+  public JButton lineButton() {
+    return sample;
+  }
+
+  public JButton applyButton() {
+    return applyBtn;
+  }
+
+  public JLabel stateLabel() {
+    return state;
+  }
+
+  public String stateText() {
+    return state.getText();
+  }
+
+  void applyLine() {
+    LineGraphic distance = sampleLine();
+    setLine(distance);
+    setKnownLength(20.0, Unit.MILLIMETER);
+    state.setText(LINE);
+  }
+
+  void applySession() {
+    apply();
+    state.setText(SESSION);
+  }
+
+  static LineGraphic sampleLine() {
+    LineGraphic distance = new LineGraphic();
+    distance.setHandlePoint(0, new Point2D.Double(0, 0));
+    distance.setHandlePoint(1, new Point2D.Double(10, 0));
+    return distance;
   }
 
   public double apply() {

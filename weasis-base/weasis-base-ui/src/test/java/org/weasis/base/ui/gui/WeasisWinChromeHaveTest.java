@@ -216,6 +216,37 @@ class WeasisWinChromeHaveTest {
       assertEquals("none", win.isoStateText());
       assertEquals("none", win.printStateText());
       assertEquals("none", win.sendStateText());
+      assertEquals("none", win.calStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
+  void calLineApplyMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("cal-line", win.calLineButton().getName());
+      assertEquals("cal-apply", win.calApplyButton().getName());
+      assertEquals("cal-state", win.calStateLabel().getName());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
+      win.calLineButton().doClick();
+      assertEquals("line", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      win.calApplyButton().doClick();
+      assertEquals("session", win.calStateText());
+      assertEquals(
+          2.0, win.calibrationView().getView().getSessionManualCalibrationMmPerPixel(), 1e-9);
+      assertEquals(0.2, win.calibrationView().getView().getMonitorCalibrationMmPerPixel(), 1e-9);
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
     } finally {
       win.dispose();
     }

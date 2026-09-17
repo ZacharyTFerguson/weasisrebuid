@@ -62,6 +62,7 @@ import org.weasis.core.api.explorer.ImportDicom;
 import org.weasis.core.api.gui.util.AppProperties;
 import org.weasis.core.api.gui.util.DynamicMenu;
 import org.weasis.core.api.service.UICore;
+import org.weasis.core.ui.editor.image.CalibrationView;
 import org.weasis.core.ui.editor.image.ImageViewerPlugin;
 import org.weasis.core.ui.editor.image.MeasureToolBar;
 import org.weasis.core.ui.editor.image.RotationToolBar;
@@ -101,6 +102,7 @@ public class WeasisWin extends JFrame {
   private final JButton qrFind = new JButton("C-FIND");
   private final JButton qrMove = new JButton("C-MOVE");
   private final JLabel qrState = new JLabel("none");
+  private final CalibrationView calibration = new CalibrationView();
 
   public WeasisWin() {
     super(windowTitle());
@@ -285,6 +287,7 @@ public class WeasisWin extends JFrame {
     addPrintChrome();
     addIsoChrome();
     addQrChrome();
+    addCalChrome();
   }
 
   void addSendChrome() {
@@ -425,6 +428,31 @@ public class WeasisWin extends JFrame {
 
   public String qrStateText() {
     return qrState.getText();
+  }
+
+  void addCalChrome() {
+    calibration.getView().setMonitorCalibrationMmPerPixel(0.2);
+    toolbars.add(calibration);
+  }
+
+  public CalibrationView calibrationView() {
+    return calibration;
+  }
+
+  public JButton calLineButton() {
+    return calibration.lineButton();
+  }
+
+  public JButton calApplyButton() {
+    return calibration.applyButton();
+  }
+
+  public JLabel calStateLabel() {
+    return calibration.stateLabel();
+  }
+
+  public String calStateText() {
+    return calibration.stateText();
   }
 
   void addDockingChrome() {
