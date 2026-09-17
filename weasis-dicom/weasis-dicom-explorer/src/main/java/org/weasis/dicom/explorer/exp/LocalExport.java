@@ -44,26 +44,47 @@ public class LocalExport extends AbstractItemDialogPage implements ExportDicom {
   private final DicomModel model;
   private final JTextField pathField = new JTextField();
   private final JPasswordField passwordField = new JPasswordField();
+  private final JButton browse = new JButton("Browse…");
+  private final JButton exportBtn = new JButton("Export");
   private final JLabel status = new JLabel(" ");
 
   public LocalExport(String title, DicomModel model) {
     super(title == null || title.isBlank() ? DicomExportFactory.PAGE_LOCAL : title, 0);
     this.model = model == null ? new DicomModel() : model;
+    pathField.setName("export-path");
+    passwordField.setName("export-zip-password");
+    browse.setName("export-browse");
+    exportBtn.setName("export-run");
+    status.setName("export-status");
     JPanel form = new JPanel(new GridLayout(0, 1, 4, 4));
     form.add(new JLabel(getTitle() + " — destination folder, ZIP, or DICOMDIR"));
     JPanel pathRow = new JPanel(new BorderLayout(4, 0));
     pathRow.add(pathField, BorderLayout.CENTER);
-    JButton browse = new JButton("Browse…");
     browse.addActionListener(e -> browse());
     pathRow.add(browse, BorderLayout.EAST);
     form.add(pathRow);
     form.add(new JLabel("ZIP password (optional)"));
     form.add(passwordField);
-    JButton exportBtn = new JButton("Export");
     exportBtn.addActionListener(e -> runExport());
     form.add(exportBtn);
     form.add(status);
     add(form, BorderLayout.NORTH);
+  }
+
+  public JTextField pathField() {
+    return pathField;
+  }
+
+  public JPasswordField passwordField() {
+    return passwordField;
+  }
+
+  public JButton exportButton() {
+    return exportBtn;
+  }
+
+  public JLabel statusLabel() {
+    return status;
   }
 
   public DicomModel getModel() {

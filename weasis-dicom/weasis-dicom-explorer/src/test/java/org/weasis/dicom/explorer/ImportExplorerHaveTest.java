@@ -265,6 +265,25 @@ class ImportExplorerHaveTest {
     assertFalse(view.documentPanel().plainText().contains("Modality"));
   }
 
+  @Test
+  void explorerExportDialogBindsImportedSeries(@TempDir Path dir) throws Exception {
+    File ct = dir.resolve("ct.dcm").toFile();
+    LoadLocalDicomTest.writeCt(ct);
+    DicomModel model = new DicomModel();
+    DicomExplorer explorer = new DicomExplorer(model);
+    new ImportDicomPage("DICOM", 0, model, new SkipUnsupportedSopNotifier())
+        .importFiles(List.of(ct), null);
+    org.weasis.dicom.explorer.exp.ExportDicomView view = explorer.createExportView(null);
+    assertEquals("export-dicom-dialog", view.getName());
+    javax.swing.tree.DefaultMutableTreeNode root =
+        (javax.swing.tree.DefaultMutableTreeNode) view.getExportTree().getModel().getRoot();
+    assertTrue(root.getChildAt(0).toString().contains("SYNTHETIC^CT"));
+    assertTrue(root.getChildAt(0).toString().contains("SYN-CT-0001"));
+    assertNotNull(view.page(org.weasis.dicom.explorer.exp.DicomExportFactory.PAGE_LOCAL));
+    assertNotNull(view.page(org.weasis.dicom.explorer.exp.DicomExportFactory.PAGE_ZIP));
+    assertNotNull(view.page(org.weasis.dicom.explorer.exp.DicomExportFactory.PAGE_DIR));
+  }
+
   static boolean containsKeyword(List<TagRow> rows, String keyword) {
     return rows.stream().anyMatch(r -> keyword.equals(r.keyword()));
   }

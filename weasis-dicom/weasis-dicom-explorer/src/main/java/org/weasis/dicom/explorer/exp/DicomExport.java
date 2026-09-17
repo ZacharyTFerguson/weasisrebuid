@@ -32,6 +32,17 @@ public final class DicomExport {
     if (!isExportEnabled()) {
       return null;
     }
-    return new ExportDicomView(owner, model);
+    ExportDicomView view = new ExportDicomView(owner, model);
+    view.setName("export-dicom-dialog");
+    return view;
+  }
+
+  public static ExportDicomView show(Frame owner, DicomModel model) {
+    ExportDicomView view = open(owner, model);
+    if (view != null) {
+      view.setLocationRelativeTo(owner);
+      view.setVisible(true);
+    }
+    return view;
   }
 }

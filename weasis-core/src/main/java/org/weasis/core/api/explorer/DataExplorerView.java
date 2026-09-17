@@ -9,6 +9,7 @@
  */
 package org.weasis.core.api.explorer;
 
+import java.awt.Frame;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
 
@@ -17,6 +18,9 @@ public interface DataExplorerView extends Insertable {
   DataExplorerModel getDataExplorerModel();
 
   void dispose();
+
+  /** File &gt; Export DICOM. Explorers that own a DICOM model override this. */
+  default void openExport(Frame owner) {}
 
   @Override
   default Type getType() {

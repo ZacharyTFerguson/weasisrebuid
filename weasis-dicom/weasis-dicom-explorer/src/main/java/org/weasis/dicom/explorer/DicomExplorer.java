@@ -10,6 +10,7 @@
 package org.weasis.dicom.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.awt.event.ItemEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -40,6 +41,8 @@ import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMediaIO;
+import org.weasis.dicom.explorer.exp.DicomExport;
+import org.weasis.dicom.explorer.exp.ExportDicomView;
 import org.weasis.dicom.explorer.main.DicomPaneManager;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
 import org.weasis.dicom.explorer.main.PatientPane;
@@ -231,6 +234,15 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
 
   public DicomFieldsView fieldsView() {
     return fields;
+  }
+
+  public ExportDicomView createExportView(Frame owner) {
+    return DicomExport.open(owner, model);
+  }
+
+  @Override
+  public void openExport(Frame owner) {
+    DicomExport.show(owner, model);
   }
 
   void bindFields() {

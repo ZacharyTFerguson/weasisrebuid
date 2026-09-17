@@ -16,6 +16,7 @@ public class ExportTree extends JTree {
 
   public ExportTree(CheckTreeModel model) {
     super(model == null ? new CheckTreeModel(null) : model);
+    setName("export-tree");
     setRootVisible(false);
     setShowsRootHandles(true);
   }

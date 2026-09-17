@@ -262,6 +262,17 @@ public class WeasisWin extends JFrame {
     importBtn.setName("import-dicom");
     importBtn.addActionListener(e -> openImportDialog(false));
     toolbars.add(importBtn);
+    JButton exportBtn = new JButton("Export DICOM");
+    exportBtn.setName("export-dicom");
+    exportBtn.addActionListener(e -> openExportDialog());
+    toolbars.add(exportBtn);
+  }
+
+  void openExportDialog() {
+    DataExplorerView explorer = explorerView;
+    if (explorer != null) {
+      explorer.openExport(this);
+    }
   }
 
   void onViewerTabChanged() {
@@ -703,6 +714,10 @@ public class WeasisWin extends JFrame {
     importMenu.add(importDicom);
     importMenu.add(importCd);
     file.add(importMenu);
+    JMenuItem exportDicom = new JMenuItem("Export DICOM");
+    exportDicom.setName("file-export-dicom");
+    exportDicom.addActionListener(e -> openExportDialog());
+    file.add(exportDicom);
     JMenuItem prefs = new JMenuItem("Preferences");
     prefs.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.ALT_DOWN_MASK));
     prefs.addActionListener(

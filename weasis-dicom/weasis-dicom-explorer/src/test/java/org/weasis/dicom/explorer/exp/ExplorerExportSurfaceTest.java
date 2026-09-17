@@ -113,10 +113,18 @@ class ExplorerExportSurfaceTest {
     ExportDicomView view = DicomExport.open(null, model);
     assertNotNull(view);
     assertEquals("Export DICOM", view.getTitle());
+    assertEquals("export-dicom-dialog", view.getName());
+    assertEquals("export-tabs", view.tabs().getName());
+    assertEquals("export-tree", view.getExportTree().getName());
+    assertEquals(3, view.tabs().getTabCount());
+    assertEquals(DicomExportFactory.PAGE_LOCAL, view.tabs().getTitleAt(0));
+    assertEquals(DicomExportFactory.PAGE_ZIP, view.tabs().getTitleAt(1));
+    assertEquals(DicomExportFactory.PAGE_DIR, view.tabs().getTitleAt(2));
     assertNotNull(view.page(DicomExportFactory.PAGE_LOCAL));
     ExportToolBar bar = new ExportToolBar();
     assertEquals(Insertable.Type.TOOLBAR, bar.getType());
     assertEquals("Export DICOM", bar.getComponentName());
+    assertEquals("export-dicom", ((javax.swing.AbstractButton) bar.getComponent(0)).getName());
     DicomExportAction action = new DicomExportAction();
     assertEquals("Export DICOM", action.getValue(javax.swing.Action.NAME));
     String prev = System.getProperty(DicomExportFactory.PREF_EXPORT);
@@ -175,6 +183,28 @@ class ExplorerExportSurfaceTest {
     List<File> written = DicomExportPR.export(model, dir.resolve("pr-out").toFile());
     assertEquals(1, written.size());
     assertTrue(written.get(0).isFile());
+  }
+
+  @Test
+  void namedExportRunWritesSelectedInstances(@TempDir Path dir) throws Exception {
+    File ct = dir.resolve("src.dcm").toFile();
+    writeCt(ct);
+    DicomModel model = new DicomModel();
+    LoadLocalDicom.importFile(ct, model, new SkipUnsupportedSopNotifier());
+    ExportDicomView view = DicomExport.open(null, model);
+    javax.swing.tree.DefaultMutableTreeNode root =
+        (javax.swing.tree.DefaultMutableTreeNode) view.getExportTree().getModel().getRoot();
+    assertTrue(root.getChildAt(0).toString().contains("SYNTHETIC^A"));
+    assertTrue(root.getChildAt(0).toString().contains("SYN-1"));
+    LocalExport local = view.page(DicomExportFactory.PAGE_LOCAL);
+    assertEquals("export-path", local.pathField().getName());
+    assertEquals("export-run", local.exportButton().getName());
+    assertEquals("export-status", local.statusLabel().getName());
+    File dest = dir.resolve("out-named").toFile();
+    local.pathField().setText(dest.getAbsolutePath());
+    local.exportButton().doClick();
+    assertTrue(local.statusLabel().getText().startsWith("Exported"));
+    assertTrue(Files.list(dest.toPath()).findAny().isPresent());
   }
 
   static void writeCt(File file) throws Exception {

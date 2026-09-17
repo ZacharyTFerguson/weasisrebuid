@@ -98,6 +98,17 @@ class WeasisWinChromeHaveTest {
       JMenu edit = win.menuNamed("Edit");
       assertEquals("Select All", edit.getItem(0).getText());
       assertEquals("Deselect All", edit.getItem(1).getText());
+      JMenu file = win.menuNamed("File");
+      assertEquals("Import", file.getItem(0).getText());
+      assertEquals("Export DICOM", file.getItem(1).getText());
+      assertEquals("file-export-dicom", file.getItem(1).getName());
+      boolean exportBtn = false;
+      for (Component c : win.getToolBarContainer().getComponents()) {
+        if ("export-dicom".equals(c.getName())) {
+          exportBtn = true;
+        }
+      }
+      assertTrue(exportBtn);
       assertEquals("Resource Monitor", win.menuNamed("Tools").getItem(0).getText());
       assertEquals("Keyboard Shortcuts", win.menuNamed("Help").getItem(0).getText());
       assertEquals("About", win.menuNamed("Help").getItem(1).getText());

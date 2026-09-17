@@ -10,17 +10,23 @@
 package org.weasis.dicom.explorer.exp;
 
 import java.awt.Frame;
+import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.util.DefaultAction;
 import org.weasis.dicom.explorer.DicomModel;
+import org.weasis.dicom.explorer.LocalPersistence;
 
 /** File &gt; Export DICOM action. */
 public class DicomExportAction extends DefaultAction {
 
   public DicomExportAction() {
-    this(null, null);
+    super("Export DICOM", DicomExportAction::showPersisted);
   }
 
   public DicomExportAction(Frame owner, DicomModel model) {
-    super("Export DICOM", () -> DicomExport.open(owner, model));
+    super("Export DICOM", () -> DicomExport.show(owner, model));
+  }
+
+  static void showPersisted() {
+    DicomExport.show(UICore.getInstance().getApplicationWindow(), LocalPersistence.getDicomModel());
   }
 }

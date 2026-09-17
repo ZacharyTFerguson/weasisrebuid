@@ -10,6 +10,7 @@
 package org.weasis.dicom.explorer.exp;
 
 import java.awt.BorderLayout;
+import java.awt.Dialog;
 import java.awt.Frame;
 import java.util.Hashtable;
 import javax.swing.JDialog;
@@ -27,17 +28,20 @@ public class ExportDicomView extends JDialog {
   private final JTabbedPane tabs = new JTabbedPane();
 
   public ExportDicomView(Frame owner, DicomModel model) {
-    super(owner, "Export DICOM", true);
+    super(owner, "Export DICOM", Dialog.ModalityType.DOCUMENT_MODAL);
+    setName("export-dicom-dialog");
     this.model = model == null ? new DicomModel() : model;
     this.treeModel = new CheckTreeModel(this.model);
     this.tree = new ExportTree(treeModel);
     Hashtable<String, Object> props = new Hashtable<>();
     props.put("model", this.model);
     DicomExportFactory factory = new DicomExportFactory();
+    tabs.setName("export-tabs");
     tabs.add(DicomExportFactory.PAGE_LOCAL, page(factory, props, DicomExportFactory.PAGE_LOCAL));
     tabs.add(DicomExportFactory.PAGE_ZIP, page(factory, props, DicomExportFactory.PAGE_ZIP));
     tabs.add(DicomExportFactory.PAGE_DIR, page(factory, props, DicomExportFactory.PAGE_DIR));
     JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(tree), tabs);
+    split.setName("export-split");
     split.setDividerLocation(220);
     getContentPane().setLayout(new BorderLayout());
     getContentPane().add(split, BorderLayout.CENTER);
@@ -70,5 +74,9 @@ public class ExportDicomView extends JDialog {
       }
     }
     return null;
+  }
+
+  public JTabbedPane tabs() {
+    return tabs;
   }
 }

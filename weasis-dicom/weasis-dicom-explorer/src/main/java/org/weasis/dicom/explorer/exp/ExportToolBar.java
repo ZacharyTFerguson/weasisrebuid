@@ -18,6 +18,7 @@ public class ExportToolBar extends WtoolBar {
   public ExportToolBar() {
     super("Export DICOM", 6);
     JButton button = new JButton(new DicomExportAction());
+    button.setName("export-dicom");
     button.setEnabled(DicomExport.isExportEnabled());
     add(button);
   }
