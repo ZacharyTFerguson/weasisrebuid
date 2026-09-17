@@ -232,6 +232,10 @@ class ViewerActionKeysHaveTest {
     assertEquals(10.0, stats.getMin(), 1e-9);
     assertEquals(10.0, stats.getMax(), 1e-9);
     assertTrue(stats.text().contains("n=2"));
+    ViewerToolBar bar = new ViewerToolBar();
+    bar.bind(view);
+    assertEquals("region-stats", bar.regionStatsLabel().getName());
+    assertEquals(stats.text(), bar.regionStatsText());
   }
 
   static void assertSameView(DefaultView2d<?> expected, DefaultView2d<?> actual) {

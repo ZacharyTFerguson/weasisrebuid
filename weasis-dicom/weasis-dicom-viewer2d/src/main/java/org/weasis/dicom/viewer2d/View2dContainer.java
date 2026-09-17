@@ -534,6 +534,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     miniTool.bind(painted);
     zoomWin.bind(painted);
     displayTool.bind(painted);
+    viewerToolBar.refreshRegionStats();
     wireCrosshair(painted);
   }
 

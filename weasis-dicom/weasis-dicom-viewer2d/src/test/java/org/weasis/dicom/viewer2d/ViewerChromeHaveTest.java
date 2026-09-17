@@ -48,6 +48,7 @@ import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.editor.image.ZoomWin;
 import org.weasis.core.ui.editor.image.dockable.MiniTool;
+import org.weasis.core.ui.model.graphic.imp.area.RectangleGraphic;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
 import org.weasis.core.ui.model.layer.LayerAnnotation;
@@ -269,6 +270,36 @@ class ViewerChromeHaveTest {
     assertEquals("mini-tool", container.getMiniTool().getName());
     assertEquals("histogram", container.getHistogramView().getName());
     assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
+    assertEquals("region-stats", container.getViewerToolBar().regionStatsLabel().getName());
+  }
+
+  @Test
+  void viewerToolBarSetsNamedRegionStats() {
+    View2dContainer container = new View2dContainer();
+    ViewerToolBar bar = container.getViewerToolBar();
+    assertEquals("region-stats", bar.regionStatsLabel().getName());
+    View2d view = container.getView2d();
+    BufferedImage src = new BufferedImage(2, 2, BufferedImage.TYPE_BYTE_GRAY);
+    src.getRaster().setSample(0, 0, 0, 10);
+    src.getRaster().setSample(1, 0, 0, 200);
+    src.getRaster().setSample(0, 1, 0, 10);
+    src.getRaster().setSample(1, 1, 0, 200);
+    view.setSourceImage(src);
+    bar.refreshRegionStats();
+    assertEquals("n=4 min=10.0 max=200.0 mean=105.0 stdev=95.0", bar.regionStatsText());
+    RectangleGraphic roi = new RectangleGraphic();
+    roi.setHandlePoint(0, new Point2D.Double(0, 0));
+    roi.setHandlePoint(1, new Point2D.Double(1, 2));
+    roi.setSelected(true);
+    view.addGraphic(roi);
+    assertEquals("n=2 min=10.0 max=10.0 mean=10.0 stdev=0.0", bar.regionStatsText());
+    assertEquals("FULL", container.getDisplayTool().visibilityValueText());
+    assertEquals(
+        "IMAGE,CROSSLINES,ANNOTATION,DRAW,MEASURE", container.getDisplayTool().layersValueText());
+    assertEquals("pixel-info", bar.pixelInfoLabel().getName());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
   }
 
   @Test

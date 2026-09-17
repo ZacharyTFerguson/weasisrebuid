@@ -41,7 +41,9 @@ public class ViewerToolBar extends WtoolBar {
 
   private String selected = ActionW.WINLEVEL.cmd();
   private DefaultView2d<?> view;
+  private DefaultView2d<?> statsView;
   private final JLabel pixelInfo = new JLabel(" ");
+  private final JLabel regionStats = new JLabel(" ");
   private final SynchViewButton synchFor = new SynchViewButton();
   private final ManualSynchViewButton synchManual = new ManualSynchViewButton();
   private final JLabel synchKind = new JLabel("FoR");
@@ -53,6 +55,8 @@ public class ViewerToolBar extends WtoolBar {
     }
     pixelInfo.setName("pixel-info");
     add(pixelInfo);
+    regionStats.setName("region-stats");
+    add(regionStats);
     nameSynchChrome();
     add(synchFor);
     add(synchManual);
@@ -75,7 +79,26 @@ public class ViewerToolBar extends WtoolBar {
       view.setCrosshairListener((v, info) -> refreshPixelInfo(info));
       refreshPixelInfo(view.getPixelInfo());
       refreshSynchKind();
+      wireRegionStats(view);
+      refreshRegionStats();
     }
+  }
+
+  void wireRegionStats(DefaultView2d<?> view) {
+    if (view == statsView) {
+      return;
+    }
+    statsView = view;
+    view.addGraphicSelectionListener(selected -> refreshRegionStats());
+    view.addGraphicModelChangeListener(this::refreshRegionStats);
+  }
+
+  public void refreshRegionStats() {
+    if (view == null) {
+      regionStats.setText(" ");
+      return;
+    }
+    regionStats.setText(ImageRegionStatistics.compute(view).text());
   }
 
   public String getSelected() {
@@ -173,6 +196,14 @@ public class ViewerToolBar extends WtoolBar {
 
   public String pixelInfoText() {
     return pixelInfo.getText();
+  }
+
+  public JLabel regionStatsLabel() {
+    return regionStats;
+  }
+
+  public String regionStatsText() {
+    return regionStats.getText();
   }
 
   public void refreshPixelInfo(PixelInfo info) {
