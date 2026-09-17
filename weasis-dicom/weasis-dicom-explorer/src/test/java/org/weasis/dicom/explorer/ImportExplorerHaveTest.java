@@ -22,6 +22,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import javax.swing.JFrame;
+import javax.swing.JSplitPane;
+import javax.swing.JTabbedPane;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -32,6 +34,8 @@ import org.weasis.dicom.explorer.exp.ExplorerTask;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
 import org.weasis.dicom.explorer.main.LoadingTaskPanel;
 import org.weasis.dicom.explorer.main.SeriesFilter;
+import org.weasis.dicom.explorer.tag.AbstractTagSearchPanel.TagRow;
+import org.weasis.dicom.explorer.tag.DicomFieldsView;
 import org.weasis.dicom.viewer2d.View2dContainer;
 import org.weasis.dicom.viewer2d.View2dFactory;
 
@@ -216,5 +220,60 @@ class ImportExplorerHaveTest {
     assertEquals(0, explorer.seriesSelection().getItems().size());
     explorer.filterQueryField().setText("20260101");
     assertEquals(1, explorer.seriesSelection().getItems().size());
+  }
+
+  @Test
+  void explorerDocksFieldsLimitedSearchOnImportedSeries(@TempDir Path dir) throws Exception {
+    File ct = dir.resolve("ct.dcm").toFile();
+    LoadLocalDicomTest.writeCt(ct);
+    DicomModel model = new DicomModel();
+    DicomExplorer explorer = new DicomExplorer(model);
+    new ImportDicomPage("DICOM", 0, model, new SkipUnsupportedSopNotifier())
+        .importFiles(List.of(ct), null);
+    assertTrue(explorer.seriesSelection().selectedIndices().isEmpty());
+    JSplitPane split =
+        (JSplitPane) ((BorderLayout) explorer.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+    assertEquals("explorer-fields-split", split.getName());
+    assertSame(
+        DicomTaskManager.getInstance().getLoadingPanel(),
+        ((BorderLayout) explorer.getLayout()).getLayoutComponent(BorderLayout.SOUTH));
+    DicomFieldsView view = explorer.fieldsView();
+    assertEquals("DICOM Fields", view.getName());
+    assertEquals("limited", view.limitedBox().getName());
+    assertEquals("tagSearch", view.searchField().getName());
+    assertEquals("tagTable", view.tablePanel().table().getName());
+    assertEquals("tagDocument", view.documentPanel().document().getName());
+    assertEquals("tagViews", ((JTabbedPane) view.getComponent(1)).getName());
+    assertTrue(view.isLimited());
+    List<TagRow> limited = view.allItems();
+    assertTrue(keywordValue(limited, "PatientID").contains("SYN-CT-0001"));
+    assertTrue(keywordValue(limited, "PatientName").contains("SYNTHETIC^CT"));
+    assertTrue(keywordValue(limited, "Modality").contains("CT"));
+    assertFalse(containsKeyword(limited, "PixelData"));
+    assertTrue(view.documentPanel().plainText().contains("SYN-CT-0001"));
+    assertFalse(view.documentPanel().plainText().contains("PixelData"));
+    view.setLimited(false);
+    List<TagRow> all = view.allItems();
+    assertTrue(containsKeyword(all, "PixelData"));
+    assertEquals("[OW]", keywordValue(all, "PixelData"));
+    view.setQuery("Patient");
+    List<TagRow> filtered = view.visibleItems();
+    assertTrue(containsKeyword(filtered, "PatientID"));
+    assertTrue(containsKeyword(filtered, "PatientName"));
+    assertFalse(containsKeyword(filtered, "Modality"));
+    assertTrue(view.documentPanel().plainText().contains("PatientID"));
+    assertFalse(view.documentPanel().plainText().contains("Modality"));
+  }
+
+  static boolean containsKeyword(List<TagRow> rows, String keyword) {
+    return rows.stream().anyMatch(r -> keyword.equals(r.keyword()));
+  }
+
+  static String keywordValue(List<TagRow> rows, String keyword) {
+    return rows.stream()
+        .filter(r -> keyword.equals(r.keyword()))
+        .map(TagRow::value)
+        .findFirst()
+        .orElse("");
   }
 }

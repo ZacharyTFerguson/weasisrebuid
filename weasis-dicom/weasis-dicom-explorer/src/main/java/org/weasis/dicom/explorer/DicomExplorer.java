@@ -15,6 +15,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -23,10 +25,12 @@ import javax.swing.JComboBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import org.dcm4che3.data.Attributes;
 import org.weasis.core.api.explorer.DataExplorerView;
 import org.weasis.core.api.explorer.model.DataExplorerModel;
 import org.weasis.core.api.gui.Insertable;
@@ -35,6 +39,7 @@ import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.explorer.main.DicomPaneManager;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
 import org.weasis.dicom.explorer.main.PatientPane;
@@ -42,6 +47,7 @@ import org.weasis.dicom.explorer.main.SeriesFilter;
 import org.weasis.dicom.explorer.main.SeriesSelectionModel;
 import org.weasis.dicom.explorer.main.StudyPane;
 import org.weasis.dicom.explorer.main.ThumbnailMouseAndKeyAdapter;
+import org.weasis.dicom.explorer.tag.DicomFieldsView;
 
 /** DICOM Explorer tree/list. Instances created on demand from {@link DicomExplorerFactory}. */
 public class DicomExplorer extends PluginTool implements DataExplorerView {
@@ -61,6 +67,7 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final JComboBox<String> filterMode =
       new JComboBox<>(new String[] {SeriesFilter.TEXT, SeriesFilter.DATE, SeriesFilter.MODALITY});
   private final JTextField filterQuery = new JTextField();
+  private final DicomFieldsView fields = new DicomFieldsView();
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
@@ -81,7 +88,10 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     north.add(filterBar(), BorderLayout.NORTH);
     north.add(hierarchy, BorderLayout.CENTER);
     add(north, BorderLayout.NORTH);
-    add(new JScrollPane(list), BorderLayout.CENTER);
+    JSplitPane split = new JSplitPane(JSplitPane.VERTICAL_SPLIT, new JScrollPane(list), fields);
+    split.setName("explorer-fields-split");
+    split.setResizeWeight(0.55);
+    add(split, BorderLayout.CENTER);
     add(DicomTaskManager.getInstance().getLoadingPanel(), BorderLayout.SOUTH);
     list.setName("explorer-series");
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -155,6 +165,7 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
       thumbs.pressed(i, e);
     }
     ViewTransferHandler.pressSeries(list, e);
+    bindFields();
   }
 
   void bindModel() {
@@ -215,6 +226,47 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     }
     list.putClientProperty(ViewTransferHandler.SERIES_ROWS, List.copyOf(rows));
     selection.setItems(labels);
+    bindFields();
+  }
+
+  public DicomFieldsView fieldsView() {
+    return fields;
+  }
+
+  void bindFields() {
+    fields.changeDicomInfo(datasetOf(selectedInstance()));
+  }
+
+  ImportedInstance selectedInstance() {
+    List<ImportedInstance> instances = filteredInstances();
+    if (instances.isEmpty()) {
+      return null;
+    }
+    Integer idx = firstSelectedIndex();
+    if (idx != null && idx >= 0 && idx < instances.size()) {
+      return instances.get(idx);
+    }
+    return instances.get(0);
+  }
+
+  Integer firstSelectedIndex() {
+    Set<Integer> idxs = selection.selectedIndices();
+    if (idxs.isEmpty()) {
+      return null;
+    }
+    return idxs.iterator().next();
+  }
+
+  static Attributes datasetOf(ImportedInstance inst) {
+    File file = inst == null ? null : inst.file();
+    if (file == null) {
+      return null;
+    }
+    try {
+      return DicomMediaIO.open(file).getDataset();
+    } catch (IOException e) {
+      return null;
+    }
   }
 
   List<ImportedInstance> filteredInstances() {
