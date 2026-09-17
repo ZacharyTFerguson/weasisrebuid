@@ -110,6 +110,9 @@ public class WeasisWin extends JFrame {
   private final JButton imgPage = new JButton("page");
   private final JButton imgPrint = new JButton("printable");
   private final JLabel imgPrintState = new JLabel("none");
+  private final JButton langEn = new JButton("en");
+  private final JButton langFr = new JButton("fr");
+  private final JLabel langState = new JLabel("none");
 
   public WeasisWin() {
     super(windowTitle());
@@ -297,6 +300,7 @@ public class WeasisWin extends JFrame {
     addCalChrome();
     addFreezeChrome();
     addImgPrintChrome();
+    addLangChrome();
     bindDefaultViewerBar();
   }
 
@@ -541,6 +545,43 @@ public class WeasisWin extends JFrame {
 
   public String imgPrintStateText() {
     return imgPrintState.getText();
+  }
+
+  void addLangChrome() {
+    langEn.setName("lang-en");
+    langFr.setName("lang-fr");
+    langState.setName("lang-state");
+    langEn.addActionListener(e -> applyLangEn());
+    langFr.addActionListener(e -> applyLangFr());
+    toolbars.add(langEn);
+    toolbars.add(langFr);
+    toolbars.add(langState);
+  }
+
+  void applyLangEn() {
+    System.setProperty("locale.lang.code", "en");
+    langState.setText("en");
+  }
+
+  void applyLangFr() {
+    System.setProperty("locale.lang.code", "fr");
+    langState.setText("fr");
+  }
+
+  public JButton langEnButton() {
+    return langEn;
+  }
+
+  public JButton langFrButton() {
+    return langFr;
+  }
+
+  public JLabel langStateLabel() {
+    return langState;
+  }
+
+  public String langStateText() {
+    return langState.getText();
   }
 
   void bindDefaultViewerBar() {

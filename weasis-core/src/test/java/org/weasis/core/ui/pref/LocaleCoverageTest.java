@@ -69,6 +69,8 @@ class LocaleCoverageTest {
   @Test
   void languageSettingPersistsPrefKeys() {
     LanguageSetting page = new LanguageSetting();
+    assertEquals("lang-list", page.getLanguageCombo().getName());
+    assertEquals("lang-percent", page.getPercentageCombo().getName());
     page.getPercentageCombo().setSelectedItem("30 %");
     page.closeAdditionalWindow();
     assertEquals("30", System.getProperty(JLocalePercentage.PROP_MIN_PERCENT));

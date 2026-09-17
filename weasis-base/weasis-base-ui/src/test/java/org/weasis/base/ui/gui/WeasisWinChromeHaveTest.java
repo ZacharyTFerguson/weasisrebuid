@@ -482,6 +482,47 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void langEnThenFrAtThirtyPercentOnWinChrome() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    String prevLang = System.getProperty("locale.lang.code");
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("lang-en", win.langEnButton().getName());
+      assertEquals("lang-fr", win.langFrButton().getName());
+      assertEquals("lang-state", win.langStateLabel().getName());
+      assertEquals("none", win.langStateText());
+      assertEquals("none", win.altStateText());
+      assertEquals("none", win.rqStateText());
+      assertEquals("none", win.szStateText());
+      assertEquals("none", win.leftStateText());
+      win.langEnButton().doClick();
+      assertEquals("en", win.langStateText());
+      assertEquals("en", System.getProperty("locale.lang.code"));
+      win.langFrButton().doClick();
+      assertEquals("fr", win.langStateText());
+      assertEquals("fr", System.getProperty("locale.lang.code"));
+      assertEquals("none", win.altStateText());
+      assertEquals("none", win.rqStateText());
+      assertEquals("none", win.szStateText());
+      assertEquals("none", win.leftStateText());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      if (prevLang == null) {
+        System.clearProperty("locale.lang.code");
+      } else {
+        System.setProperty("locale.lang.code", prevLang);
+      }
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();

@@ -26,6 +26,8 @@ public class LanguageSetting extends AbstractItemDialogPage {
     super("Language", 110);
     this.percentage = new JLocalePercentage();
     this.languages = new JLocaleLanguage();
+    languages.setName("lang-list");
+    percentage.setName("lang-percent");
     JPanel form = new JPanel(new GridLayout(0, 2, 8, 8));
     form.add(new JLabel(Messages.getString("language.title")));
     form.add(languages);
