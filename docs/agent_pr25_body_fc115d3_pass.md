@@ -13,18 +13,21 @@ Staffing until 2026-09-17T23:26Z: Grok writer + Composer verifier only.
 
 ## Headed `fc115d3` — Screenshot toolbar PNG/JPEG / `name=screenshot` (Composer)
 
-**Jar:** `/tmp/weasis-headed-fc115d3.jar` · **SHA:** `fc115d3e8c18b6016657b86f62128f4445c934f4` · **Jar file:** `4ab1205471b0bdb1b55717d4d1e971e00fe2e5b22981628bea5af034ff934e5a` · **Gogo:** `17279` · OSGi cache `/tmp/weasis-headed-cache-fc115d3-fresh`; prior headed JVMs killed; **did not reuse** Help/Export/Fields/Dump/ImageTool jars.
+**Jar:** `/tmp/weasis-headed-fc115d3.jar` · **SHA:** `fc115d3e8c18b6016657b86f62128f4445c934f4` · **Jar file:** `4ab1205471b0bdb1b55717d4d1e971e00fe2e5b22981628bea5af034ff934e5a` · **Gogo:** `17279` · OSGi cache `/tmp/weasis-headed-cache-fc115d3-fresh6`; prior headed JVMs killed; **did not reuse** Help/Export/Fields/Dump/ImageTool jars.
 
 **Flow:** `dicom:get` Reed chest (`/opt/cursor/artifacts/chest_pa.dcm`) on **DICOM 2D** → jattach toolbar **`screenshot`** (`Screenshot` bar, after Dump) → dialog **`screenshot-dialog`**. Set **`screenshot-scope`** to `NATIVE_PIXELS`. Type dest in **`screenshot-path`** (e.g. `/tmp/weasis-shot-reed.png`). Click **`screenshot-run`**. Read **`screenshot-status`** `getText`. Do **not** click Export / Help / ImageTool / `dumpHeader` / Fields.
 
 | Check | Stills-based result |
 |---|---|
-| Toolbar `screenshot` | **pending** — jattach `name=screenshot` opens `screenshot-dialog` title `Screenshot` |
-| Format / scope chrome | **pending** — `screenshot-format` PNG; `screenshot-scope` `NATIVE_PIXELS`; `screenshot-overlays` |
-| `screenshot-run` writes dest; `screenshot-status` Saved | **pending** — PNG (or JPEG) file; native pixels **1929×2207** |
-| Help / Export / ImageTool / Dump / Fields untouched | **pending** — raster **1929×2207**; Help/Export not clicked |
+| Toolbar `screenshot` | **OK** — jattach `name=screenshot` opens `screenshot-dialog` title `Screenshot` |
+| Format / scope chrome | **OK** — `screenshot-format` **PNG**; `screenshot-scope` **NATIVE_PIXELS** after set |
+| `screenshot-run` writes dest; `screenshot-status` Saved | **OK** — `Saved /tmp/weasis-shot-reed-1789610734.png`; PNG **1929×2207** native |
+| Help / Export / ImageTool / Dump / Fields untouched | **OK** — viewer raster **1929×2207**; no Help/Export/`dumpHeader`/Fields clicks |
 
-**Route:** Composer headed verify **in progress** on `fc115d3`. **Next:** remaining TUTORIALS after Screenshot — **not** Pass.
+**Route:** Screenshot **headed OK** on `fc115d3`. **Next:** remaining TUTORIALS — **not** Pass.
+
+<img src="/opt/cursor/artifacts/headed_fc115d3_dialog.png" width="720" />
+<img src="/opt/cursor/artifacts/headed_fc115d3_saved.png" width="720" />
 
 ## Headed `e88e780` — Help Keyboard Shortcuts / System resources (Composer)
 
