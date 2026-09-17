@@ -13,7 +13,7 @@ Staffing until 2026-09-17T23:26Z: Grok writer + Composer verifier only.
 
 ## Headed `363f172` — File/toolbar Export DICOM / `name=export-dicom` (Composer)
 
-**Jar:** `/tmp/weasis-headed-363f172.jar` · **SHA:** `363f17231017b86f132dfc4a55ce536d457de7d6` · **Gogo:** `17279` · OSGi cache `/tmp/weasis-headed-cache-363f172-fresh`; prior headed JVMs killed; **did not reuse** Fields/Dump/ImageTool jars.
+**Jar:** `/tmp/weasis-headed-363f172.jar` · **SHA:** `363f17231017b86f132dfc4a55ce536d457de7d6` · **Jar file:** `49d71b00b53fe43dafb3402da37dad2f4f47f782acf1d3f2a00779536d9ffc11` · **Gogo:** `17279` · OSGi cache `/tmp/weasis-headed-cache-363f172-fresh`; prior headed JVMs killed; **did not reuse** Fields/Dump/ImageTool jars.
 
 **Flow:** `dicom:get` Reed chest (`/opt/cursor/artifacts/chest_pa.dcm`) on **DICOM 2D** → jattach toolbar **`export-dicom`** (next to `import-dicom`) or File **`file-export-dicom`** → dialog **`export-dicom-dialog`** with **`export-tree`** / **`export-tabs`** (DICOM / ZIP / DICOMDIR). Type dest in **`export-path`**, click **`export-run`**. Do **not** click ImageTool / `dumpHeader` / uncheck Fields limited.
 
