@@ -44,6 +44,7 @@ import org.weasis.core.ui.editor.image.HistogramView;
 import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
+import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
 import org.weasis.dicom.viewer2d.mpr.MprAxis;
@@ -94,6 +95,32 @@ class ViewerChromeHaveTest {
     dock.rgbButton().doClick();
     assertEquals(ColorModel.RGB, dock.getHistogramColorModel());
     assertTrue(dock.getChannels().isVisible());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+  }
+
+  @Test
+  void miniToolDockBindsNamedZoomPanner() {
+    View2dContainer container = new View2dContainer();
+    MiniTool mini = container.getMiniTool();
+    assertEquals("mini-tool", mini.getName());
+    assertEquals("mini-zoom", mini.getZoomSlider().getName());
+    assertEquals("mini-rotation", mini.getRotationSlider().getName());
+    assertEquals("mini-series", mini.getSeriesSlider().getName());
+    assertEquals("mini-panner", mini.getPanner().getName());
+    assertEquals("mini-zoom-value", mini.zoomValueLabel().getName());
+    assertTrue(
+        container.getSeriesViewerUI().getTools().stream()
+            .anyMatch(b -> MiniTool.NAME.equals(b.getComponentName())));
+    assertEquals("histogram", container.getHistogramView().getName());
+    View2d view = container.getView2d();
+    view.setSourceImage(new BufferedImage(100, 100, BufferedImage.TYPE_BYTE_GRAY));
+    mini.bind(view);
+    assertSame(view, mini.boundView());
+    mini.getZoomSlider().setValue(200);
+    assertEquals(2.0, view.getZoom(), 1e-9);
+    assertEquals("200%", mini.zoomValueText());
+    mini.getRotationSlider().setValue(90);
+    assertEquals(90.0, view.getRotation(), 1e-9);
     assertEquals("flip", container.getImageTool().flipButton().getName());
   }
 

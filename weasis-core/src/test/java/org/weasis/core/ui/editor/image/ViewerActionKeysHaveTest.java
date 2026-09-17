@@ -163,6 +163,12 @@ class ViewerActionKeysHaveTest {
     view.setSourceImage(gray(new int[100][100]));
     MiniTool mini = new MiniTool();
     assertEquals("Mini Tool", mini.getComponentName());
+    assertEquals("mini-tool", mini.getName());
+    assertEquals("mini-zoom", mini.getZoomSlider().getName());
+    assertEquals("mini-rotation", mini.getRotationSlider().getName());
+    assertEquals("mini-series", mini.getSeriesSlider().getName());
+    assertEquals("mini-panner", mini.getPanner().getName());
+    assertEquals("mini-zoom-value", mini.zoomValueLabel().getName());
     assertEquals(Insertable.Type.TOOL, mini.getType());
     mini.bind(view);
     assertSameView(view, mini.boundView());
@@ -172,6 +178,7 @@ class ViewerActionKeysHaveTest {
     assertEquals(50.0, view.getPanY(), 1e-9);
     mini.getZoomSlider().setValue(200);
     assertEquals(2.0, view.getZoom(), 1e-9);
+    assertEquals("200%", mini.zoomValueText());
     mini.getRotationSlider().setValue(90);
     assertEquals(90.0, view.getRotation(), 1e-9);
   }

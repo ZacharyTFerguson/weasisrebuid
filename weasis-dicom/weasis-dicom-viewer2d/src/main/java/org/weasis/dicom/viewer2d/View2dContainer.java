@@ -39,6 +39,7 @@ import org.weasis.core.ui.editor.image.SynchView;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
+import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.dicom.codec.KOSpecialElement;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
@@ -71,6 +72,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final SegmentationTool segmentationTool = new SegmentationTool();
   private final ImageTool imageTool = new ImageTool();
   private final HistogramView histogramView = new HistogramView();
+  private final MiniTool miniTool = new MiniTool();
   private final ViewTransferHandler seriesDrop = new ViewTransferHandler();
   private int layoutIndex;
 
@@ -81,9 +83,11 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     segmentationTool.bind(view2d);
     imageTool.bind(view2d);
     histogramView.bind(view2d);
+    miniTool.bind(view2d);
     bindToolBars();
     add(viewGrid, BorderLayout.CENTER);
     add(histogramView, BorderLayout.SOUTH);
+    add(miniTool, BorderLayout.WEST);
     bindDrop(this);
     bindDrop(viewGrid);
     bindDrop(view2d);
@@ -162,6 +166,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     List<Insertable> tools = getSeriesViewerUI().getTools();
     tools.clear();
     tools.add(histogramView);
+    tools.add(miniTool);
   }
 
   public ToolBarContainer getToolBars() {
@@ -214,6 +219,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public HistogramView getHistogramView() {
     return histogramView;
+  }
+
+  public MiniTool getMiniTool() {
+    return miniTool;
   }
 
   public DcmHeaderToolBar getHeaderToolBar() {
@@ -503,6 +512,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     headerToolBar.bind(painted);
     screenshotToolBar.bind(painted);
     histogramView.bind(painted);
+    miniTool.bind(painted);
   }
 
   public void cycleLayout(int delta) {

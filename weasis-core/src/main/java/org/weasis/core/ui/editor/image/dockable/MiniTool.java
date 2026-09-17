@@ -10,6 +10,7 @@
 package org.weasis.core.ui.editor.image.dockable;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -29,21 +30,36 @@ public class MiniTool extends PluginTool {
   private final JSliderW rotation = new JSliderW(0, 359, 0);
   private final JSliderW series = new JSliderW(0, 0, 0);
   private final Panner panner = new Panner();
+  private final JLabel zoomValue = new JLabel("100%");
+  private final JLabel rotationValue = new JLabel("0°");
   private DefaultView2d<?> view;
   private boolean syncing;
 
   public MiniTool() {
     super(NAME, 5);
+    setName("mini-tool");
+    setPreferredSize(new Dimension(160, 280));
+    nameChrome();
     JPanel sliders = new JPanel();
+    sliders.setName("mini-sliders");
     sliders.setLayout(new BoxLayout(sliders, BoxLayout.Y_AXIS));
-    sliders.add(labeled("Zoom", zoom));
-    sliders.add(labeled("Rotation", rotation));
-    sliders.add(labeled("Series", series));
+    sliders.add(labeled("Zoom", zoom, zoomValue));
+    sliders.add(labeled("Rotation", rotation, rotationValue));
+    sliders.add(labeled("Series", series, null));
     add(sliders, BorderLayout.CENTER);
     add(panner, BorderLayout.SOUTH);
     zoom.addChangeListener(e -> applyZoom());
     rotation.addChangeListener(e -> applyRotation());
     series.addChangeListener(e -> applySeries());
+  }
+
+  void nameChrome() {
+    zoom.setName("mini-zoom");
+    rotation.setName("mini-rotation");
+    series.setName("mini-series");
+    panner.setName("mini-panner");
+    zoomValue.setName("mini-zoom-value");
+    rotationValue.setName("mini-rotation-value");
   }
 
   public void bind(DefaultView2d<?> view) {
@@ -72,6 +88,18 @@ public class MiniTool extends PluginTool {
     return series;
   }
 
+  public JLabel zoomValueLabel() {
+    return zoomValue;
+  }
+
+  public String zoomValueText() {
+    return zoomValue.getText();
+  }
+
+  public JLabel rotationValueLabel() {
+    return rotationValue;
+  }
+
   public void refresh() {
     if (view == null) {
       return;
@@ -89,6 +117,7 @@ public class MiniTool extends PluginTool {
       rotation.setValue(rot);
       series.setMaximum(Math.max(0, view.getFrameCount() - 1));
       series.setValue(Math.min(series.getMaximum(), view.getFrameIndex()));
+      syncValueLabels();
     } finally {
       syncing = false;
     }
@@ -99,6 +128,7 @@ public class MiniTool extends PluginTool {
       return;
     }
     view.setZoom(zoom.getValue() / 100.0);
+    syncValueLabels();
   }
 
   private void applyRotation() {
@@ -106,6 +136,12 @@ public class MiniTool extends PluginTool {
       return;
     }
     view.setRotation(rotation.getValue());
+    syncValueLabels();
+  }
+
+  void syncValueLabels() {
+    zoomValue.setText(zoom.getValue() + "%");
+    rotationValue.setText(rotation.getValue() + "°");
   }
 
   private void applySeries() {
@@ -115,9 +151,14 @@ public class MiniTool extends PluginTool {
     view.setFrameIndex(series.getValue());
   }
 
-  static JPanel labeled(String title, JSliderW slider) {
+  static JPanel labeled(String title, JSliderW slider, JLabel value) {
     JPanel row = new JPanel(new BorderLayout());
-    row.add(new JLabel(title), BorderLayout.NORTH);
+    JPanel header = new JPanel(new BorderLayout());
+    header.add(new JLabel(title), BorderLayout.WEST);
+    if (value != null) {
+      header.add(value, BorderLayout.EAST);
+    }
+    row.add(header, BorderLayout.NORTH);
     row.add(slider, BorderLayout.CENTER);
     return row;
   }
