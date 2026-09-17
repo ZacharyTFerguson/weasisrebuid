@@ -5,7 +5,7 @@ Draft on `cursor/weasis-spec-rebuild-26c5`. **Do not merge.** **Do not tick Pass
 
 Staffing until 2026-09-17T23:26Z: Grok writer + Composer verifier only.
 
-**HEAD:** `987649e` (`Show ImageRegionStatistics as live named region-stats chrome.`). **Flip** `004f59d`, **Sharpen** `3844bd4`, **Window** `3091f5e`, **Crop** `f88ec68`, **Brightness** `e9ef165`, **AutoLevels** `18f9802`, **Mask** `3355cda`, **Shutter** `b00cd4d`, **DcmHeader Dump** `0d2f39f`, **DicomFieldsView** `eefe975`, **Export DICOM** `363f172`, **Help shortcuts/resources** `e88e780`, **Screenshot** `fc115d3`, **Import DICOM** `a569b23`, **Help About** `17df6d0`, **File Preferences** `fe8df27`, **Histogram** `9d00ffa`, **Mini Tool** `5497cf5`, **3D cursor H/PixelInfo** `e54747f`, **2D lens ZoomWin** `ceb0de9`, **FoR vs manual** `0e7a548`, **central-panel docking keys** `0d01de8`, **Display dock / InfoLayer** `22491cc`, and **Display LayerItem / LayerAnnotation** `be35118` headed PASS (prior chrome not re-scored). **ImageRegionStatistics** / `name=region-stats` — Composer headed proof **in progress**. Full TUTORIALS.md walkthrough is still **not** Pass.
+**HEAD:** `987649e` (`Show ImageRegionStatistics as live named region-stats chrome.`). **Flip** `004f59d`, **Sharpen** `3844bd4`, **Window** `3091f5e`, **Crop** `f88ec68`, **Brightness** `e9ef165`, **AutoLevels** `18f9802`, **Mask** `3355cda`, **Shutter** `b00cd4d`, **DcmHeader Dump** `0d2f39f`, **DicomFieldsView** `eefe975`, **Export DICOM** `363f172`, **Help shortcuts/resources** `e88e780`, **Screenshot** `fc115d3`, **Import DICOM** `a569b23`, **Help About** `17df6d0`, **File Preferences** `fe8df27`, **Histogram** `9d00ffa`, **Mini Tool** `5497cf5`, **3D cursor H/PixelInfo** `e54747f`, **2D lens ZoomWin** `ceb0de9`, **FoR vs manual** `0e7a548`, **central-panel docking keys** `0d01de8`, **Display dock / InfoLayer** `22491cc`, and **Display LayerItem / LayerAnnotation** `be35118` headed PASS (prior chrome not re-scored). **ImageRegionStatistics** / `name=region-stats` headed PASS (prior chrome not re-scored). Full TUTORIALS.md walkthrough is still **not** Pass.
 
 
 
@@ -17,11 +17,13 @@ Staffing until 2026-09-17T23:26Z: Grok writer + Composer verifier only.
 
 | Check | Stills-based result |
 |---|---|
-| Viewer `region-stats` whole image | **pending** — `name=region-stats`; after Reed load `getText` `n=4257303` with `min=` / `max=` / `mean=` / `stdev=` |
-| Selected closed graphic (G ROI) | **pending** — after `measure-rect` click-drag, `region-stats` `n=` smaller than whole image |
-| LayerItem / Display 3-state / docking keys / FoR / Lens east / Mini Tool west / Histogram south / PixelInfo untouched | **pending** — region-stats-only jattach; `display-visibility-value` `FULL`; `docking-state` `NORMAL`; `synch-kind` `FoR`; docks unchanged |
+| Viewer `region-stats` whole image | **OK** — `name=region-stats`; after Reed load `getText` `n=4257303` with `min=` / `max=` / `mean=` / `stdev=` |
+| Selected closed graphic (G ROI) | **OK** — after `measure-rect` (live bounds `727,408,40×32`) click-drag, `region-stats` `n=1548781` (< `4257303`) with `min=` / `max=` / `mean=` / `stdev=` |
+| LayerItem / Display 3-state / docking keys / FoR / Lens east / Mini Tool west / Histogram south / PixelInfo untouched | **OK** — region-stats-only jattach; `display-visibility-value` `FULL`; `display-layers-value` includes `CROSSLINES`; `docking-state` `NORMAL`; `synch-kind` `FoR`; docks unchanged |
 
-**Route:** Composer headed verify **in progress** on `987649e`. **Next:** remaining TUTORIALS after ImageRegionStatistics — **not** Pass.
+**Route:** ImageRegionStatistics / `region-stats` **headed OK** on `987649e`. **Next:** remaining TUTORIALS — **not** Pass.
+
+<img src="/opt/cursor/artifacts/headed_987649e_region.png" width="720" />
 
 
 ## Headed `be35118` — Display LayerItem / LayerAnnotation / `name=display-layers-value` (Composer)
