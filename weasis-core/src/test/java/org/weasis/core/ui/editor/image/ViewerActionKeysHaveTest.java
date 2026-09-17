@@ -241,6 +241,17 @@ class ViewerActionKeysHaveTest {
   }
 
   @Test
+  void freezeParametersIsNotFreezeImage() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    view.setFreezeParameters(true);
+    assertTrue(view.isFreezeParameters());
+    assertFalse(view.isFreezeImage());
+    view.setFreezeImage(true);
+    assertTrue(view.isFreezeParameters());
+    assertTrue(view.isFreezeImage());
+  }
+
+  @Test
   void regionStatisticsFollowSelectedClosedGraphic() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setSourceImage(gray(new int[][] {{10, 200}, {10, 200}}));

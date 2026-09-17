@@ -103,6 +103,9 @@ public class WeasisWin extends JFrame {
   private final JButton qrMove = new JButton("C-MOVE");
   private final JLabel qrState = new JLabel("none");
   private final CalibrationView calibration = new CalibrationView();
+  private final JButton freezeParams = new JButton("parameters");
+  private final JButton freezeImage = new JButton("image");
+  private final JLabel freezeState = new JLabel("none");
 
   public WeasisWin() {
     super(windowTitle());
@@ -288,6 +291,7 @@ public class WeasisWin extends JFrame {
     addIsoChrome();
     addQrChrome();
     addCalChrome();
+    addFreezeChrome();
   }
 
   void addSendChrome() {
@@ -453,6 +457,43 @@ public class WeasisWin extends JFrame {
 
   public String calStateText() {
     return calibration.stateText();
+  }
+
+  void addFreezeChrome() {
+    freezeParams.setName("freeze-params");
+    freezeImage.setName("freeze-image");
+    freezeState.setName("freeze-state");
+    freezeParams.addActionListener(e -> applyFreezeParams());
+    freezeImage.addActionListener(e -> applyFreezeImage());
+    toolbars.add(freezeParams);
+    toolbars.add(freezeImage);
+    toolbars.add(freezeState);
+  }
+
+  void applyFreezeParams() {
+    calibration.getView().setFreezeParameters(true);
+    freezeState.setText("parameters");
+  }
+
+  void applyFreezeImage() {
+    calibration.getView().setFreezeImage(true);
+    freezeState.setText("image");
+  }
+
+  public JButton freezeParamsButton() {
+    return freezeParams;
+  }
+
+  public JButton freezeImageButton() {
+    return freezeImage;
+  }
+
+  public JLabel freezeStateLabel() {
+    return freezeState;
+  }
+
+  public String freezeStateText() {
+    return freezeState.getText();
   }
 
   void addDockingChrome() {

@@ -247,6 +247,40 @@ class WeasisWinChromeHaveTest {
       assertEquals("none", win.isoStateText());
       assertEquals("none", win.printStateText());
       assertEquals("none", win.sendStateText());
+      assertEquals("none", win.freezeStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
+  void freezeParamsImageMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("freeze-params", win.freezeParamsButton().getName());
+      assertEquals("freeze-image", win.freezeImageButton().getName());
+      assertEquals("freeze-state", win.freezeStateLabel().getName());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
+      win.freezeParamsButton().doClick();
+      assertEquals("parameters", win.freezeStateText());
+      assertTrue(win.calibrationView().getView().isFreezeParameters());
+      assertFalse(win.calibrationView().getView().isFreezeImage());
+      assertEquals("none", win.calStateText());
+      win.freezeImageButton().doClick();
+      assertEquals("image", win.freezeStateText());
+      assertTrue(win.calibrationView().getView().isFreezeParameters());
+      assertTrue(win.calibrationView().getView().isFreezeImage());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
     } finally {
       win.dispose();
     }
