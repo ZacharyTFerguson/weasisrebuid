@@ -39,6 +39,10 @@ class ViewerCineHaveTest {
     assertEquals(ActionW.NONE.cmd(), ViewerToolBar.ACTIONS[ViewerToolBar.ACTIONS.length - 1]);
     assertEquals("pixel-info", bar.pixelInfoLabel().getName());
     assertEquals(ActionW.CROSSHAIR.cmd(), bar.getComponent(5).getName());
+    assertEquals("synch-for", bar.synchForButton().getName());
+    assertEquals("synch-manual", bar.synchManualButton().getName());
+    assertEquals("synch-kind", bar.synchKindLabel().getName());
+    assertEquals("FoR", bar.synchKindText());
   }
 
   @Test

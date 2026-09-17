@@ -11,6 +11,7 @@ package org.weasis.core.ui.editor.image;
 
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import org.weasis.core.api.gui.util.ActionW;
@@ -41,6 +42,9 @@ public class ViewerToolBar extends WtoolBar {
   private String selected = ActionW.WINLEVEL.cmd();
   private DefaultView2d<?> view;
   private final JLabel pixelInfo = new JLabel(" ");
+  private final SynchViewButton synchFor = new SynchViewButton();
+  private final ManualSynchViewButton synchManual = new ManualSynchViewButton();
+  private final JLabel synchKind = new JLabel("FoR");
 
   public ViewerToolBar() {
     super(NAME, 10);
@@ -49,6 +53,19 @@ public class ViewerToolBar extends WtoolBar {
     }
     pixelInfo.setName("pixel-info");
     add(pixelInfo);
+    nameSynchChrome();
+    add(synchFor);
+    add(synchManual);
+    add(synchKind);
+  }
+
+  void nameSynchChrome() {
+    synchKind.setName("synch-kind");
+    ButtonGroup group = new ButtonGroup();
+    group.add(synchFor);
+    group.add(synchManual);
+    synchFor.addActionListener(e -> applyFor());
+    synchManual.addActionListener(e -> applyManual());
   }
 
   public void bind(DefaultView2d<?> view) {
@@ -57,6 +74,7 @@ public class ViewerToolBar extends WtoolBar {
       apply(view);
       view.setCrosshairListener((v, info) -> refreshPixelInfo(info));
       refreshPixelInfo(view.getPixelInfo());
+      refreshSynchKind();
     }
   }
 
@@ -163,6 +181,46 @@ public class ViewerToolBar extends WtoolBar {
       return;
     }
     pixelInfo.setText(" ");
+  }
+
+  public SynchViewButton synchForButton() {
+    return synchFor;
+  }
+
+  public ManualSynchViewButton synchManualButton() {
+    return synchManual;
+  }
+
+  public JLabel synchKindLabel() {
+    return synchKind;
+  }
+
+  public String synchKindText() {
+    return synchKind.getText();
+  }
+
+  void applyFor() {
+    if (view != null) {
+      synchFor.apply(view);
+    }
+    refreshSynchKind();
+  }
+
+  void applyManual() {
+    if (view != null) {
+      synchManual.apply(view);
+    }
+    refreshSynchKind();
+  }
+
+  void refreshSynchKind() {
+    if (view != null && view.getSynchData().isManual()) {
+      synchManual.setSelected(true);
+      synchKind.setText("Manual");
+      return;
+    }
+    synchFor.setSelected(true);
+    synchKind.setText("FoR");
   }
 
   private JButton button(String action) {

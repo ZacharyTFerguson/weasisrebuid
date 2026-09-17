@@ -32,9 +32,13 @@ class SynchMx14Test {
   @Test
   void buttonsSelectDifferentKinds() {
     DefaultView2d<?> view = new DefaultView2d<>();
-    new SynchViewButton().apply(view);
+    SynchViewButton forBtn = new SynchViewButton();
+    ManualSynchViewButton manual = new ManualSynchViewButton();
+    assertEquals("synch-for", forBtn.getName());
+    assertEquals("synch-manual", manual.getName());
+    forBtn.apply(view);
     assertEquals(SynchData.Kind.FRAME_OF_REFERENCE, view.getSynchData().getKind());
-    new ManualSynchViewButton().apply(view);
+    manual.apply(view);
     assertEquals(SynchData.Kind.MANUAL, view.getSynchData().getKind());
   }
 }

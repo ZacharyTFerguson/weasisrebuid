@@ -16,6 +16,7 @@ public class SynchViewButton extends JToggleButton {
 
   public SynchViewButton() {
     super("FoR");
+    setName("synch-for");
     setSelected(true);
   }
 

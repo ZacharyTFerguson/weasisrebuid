@@ -175,6 +175,34 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void synchButtonsSetNamedKind() {
+    View2dContainer container = new View2dContainer();
+    ViewerToolBar bar = container.getViewerToolBar();
+    assertEquals("synch-for", bar.synchForButton().getName());
+    assertEquals("synch-manual", bar.synchManualButton().getName());
+    assertEquals("synch-kind", bar.synchKindLabel().getName());
+    assertEquals("FoR", bar.synchKindText());
+    View2d view = container.getView2d();
+    bar.bind(view);
+    bar.synchManualButton().doClick();
+    assertEquals(
+        org.weasis.core.ui.editor.image.SynchData.Kind.MANUAL, view.getSynchData().getKind());
+    assertEquals("Manual", bar.synchKindText());
+    assertTrue(bar.synchManualButton().isSelected());
+    assertFalse(bar.synchForButton().isSelected());
+    bar.synchForButton().doClick();
+    assertEquals(
+        org.weasis.core.ui.editor.image.SynchData.Kind.FRAME_OF_REFERENCE,
+        view.getSynchData().getKind());
+    assertEquals("FoR", bar.synchKindText());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
+    assertEquals("pixel-info", bar.pixelInfoLabel().getName());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+  }
+
+  @Test
   void lutToolBarSetsPseudoColorAndInvert() {
     View2d view = new View2d();
     LutToolBar bar = new LutToolBar();

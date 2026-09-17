@@ -16,6 +16,7 @@ public class ManualSynchViewButton extends JToggleButton {
 
   public ManualSynchViewButton() {
     super("Manual");
+    setName("synch-manual");
   }
 
   public void apply(DefaultView2d<?> view) {
