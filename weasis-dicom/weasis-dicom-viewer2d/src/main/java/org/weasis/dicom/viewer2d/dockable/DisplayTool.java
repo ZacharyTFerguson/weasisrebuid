@@ -10,8 +10,12 @@
 package org.weasis.dicom.viewer2d.dockable;
 
 import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer;
@@ -25,13 +29,45 @@ public class DisplayTool extends PluginTool {
   public static final String NAME = "Display";
 
   private final JComboBox<Visibility> visibility = new JComboBox<>(Visibility.values());
+  private final JLabel value = new JLabel(Visibility.FULL.name());
+  private JButton fullButton;
+  private JButton minimalButton;
+  private JButton hiddenButton;
   private AbstractInfoLayer layer;
   private DefaultView2d<?> view;
 
   public DisplayTool() {
     super(NAME, 10);
-    add(visibility, BorderLayout.NORTH);
+    setName("display");
+    nameChrome();
+    add(chromeBar(), BorderLayout.NORTH);
+  }
+
+  void nameChrome() {
+    visibility.setName("display-visibility");
+    value.setName("display-visibility-value");
     visibility.addActionListener(e -> apply());
+  }
+
+  JPanel chromeBar() {
+    JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+    bar.setName("display-chrome");
+    bar.add(visibility);
+    bar.add(value);
+    fullButton = stateButton("FULL", "display-full", Visibility.FULL);
+    minimalButton = stateButton("MINIMAL", "display-minimal", Visibility.MINIMAL);
+    hiddenButton = stateButton("HIDDEN", "display-hidden", Visibility.HIDDEN);
+    bar.add(fullButton);
+    bar.add(minimalButton);
+    bar.add(hiddenButton);
+    return bar;
+  }
+
+  JButton stateButton(String title, String name, Visibility state) {
+    JButton button = new JButton(title);
+    button.setName(name);
+    button.addActionListener(e -> setVisibility(state));
+    return button;
   }
 
   public void bind(AbstractInfoLayer layer) {
@@ -39,6 +75,7 @@ public class DisplayTool extends PluginTool {
     if (layer != null) {
       visibility.setSelectedItem(layer.getVisibility());
     }
+    refreshValue();
   }
 
   public void bind(DefaultView2d<?> view) {
@@ -69,9 +106,21 @@ public class DisplayTool extends PluginTool {
     }
   }
 
+  public void setVisibility(Visibility state) {
+    Visibility next = state == null ? Visibility.FULL : state;
+    if (layer != null) {
+      layer.setVisibility(next);
+    }
+    visibility.setSelectedItem(next);
+    refreshValue();
+  }
+
   public void apply() {
-    if (layer != null && visibility.getSelectedItem() instanceof Visibility selected) {
-      layer.setVisibility(selected);
+    if (visibility.getSelectedItem() instanceof Visibility selected) {
+      if (layer != null) {
+        layer.setVisibility(selected);
+      }
+      refreshValue();
     }
   }
 
@@ -80,5 +129,35 @@ public class DisplayTool extends PluginTool {
       layer.cycle();
       visibility.setSelectedItem(layer.getVisibility());
     }
+    refreshValue();
+  }
+
+  void refreshValue() {
+    Object selected = visibility.getSelectedItem();
+    value.setText(selected == null ? Visibility.FULL.name() : selected.toString());
+  }
+
+  public JComboBox<Visibility> visibilityCombo() {
+    return visibility;
+  }
+
+  public JLabel visibilityValueLabel() {
+    return value;
+  }
+
+  public String visibilityValueText() {
+    return value.getText();
+  }
+
+  public JButton fullButton() {
+    return fullButton;
+  }
+
+  public JButton minimalButton() {
+    return minimalButton;
+  }
+
+  public JButton hiddenButton() {
+    return hiddenButton;
   }
 }

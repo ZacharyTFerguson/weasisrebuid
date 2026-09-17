@@ -49,6 +49,8 @@ import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.editor.image.ZoomWin;
 import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
+import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
+import org.weasis.dicom.viewer2d.dockable.DisplayTool;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
 import org.weasis.dicom.viewer2d.mpr.MprAxis;
 import org.weasis.dicom.viewer2d.mpr.MprContainer;
@@ -198,7 +200,41 @@ class ViewerChromeHaveTest {
     assertEquals("lens", container.getZoomWin().getName());
     assertEquals("mini-tool", container.getMiniTool().getName());
     assertEquals("histogram", container.getHistogramView().getName());
+    assertEquals("display", container.getDisplayTool().getName());
     assertEquals("pixel-info", bar.pixelInfoLabel().getName());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+  }
+
+  @Test
+  void displayDockBindsNamedVisibilityChrome() {
+    View2dContainer container = new View2dContainer();
+    DisplayTool display = container.getDisplayTool();
+    assertEquals("display", display.getName());
+    assertEquals("display-visibility", display.visibilityCombo().getName());
+    assertEquals("display-visibility-value", display.visibilityValueLabel().getName());
+    assertEquals("display-full", display.fullButton().getName());
+    assertEquals("display-minimal", display.minimalButton().getName());
+    assertEquals("display-hidden", display.hiddenButton().getName());
+    assertEquals("FULL", display.visibilityValueText());
+    assertTrue(
+        container.getSeriesViewerUI().getTools().stream()
+            .anyMatch(b -> DisplayTool.NAME.equals(b.getComponentName())));
+    View2d view = container.getView2d();
+    display.bind(view);
+    assertSame(view, display.boundView());
+    display.minimalButton().doClick();
+    assertEquals(Visibility.MINIMAL, view.getInfoLayer().getVisibility());
+    assertEquals("MINIMAL", display.visibilityValueText());
+    display.hiddenButton().doClick();
+    assertEquals(Visibility.HIDDEN, view.getInfoLayer().getVisibility());
+    assertEquals("HIDDEN", display.visibilityValueText());
+    display.fullButton().doClick();
+    assertEquals(Visibility.FULL, view.getInfoLayer().getVisibility());
+    assertEquals("FULL", display.visibilityValueText());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
+    assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
     assertEquals("flip", container.getImageTool().flipButton().getName());
   }
 

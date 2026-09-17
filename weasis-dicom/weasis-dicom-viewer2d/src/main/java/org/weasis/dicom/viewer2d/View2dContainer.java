@@ -43,6 +43,7 @@ import org.weasis.core.ui.editor.image.ZoomWin;
 import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.dicom.codec.KOSpecialElement;
+import org.weasis.dicom.viewer2d.dockable.DisplayTool;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
 import org.weasis.dicom.viewer2d.dockable.SegmentationTool;
 import org.weasis.dicom.viewer2d.fusion.FusionColorBar;
@@ -72,6 +73,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final Basic3DToolBar basic3DToolBar = new Basic3DToolBar();
   private final SegmentationTool segmentationTool = new SegmentationTool();
   private final ImageTool imageTool = new ImageTool();
+  private final DisplayTool displayTool = new DisplayTool();
   private final HistogramView histogramView = new HistogramView();
   private final MiniTool miniTool = new MiniTool();
   private final ZoomWin zoomWin = new ZoomWin();
@@ -84,12 +86,14 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     fusionController.addTarget(view2d);
     segmentationTool.bind(view2d);
     imageTool.bind(view2d);
+    displayTool.bind(view2d);
     histogramView.bind(view2d);
     miniTool.bind(view2d);
     zoomWin.bind(view2d);
     bindToolBars();
     wireCrosshair(view2d);
     add(viewGrid, BorderLayout.CENTER);
+    add(displayTool, BorderLayout.NORTH);
     add(histogramView, BorderLayout.SOUTH);
     add(miniTool, BorderLayout.WEST);
     add(zoomWin, BorderLayout.EAST);
@@ -173,6 +177,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     tools.add(histogramView);
     tools.add(miniTool);
     tools.add(zoomWin);
+    tools.add(displayTool);
   }
 
   public ToolBarContainer getToolBars() {
@@ -221,6 +226,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public ImageTool getImageTool() {
     return imageTool;
+  }
+
+  public DisplayTool getDisplayTool() {
+    return displayTool;
   }
 
   public HistogramView getHistogramView() {
@@ -524,6 +533,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     histogramView.bind(painted);
     miniTool.bind(painted);
     zoomWin.bind(painted);
+    displayTool.bind(painted);
     wireCrosshair(painted);
   }
 

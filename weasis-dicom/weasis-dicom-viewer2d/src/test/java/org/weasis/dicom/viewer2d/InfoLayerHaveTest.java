@@ -43,12 +43,17 @@ class InfoLayerHaveTest {
     View2d view = new View2d();
     assertTrue(view.getInfoLayer().overlayText(view).contains("W:" + (int) view.getWindow()));
     DisplayTool display = new DisplayTool();
+    assertEquals("display", display.getName());
+    assertEquals("display-visibility-value", display.visibilityValueLabel().getName());
     assertEquals(Insertable.Type.TOOL, display.getType());
     display.bind(view.getInfoLayer());
+    assertEquals("FULL", display.visibilityValueText());
     display.cycle();
     assertEquals(Visibility.MINIMAL, view.getInfoLayer().getVisibility());
+    assertEquals("MINIMAL", display.visibilityValueText());
     display.cycle();
     assertEquals(Visibility.HIDDEN, view.getInfoLayer().getVisibility());
+    assertEquals("HIDDEN", display.visibilityValueText());
     ImageTool image = new ImageTool();
     image.bind(view);
     assertTrue(image.summaryText().contains("W:400"));
