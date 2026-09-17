@@ -213,6 +213,11 @@ class ImportExplorerHaveTest {
     assertEquals("explorer-series", explorer.seriesList().getName());
     assertEquals("explorer-filter-mode", explorer.filterModeCombo().getName());
     assertEquals("explorer-filter-query", explorer.filterQueryField().getName());
+    assertEquals("apply-pr", explorer.applyPrButton().getName());
+    assertEquals("pr-graphics", explorer.prGraphicsLabel().getName());
+    assertEquals("pr-mapped", explorer.prMappedLabel().getName());
+    assertEquals("0", explorer.prGraphicsText());
+    assertEquals("none", explorer.prMappedText());
     explorer.filterModeCombo().setSelectedItem(SeriesFilter.TEXT);
     assertEquals(SeriesFilter.TEXT, explorer.seriesFilter().getMode());
     explorer.filterModeCombo().setSelectedItem(SeriesFilter.DATE);
@@ -302,6 +307,16 @@ class ImportExplorerHaveTest {
     assertNotNull(view.page(org.weasis.dicom.explorer.exp.DicomExportFactory.PAGE_LOCAL));
     assertNotNull(view.page(org.weasis.dicom.explorer.exp.DicomExportFactory.PAGE_ZIP));
     assertNotNull(view.page(org.weasis.dicom.explorer.exp.DicomExportFactory.PAGE_DIR));
+  }
+
+  @Test
+  void applyPrMapsGspsPolylineToLineGraphic() {
+    DicomExplorer explorer = new DicomExplorer(new DicomModel());
+    assertEquals("0", explorer.prGraphicsText());
+    assertEquals("none", explorer.prMappedText());
+    explorer.applyPrButton().doClick();
+    assertEquals("1", explorer.prGraphicsText());
+    assertEquals("LineGraphic", explorer.prMappedText());
   }
 
   static boolean containsKeyword(List<TagRow> rows, String keyword) {

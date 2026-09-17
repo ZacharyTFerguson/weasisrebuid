@@ -142,6 +142,13 @@ class PrGraphicUtilHaveTest {
     assertTrue(util.getGraphics(null).isEmpty());
   }
 
+  @Test
+  void samplePolylineMapsToLineGraphic() {
+    Graphic mapped = util.mapSamplePolyline();
+    assertInstanceOf(LineGraphic.class, mapped);
+    assertEquals(PrGraphicUtil.POLYLINE, util.samplePolylineObject().getString(Tag.GraphicType));
+  }
+
   static Attributes graphic(String type, boolean filled, float... data) {
     Attributes go = new Attributes();
     go.setString(Tag.GraphicAnnotationUnits, VR.CS, "PIXEL");

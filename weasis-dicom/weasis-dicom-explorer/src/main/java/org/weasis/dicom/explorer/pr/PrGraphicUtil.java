@@ -22,6 +22,7 @@ import java.util.Map;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Sequence;
 import org.dcm4che3.data.Tag;
+import org.dcm4che3.data.VR;
 import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.core.ui.model.graphic.imp.AnnotationGraphic;
 import org.weasis.core.ui.model.graphic.imp.NonEditableGraphic;
@@ -74,6 +75,20 @@ public class PrGraphicUtil {
       addTexts(out, ann.getSequence(Tag.TextObjectSequence), color, columns, rows);
     }
     return out;
+  }
+
+  public Attributes samplePolylineObject() {
+    Attributes go = new Attributes();
+    go.setString(Tag.GraphicAnnotationUnits, VR.CS, UNITS_PIXEL);
+    go.setString(Tag.GraphicType, VR.CS, POLYLINE);
+    go.setString(Tag.GraphicFilled, VR.CS, "N");
+    go.setInt(Tag.NumberOfGraphicPoints, VR.US, 2);
+    go.setFloat(Tag.GraphicData, VR.FL, 0f, 0f, 10f, 0f);
+    return go;
+  }
+
+  public Graphic mapSamplePolyline() {
+    return buildGraphic(samplePolylineObject());
   }
 
   public Graphic buildGraphic(Attributes graphicObject) {

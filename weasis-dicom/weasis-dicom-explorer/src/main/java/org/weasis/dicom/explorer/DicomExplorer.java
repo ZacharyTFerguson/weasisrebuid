@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -40,6 +42,7 @@ import org.weasis.core.api.media.data.MediaSeries;
 import org.weasis.core.ui.docking.PluginTool;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.core.ui.model.graphic.Graphic;
 import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.explorer.exp.DicomExport;
 import org.weasis.dicom.explorer.exp.ExportDicomView;
@@ -51,6 +54,7 @@ import org.weasis.dicom.explorer.main.SeriesFilter;
 import org.weasis.dicom.explorer.main.SeriesSelectionModel;
 import org.weasis.dicom.explorer.main.StudyPane;
 import org.weasis.dicom.explorer.main.ThumbnailMouseAndKeyAdapter;
+import org.weasis.dicom.explorer.pr.PrGraphicUtil;
 import org.weasis.dicom.explorer.tag.DicomFieldsView;
 
 /** DICOM Explorer tree/list. Instances created on demand from {@link DicomExplorerFactory}. */
@@ -72,6 +76,10 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
       new JComboBox<>(new String[] {SeriesFilter.TEXT, SeriesFilter.DATE, SeriesFilter.MODALITY});
   private final JTextField filterQuery = new JTextField();
   private final DicomFieldsView fields = new DicomFieldsView();
+  private final PrGraphicUtil prUtil = new PrGraphicUtil();
+  private final JButton applyPr = new JButton("Apply PR");
+  private final JLabel prGraphics = new JLabel("0");
+  private final JLabel prMapped = new JLabel("none");
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
@@ -108,7 +116,57 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     bindFilterQuery();
     bar.add(filterMode, BorderLayout.WEST);
     bar.add(filterQuery, BorderLayout.CENTER);
+    bar.add(prMapChrome(), BorderLayout.EAST);
     return bar;
+  }
+
+  JPanel prMapChrome() {
+    JPanel box = new JPanel();
+    applyPr.setName("apply-pr");
+    applyPr.setToolTipText("Apply PR");
+    applyPr.addActionListener(e -> applyPr());
+    prGraphics.setName("pr-graphics");
+    prMapped.setName("pr-mapped");
+    box.add(applyPr);
+    box.add(prGraphics);
+    box.add(prMapped);
+    return box;
+  }
+
+  public JButton applyPrButton() {
+    return applyPr;
+  }
+
+  public JLabel prGraphicsLabel() {
+    return prGraphics;
+  }
+
+  public JLabel prMappedLabel() {
+    return prMapped;
+  }
+
+  public String prGraphicsText() {
+    return prGraphics.getText();
+  }
+
+  public String prMappedText() {
+    return prMapped.getText();
+  }
+
+  public String applyPr() {
+    return showMapped(prUtil.mapSamplePolyline());
+  }
+
+  String showMapped(Graphic graphic) {
+    if (graphic == null) {
+      prGraphics.setText("0");
+      prMapped.setText("none");
+      return "none";
+    }
+    prGraphics.setText("1");
+    String name = graphic.getClass().getSimpleName();
+    prMapped.setText(name);
+    return name;
   }
 
   void bindFilterMode() {
