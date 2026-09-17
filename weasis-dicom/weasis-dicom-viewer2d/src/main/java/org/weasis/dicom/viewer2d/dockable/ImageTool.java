@@ -28,6 +28,7 @@ public class ImageTool extends PluginTool {
   public static final String BRIGHTNESS = "brightness";
   public static final String AUTO_LEVELS = "autolevels";
   public static final String MASK = "mask";
+  public static final String SHUTTER = "shutter";
 
   private final JLabel summary = new JLabel(" ");
   private final JToggleButton window = new JToggleButton("Window");
@@ -35,6 +36,7 @@ public class ImageTool extends PluginTool {
   private final JToggleButton brightness = new JToggleButton("Brightness");
   private final JToggleButton autoLevels = new JToggleButton("AutoLevels");
   private final JToggleButton mask = new JToggleButton("Mask");
+  private final JToggleButton shutter = new JToggleButton("Shutter");
   private final JToggleButton flip = new JToggleButton("Flip");
   private View2d view;
 
@@ -50,6 +52,8 @@ public class ImageTool extends PluginTool {
     autoLevels.addActionListener(e -> applyAutoLevels());
     mask.setName(MASK);
     mask.addActionListener(e -> applyMask());
+    shutter.setName(SHUTTER);
+    shutter.addActionListener(e -> applyShutter());
     flip.setName(ActionW.FLIP.cmd());
     flip.addActionListener(e -> applyFlip());
     JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
@@ -59,6 +63,7 @@ public class ImageTool extends PluginTool {
     row.add(brightness);
     row.add(autoLevels);
     row.add(mask);
+    row.add(shutter);
     row.add(flip);
     add(row, BorderLayout.NORTH);
   }
@@ -71,6 +76,7 @@ public class ImageTool extends PluginTool {
       brightness.setSelected(view.isBrightnessChrome());
       autoLevels.setSelected(view.isAutoLevelsChrome());
       mask.setSelected(view.isMaskChrome());
+      shutter.setSelected(view.isShutterChrome());
       flip.setSelected(view.isFlip());
     }
     refresh();
@@ -94,6 +100,10 @@ public class ImageTool extends PluginTool {
 
   public JToggleButton maskButton() {
     return mask;
+  }
+
+  public JToggleButton shutterButton() {
+    return shutter;
   }
 
   public JToggleButton flipButton() {
@@ -151,6 +161,17 @@ public class ImageTool extends PluginTool {
       host.applyMask(on);
     } else if (view != null) {
       view.applyMaskChrome(on);
+    }
+    refresh();
+  }
+
+  void applyShutter() {
+    boolean on = shutter.isSelected();
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyShutter(on);
+    } else if (view != null) {
+      view.applyShutterChrome(on);
     }
     refresh();
   }

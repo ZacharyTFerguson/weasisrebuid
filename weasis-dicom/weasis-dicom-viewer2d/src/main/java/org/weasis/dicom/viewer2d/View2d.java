@@ -58,6 +58,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private boolean brightnessChrome;
   private boolean autoLevelsChrome;
   private boolean maskChrome;
+  private boolean shutterChrome;
   private File file;
   private final KOManager koManager = new KOManager();
   private final List<WindLevelParameters> presets = new ArrayList<>();
@@ -235,6 +236,15 @@ public class View2d extends DefaultView2d<MediaElement> {
     return maskChrome;
   }
 
+  public void applyShutterChrome(boolean on) {
+    shutterChrome = on;
+    render();
+  }
+
+  public boolean isShutterChrome() {
+    return shutterChrome;
+  }
+
   @Override
   public void setLut(String lut) {
     super.setLut(lut);
@@ -384,6 +394,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     painted = applyBrightness(painted);
     painted = applyAutoLevels(painted);
     painted = applyMask(painted);
+    painted = applyShutterBox(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);
     painted = applyCrop(painted);
@@ -481,6 +492,34 @@ public class View2d extends DefaultView2d<MediaElement> {
     g.fillRect(w / 4, h / 4, Math.max(1, w / 2), Math.max(1, h / 2));
     g.dispose();
     return mask;
+  }
+
+  BufferedImage applyShutterBox(BufferedImage src) {
+    if (!shutterChrome) {
+      return src;
+    }
+    return runShutterOp(src);
+  }
+
+  static BufferedImage runShutterOp(BufferedImage src) {
+    int w = src.getWidth();
+    int h = src.getHeight();
+    int left = w / 8;
+    int upper = h / 8;
+    ShutterOp op = new ShutterOp();
+    op.setParam(ShutterOp.P_ENABLED, Boolean.TRUE);
+    op.setParam(ShutterOp.P_LEFT, left);
+    op.setParam(ShutterOp.P_RIGHT, Math.max(left, w - left - 1));
+    op.setParam(ShutterOp.P_UPPER, upper);
+    op.setParam(ShutterOp.P_LOWER, Math.max(upper, h - upper - 1));
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    try {
+      op.process();
+    } catch (Exception e) {
+      return src;
+    }
+    Object out = op.getParam(ImageOpNode.OUTPUT_IMG);
+    return out instanceof BufferedImage img ? img : src;
   }
 
   BufferedImage applyCrop(BufferedImage src) {
