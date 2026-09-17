@@ -9,7 +9,7 @@ At least once every **14 days**, and whenever you touch Go toolchain files (`go.
 
 Record the last-checked date in the session. If that check is older than 14 days, check again **before** changing any `go` version pin.
 
-Last checked: **2026-09-17T04:09Z** — latest stable **go1.27.1**. Exhaustive hunt on `origin/main` + this branch found no Go toolchain pins to bump.
+Last checked: **2026-09-17T08:24Z** — latest stable **go1.27.1**. Hunt on `origin/main`, this branch, and `origin/cursor/weasis-spec-rebuild-26c5` found no Go toolchain pins to bump.
 
 ## If this repo has Go
 
