@@ -1,0 +1,35 @@
+---
+description: Every two weeks, check the latest stable Go release and steer the project toward it.
+alwaysApply: true
+---
+
+# Go toolchain: latest stable every 14 days
+
+At least once every **14 days**, and whenever you touch Go toolchain files (`go.mod`, `go.work`, CI `setup-go`, Go Docker images), look up the **latest stable Go** from [go.dev/dl](https://go.dev/dl/) or the official release notes. Do **not** use tip, beta, or RC unless the user asks.
+
+Record the last-checked date in the session. If that check is older than 14 days, check again **before** changing any `go` version pin.
+
+Last checked: **2026-09-17T08:24Z** — latest stable **go1.27.1**. Hunt on `origin/main`, this branch, and `origin/cursor/weasis-spec-rebuild-26c5` found no Go toolchain pins to bump.
+
+## If this repo has Go
+
+When `go.mod`, `**/*.go`, or Go CI already exists: update the `go` directive, keep `toolchain` consistent with that stable, pin CI `setup-go`, Docker `golang:` images, and docs to the same version, then run tests.
+
+```
+# go.mod — language line matches latest stable (1.27.1 on 2026-09-17)
+go 1.27
+toolchain go1.27.1
+```
+
+```yaml
+# CI — pin setup-go to the same stable
+- uses: actions/setup-go@v5
+  with:
+    go-version: "1.27.1"
+```
+
+## If this repo is not Go (Weasis is Java/OSGi)
+
+Do **not** add Go sources, modules, or CI, and do **not** convert the app. The cadence still applies so agents remember to check; only steer Go modules/CI **if they already exist**.
+
+Never copy unrelated method bodies. Don't invent preference keys. Don't `git add` Weasis anatomy DICOMs.
