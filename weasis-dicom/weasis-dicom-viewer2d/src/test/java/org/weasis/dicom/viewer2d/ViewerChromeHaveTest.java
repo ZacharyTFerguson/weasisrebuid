@@ -54,6 +54,7 @@ import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.core.ui.model.layer.AbstractInfoLayer.Visibility;
 import org.weasis.core.ui.model.layer.LayerAnnotation;
 import org.weasis.core.ui.model.layer.LayerType;
+import org.weasis.dicom.codec.utils.LutPipeline;
 import org.weasis.dicom.viewer2d.dockable.DisplayTool;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
 import org.weasis.dicom.viewer2d.mpr.MprAxis;
@@ -459,6 +460,36 @@ class ViewerChromeHaveTest {
     assertTrue(view.isInverseLut());
     bar.toggleInvert();
     assertFalse(view.isInverseLut());
+  }
+
+  @Test
+  void lutToolBarSetsNamedVoiLutStateChrome() {
+    View2dContainer container = new View2dContainer();
+    LutToolBar bar = container.getLutToolBar();
+    View2d view = container.getView2d();
+    AbstractButton inverse = (AbstractButton) bar.getComponent(3);
+    AbstractButton sharpen = (AbstractButton) bar.getComponent(4);
+    assertEquals("inverseLut", inverse.getName());
+    assertEquals(ActionW.FILTER.cmd(), sharpen.getName());
+    assertEquals("voi-table", bar.tableButton().getName());
+    assertEquals("voi-sigmoid", bar.sigmoidButton().getName());
+    assertEquals("voi-lut-state", bar.stateLabel().getName());
+    assertEquals("none", bar.stateText());
+    assertEquals("none", LutToolBar.token(null));
+    assertEquals("none", LutToolBar.tokenOf(null));
+    bar.tableButton().doClick();
+    assertEquals("table", bar.stateText());
+    assertTrue(view.getActiveVoi().hasVoiLut());
+    bar.sigmoidButton().doClick();
+    assertEquals("SIGMOID", bar.stateText());
+    assertFalse(view.getActiveVoi().hasVoiLut());
+    assertEquals(LutPipeline.SHAPE_SIGMOID, view.getActiveVoi().getLutShape());
+    assertEquals("none", container.getResetTools().stateText());
+    assertEquals("0", container.getGraphicsPane().countText());
+    LutToolBar unbound = new LutToolBar();
+    unbound.tableButton().doClick();
+    unbound.sigmoidButton().doClick();
+    assertEquals("none", unbound.stateText());
   }
 
   @Test

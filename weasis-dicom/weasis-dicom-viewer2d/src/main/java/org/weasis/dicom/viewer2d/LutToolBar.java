@@ -14,23 +14,32 @@ import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import javax.swing.JToggleButton;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.api.image.FilterOp;
 import org.weasis.core.api.image.PseudoColorOp;
 import org.weasis.core.api.image.util.KernelData;
+import org.weasis.core.api.image.util.WindLevelParameters;
 import org.weasis.core.ui.editor.image.DefaultView2d;
 import org.weasis.core.ui.util.WtoolBar;
+import org.weasis.dicom.codec.utils.LutPipeline;
 
-/** 2D pseudo-color LUT chrome (Gray / Inverse). */
+/** 2D pseudo-color LUT chrome (Gray / Inverse) plus VOILUTSequence table / SIGMOID VOI. */
 public class LutToolBar extends WtoolBar {
 
   public static final String NAME = "LUT";
+  public static final String STATE = "voi-lut-state";
+  public static final String TABLE = "voi-table";
+  public static final String SIGMOID = "voi-sigmoid";
   public static final List<String> LUTS = List.of(PseudoColorOp.GRAY, "Sine", "HotIron");
 
   private DefaultView2d<?> view;
   private final JToggleButton invert = new JToggleButton("Inverse");
   private final JToggleButton sharpen = new JToggleButton("Sharpen");
+  private final JButton table = new JButton("VOI LUT");
+  private final JButton sigmoid = new JButton("SIGMOID");
+  private final JLabel state = new JLabel("none");
 
   public LutToolBar() {
     super(NAME, 15);
@@ -43,6 +52,18 @@ public class LutToolBar extends WtoolBar {
     sharpen.setName(ActionW.FILTER.cmd());
     sharpen.addActionListener(e -> applySharpen());
     add(sharpen);
+    bindVoiChrome();
+    add(table);
+    add(sigmoid);
+    add(state);
+  }
+
+  void bindVoiChrome() {
+    table.setName(TABLE);
+    table.addActionListener(e -> applyTable());
+    sigmoid.setName(SIGMOID);
+    sigmoid.addActionListener(e -> applySigmoid());
+    state.setName(STATE);
   }
 
   public void bind(DefaultView2d<?> view) {
@@ -51,10 +72,86 @@ public class LutToolBar extends WtoolBar {
       invert.setSelected(view.isInverseLut());
       sharpen.setSelected(sharpened(view.getFilter()));
     }
+    showState();
   }
 
   public DefaultView2d<?> boundView() {
     return view;
+  }
+
+  public JButton tableButton() {
+    return table;
+  }
+
+  public JButton sigmoidButton() {
+    return sigmoid;
+  }
+
+  public JLabel stateLabel() {
+    return state;
+  }
+
+  public String stateText() {
+    return state.getText();
+  }
+
+  void applyTable() {
+    View2d v = view2d();
+    if (v == null) {
+      return;
+    }
+    v.applyVoi(sampleTable(v));
+    showState();
+  }
+
+  void applySigmoid() {
+    View2d v = view2d();
+    if (v == null) {
+      return;
+    }
+    v.applyVoi(sampleSigmoid(v));
+    showState();
+  }
+
+  void showState() {
+    state.setText(token(view2d()));
+  }
+
+  View2d view2d() {
+    return view instanceof View2d v ? v : null;
+  }
+
+  static WindLevelParameters sampleTable(View2d v) {
+    WindLevelParameters p = new WindLevelParameters(v.getWindow(), v.getLevel());
+    p.setVoiLut(new int[] {255, 128, 0}, 0);
+    p.setLutShape(LutPipeline.SHAPE_NON_LINEAR);
+    return p;
+  }
+
+  static WindLevelParameters sampleSigmoid(View2d v) {
+    WindLevelParameters p = new WindLevelParameters(v.getWindow(), v.getLevel());
+    p.setLutShape(LutPipeline.SHAPE_SIGMOID);
+    return p;
+  }
+
+  static String token(View2d v) {
+    if (v == null) {
+      return "none";
+    }
+    return tokenOf(v.getActiveVoi());
+  }
+
+  static String tokenOf(WindLevelParameters voi) {
+    if (voi == null) {
+      return "none";
+    }
+    if (voi.hasVoiLut()) {
+      return "table";
+    }
+    if (LutPipeline.SHAPE_SIGMOID.equals(voi.getLutShape())) {
+      return "SIGMOID";
+    }
+    return "none";
   }
 
   public void setLut(String lut) {
