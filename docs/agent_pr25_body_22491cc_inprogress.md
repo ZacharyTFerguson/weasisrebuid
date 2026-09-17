@@ -13,7 +13,7 @@ Staffing until 2026-09-17T23:26Z: Grok writer + Composer verifier only.
 
 ## Headed `22491cc` — Display dock / InfoLayer / `name=display-visibility-value` (Composer)
 
-**Jar:** `/tmp/weasis-headed-22491cc.jar` · **SHA:** `22491ccbae194cd159a5f3831131a9e774d7fcbf` · **Jar file:** `5dddf1bf49d419baa9a95abb0e788b2d4ab2f255d5cedb820ef69397891aeba4` · **Gogo:** `17179` · OSGi cache `/tmp/weasis-headed-cache-22491cc-fresh`; prior headed JVMs killed; **did not reuse** docking/FoR/Lens/PixelInfo/Mini Tool/Histogram/Preferences/About/Import/Screenshot/Help shortcuts/Export/Fields/Dump/ImageTool jars.
+**Jar:** `/tmp/weasis-headed-22491cc.jar` · **SHA:** `22491ccbae194cd159a5f3831131a9e774d7fcbf` · **Jar file:** `320c5b6b4fd7c533da38abc7883829768b898280e7f41b28b89eaf3735ce825f` · **Gogo:** `17179` · OSGi cache `/tmp/weasis-headed-cache-22491cc-fresh`; prior headed JVMs killed; **did not reuse** docking/FoR/Lens/PixelInfo/Mini Tool/Histogram/Preferences/About/Import/Screenshot/Help shortcuts/Export/Fields/Dump/ImageTool jars.
 
 **Flow:** `dicom:get` Reed chest (`/opt/cursor/artifacts/chest_pa.dcm`) on **DICOM 2D**. jattach north-of-viewer **`display`**. Read **`display-visibility-value`** `getText` (not OCR) expect `FULL`. Click **`display-minimal`** expect `MINIMAL`. Click **`display-hidden`** expect `HIDDEN`. Click **`display-full`** restore `FULL`. Confirm `docking-state` still `NORMAL`, `synch-kind` `FoR`, `lens` east, `mini-tool` west, `histogram` south, `pixel-info` on Viewer. Do **not** click `window-close` / `window-maximize` / `window-externalize` / `window-docking-list` / lens sliders / `synch-manual` / `crosshair` / Mini Tool / Histogram RGB / Preferences / About / Import / Screenshot / Help / Export / ImageTool / `dumpHeader` / Fields.
 
