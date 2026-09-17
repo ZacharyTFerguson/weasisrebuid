@@ -28,6 +28,7 @@ import org.weasis.core.api.gui.Insertable;
 import org.weasis.core.api.media.data.MediaReader;
 import org.weasis.dicom.explorer.DicomModel;
 import org.weasis.dicom.explorer.ImportDicomDialog;
+import org.weasis.dicom.explorer.ImportDicomPage;
 import org.weasis.dicom.explorer.LocalImportFactory;
 
 class ExplorerImportSurfaceTest {
@@ -70,8 +71,25 @@ class ExplorerImportSurfaceTest {
     ImportToolBar bar = new ImportToolBar();
     assertEquals(Insertable.Type.TOOLBAR, bar.getType());
     assertEquals("Import DICOM", bar.getComponentName());
+    assertEquals("import-dicom", bar.button().getName());
     ImportDicomDialog dialog = DicomImport.open(null, false);
     assertEquals("Import DICOM", dialog.getTitle());
+    assertEquals("import-dicom-dialog", dialog.getName());
+    assertEquals("import-tabs", dialog.tabs().getName());
+    assertEquals(3, dialog.tabs().getTabCount());
+    assertEquals(DicomImportFactory.PAGE_LOCAL, dialog.tabs().getTitleAt(0));
+    assertEquals(DicomImportFactory.PAGE_ZIP, dialog.tabs().getTitleAt(1));
+    assertEquals(DicomImportFactory.PAGE_DIR, dialog.tabs().getTitleAt(2));
+    ImportDicomPage local = dialog.page(DicomImportFactory.PAGE_LOCAL);
+    assertEquals("import-path", local.pathField().getName());
+    assertEquals("import-run", local.importButton().getName());
+    assertEquals("import-status", local.statusLabel().getName());
+    assertEquals("import-browse", local.browseButton().getName());
+    ImportDicomDialog cd = DicomImport.open(null, true);
+    assertEquals("Import DICOM CD", cd.getTitle());
+    assertEquals("import-dicom-dialog", cd.getName());
+    assertEquals(1, cd.tabs().getTabCount());
+    assertEquals("import-detect-cd", cd.page(DicomImportFactory.PAGE_CD).detectButton().getName());
   }
 
   static void writeCt(File file) throws Exception {

@@ -100,6 +100,12 @@ class WeasisWinChromeHaveTest {
       assertEquals("Deselect All", edit.getItem(1).getText());
       JMenu file = win.menuNamed("File");
       assertEquals("Import", file.getItem(0).getText());
+      assertEquals("file-import", file.getItem(0).getName());
+      JMenu importMenu = (JMenu) file.getItem(0);
+      assertEquals("DICOM", importMenu.getItem(0).getText());
+      assertEquals("file-import-dicom", importMenu.getItem(0).getName());
+      assertEquals("DICOM CD", importMenu.getItem(1).getText());
+      assertEquals("file-import-dicom-cd", importMenu.getItem(1).getName());
       assertEquals("Export DICOM", file.getItem(1).getText());
       assertEquals("file-export-dicom", file.getItem(1).getName());
       boolean exportBtn = false;
@@ -343,6 +349,7 @@ class WeasisWinChromeHaveTest {
     try {
       win.setVisible(true);
       JDialog dialog = win.importDialog(false);
+      assertEquals("import-dicom-dialog", dialog.getName());
       assertEquals(WindowConstants.DISPOSE_ON_CLOSE, dialog.getDefaultCloseOperation());
       assertEquals(Dialog.ModalityType.DOCUMENT_MODAL, dialog.getModalityType());
       dialog.setModal(false);

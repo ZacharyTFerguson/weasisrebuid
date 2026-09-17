@@ -22,6 +22,9 @@ public interface DataExplorerView extends Insertable {
   /** File &gt; Export DICOM. Explorers that own a DICOM model override this. */
   default void openExport(Frame owner) {}
 
+  /** File &gt; Import DICOM / DICOM CD. Explorers that own a DICOM model override this. */
+  default void openImport(Frame owner, boolean cd) {}
+
   @Override
   default Type getType() {
     return Type.EXPLORER;

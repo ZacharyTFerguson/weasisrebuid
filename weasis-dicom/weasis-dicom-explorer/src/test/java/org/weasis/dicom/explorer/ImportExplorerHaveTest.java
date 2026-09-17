@@ -266,6 +266,26 @@ class ImportExplorerHaveTest {
   }
 
   @Test
+  void explorerImportDialogNamesAndRunLoadsPart10(@TempDir Path dir) throws Exception {
+    File ct = dir.resolve("ct.dcm").toFile();
+    LoadLocalDicomTest.writeCt(ct);
+    DicomModel model = new DicomModel();
+    DicomExplorer explorer = new DicomExplorer(model);
+    ImportDicomDialog dialog = explorer.createImportView(null, false);
+    assertEquals("import-dicom-dialog", dialog.getName());
+    assertEquals("import-tabs", dialog.tabs().getName());
+    assertEquals(LocalImportFactory.PAGE_LOCAL, dialog.tabs().getTitleAt(0));
+    assertEquals(LocalImportFactory.PAGE_ZIP, dialog.tabs().getTitleAt(1));
+    assertEquals(LocalImportFactory.PAGE_DIR, dialog.tabs().getTitleAt(2));
+    ImportDicomPage page = dialog.page(LocalImportFactory.PAGE_LOCAL);
+    assertEquals("import-path", page.pathField().getName());
+    page.setPath(ct.getAbsolutePath());
+    page.runImport();
+    assertTrue(page.statusText().startsWith("Imported "));
+    assertEquals(1, model.getInstances().size());
+  }
+
+  @Test
   void explorerExportDialogBindsImportedSeries(@TempDir Path dir) throws Exception {
     File ct = dir.resolve("ct.dcm").toFile();
     LoadLocalDicomTest.writeCt(ct);

@@ -43,6 +43,7 @@ import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.dicom.codec.DicomMediaIO;
 import org.weasis.dicom.explorer.exp.DicomExport;
 import org.weasis.dicom.explorer.exp.ExportDicomView;
+import org.weasis.dicom.explorer.imp.DicomImport;
 import org.weasis.dicom.explorer.main.DicomPaneManager;
 import org.weasis.dicom.explorer.main.DicomTaskManager;
 import org.weasis.dicom.explorer.main.PatientPane;
@@ -240,9 +241,18 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     return DicomExport.open(owner, model);
   }
 
+  public ImportDicomDialog createImportView(Frame owner, boolean cd) {
+    return new ImportDicomDialog(owner, model, cd);
+  }
+
   @Override
   public void openExport(Frame owner) {
     DicomExport.show(owner, model);
+  }
+
+  @Override
+  public void openImport(Frame owner, boolean cd) {
+    DicomImport.show(owner, model, cd);
   }
 
   void bindFields() {

@@ -14,25 +14,25 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import org.weasis.core.api.service.UICore;
 import org.weasis.core.ui.util.WtoolBar;
-import org.weasis.dicom.explorer.ImportDicomDialog;
 
 /** Explorer import toolbar. Opens File &gt; Import DICOM. */
 public class ImportToolBar extends WtoolBar {
 
+  private final JButton button = new JButton("Import DICOM");
+
   public ImportToolBar() {
     super("Import DICOM", 5);
-    JButton button = new JButton("Import DICOM");
     button.setName("import-dicom");
     button.addActionListener(e -> openImport());
     add(button);
   }
 
+  public JButton button() {
+    return button;
+  }
+
   void openImport() {
-    ImportDicomDialog dialog = ImportDicomDialog.openFromFactories(ownerFrame(), false);
-    dialog.setVisible(true);
-    if (dialog.isDisplayable()) {
-      dialog.dispose();
-    }
+    DicomImport.show(ownerFrame(), false);
   }
 
   static Frame ownerFrame() {

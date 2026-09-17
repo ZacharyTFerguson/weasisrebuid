@@ -37,8 +37,11 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
   private final boolean copyToTemp;
   private final JTextField pathField = new JTextField();
   private final JPasswordField passwordField = new JPasswordField();
+  private final JButton browse = new JButton("Browse…");
+  private final JButton importBtn = new JButton("Import");
   private final JLabel status = new JLabel(" ");
   private final JCheckBox dontShow = new JCheckBox("Don't show again");
+  private JButton detect;
 
   public ImportDicomPage(
       String title, int position, DicomModel model, SkipUnsupportedSopNotifier skip) {
@@ -60,7 +63,6 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     form.add(new JLabel(title + " — files, folder, ZIP, or DICOMDIR"));
     JPanel pathRow = new JPanel(new BorderLayout(4, 0));
     pathRow.add(pathField, BorderLayout.CENTER);
-    JButton browse = new JButton("Browse…");
     browse.addActionListener(e -> browse());
     pathRow.add(browse, BorderLayout.EAST);
     form.add(pathRow);
@@ -68,17 +70,57 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     form.add(passwordField);
     if (copyToTemp) {
       form.add(new JLabel("DICOM CD: copy-to-temp before parse"));
-      JButton detect = new JButton("Detect CD-ROM");
+      detect = new JButton("Detect CD-ROM");
       detect.addActionListener(e -> detectCdrom(CdromDetector.defaultSearchRoots()));
       form.add(detect);
     }
-    JButton importBtn = new JButton("Import");
     importBtn.addActionListener(e -> runImport());
     form.add(importBtn);
     dontShow.addActionListener(e -> skip.setDontShowAgain(dontShow.isSelected()));
     form.add(dontShow);
     form.add(status);
+    nameChrome();
     add(form, BorderLayout.NORTH);
+  }
+
+  void nameChrome() {
+    pathField.setName("import-path");
+    passwordField.setName("import-zip-password");
+    browse.setName("import-browse");
+    importBtn.setName("import-run");
+    status.setName("import-status");
+    dontShow.setName("import-dont-show");
+    if (detect != null) {
+      detect.setName("import-detect-cd");
+    }
+  }
+
+  public JTextField pathField() {
+    return pathField;
+  }
+
+  public JButton importButton() {
+    return importBtn;
+  }
+
+  public JButton browseButton() {
+    return browse;
+  }
+
+  public JButton detectButton() {
+    return detect;
+  }
+
+  public JLabel statusLabel() {
+    return status;
+  }
+
+  public String statusText() {
+    return status.getText();
+  }
+
+  public void setPath(String path) {
+    pathField.setText(path == null ? "" : path);
   }
 
   void detectCdrom(List<File> roots) {
@@ -109,7 +151,7 @@ public class ImportDicomPage extends AbstractItemDialogPage implements ImportDic
     return chooser;
   }
 
-  void runImport() {
+  public void runImport() {
     String path = pathField.getText();
     if (path == null || path.isBlank()) {
       status.setText("Choose a file, folder, ZIP, or DICOMDIR");

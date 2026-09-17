@@ -10,6 +10,7 @@
 package org.weasis.dicom.explorer.imp;
 
 import java.awt.Frame;
+import org.weasis.dicom.explorer.DicomModel;
 import org.weasis.dicom.explorer.ImportDicomDialog;
 
 /** File &gt; Import DICOM / DICOM CD entry. */
@@ -19,5 +20,18 @@ public final class DicomImport {
 
   public static ImportDicomDialog open(Frame owner, boolean cd) {
     return ImportDicomDialog.openFromFactories(owner, cd);
+  }
+
+  public static ImportDicomDialog show(Frame owner, boolean cd) {
+    ImportDicomDialog dialog = open(owner, cd);
+    dialog.setVisible(true);
+    return dialog;
+  }
+
+  public static ImportDicomDialog show(Frame owner, DicomModel model, boolean cd) {
+    ImportDicomDialog dialog = new ImportDicomDialog(owner, model, cd);
+    dialog.setLocationRelativeTo(owner);
+    dialog.setVisible(true);
+    return dialog;
   }
 }

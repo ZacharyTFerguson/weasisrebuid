@@ -707,9 +707,12 @@ public class WeasisWin extends JFrame {
   JMenu createFileMenu() {
     JMenu file = new JMenu("File");
     JMenu importMenu = new JMenu("Import");
+    importMenu.setName("file-import");
     JMenuItem importDicom = new JMenuItem("DICOM");
+    importDicom.setName("file-import-dicom");
     importDicom.addActionListener(e -> openImportDialog(false));
     JMenuItem importCd = new JMenuItem("DICOM CD");
+    importCd.setName("file-import-dicom-cd");
     importCd.addActionListener(e -> openImportDialog(true));
     importMenu.add(importDicom);
     importMenu.add(importCd);
@@ -986,6 +989,11 @@ public class WeasisWin extends JFrame {
   }
 
   void openImportDialog(boolean cd) {
+    DataExplorerView explorer = explorerView;
+    if (explorer != null) {
+      explorer.openImport(this, cd);
+      return;
+    }
     JDialog dialog = importDialog(cd);
     dialog.setVisible(true);
     disposeImportDialog(dialog);
@@ -995,6 +1003,7 @@ public class WeasisWin extends JFrame {
     JDialog dialog =
         new JDialog(
             this, cd ? "Import DICOM CD" : "Import DICOM", Dialog.ModalityType.DOCUMENT_MODAL);
+    dialog.setName("import-dicom-dialog");
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     dialog.setContentPane(importPagePanel(cd));
     dialog.setSize(480, 320);
