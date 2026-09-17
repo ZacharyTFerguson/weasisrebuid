@@ -26,11 +26,13 @@ public class ImageTool extends PluginTool {
   public static final String NAME = "Image";
   public static final String CROP = "crop";
   public static final String BRIGHTNESS = "brightness";
+  public static final String AUTO_LEVELS = "autolevels";
 
   private final JLabel summary = new JLabel(" ");
   private final JToggleButton window = new JToggleButton("Window");
   private final JToggleButton crop = new JToggleButton("Crop");
   private final JToggleButton brightness = new JToggleButton("Brightness");
+  private final JToggleButton autoLevels = new JToggleButton("AutoLevels");
   private final JToggleButton flip = new JToggleButton("Flip");
   private View2d view;
 
@@ -42,6 +44,8 @@ public class ImageTool extends PluginTool {
     crop.addActionListener(e -> applyCrop());
     brightness.setName(BRIGHTNESS);
     brightness.addActionListener(e -> applyBrightness());
+    autoLevels.setName(AUTO_LEVELS);
+    autoLevels.addActionListener(e -> applyAutoLevels());
     flip.setName(ActionW.FLIP.cmd());
     flip.addActionListener(e -> applyFlip());
     JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
@@ -49,6 +53,7 @@ public class ImageTool extends PluginTool {
     row.add(window);
     row.add(crop);
     row.add(brightness);
+    row.add(autoLevels);
     row.add(flip);
     add(row, BorderLayout.NORTH);
   }
@@ -59,6 +64,7 @@ public class ImageTool extends PluginTool {
       window.setSelected(view.isWindowChrome());
       crop.setSelected(view.isCropChrome());
       brightness.setSelected(view.isBrightnessChrome());
+      autoLevels.setSelected(view.isAutoLevelsChrome());
       flip.setSelected(view.isFlip());
     }
     refresh();
@@ -74,6 +80,10 @@ public class ImageTool extends PluginTool {
 
   public JToggleButton brightnessButton() {
     return brightness;
+  }
+
+  public JToggleButton autoLevelsButton() {
+    return autoLevels;
   }
 
   public JToggleButton flipButton() {
@@ -109,6 +119,17 @@ public class ImageTool extends PluginTool {
       host.applyBrightness(on);
     } else if (view != null) {
       view.applyBrightnessChrome(on);
+    }
+    refresh();
+  }
+
+  void applyAutoLevels() {
+    boolean on = autoLevels.isSelected();
+    View2dContainer host = hostOf(view);
+    if (host != null) {
+      host.applyAutoLevels(on);
+    } else if (view != null) {
+      view.applyAutoLevelsChrome(on);
     }
     refresh();
   }

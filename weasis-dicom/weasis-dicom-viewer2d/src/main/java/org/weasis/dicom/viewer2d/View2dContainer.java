@@ -401,6 +401,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     flushFlipPaint();
   }
 
+  public void applyAutoLevels(boolean on) {
+    View2d painted = paintedCell();
+    for (View2d cell : layout) {
+      cell.applyAutoLevelsChrome(on);
+    }
+    if (painted != null) {
+      painted.applyAutoLevelsChrome(on);
+      imageTool.bind(painted);
+    }
+    flushFlipPaint();
+  }
+
   View2d paintedCell() {
     View2d showing = showingRasterCell();
     if (showing != null) {

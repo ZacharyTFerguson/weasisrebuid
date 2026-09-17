@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import org.dcm4che3.data.Attributes;
 import org.dcm4che3.data.Tag;
+import org.weasis.core.api.image.AutoLevelsOp;
 import org.weasis.core.api.image.BrightnessOp;
 import org.weasis.core.api.image.CropOp;
 import org.weasis.core.api.image.FilterOp;
@@ -53,6 +54,7 @@ public class View2d extends DefaultView2d<MediaElement> {
   private boolean windowChrome;
   private boolean cropChrome;
   private boolean brightnessChrome;
+  private boolean autoLevelsChrome;
   private File file;
   private final KOManager koManager = new KOManager();
   private final List<WindLevelParameters> presets = new ArrayList<>();
@@ -212,6 +214,15 @@ public class View2d extends DefaultView2d<MediaElement> {
     return brightnessChrome;
   }
 
+  public void applyAutoLevelsChrome(boolean on) {
+    autoLevelsChrome = on;
+    render();
+  }
+
+  public boolean isAutoLevelsChrome() {
+    return autoLevelsChrome;
+  }
+
   @Override
   public void setLut(String lut) {
     super.setLut(lut);
@@ -359,6 +370,7 @@ public class View2d extends DefaultView2d<MediaElement> {
     BufferedImage painted = WindowLevelPainter.paintMonochrome2(dataset, activeVoi);
     painted = applyFilterAndColor(painted);
     painted = applyBrightness(painted);
+    painted = applyAutoLevels(painted);
     painted = applyShutter(painted);
     painted = applyOverlay(painted);
     painted = applyCrop(painted);
@@ -400,6 +412,25 @@ public class View2d extends DefaultView2d<MediaElement> {
   static BufferedImage runBrightnessOp(BufferedImage src) {
     BrightnessOp op = new BrightnessOp();
     op.setParam(BrightnessOp.P_BRIGHTNESS, 48.0);
+    op.setParam(ImageOpNode.INPUT_IMG, src);
+    try {
+      op.process();
+    } catch (Exception e) {
+      return src;
+    }
+    Object out = op.getParam(ImageOpNode.OUTPUT_IMG);
+    return out instanceof BufferedImage img ? img : src;
+  }
+
+  BufferedImage applyAutoLevels(BufferedImage src) {
+    if (!autoLevelsChrome) {
+      return src;
+    }
+    return runAutoLevelsOp(src);
+  }
+
+  static BufferedImage runAutoLevelsOp(BufferedImage src) {
+    AutoLevelsOp op = new AutoLevelsOp();
     op.setParam(ImageOpNode.INPUT_IMG, src);
     try {
       op.process();

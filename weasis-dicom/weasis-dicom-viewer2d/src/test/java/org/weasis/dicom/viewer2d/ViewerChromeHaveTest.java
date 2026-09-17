@@ -254,6 +254,48 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void autoLevelsClickStretchesMinMaxWithoutChangingBrightness(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    int left = view.getSourceImage().getRaster().getSample(0, 4, 0);
+    int right = view.getSourceImage().getRaster().getSample(7, 4, 0);
+    AbstractButton auto = container.getImageTool().autoLevelsButton();
+    assertEquals("AutoLevels", auto.getText());
+    assertEquals(ImageTool.AUTO_LEVELS, auto.getName());
+    assertEquals(ImageTool.BRIGHTNESS, container.getImageTool().brightnessButton().getName());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+    auto.doClick();
+    assertTrue(view.isAutoLevelsChrome());
+    int leftStretch = view.getSourceImage().getRaster().getSample(0, 4, 0);
+    int rightStretch = view.getSourceImage().getRaster().getSample(7, 4, 0);
+    assertEquals(0, leftStretch);
+    assertEquals(255, rightStretch);
+    assertTrue(leftStretch < left);
+    assertTrue(rightStretch > right);
+    view.setSize(8, 8);
+    view.setZoom(1.0);
+    view.setRotation(0);
+    assertEquals(0, paint(view).getRGB(0, 4) & 0xFF);
+    assertEquals(255, paint(view).getRGB(7, 4) & 0xFF);
+    assertFalse(view.isBrightnessChrome());
+    assertFalse(view.isCropChrome());
+    assertFalse(view.isWindowChrome());
+    assertFalse(view.isFlip());
+    assertEquals(FilterOp.NONE, String.valueOf(view.getFilter()));
+    AffineTransformOp affine = new AffineTransformOp();
+    affine.setParam(ImageOpNode.INPUT_IMG, view.getSourceImage());
+    affine.process();
+    assertSame(view.getSourceImage(), affine.getParam(ImageOpNode.OUTPUT_IMG));
+    auto.doClick();
+    assertFalse(view.isAutoLevelsChrome());
+    assertEquals(left, view.getSourceImage().getRaster().getSample(0, 4, 0));
+    assertEquals(right, view.getSourceImage().getRaster().getSample(7, 4, 0));
+  }
+
+  @Test
   void namedFlipMirrorsEveryDxHangCellWithoutRasterizingSource() throws Exception {
     View2dContainer container = new View2dContainer();
     container.applyHanging(1, 2);
