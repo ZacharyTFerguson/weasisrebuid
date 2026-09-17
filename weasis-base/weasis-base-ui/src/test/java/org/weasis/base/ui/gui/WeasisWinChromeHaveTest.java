@@ -197,6 +197,31 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void qrFindMoveMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("qr-find", win.qrFindButton().getName());
+      assertEquals("qr-move", win.qrMoveButton().getName());
+      assertEquals("qr-state", win.qrStateLabel().getName());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
+      win.qrFindButton().doClick();
+      assertEquals("C-FIND", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      win.qrMoveButton().doClick();
+      assertEquals("C-MOVE", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();

@@ -98,6 +98,9 @@ public class WeasisWin extends JFrame {
   private final JButton isoWrite = new JButton("ISO");
   private final JButton isoDicomdir = new JButton("DICOMDIR");
   private final JLabel isoState = new JLabel("none");
+  private final JButton qrFind = new JButton("C-FIND");
+  private final JButton qrMove = new JButton("C-MOVE");
+  private final JLabel qrState = new JLabel("none");
 
   public WeasisWin() {
     super(windowTitle());
@@ -281,6 +284,7 @@ public class WeasisWin extends JFrame {
     addSendChrome();
     addPrintChrome();
     addIsoChrome();
+    addQrChrome();
   }
 
   void addSendChrome() {
@@ -386,6 +390,41 @@ public class WeasisWin extends JFrame {
 
   public String isoStateText() {
     return isoState.getText();
+  }
+
+  void addQrChrome() {
+    qrFind.setName("qr-find");
+    qrMove.setName("qr-move");
+    qrState.setName("qr-state");
+    qrFind.addActionListener(e -> applyQrFind());
+    qrMove.addActionListener(e -> applyQrMove());
+    toolbars.add(qrFind);
+    toolbars.add(qrMove);
+    toolbars.add(qrState);
+  }
+
+  void applyQrFind() {
+    qrState.setText("C-FIND");
+  }
+
+  void applyQrMove() {
+    qrState.setText("C-MOVE");
+  }
+
+  public JButton qrFindButton() {
+    return qrFind;
+  }
+
+  public JButton qrMoveButton() {
+    return qrMove;
+  }
+
+  public JLabel qrStateLabel() {
+    return qrState;
+  }
+
+  public String qrStateText() {
+    return qrState.getText();
   }
 
   void addDockingChrome() {

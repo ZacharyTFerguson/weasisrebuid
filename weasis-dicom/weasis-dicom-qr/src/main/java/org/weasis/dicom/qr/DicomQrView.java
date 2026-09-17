@@ -27,6 +27,10 @@ import org.weasis.core.api.gui.util.AbstractItemDialogPage;
 public class DicomQrView extends AbstractItemDialogPage implements ImportDicom {
 
   public static final String PAGE = "DICOM Q/R";
+  public static final String STATE = "qr-state";
+  public static final String NONE = "none";
+  public static final String C_FIND = "C-FIND";
+  public static final String C_MOVE = "C-MOVE";
 
   private final SearchParameters search = new SearchParameters();
   private final RetrieveContext context = new RetrieveContext();
@@ -42,11 +46,17 @@ public class DicomQrView extends AbstractItemDialogPage implements ImportDicom {
             RetrieveContext.RetrieveMethod.C_MOVE, RetrieveContext.RetrieveMethod.C_GET
           });
   private final JLabel status = new JLabel(" ");
+  private final JButton find = new JButton(C_FIND);
+  private final JButton move = new JButton(C_MOVE);
+  private final JLabel state = new JLabel(NONE);
   private RetrieveTask lastTask;
 
   public DicomQrView() {
     super(PAGE, 10);
+    setName("qr-page");
+    bindQrChrome();
     JPanel form = new JPanel(new GridLayout(0, 1, 4, 4));
+    form.add(qrChrome());
     form.add(new JLabel("Patient ID"));
     form.add(patientIdField);
     form.add(new JLabel("Patient name"));
@@ -70,6 +80,22 @@ public class DicomQrView extends AbstractItemDialogPage implements ImportDicom {
     form.add(status);
     add(form, BorderLayout.NORTH);
     add(new JScrollPane(tree), BorderLayout.CENTER);
+  }
+
+  void bindQrChrome() {
+    find.setName("qr-find");
+    move.setName("qr-move");
+    state.setName(STATE);
+    find.addActionListener(e -> applyFind());
+    move.addActionListener(e -> applyMove());
+  }
+
+  JPanel qrChrome() {
+    JPanel chrome = new JPanel();
+    chrome.add(find);
+    chrome.add(move);
+    chrome.add(state);
+    return chrome;
   }
 
   public SearchParameters searchParameters() {
@@ -113,6 +139,22 @@ public class DicomQrView extends AbstractItemDialogPage implements ImportDicom {
     applyRetrieveMethod();
   }
 
+  public JButton findButton() {
+    return find;
+  }
+
+  public JButton moveButton() {
+    return move;
+  }
+
+  public JLabel stateLabel() {
+    return state;
+  }
+
+  public String stateText() {
+    return state.getText();
+  }
+
   public void applySearchFields() {
     search.setPatientId(blankToNull(patientIdField.getText()));
     search.setPatientName(blankToNull(patientNameField.getText()));
@@ -120,6 +162,16 @@ public class DicomQrView extends AbstractItemDialogPage implements ImportDicom {
     search.setModality(blankToNull(modalityField.getText()));
     applyRetrieveMethod();
     status.setText("C-FIND keys ready");
+  }
+
+  void applyFind() {
+    applySearchFields();
+    state.setText(C_FIND);
+  }
+
+  void applyMove() {
+    setRetrieveMethod(RetrieveContext.RetrieveMethod.C_MOVE);
+    state.setText(C_MOVE);
   }
 
   public void loadFindResults(List<Attributes> findResults) {
@@ -180,5 +232,6 @@ public class DicomQrView extends AbstractItemDialogPage implements ImportDicom {
     cancel.reset();
     lastTask = null;
     status.setText(" ");
+    state.setText(NONE);
   }
 }

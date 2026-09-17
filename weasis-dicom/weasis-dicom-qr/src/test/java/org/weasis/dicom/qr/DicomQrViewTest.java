@@ -95,6 +95,25 @@ class DicomQrViewTest {
         UID.StudyRootQueryRetrieveInformationModelGet, get.identifiers().get(0).sopClassUid());
   }
 
+  @Test
+  void qrFindMoveMapSetsNamedState() {
+    DicomQrView view = new DicomQrView();
+    assertEquals("qr-page", view.getName());
+    assertEquals("qr-find", view.findButton().getName());
+    assertEquals("qr-move", view.moveButton().getName());
+    assertEquals("qr-state", view.stateLabel().getName());
+    assertEquals("none", view.stateText());
+    view.setPatientId("XR-CHEST-001");
+    view.findButton().doClick();
+    assertEquals("C-FIND", view.stateText());
+    assertEquals("XR-CHEST-001", view.searchParameters().patientId());
+    view.moveButton().doClick();
+    assertEquals("C-MOVE", view.stateText());
+    assertEquals(RetrieveContext.RetrieveMethod.C_MOVE, view.retrieveContext().method());
+    view.resetToDefaultValues();
+    assertEquals("none", view.stateText());
+  }
+
   static Attributes study(String studyUid, String patientId) {
     Attributes attrs = new Attributes();
     attrs.setString(Tag.PatientID, VR.LO, patientId);
