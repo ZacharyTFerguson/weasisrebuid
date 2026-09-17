@@ -54,6 +54,9 @@ public class ViewerToolBar extends WtoolBar {
   private final JButton leftS = new JButton("sequence");
   private final JButton leftZ = new JButton("zoom");
   private final JLabel szState = new JLabel("none");
+  private final JButton leftR = new JButton("rotation");
+  private final JButton leftQ = new JButton("contextMenu");
+  private final JLabel rqState = new JLabel("none");
 
   public ViewerToolBar() {
     super(NAME, 10);
@@ -71,6 +74,7 @@ public class ViewerToolBar extends WtoolBar {
     add(synchKind);
     addLeftKeyChrome();
     addSzKeyChrome();
+    addRqKeyChrome();
   }
 
   void nameSynchChrome() {
@@ -345,6 +349,45 @@ public class ViewerToolBar extends WtoolBar {
 
   public String szStateText() {
     return szState.getText();
+  }
+
+  void addRqKeyChrome() {
+    leftR.setName("left-r");
+    leftQ.setName("left-q");
+    rqState.setName("rq-state");
+    leftR.addActionListener(e -> applyLeftR());
+    leftQ.addActionListener(e -> applyLeftQ());
+    add(leftR);
+    add(leftQ);
+    add(rqState);
+  }
+
+  void applyLeftR() {
+    setSelected(ActionW.ROTATION.cmd());
+    apply(view);
+    rqState.setText("rotation");
+  }
+
+  void applyLeftQ() {
+    setSelected(ActionW.CONTEXTMENU.cmd());
+    apply(view);
+    rqState.setText("contextMenu");
+  }
+
+  public JButton leftRButton() {
+    return leftR;
+  }
+
+  public JButton leftQButton() {
+    return leftQ;
+  }
+
+  public JLabel rqStateLabel() {
+    return rqState;
+  }
+
+  public String rqStateText() {
+    return rqState.getText();
   }
 
   private JButton button(String action) {

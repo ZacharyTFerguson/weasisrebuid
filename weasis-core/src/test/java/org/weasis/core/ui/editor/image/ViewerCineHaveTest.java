@@ -87,6 +87,31 @@ class ViewerCineHaveTest {
   }
 
   @Test
+  void leftRQMapSetsNamedStateOnBoundView() {
+    ViewerToolBar bar = new ViewerToolBar();
+    DefaultView2d<?> view = new DefaultView2d<>();
+    DefaultView2d<?> cal = new DefaultView2d<>();
+    bar.bind(view);
+    assertEquals("left-r", bar.leftRButton().getName());
+    assertEquals("left-q", bar.leftQButton().getName());
+    assertEquals("rq-state", bar.rqStateLabel().getName());
+    assertEquals("none", bar.rqStateText());
+    assertEquals("none", bar.leftStateText());
+    assertEquals("none", bar.szStateText());
+    bar.leftRButton().doClick();
+    assertEquals("rotation", bar.rqStateText());
+    assertEquals(MouseActions.ROTATION, view.getMouseActions().getLeft());
+    assertEquals(MouseActions.WINLEVEL, cal.getMouseActions().getLeft());
+    assertSame(view, bar.boundView());
+    bar.leftQButton().doClick();
+    assertEquals("contextMenu", bar.rqStateText());
+    assertEquals(MouseActions.CONTEXT_MENU, view.getMouseActions().getLeft());
+    assertEquals(MouseActions.WINLEVEL, cal.getMouseActions().getLeft());
+    assertEquals("none", bar.leftStateText());
+    assertEquals("none", bar.szStateText());
+  }
+
+  @Test
   void sequenceDragScrollsAndRotationDragTurns() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setFrameIndex(2);

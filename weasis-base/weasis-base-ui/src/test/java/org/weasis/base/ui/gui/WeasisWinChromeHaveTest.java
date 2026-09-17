@@ -398,6 +398,45 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void leftRQMapSetsNamedStateOnBoundView() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      ViewerToolBar bar = win.viewerToolBar();
+      assertEquals("left-r", win.leftRButton().getName());
+      assertEquals("left-q", win.leftQButton().getName());
+      assertEquals("rq-state", win.rqStateLabel().getName());
+      assertEquals("none", win.rqStateText());
+      assertEquals("none", win.leftStateText());
+      assertEquals("none", win.szStateText());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+      win.leftRButton().doClick();
+      assertEquals("rotation", win.rqStateText());
+      assertEquals(MouseActions.ROTATION, bar.boundView().getMouseActions().getLeft());
+      win.leftQButton().doClick();
+      assertEquals("contextMenu", win.rqStateText());
+      assertEquals(MouseActions.CONTEXT_MENU, bar.boundView().getMouseActions().getLeft());
+      assertEquals("none", win.leftStateText());
+      assertEquals("none", win.szStateText());
+      assertEquals("none", win.imgPrintStateText());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.freezeStateText());
+      assertEquals("none", win.calStateText());
+      assertEquals("none", win.qrStateText());
+      assertEquals("none", win.isoStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();
