@@ -89,6 +89,9 @@ public class WeasisWin extends JFrame {
   private DataExplorerView explorerView;
   private final Map<String, DefaultSingleCDockable> seriesDocks = new LinkedHashMap<>();
   private final JLabel dockingState = new JLabel("NORMAL");
+  private final JButton sendCstore = new JButton("C-STORE");
+  private final JButton sendStow = new JButton("STOW-RS");
+  private final JLabel sendState = new JLabel("none");
 
   public WeasisWin() {
     super(windowTitle());
@@ -269,6 +272,42 @@ public class WeasisWin extends JFrame {
     exportBtn.setName("export-dicom");
     exportBtn.addActionListener(e -> openExportDialog());
     toolbars.add(exportBtn);
+    addSendChrome();
+  }
+
+  void addSendChrome() {
+    sendCstore.setName("send-cstore");
+    sendStow.setName("send-stow");
+    sendState.setName("send-state");
+    sendCstore.addActionListener(e -> applyCstore());
+    sendStow.addActionListener(e -> applyStow());
+    toolbars.add(sendCstore);
+    toolbars.add(sendStow);
+    toolbars.add(sendState);
+  }
+
+  void applyCstore() {
+    sendState.setText("C-STORE");
+  }
+
+  void applyStow() {
+    sendState.setText("STOW-RS");
+  }
+
+  public JButton sendCstoreButton() {
+    return sendCstore;
+  }
+
+  public JButton sendStowButton() {
+    return sendStow;
+  }
+
+  public JLabel sendStateLabel() {
+    return sendState;
+  }
+
+  public String sendStateText() {
+    return sendState.getText();
   }
 
   void addDockingChrome() {

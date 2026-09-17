@@ -41,4 +41,22 @@ class SendDicomViewTest {
     assertEquals("PACS", view.prepareSend());
     assertEquals(SendDicomFactory.Protocol.C_STORE, view.protocol());
   }
+
+  @Test
+  void sendCstoreStowMapSetsNamedState() {
+    SendDicomView view = new SendDicomFactory().newView();
+    assertEquals("send-page", view.getName());
+    assertEquals("send-cstore", view.cstoreButton().getName());
+    assertEquals("send-stow", view.stowButton().getName());
+    assertEquals("send-state", view.stateLabel().getName());
+    assertEquals("none", view.stateText());
+    view.cstoreButton().doClick();
+    assertEquals("C-STORE", view.stateText());
+    assertEquals(SendDicomFactory.Protocol.C_STORE, view.protocol());
+    view.stowButton().doClick();
+    assertEquals("STOW-RS", view.stateText());
+    assertEquals(SendDicomFactory.Protocol.STOW_RS, view.protocol());
+    view.resetToDefaultValues();
+    assertEquals("none", view.stateText());
+  }
 }

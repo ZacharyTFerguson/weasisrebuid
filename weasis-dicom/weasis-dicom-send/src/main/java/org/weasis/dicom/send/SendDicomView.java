@@ -31,6 +31,10 @@ import org.weasis.core.api.gui.util.AbstractItemDialogPage;
 public class SendDicomView extends AbstractItemDialogPage {
 
   public static final String PAGE = "DICOM Send";
+  public static final String STATE = "send-state";
+  public static final String NONE = "none";
+  public static final String C_STORE = "C-STORE";
+  public static final String STOW_RS = "STOW-RS";
 
   private final StowRS stow = new StowRS();
   private final List<File> files = new ArrayList<>();
@@ -38,19 +42,45 @@ public class SendDicomView extends AbstractItemDialogPage {
       new JComboBox<>(SendDicomFactory.Protocol.values());
   private final JTextField destinationField = new JTextField();
   private final JLabel status = new JLabel(" ");
+  private final JButton cstore = new JButton(C_STORE);
+  private final JButton stowBtn = new JButton(STOW_RS);
+  private final JLabel state = new JLabel(NONE);
 
   public SendDicomView() {
     super(PAGE, 20);
+    setName("send-page");
+    bindSendChrome();
     JPanel form = new JPanel(new GridLayout(0, 1, 4, 4));
+    form.add(sendChrome());
     form.add(new JLabel("Protocol"));
     form.add(protocolBox);
     form.add(new JLabel("Destination (AET or DICOMweb base)"));
     form.add(destinationField);
     JButton sendBtn = new JButton("Send");
+    sendBtn.setName("send-run");
     sendBtn.addActionListener(e -> prepareSend());
     form.add(sendBtn);
     form.add(status);
     add(form, BorderLayout.NORTH);
+  }
+
+  void bindSendChrome() {
+    protocolBox.setName("send-protocol");
+    destinationField.setName("send-destination");
+    status.setName("send-status");
+    cstore.setName("send-cstore");
+    stowBtn.setName("send-stow");
+    state.setName(STATE);
+    cstore.addActionListener(e -> applyCstore());
+    stowBtn.addActionListener(e -> applyStow());
+  }
+
+  JPanel sendChrome() {
+    JPanel chrome = new JPanel();
+    chrome.add(cstore);
+    chrome.add(stowBtn);
+    chrome.add(state);
+    return chrome;
   }
 
   public SendDicomFactory.Protocol protocol() {
@@ -108,6 +138,34 @@ public class SendDicomView extends AbstractItemDialogPage {
     return destination();
   }
 
+  public JButton cstoreButton() {
+    return cstore;
+  }
+
+  public JButton stowButton() {
+    return stowBtn;
+  }
+
+  public JLabel stateLabel() {
+    return state;
+  }
+
+  public String stateText() {
+    return state.getText();
+  }
+
+  void applyCstore() {
+    setProtocol(SendDicomFactory.Protocol.C_STORE);
+    prepareSend();
+    state.setText(C_STORE);
+  }
+
+  void applyStow() {
+    setProtocol(SendDicomFactory.Protocol.STOW_RS);
+    prepareSend();
+    state.setText(STOW_RS);
+  }
+
   @Override
   public void closeAdditionalWindow() {
     // no-op
@@ -119,5 +177,6 @@ public class SendDicomView extends AbstractItemDialogPage {
     setProtocol(SendDicomFactory.Protocol.C_STORE);
     destinationField.setText("");
     status.setText(" ");
+    state.setText(NONE);
   }
 }

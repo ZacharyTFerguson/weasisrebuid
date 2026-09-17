@@ -135,6 +135,24 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void sendCstoreStowMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("send-cstore", win.sendCstoreButton().getName());
+      assertEquals("send-stow", win.sendStowButton().getName());
+      assertEquals("send-state", win.sendStateLabel().getName());
+      assertEquals("none", win.sendStateText());
+      win.sendCstoreButton().doClick();
+      assertEquals("C-STORE", win.sendStateText());
+      win.sendStowButton().doClick();
+      assertEquals("STOW-RS", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();
