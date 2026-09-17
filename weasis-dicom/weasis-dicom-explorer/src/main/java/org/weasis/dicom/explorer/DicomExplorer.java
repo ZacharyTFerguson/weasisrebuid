@@ -85,6 +85,9 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final JButton applyInterp = new JButton("Interp");
   private final JLabel interpShape = new JLabel("none");
   private final JLabel interpThrough = new JLabel("none");
+  private final JButton closeSeries = new JButton("series");
+  private final JButton closeAll = new JButton("all");
+  private final JLabel closeState = new JLabel("none");
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
@@ -151,7 +154,48 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     box.add(applyInterp);
     box.add(interpShape);
     box.add(interpThrough);
+    addCloseChrome(box);
     return box;
+  }
+
+  void addCloseChrome(JPanel box) {
+    closeSeries.setName("close-series");
+    closeAll.setName("close-all");
+    closeState.setName("close-state");
+    closeSeries.addActionListener(e -> applyCloseSeries());
+    closeAll.addActionListener(e -> applyCloseAll());
+    box.add(closeSeries);
+    box.add(closeAll);
+    box.add(closeState);
+  }
+
+  void applyCloseSeries() {
+    ImportedInstance inst = selectedInstance();
+    if (inst != null) {
+      DicomCommands.closeSeries(model, inst.seriesUid());
+    }
+    closeState.setText("series");
+  }
+
+  void applyCloseAll() {
+    DicomCommands.closeAll(model);
+    closeState.setText("all");
+  }
+
+  public JButton closeSeriesButton() {
+    return closeSeries;
+  }
+
+  public JButton closeAllButton() {
+    return closeAll;
+  }
+
+  public JLabel closeStateLabel() {
+    return closeState;
+  }
+
+  public String closeStateText() {
+    return closeState.getText();
   }
 
   public JButton applyPrButton() {

@@ -329,6 +329,46 @@ class ImportExplorerHaveTest {
   }
 
   @Test
+  void dicomCloseSeriesThenAllUpdatesCloseState() {
+    DicomModel model = new DicomModel();
+    model.addInstance(closeInst("P1", "2.25.st1", "2.25.se1"));
+    model.addInstance(closeInst("P1", "2.25.st1", "2.25.se2"));
+    DicomExplorer explorer = new DicomExplorer(model);
+    assertEquals("close-series", explorer.closeSeriesButton().getName());
+    assertEquals("close-all", explorer.closeAllButton().getName());
+    assertEquals("close-state", explorer.closeStateLabel().getName());
+    assertEquals("none", explorer.closeStateText());
+    assertEquals(2, model.getInstances().size());
+    explorer.closeSeriesButton().doClick();
+    assertEquals("series", explorer.closeStateText());
+    assertEquals(1, model.getInstances().size());
+    assertEquals("2.25.se2", model.getInstances().get(0).seriesUid());
+    assertEquals("none", explorer.prMappedText());
+    explorer.closeAllButton().doClick();
+    assertEquals("all", explorer.closeStateText());
+    assertEquals(0, model.getInstances().size());
+    assertEquals("none", explorer.prMappedText());
+    assertEquals("none", explorer.interpShapeText());
+  }
+
+  static ImportedInstance closeInst(String patientId, String studyUid, String seriesUid) {
+    return new ImportedInstance(
+        "SYNTHETIC^" + patientId,
+        patientId,
+        studyUid,
+        seriesUid,
+        seriesUid + ".1",
+        "1.2.840.10008.10.0.2.2.1.2",
+        "CT",
+        "chest",
+        "20260101",
+        1,
+        1,
+        null,
+        "image/dicom");
+  }
+
+  @Test
   void applyPrMapsGspsPolylineToLineGraphic() {
     DicomExplorer explorer = new DicomExplorer(new DicomModel());
     assertEquals("0", explorer.prGraphicsText());
