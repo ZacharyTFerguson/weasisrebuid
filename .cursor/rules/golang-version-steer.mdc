@@ -9,6 +9,8 @@ At least once every **14 days**, and whenever you touch Go toolchain files (`go.
 
 Record the last-checked date in the session. If that check is older than 14 days, check again **before** changing any `go` version pin.
 
+Last checked: **2026-09-17** — latest stable **go1.27.1**. This repo had no `go.mod` / CI / Docker Go pins to bump.
+
 ## If this repo has Go
 
 When `go.mod`, `**/*.go`, or Go CI already exists: update the `go` directive, keep `toolchain` consistent with that stable, pin CI `setup-go`, Docker `golang:` images, and docs to the same version, then run tests.
