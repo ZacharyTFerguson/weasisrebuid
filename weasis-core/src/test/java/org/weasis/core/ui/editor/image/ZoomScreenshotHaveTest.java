@@ -52,6 +52,14 @@ class ZoomScreenshotHaveTest {
     lens.setOrigin(10, 12);
     assertEquals(4.0, lens.magnifiedScale(view, 64, 32));
     assertEquals(10.0, lens.originX());
+    assertEquals("lens", lens.getName());
+    assertEquals("lens-factor", lens.getFactorSlider().getName());
+    assertEquals("lens-factor-value", lens.factorValueLabel().getName());
+    assertEquals("lens-panel", lens.previewPanel().getName());
+    assertEquals("4x", lens.factorValueText());
+    lens.getFactorSlider().setValue(200);
+    assertEquals(2.0, lens.getFactor(), 1e-9);
+    assertEquals("2x", lens.factorValueText());
   }
 
   @Test

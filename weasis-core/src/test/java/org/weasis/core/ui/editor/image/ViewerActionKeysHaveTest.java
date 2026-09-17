@@ -184,6 +184,25 @@ class ViewerActionKeysHaveTest {
   }
 
   @Test
+  void lensSliderSetsNamedFactorValue() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    view.setSourceImage(gray(new int[32][32]));
+    ZoomWin lens = new ZoomWin();
+    assertEquals("Lens", lens.getComponentName());
+    assertEquals("lens", lens.getName());
+    assertEquals("lens-factor", lens.getFactorSlider().getName());
+    assertEquals("lens-factor-value", lens.factorValueLabel().getName());
+    assertEquals("lens-panel", lens.previewPanel().getName());
+    assertEquals(Insertable.Type.TOOL, lens.getType());
+    lens.bind(view);
+    assertSameView(view, lens.boundView());
+    assertEquals("2x", lens.factorValueText());
+    lens.getFactorSlider().setValue(400);
+    assertEquals(4.0, lens.getFactor(), 1e-9);
+    assertEquals("4x", lens.factorValueText());
+  }
+
+  @Test
   void manualCalibrationDoesNotWriteMonitorPitch() {
     DefaultView2d<?> view = new DefaultView2d<>();
     view.setMonitorCalibrationMmPerPixel(0.2);

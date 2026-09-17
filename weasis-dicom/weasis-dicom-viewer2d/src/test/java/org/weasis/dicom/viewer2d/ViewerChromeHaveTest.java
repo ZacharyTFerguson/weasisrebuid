@@ -46,6 +46,7 @@ import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
+import org.weasis.core.ui.editor.image.ZoomWin;
 import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
 import org.weasis.dicom.viewer2d.dockable.ImageTool;
@@ -145,6 +146,31 @@ class ViewerChromeHaveTest {
     assertTrue(container.getImageTool().summaryText().contains("v=90"));
     assertEquals("mini-tool", container.getMiniTool().getName());
     assertEquals("histogram", container.getHistogramView().getName());
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+  }
+
+  @Test
+  void lensDockBindsNamedFactorChrome() {
+    View2dContainer container = new View2dContainer();
+    ZoomWin lens = container.getZoomWin();
+    assertEquals("lens", lens.getName());
+    assertEquals("lens-factor", lens.getFactorSlider().getName());
+    assertEquals("lens-factor-value", lens.factorValueLabel().getName());
+    assertEquals("lens-panel", lens.previewPanel().getName());
+    assertEquals("2x", lens.factorValueText());
+    assertTrue(
+        container.getSeriesViewerUI().getTools().stream()
+            .anyMatch(b -> ZoomWin.NAME.equals(b.getComponentName())));
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
+    assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
+    View2d view = container.getView2d();
+    view.setSourceImage(new BufferedImage(32, 32, BufferedImage.TYPE_BYTE_GRAY));
+    lens.bind(view);
+    assertSame(view, lens.boundView());
+    lens.getFactorSlider().setValue(400);
+    assertEquals(4.0, lens.getFactor(), 1e-9);
+    assertEquals("4x", lens.factorValueText());
     assertEquals("flip", container.getImageTool().flipButton().getName());
   }
 

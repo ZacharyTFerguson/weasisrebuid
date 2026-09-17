@@ -39,6 +39,7 @@ import org.weasis.core.ui.editor.image.SynchView;
 import org.weasis.core.ui.editor.image.ViewTransferHandler;
 import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
+import org.weasis.core.ui.editor.image.ZoomWin;
 import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.util.ToolBarContainer;
 import org.weasis.dicom.codec.KOSpecialElement;
@@ -73,6 +74,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
   private final ImageTool imageTool = new ImageTool();
   private final HistogramView histogramView = new HistogramView();
   private final MiniTool miniTool = new MiniTool();
+  private final ZoomWin zoomWin = new ZoomWin();
   private final ViewTransferHandler seriesDrop = new ViewTransferHandler();
   private int layoutIndex;
 
@@ -84,11 +86,13 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     imageTool.bind(view2d);
     histogramView.bind(view2d);
     miniTool.bind(view2d);
+    zoomWin.bind(view2d);
     bindToolBars();
     wireCrosshair(view2d);
     add(viewGrid, BorderLayout.CENTER);
     add(histogramView, BorderLayout.SOUTH);
     add(miniTool, BorderLayout.WEST);
+    add(zoomWin, BorderLayout.EAST);
     bindDrop(this);
     bindDrop(viewGrid);
     bindDrop(view2d);
@@ -168,6 +172,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     tools.clear();
     tools.add(histogramView);
     tools.add(miniTool);
+    tools.add(zoomWin);
   }
 
   public ToolBarContainer getToolBars() {
@@ -224,6 +229,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
 
   public MiniTool getMiniTool() {
     return miniTool;
+  }
+
+  public ZoomWin getZoomWin() {
+    return zoomWin;
   }
 
   public DcmHeaderToolBar getHeaderToolBar() {
@@ -514,6 +523,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     screenshotToolBar.bind(painted);
     histogramView.bind(painted);
     miniTool.bind(painted);
+    zoomWin.bind(painted);
     wireCrosshair(painted);
   }
 
