@@ -56,7 +56,6 @@ public class DisplayTool extends PluginTool {
     setName("display");
     nameChrome();
     add(chromeBar(), BorderLayout.NORTH);
-    add(layerBar(), BorderLayout.SOUTH);
   }
 
   void nameChrome() {
@@ -78,19 +77,6 @@ public class DisplayTool extends PluginTool {
     bar.add(fullButton);
     bar.add(minimalButton);
     bar.add(hiddenButton);
-    return bar;
-  }
-
-  JButton stateButton(String title, String name, Visibility state) {
-    JButton button = new JButton(title);
-    button.setName(name);
-    button.addActionListener(e -> setVisibility(state));
-    return button;
-  }
-
-  JPanel layerBar() {
-    JPanel bar = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-    bar.setName("display-layers");
     bar.add(layersValue);
     crosslinesButton = layerToggle(LayerType.CROSSLINES, "display-layer-crosslines");
     measureButton = layerToggle(LayerType.MEASURE, "display-layer-measure");
@@ -100,6 +86,13 @@ public class DisplayTool extends PluginTool {
     patientButton = annToggle(LayerAnnotation.PATIENT, "display-ann-patient");
     bar.add(patientButton);
     return bar;
+  }
+
+  JButton stateButton(String title, String name, Visibility state) {
+    JButton button = new JButton(title);
+    button.setName(name);
+    button.addActionListener(e -> setVisibility(state));
+    return button;
   }
 
   JToggleButton layerToggle(LayerType type, String name) {
