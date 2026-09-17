@@ -12,6 +12,7 @@ package org.weasis.core.ui.editor.image;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
+import javax.swing.JLabel;
 import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.ui.editor.image.dockable.MeasureTool;
 import org.weasis.core.ui.util.WtoolBar;
@@ -39,18 +40,23 @@ public class ViewerToolBar extends WtoolBar {
 
   private String selected = ActionW.WINLEVEL.cmd();
   private DefaultView2d<?> view;
+  private final JLabel pixelInfo = new JLabel(" ");
 
   public ViewerToolBar() {
     super(NAME, 10);
     for (String action : ACTIONS) {
       add(button(action));
     }
+    pixelInfo.setName("pixel-info");
+    add(pixelInfo);
   }
 
   public void bind(DefaultView2d<?> view) {
     this.view = view;
     if (view != null) {
       apply(view);
+      view.setCrosshairListener((v, info) -> refreshPixelInfo(info));
+      refreshPixelInfo(view.getPixelInfo());
     }
   }
 
@@ -141,6 +147,22 @@ public class ViewerToolBar extends WtoolBar {
 
   public DefaultView2d<?> boundView() {
     return view;
+  }
+
+  public JLabel pixelInfoLabel() {
+    return pixelInfo;
+  }
+
+  public String pixelInfoText() {
+    return pixelInfo.getText();
+  }
+
+  public void refreshPixelInfo(PixelInfo info) {
+    if (info != null && !info.getText().isBlank()) {
+      pixelInfo.setText(info.getText());
+      return;
+    }
+    pixelInfo.setText(" ");
   }
 
   private JButton button(String action) {

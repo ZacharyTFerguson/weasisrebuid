@@ -85,6 +85,7 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     histogramView.bind(view2d);
     miniTool.bind(view2d);
     bindToolBars();
+    wireCrosshair(view2d);
     add(viewGrid, BorderLayout.CENTER);
     add(histogramView, BorderLayout.SOUTH);
     add(miniTool, BorderLayout.WEST);
@@ -513,6 +514,18 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     screenshotToolBar.bind(painted);
     histogramView.bind(painted);
     miniTool.bind(painted);
+    wireCrosshair(painted);
+  }
+
+  void wireCrosshair(View2d view) {
+    if (view == null) {
+      return;
+    }
+    view.setCrosshairListener(
+        (v, info) -> {
+          viewerToolBar.refreshPixelInfo(info);
+          imageTool.refresh();
+        });
   }
 
   public void cycleLayout(int delta) {

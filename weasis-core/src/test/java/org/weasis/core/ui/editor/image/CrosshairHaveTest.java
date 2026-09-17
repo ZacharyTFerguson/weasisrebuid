@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import org.junit.jupiter.api.Test;
+import org.weasis.core.api.gui.util.ActionW;
 import org.weasis.core.ui.model.layer.LayerAnnotation;
 import org.weasis.core.ui.model.layer.LayerItem;
 import org.weasis.core.ui.model.layer.LayerType;
@@ -49,6 +50,24 @@ class CrosshairHaveTest {
     assertEquals(2, view.getPixelInfo().getPixelValue());
     assertEquals(-1022.0, view.getPixelInfo().getModalityValue(), 1e-9);
     assertTrue(view.isCrosshairPainted());
+  }
+
+  @Test
+  void viewerToolbarPixelInfoFollowsHAndClick() {
+    DefaultView2d<?> view = new DefaultView2d<>();
+    view.setSourceImage(gray(new int[][] {{1, 2}, {3, 4}}));
+    view.setModalityLut(1.0, -1024);
+    ViewerToolBar bar = new ViewerToolBar();
+    assertEquals("pixel-info", bar.pixelInfoLabel().getName());
+    assertEquals(ActionW.CROSSHAIR.cmd(), bar.getComponent(5).getName());
+    bar.bind(view);
+    ((javax.swing.AbstractButton) bar.getComponent(5)).doClick();
+    assertEquals(MouseActions.CROSSHAIR, view.getMouseActions().getLeft());
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 1, 0));
+    assertTrue(view.hasCrosshair());
+    assertTrue(bar.pixelInfoText().contains("1,0"));
+    assertTrue(bar.pixelInfoText().contains("v=2"));
+    assertTrue(bar.pixelInfoText().contains("HU="));
   }
 
   @Test

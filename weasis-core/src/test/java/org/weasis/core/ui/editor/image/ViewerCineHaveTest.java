@@ -37,6 +37,8 @@ class ViewerCineHaveTest {
     assertEquals(MouseActions.SEQUENCE, view.getMouseActions().getLeft());
     assertEquals(10, ViewerToolBar.ACTIONS.length);
     assertEquals(ActionW.NONE.cmd(), ViewerToolBar.ACTIONS[ViewerToolBar.ACTIONS.length - 1]);
+    assertEquals("pixel-info", bar.pixelInfoLabel().getName());
+    assertEquals(ActionW.CROSSHAIR.cmd(), bar.getComponent(5).getName());
   }
 
   @Test

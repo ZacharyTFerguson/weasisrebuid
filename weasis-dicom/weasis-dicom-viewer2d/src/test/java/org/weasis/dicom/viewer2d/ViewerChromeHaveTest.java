@@ -41,8 +41,10 @@ import org.weasis.core.ui.editor.SeriesViewer;
 import org.weasis.core.ui.editor.SeriesViewerFactory;
 import org.weasis.core.ui.editor.image.HistogramData.ColorModel;
 import org.weasis.core.ui.editor.image.HistogramView;
+import org.weasis.core.ui.editor.image.MouseActions;
 import org.weasis.core.ui.editor.image.RotationToolBar;
 import org.weasis.core.ui.editor.image.ViewerPlugin;
+import org.weasis.core.ui.editor.image.ViewerToolBar;
 import org.weasis.core.ui.editor.image.ZoomToolBar;
 import org.weasis.core.ui.editor.image.dockable.MiniTool;
 import org.weasis.core.ui.model.graphic.imp.line.LineGraphic;
@@ -121,6 +123,28 @@ class ViewerChromeHaveTest {
     assertEquals("200%", mini.zoomValueText());
     mini.getRotationSlider().setValue(90);
     assertEquals(90.0, view.getRotation(), 1e-9);
+    assertEquals("flip", container.getImageTool().flipButton().getName());
+  }
+
+  @Test
+  void viewerCrosshairSetsNamedPixelInfo() {
+    View2dContainer container = new View2dContainer();
+    ViewerToolBar bar = container.getViewerToolBar();
+    assertEquals("pixel-info", bar.pixelInfoLabel().getName());
+    assertEquals(ActionW.CROSSHAIR.cmd(), bar.getComponent(5).getName());
+    View2d view = container.getView2d();
+    BufferedImage src = new BufferedImage(8, 4, BufferedImage.TYPE_BYTE_GRAY);
+    src.getRaster().setSample(2, 1, 0, 90);
+    view.setSourceImage(src);
+    view.setModalityLut(1.0, 0);
+    ((AbstractButton) bar.getComponent(5)).doClick();
+    assertEquals(MouseActions.CROSSHAIR, view.getMouseActions().getLeft());
+    view.getEventManager().mousePressed(mouse(view, MouseEvent.MOUSE_PRESSED, 2, 1));
+    assertTrue(bar.pixelInfoText().contains("2,1"));
+    assertTrue(bar.pixelInfoText().contains("v=90"));
+    assertTrue(container.getImageTool().summaryText().contains("v=90"));
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
     assertEquals("flip", container.getImageTool().flipButton().getName());
   }
 
