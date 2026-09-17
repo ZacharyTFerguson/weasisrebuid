@@ -153,6 +153,27 @@ class WeasisWinChromeHaveTest {
   }
 
   @Test
+  void printFilmActionMapSetsNamedState() {
+    Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
+    WeasisWin win = new WeasisWin();
+    try {
+      assertEquals("print-film", win.printFilmButton().getName());
+      assertEquals("print-action", win.printActionButton().getName());
+      assertEquals("print-state", win.printStateLabel().getName());
+      assertEquals("none", win.printStateText());
+      assertEquals("none", win.sendStateText());
+      win.printFilmButton().doClick();
+      assertEquals("film-session", win.printStateText());
+      assertEquals("none", win.sendStateText());
+      win.printActionButton().doClick();
+      assertEquals("print", win.printStateText());
+      assertEquals("none", win.sendStateText());
+    } finally {
+      win.dispose();
+    }
+  }
+
+  @Test
   void helpKeyboardShortcutsShowsLiveMapFromShortcutManager() {
     Assumptions.assumeFalse(GraphicsEnvironment.isHeadless());
     WeasisWin win = new WeasisWin();

@@ -37,14 +37,41 @@ class DicomPrintTest {
   void dialogOptionPaneBuildsFilmSession() {
     DefaultDicomNode printer = new DefaultDicomNode("printer", "PRINT_SCP", "127.0.0.1", 104);
     DicomPrintDialog dialog = DicomPrintDialog.open(null, printer);
-    assertEquals("DICOM Print", dialog.getTitle());
-    DicomPrintOptions options = new DicomPrintOptions();
-    options.setCopies(3);
-    options.setFilmSize(DicomPrintOptions.FilmSize.SIZE_14INX17IN);
-    dialog.getOptionPane().setOptions(options);
-    assertEquals(3, dialog.getPrint().buildFilmSession().getInt(Tag.NumberOfCopies, 0));
-    dialog.getOptionPane().resetToDefaultValues();
-    assertEquals(1, dialog.getOptionPane().getOptions().copies());
+    try {
+      assertEquals("DICOM Print", dialog.getTitle());
+      DicomPrintOptions options = new DicomPrintOptions();
+      options.setCopies(3);
+      options.setFilmSize(DicomPrintOptions.FilmSize.SIZE_14INX17IN);
+      dialog.getOptionPane().setOptions(options);
+      assertEquals(3, dialog.getPrint().buildFilmSession().getInt(Tag.NumberOfCopies, 0));
+      dialog.getOptionPane().resetToDefaultValues();
+      assertEquals(1, dialog.getOptionPane().getOptions().copies());
+    } finally {
+      dialog.dispose();
+    }
+  }
+
+  @Test
+  void printFilmActionMapSetsNamedState() {
+    DefaultDicomNode printer = new DefaultDicomNode("printer", "PRINT_SCP", "127.0.0.1", 104);
+    DicomPrintDialog dialog = DicomPrintDialog.open(null, printer);
+    try {
+      assertEquals("print-film", dialog.filmButton().getName());
+      assertEquals("print-action", dialog.actionButton().getName());
+      assertEquals("print-state", dialog.stateLabel().getName());
+      assertEquals("none", dialog.stateText());
+      dialog.filmButton().doClick();
+      assertEquals("film-session", dialog.stateText());
+      assertEquals(1, dialog.lastSession().getInt(Tag.NumberOfCopies, 0));
+      assertEquals("PRINT_SCP", dialog.lastSession().getString(Tag.RetrieveAETitle));
+      dialog.actionButton().doClick();
+      assertEquals("print", dialog.stateText());
+      assertEquals(DicomPrint.ACTION_PRINT, dialog.lastAction().actionTypeId());
+      assertEquals(UID.BasicFilmSession, dialog.lastAction().sopClassUid());
+      assertEquals("2.25.session", dialog.lastAction().sopInstanceUid());
+    } finally {
+      dialog.dispose();
+    }
   }
 
   @Test

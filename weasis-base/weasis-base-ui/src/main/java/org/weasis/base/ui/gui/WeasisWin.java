@@ -92,6 +92,9 @@ public class WeasisWin extends JFrame {
   private final JButton sendCstore = new JButton("C-STORE");
   private final JButton sendStow = new JButton("STOW-RS");
   private final JLabel sendState = new JLabel("none");
+  private final JButton printFilm = new JButton("Film Session");
+  private final JButton printAction = new JButton("Print");
+  private final JLabel printState = new JLabel("none");
 
   public WeasisWin() {
     super(windowTitle());
@@ -273,6 +276,7 @@ public class WeasisWin extends JFrame {
     exportBtn.addActionListener(e -> openExportDialog());
     toolbars.add(exportBtn);
     addSendChrome();
+    addPrintChrome();
   }
 
   void addSendChrome() {
@@ -308,6 +312,41 @@ public class WeasisWin extends JFrame {
 
   public String sendStateText() {
     return sendState.getText();
+  }
+
+  void addPrintChrome() {
+    printFilm.setName("print-film");
+    printAction.setName("print-action");
+    printState.setName("print-state");
+    printFilm.addActionListener(e -> applyFilm());
+    printAction.addActionListener(e -> applyAction());
+    toolbars.add(printFilm);
+    toolbars.add(printAction);
+    toolbars.add(printState);
+  }
+
+  void applyFilm() {
+    printState.setText("film-session");
+  }
+
+  void applyAction() {
+    printState.setText("print");
+  }
+
+  public JButton printFilmButton() {
+    return printFilm;
+  }
+
+  public JButton printActionButton() {
+    return printAction;
+  }
+
+  public JLabel printStateLabel() {
+    return printState;
+  }
+
+  public String printStateText() {
+    return printState.getText();
   }
 
   void addDockingChrome() {
