@@ -109,7 +109,8 @@ class ViewerChromeHaveTest {
     assertEquals(
         "reset-winLevel",
         ResetTools.buttonName(org.weasis.core.ui.editor.image.ResetTools.WINLEVEL));
-    assertEquals("reset-all", ResetTools.buttonName(org.weasis.core.ui.editor.image.ResetTools.ALL));
+    assertEquals(
+        "reset-all", ResetTools.buttonName(org.weasis.core.ui.editor.image.ResetTools.ALL));
     View2d view = container.getView2d();
     view.setZoom(2.0);
     view.setPan(4, 5);
