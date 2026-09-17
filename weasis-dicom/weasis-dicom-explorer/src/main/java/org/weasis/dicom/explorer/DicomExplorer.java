@@ -54,6 +54,7 @@ import org.weasis.dicom.explorer.main.SeriesFilter;
 import org.weasis.dicom.explorer.main.SeriesSelectionModel;
 import org.weasis.dicom.explorer.main.StudyPane;
 import org.weasis.dicom.explorer.main.ThumbnailMouseAndKeyAdapter;
+import org.weasis.dicom.explorer.pr.InterpolatedPath2D;
 import org.weasis.dicom.explorer.pr.PrGraphicUtil;
 import org.weasis.dicom.explorer.tag.DicomFieldsView;
 
@@ -80,6 +81,9 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final JButton applyPr = new JButton("Apply PR");
   private final JLabel prGraphics = new JLabel("0");
   private final JLabel prMapped = new JLabel("none");
+  private final JButton applyInterp = new JButton("Interp");
+  private final JLabel interpShape = new JLabel("none");
+  private final JLabel interpThrough = new JLabel("none");
 
   public DicomExplorer(DicomModel model) {
     super(NAME, 0);
@@ -130,6 +134,14 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     box.add(applyPr);
     box.add(prGraphics);
     box.add(prMapped);
+    applyInterp.setName("apply-interp");
+    applyInterp.setToolTipText("Interp");
+    applyInterp.addActionListener(e -> applyInterp());
+    interpShape.setName("interp-shape");
+    interpThrough.setName("interp-through");
+    box.add(applyInterp);
+    box.add(interpShape);
+    box.add(interpThrough);
     return box;
   }
 
@@ -155,6 +167,56 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
 
   public String applyPr() {
     return showMapped(prUtil.mapSamplePolyline());
+  }
+
+  public JButton applyInterpButton() {
+    return applyInterp;
+  }
+
+  public JLabel interpShapeLabel() {
+    return interpShape;
+  }
+
+  public JLabel interpThroughLabel() {
+    return interpThrough;
+  }
+
+  public String interpShapeText() {
+    return interpShape.getText();
+  }
+
+  public String interpThroughText() {
+    return interpThrough.getText();
+  }
+
+  public String applyInterp() {
+    return showInterp(prUtil.mapSampleInterpolated());
+  }
+
+  String showInterp(Graphic graphic) {
+    InterpolatedPath2D path = interpPath(graphic);
+    if (path == null) {
+      interpShape.setText("none");
+      interpThrough.setText("none");
+      return "none";
+    }
+    interpShape.setText("InterpolatedPath2D");
+    interpThrough.setText(throughControls(path) ? "through" : "miss");
+    return interpShape.getText();
+  }
+
+  static InterpolatedPath2D interpPath(Graphic graphic) {
+    if (graphic == null || !(graphic.getShape() instanceof InterpolatedPath2D path)) {
+      return null;
+    }
+    return path;
+  }
+
+  static boolean throughControls(InterpolatedPath2D path) {
+    return path.distanceTo(0, 0) < 0.05
+        && path.distanceTo(10, 0) < 0.05
+        && path.distanceTo(10, 10) < 0.05
+        && path.distanceTo(0, 10) < 0.05;
   }
 
   String showMapped(Graphic graphic) {

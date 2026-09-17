@@ -91,6 +91,20 @@ public class PrGraphicUtil {
     return buildGraphic(samplePolylineObject());
   }
 
+  public Attributes sampleInterpolatedObject() {
+    Attributes go = new Attributes();
+    go.setString(Tag.GraphicAnnotationUnits, VR.CS, UNITS_PIXEL);
+    go.setString(Tag.GraphicType, VR.CS, INTERPOLATED);
+    go.setString(Tag.GraphicFilled, VR.CS, "N");
+    go.setInt(Tag.NumberOfGraphicPoints, VR.US, 4);
+    go.setFloat(Tag.GraphicData, VR.FL, 0f, 0f, 10f, 0f, 10f, 10f, 0f, 10f);
+    return go;
+  }
+
+  public Graphic mapSampleInterpolated() {
+    return buildGraphic(sampleInterpolatedObject());
+  }
+
   public Graphic buildGraphic(Attributes graphicObject) {
     return buildGraphic(graphicObject, 0, 0);
   }

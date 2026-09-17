@@ -149,6 +149,18 @@ class PrGraphicUtilHaveTest {
     assertEquals(PrGraphicUtil.POLYLINE, util.samplePolylineObject().getString(Tag.GraphicType));
   }
 
+  @Test
+  void sampleInterpolatedMapsToSplineThroughControls() {
+    Graphic mapped = util.mapSampleInterpolated();
+    assertInstanceOf(NonEditableGraphic.class, mapped);
+    assertInstanceOf(InterpolatedPath2D.class, mapped.getShape());
+    InterpolatedPath2D path = (InterpolatedPath2D) mapped.getShape();
+    assertTrue(path.distanceTo(0, 0) < 0.05);
+    assertTrue(path.distanceTo(10, 10) < 0.05);
+    assertEquals(
+        PrGraphicUtil.INTERPOLATED, util.sampleInterpolatedObject().getString(Tag.GraphicType));
+  }
+
   static Attributes graphic(String type, boolean filled, float... data) {
     Attributes go = new Attributes();
     go.setString(Tag.GraphicAnnotationUnits, VR.CS, "PIXEL");

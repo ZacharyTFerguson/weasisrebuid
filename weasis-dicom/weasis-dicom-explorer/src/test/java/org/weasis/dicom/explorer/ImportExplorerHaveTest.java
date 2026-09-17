@@ -216,6 +216,9 @@ class ImportExplorerHaveTest {
     assertEquals("apply-pr", explorer.applyPrButton().getName());
     assertEquals("pr-graphics", explorer.prGraphicsLabel().getName());
     assertEquals("pr-mapped", explorer.prMappedLabel().getName());
+    assertEquals("apply-interp", explorer.applyInterpButton().getName());
+    assertEquals("interp-shape", explorer.interpShapeLabel().getName());
+    assertEquals("interp-through", explorer.interpThroughLabel().getName());
     assertEquals("0", explorer.prGraphicsText());
     assertEquals("none", explorer.prMappedText());
     explorer.filterModeCombo().setSelectedItem(SeriesFilter.TEXT);
@@ -317,6 +320,17 @@ class ImportExplorerHaveTest {
     explorer.applyPrButton().doClick();
     assertEquals("1", explorer.prGraphicsText());
     assertEquals("LineGraphic", explorer.prMappedText());
+  }
+
+  @Test
+  void applyInterpMapsGspsSplineThroughControls() {
+    DicomExplorer explorer = new DicomExplorer(new DicomModel());
+    assertEquals("none", explorer.interpShapeText());
+    assertEquals("none", explorer.interpThroughText());
+    explorer.applyInterpButton().doClick();
+    assertEquals("InterpolatedPath2D", explorer.interpShapeText());
+    assertEquals("through", explorer.interpThroughText());
+    assertEquals("none", explorer.prMappedText());
   }
 
   static boolean containsKeyword(List<TagRow> rows, String keyword) {
