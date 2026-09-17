@@ -201,6 +201,10 @@ public class View2dContainer extends ImageViewerPlugin<MediaElement> {
     return rotationToolBar;
   }
 
+  public ResetTools getResetTools() {
+    return resetTools;
+  }
+
   public KeyObjectToolBar getKeyObjectToolBar() {
     return keyObjectToolBar;
   }

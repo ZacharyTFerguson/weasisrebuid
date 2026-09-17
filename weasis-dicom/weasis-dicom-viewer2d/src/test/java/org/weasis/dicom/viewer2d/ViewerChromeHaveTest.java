@@ -70,15 +70,73 @@ class ViewerChromeHaveTest {
     view.setFlip(true);
     ResetTools bar = new ResetTools();
     assertEquals("Reset", bar.getComponentName());
+    assertEquals("reset", bar.getName());
     assertEquals(Insertable.Type.TOOLBAR, bar.getType());
+    assertEquals("none", bar.stateText());
+    bar.apply(null, org.weasis.core.ui.editor.image.ResetTools.ZOOM);
+    bar.apply(view, null);
+    assertEquals("none", bar.stateText());
     bar.bind(view);
     bar.apply(org.weasis.core.ui.editor.image.ResetTools.ZOOM);
     assertEquals(-200.0, view.getZoom(), 1e-9);
     assertEquals(4.0, view.getPanX(), 1e-9);
+    assertEquals("zoom", bar.stateText());
     bar.apply(org.weasis.core.ui.editor.image.ResetTools.ALL);
     assertEquals(0.0, view.getPanX(), 1e-9);
     assertEquals(0.0, view.getRotation(), 1e-9);
     assertFalse(view.isFlip());
+    assertEquals("-a", bar.stateText());
+  }
+
+  @Test
+  void resetToolsSetsNamedStateChrome() {
+    View2dContainer container = new View2dContainer();
+    ResetTools bar = container.getResetTools();
+    assertEquals("reset", bar.getName());
+    assertEquals("reset-state", bar.stateLabel().getName());
+    assertEquals("none", bar.stateText());
+    assertEquals("reset-all", bar.allButton().getName());
+    assertEquals("reset-winLevel", bar.winLevelButton().getName());
+    assertEquals("reset-zoom", bar.zoomButton().getName());
+    assertEquals("reset-pan", bar.panButton().getName());
+    assertEquals("reset-rotation", bar.rotationButton().getName());
+    assertEquals("winLevel", ResetTools.token(org.weasis.core.ui.editor.image.ResetTools.WINLEVEL));
+    assertEquals("zoom", ResetTools.token(org.weasis.core.ui.editor.image.ResetTools.ZOOM));
+    assertEquals("pan", ResetTools.token(org.weasis.core.ui.editor.image.ResetTools.PAN));
+    assertEquals("rotation", ResetTools.token(org.weasis.core.ui.editor.image.ResetTools.ROTATION));
+    assertEquals("-a", ResetTools.token(org.weasis.core.ui.editor.image.ResetTools.ALL));
+    assertEquals("-a", ResetTools.token(null));
+    assertEquals(
+        "reset-winLevel",
+        ResetTools.buttonName(org.weasis.core.ui.editor.image.ResetTools.WINLEVEL));
+    assertEquals("reset-all", ResetTools.buttonName(org.weasis.core.ui.editor.image.ResetTools.ALL));
+    View2d view = container.getView2d();
+    view.setZoom(2.0);
+    view.setPan(4, 5);
+    view.setRotation(90);
+    bar.bind(view);
+    bar.winLevelButton().doClick();
+    assertEquals("winLevel", bar.stateText());
+    bar.zoomButton().doClick();
+    assertEquals("zoom", bar.stateText());
+    assertEquals(-200.0, view.getZoom(), 1e-9);
+    bar.panButton().doClick();
+    assertEquals("pan", bar.stateText());
+    assertEquals(0.0, view.getPanX(), 1e-9);
+    bar.rotationButton().doClick();
+    assertEquals("rotation", bar.stateText());
+    assertEquals(0.0, view.getRotation(), 1e-9);
+    bar.allButton().doClick();
+    assertEquals("-a", bar.stateText());
+    assertEquals("none", container.getKeyObjectToolBar().stateText());
+    assertEquals("0", container.getGraphicsPane().countText());
+    assertEquals("region-stats", container.getViewerToolBar().regionStatsLabel().getName());
+    assertEquals("FULL", container.getDisplayTool().visibilityValueText());
+    assertEquals("FoR", container.getViewerToolBar().synchKindText());
+    assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
   }
 
   @Test
