@@ -327,6 +327,38 @@ class ViewerChromeHaveTest {
   }
 
   @Test
+  void keyObjectToolbarSetsNamedStarFilterChrome(@TempDir Path dir) throws Exception {
+    Path file = dir.resolve("ct.dcm");
+    TestCt.write(file.toFile(), 8, 40, 400);
+    View2dContainer container = new View2dContainer();
+    KeyObjectToolBar bar = container.getKeyObjectToolBar();
+    assertEquals("key-object", bar.getName());
+    assertEquals("star", bar.starButton().getName());
+    assertEquals("ko-filter", bar.filterButton().getName());
+    assertEquals("ko-state", bar.stateLabel().getName());
+    View2d view = container.getView2d();
+    view.load(file.toFile());
+    bar.bind(view);
+    assertEquals("none", bar.stateText());
+    bar.starButton().doClick();
+    assertEquals("starred", bar.stateText());
+    bar.filterButton().doClick();
+    assertEquals("filtered", bar.stateText());
+    bar.filterButton().doClick();
+    assertEquals("starred", bar.stateText());
+    bar.starButton().doClick();
+    assertEquals("none", bar.stateText());
+    assertEquals("graphics-pane", container.getGraphicsPane().getName());
+    assertEquals("0", container.getGraphicsPane().countText());
+    assertEquals("region-stats", container.getViewerToolBar().regionStatsLabel().getName());
+    assertEquals("FULL", container.getDisplayTool().visibilityValueText());
+    assertEquals("pixel-info", container.getViewerToolBar().pixelInfoLabel().getName());
+    assertEquals("lens", container.getZoomWin().getName());
+    assertEquals("mini-tool", container.getMiniTool().getName());
+    assertEquals("histogram", container.getHistogramView().getName());
+  }
+
+  @Test
   void lutToolBarSetsPseudoColorAndInvert() {
     View2d view = new View2d();
     LutToolBar bar = new LutToolBar();

@@ -31,7 +31,7 @@ class KeyObjectToolBarHaveTest {
     KeyObjectToolBar bar = new KeyObjectToolBar();
     assertEquals("Key Object", bar.getComponentName());
     assertEquals(Insertable.Type.TOOLBAR, bar.getType());
-    assertEquals(2, bar.getComponent().getComponentCount());
+    assertEquals(3, bar.getComponent().getComponentCount());
     assertTrue(bar.toggle("1.2.3"));
     assertTrue(bar.getManager().isKeyImage("1.2.3"));
     assertTrue(bar.filter());
@@ -62,8 +62,19 @@ class KeyObjectToolBarHaveTest {
     String sop = view.getDataset().getString(Tag.SOPInstanceUID);
     KeyObjectToolBar bar = new KeyObjectToolBar();
     bar.bind(view);
+    assertEquals("key-object", bar.getName());
+    assertEquals("star", bar.starButton().getName());
+    assertEquals("ko-filter", bar.filterButton().getName());
+    assertEquals("ko-state", bar.stateLabel().getName());
+    assertEquals("none", bar.stateText());
     assertTrue(bar.star());
     assertTrue(view.getKoManager().isKeyImage(sop));
+    assertEquals("starred", bar.stateText());
+    bar.filterButton().doClick();
+    assertTrue(bar.isFilterKeyImages());
+    assertEquals("filtered", bar.stateText());
+    bar.filterButton().doClick();
+    assertEquals("starred", bar.stateText());
     view.getEventManager()
         .keyPressed(new KeyEvent(view, KeyEvent.KEY_PRESSED, 0L, 0, KeyEvent.VK_K, 'k'));
     assertFalse(view.getKoManager().isKeyImage(sop));

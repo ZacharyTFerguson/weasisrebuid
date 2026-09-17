@@ -13,7 +13,9 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JToggleButton;
+import org.dcm4che3.data.Tag;
 import org.weasis.core.ui.util.Toolbar;
 import org.weasis.core.ui.util.WtoolBar;
 
@@ -25,12 +27,13 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
 
   public static final String NAME = "Key Object";
   public static final String STAR = "star";
-  public static final String FILTER = "filter";
+  public static final String FILTER = "ko-filter";
 
   private KOManager manager;
   private View2d view;
   private final JButton star = actionButton(STAR, "Star");
   private final JToggleButton filter = new JToggleButton("Filter");
+  private final JLabel state = new JLabel("none");
 
   public KeyObjectToolBar() {
     this(new KOManager());
@@ -39,11 +42,14 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
   public KeyObjectToolBar(KOManager manager) {
     super(NAME, 12);
     this.manager = manager == null ? new KOManager() : manager;
+    setName("key-object");
     add(star);
     filter.setName(FILTER);
     filter.setToolTipText("Filter");
     filter.addActionListener(e -> filter());
     add(filter);
+    state.setName("ko-state");
+    add(state);
   }
 
   public void bind(View2d view) {
@@ -52,6 +58,7 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
       this.manager = view.getKoManager();
     }
     syncFilter();
+    refreshState();
   }
 
   public View2d boundView() {
@@ -67,10 +74,9 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
   }
 
   public boolean star() {
-    if (view != null) {
-      return view.toggleKeyImage();
-    }
-    return false;
+    boolean on = view != null && view.toggleKeyImage();
+    refreshState();
+    return on;
   }
 
   public boolean filter() {
@@ -80,6 +86,7 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
       view.applyKeyImageFilter();
     }
     syncFilter();
+    refreshState();
     return ko.isFilterKeyImages();
   }
 
@@ -87,12 +94,43 @@ public class KeyObjectToolBar extends WtoolBar implements Toolbar {
     return getManager().isFilterKeyImages();
   }
 
+  public JButton starButton() {
+    return star;
+  }
+
   public JToggleButton filterButton() {
     return filter;
   }
 
+  public JLabel stateLabel() {
+    return state;
+  }
+
+  public String stateText() {
+    return state.getText();
+  }
+
   public void syncFilter() {
     filter.setSelected(isFilterKeyImages());
+  }
+
+  void refreshState() {
+    if (isFilterKeyImages()) {
+      state.setText("filtered");
+      return;
+    }
+    if (currentIsStarred()) {
+      state.setText("starred");
+      return;
+    }
+    state.setText("none");
+  }
+
+  boolean currentIsStarred() {
+    if (view == null || view.getDataset() == null) {
+      return false;
+    }
+    return getManager().isKeyImage(view.getDataset().getString(Tag.SOPInstanceUID));
   }
 
   JButton actionButton(String name, String label) {
