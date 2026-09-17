@@ -182,13 +182,16 @@ class ImportExplorerHaveTest {
             "image/dicom"));
     DicomExplorer explorer = new DicomExplorer(model);
     assertEquals(1, explorer.seriesSelection().getItems().size());
+    assertEquals("1", explorer.filterHitsText());
     explorer.seriesFilter().setMode(SeriesFilter.MODALITY);
     explorer.seriesFilter().setQuery("mr");
     explorer.refresh();
     assertEquals(0, explorer.seriesSelection().getItems().size());
+    assertEquals("0", explorer.filterHitsText());
     explorer.seriesFilter().setQuery("ct");
     explorer.refresh();
     assertEquals(1, explorer.seriesSelection().getItems().size());
+    assertEquals("1", explorer.filterHitsText());
   }
 
   @Test
@@ -213,6 +216,8 @@ class ImportExplorerHaveTest {
     assertEquals("explorer-series", explorer.seriesList().getName());
     assertEquals("explorer-filter-mode", explorer.filterModeCombo().getName());
     assertEquals("explorer-filter-query", explorer.filterQueryField().getName());
+    assertEquals("explorer-filter-hits", explorer.filterHitsLabel().getName());
+    assertEquals("1", explorer.filterHitsText());
     assertEquals("apply-pr", explorer.applyPrButton().getName());
     assertEquals("pr-graphics", explorer.prGraphicsLabel().getName());
     assertEquals("pr-mapped", explorer.prMappedLabel().getName());
@@ -223,11 +228,22 @@ class ImportExplorerHaveTest {
     assertEquals("none", explorer.prMappedText());
     explorer.filterModeCombo().setSelectedItem(SeriesFilter.TEXT);
     assertEquals(SeriesFilter.TEXT, explorer.seriesFilter().getMode());
+    explorer.filterQueryField().setText("zzz");
+    assertEquals("0", explorer.filterHitsText());
+    explorer.filterQueryField().setText("SYNTHETIC");
+    assertEquals("1", explorer.filterHitsText());
     explorer.filterModeCombo().setSelectedItem(SeriesFilter.DATE);
     explorer.filterQueryField().setText("20251231");
     assertEquals(0, explorer.seriesSelection().getItems().size());
+    assertEquals("0", explorer.filterHitsText());
     explorer.filterQueryField().setText("20260101");
     assertEquals(1, explorer.seriesSelection().getItems().size());
+    assertEquals("1", explorer.filterHitsText());
+    explorer.filterModeCombo().setSelectedItem(SeriesFilter.MODALITY);
+    explorer.filterQueryField().setText("mr");
+    assertEquals("0", explorer.filterHitsText());
+    explorer.filterQueryField().setText("CT");
+    assertEquals("1", explorer.filterHitsText());
   }
 
   @Test

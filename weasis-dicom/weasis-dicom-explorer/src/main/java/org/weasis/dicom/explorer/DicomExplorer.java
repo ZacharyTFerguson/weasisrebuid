@@ -76,6 +76,7 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
   private final JComboBox<String> filterMode =
       new JComboBox<>(new String[] {SeriesFilter.TEXT, SeriesFilter.DATE, SeriesFilter.MODALITY});
   private final JTextField filterQuery = new JTextField();
+  private final JLabel filterHits = new JLabel("0");
   private final DicomFieldsView fields = new DicomFieldsView();
   private final PrGraphicUtil prUtil = new PrGraphicUtil();
   private final JButton applyPr = new JButton("Apply PR");
@@ -118,10 +119,18 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     JPanel bar = new JPanel(new BorderLayout());
     bindFilterMode();
     bindFilterQuery();
+    bindFilterHits();
     bar.add(filterMode, BorderLayout.WEST);
-    bar.add(filterQuery, BorderLayout.CENTER);
+    bar.add(queryRow(), BorderLayout.CENTER);
     bar.add(prMapChrome(), BorderLayout.EAST);
     return bar;
+  }
+
+  JPanel queryRow() {
+    JPanel row = new JPanel(new BorderLayout());
+    row.add(filterQuery, BorderLayout.CENTER);
+    row.add(filterHits, BorderLayout.EAST);
+    return row;
   }
 
   JPanel prMapChrome() {
@@ -242,6 +251,14 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     filterQuery.getDocument().addDocumentListener(queryListener());
   }
 
+  void bindFilterHits() {
+    filterHits.setName("explorer-filter-hits");
+  }
+
+  void showHits(int n) {
+    filterHits.setText(Integer.toString(n));
+  }
+
   void onFilterMode(ItemEvent e) {
     if (e.getStateChange() != ItemEvent.SELECTED) {
       return;
@@ -334,6 +351,14 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     return filterQuery;
   }
 
+  public JLabel filterHitsLabel() {
+    return filterHits;
+  }
+
+  public String filterHitsText() {
+    return filterHits.getText();
+  }
+
   public PluginOpeningStrategy openingStrategy() {
     return opening;
   }
@@ -350,6 +375,7 @@ public class DicomExplorer extends PluginTool implements DataExplorerView {
     }
     list.putClientProperty(ViewTransferHandler.SERIES_ROWS, List.copyOf(rows));
     selection.setItems(labels);
+    showHits(labels.size());
     bindFields();
   }
 
